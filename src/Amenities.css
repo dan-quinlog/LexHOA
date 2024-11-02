@@ -1,0 +1,52 @@
+  .amenities {
+    padding-top: 80px;
+    padding-bottom: 20px;
+    padding-left: 11%;
+    padding-right: 11%;
+  }
+
+  @media (min-width: 768px) {
+    .amenities {
+      padding-top: 115px;
+    }
+  }
+.amenity-item {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 50px;
+}
+
+.amenity-image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.amenity-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.amenity-description h2 {
+  margin-bottom: 10px;
+}
+
+@media (min-width: 768px) {
+  .amenity-item {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .amenity-image {
+    width: 45%;
+    margin-right: 5%;
+    margin-bottom: 0;
+  }
+
+  .amenity-description {
+    width: 50%;
+  }
+}

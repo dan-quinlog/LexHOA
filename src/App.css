@@ -1,0 +1,287 @@
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.top-bar, .bottom-bar {
+  background-color: #f8f9fa;
+  padding: 1rem;
+}
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 1rem 75px;
+}
+
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.top-bar h1 {
+  font-size: clamp(1rem, 5vw, 2rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 767px) {
+  .top-bar {
+    padding: 1rem;
+    justify-content: center;
+  }
+}
+
+.content {
+  flex-grow: 1;
+  margin-top: 60px;
+  margin-bottom: 60px;
+}
+
+.desktop-menu {
+  display: none;
+}
+.mobile-menu {
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-menu a, .mobile-menu button {
+  flex: 0 0 auto;
+  text-decoration: none;
+  color: inherit;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  padding: 10px 15px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+}
+.mobile-menu button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+.mobile-menu button {
+  font-size: .95rem;
+  padding: 0px 10px;
+}
+
+
+@media (max-width: 767px) {
+  .top-bar {
+    padding: 1rem;
+    justify-content: center;
+  }
+
+  .hamburger-menu {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .desktop-menu {
+    display: block;
+  }
+
+  .bottom-bar {
+    display: none;
+  }
+
+  .content {
+    margin-bottom: 0;
+  }
+
+  .hamburger-menu {
+    display: block;
+  }
+}
+.desktop-menu a, .mobile-menu a, .desktop-menu button {
+  margin: 0 10px;
+  text-decoration: none;
+  color: #333;
+  background: none;
+  border: none;
+  font-size: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+.top-bar h1 {
+  font-size: clamp(1rem, 5vw, 2rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.main-content {
+  padding: 20px;
+}
+
+.image-map-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.hoa-image img {
+  width: 100%;
+  height: auto;
+}
+
+.map-placeholder img {
+  width: 100%;
+  height: auto;
+}
+
+.bulletins {
+  padding: 0 10%; /* Matches the side spacing of the images */
+  margin-top: 50px;
+}
+
+.bulletins ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.bulletins li {
+  border: 2px solid #ccc; /* Adds a 2px border */
+  border-radius: 10px; /* Adds rounded corners */
+  padding: 15px;
+  margin-bottom: 15px;
+}
+.image-map-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 10%;
+}
+
+.hoa-image, .map-placeholder {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+
+.hoa-image img, .map-placeholder img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+@media (min-width: 768px) {
+  .image-map-container {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 50px; /* Applies the 50px top margin only in desktop view */
+  }
+
+  .hoa-image, .map-placeholder {
+    width: 45%;
+  }
+}
+
+.site-title {
+  text-decoration: none;
+  color: inherit;
+}
+
+.hamburger-menu button {
+  background: none;
+  border: 2px gray solid;
+  font-size: 1.5em; /* Increases size by 50% */
+  color: inherit; /* Matches text color */
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 10px; /* Rounds off the corners */
+  transition: background-color 0.3s ease;
+}
+
+.hamburger-menu button:hover {
+  background-color: rgba(0, 0, 0, 0.1); /* Subtle hover effect */
+}
+
+.hamburger-menu {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  min-width: 100px;
+}
+
+.dropdown-menu a, .dropdown-menu button {
+  padding: 10px 15px;
+  text-decoration: none;
+  color: #333;
+  transition: background-color 0.3s ease;
+}
+
+.dropdown-menu a:hover, .dropdown-menu button:hover {
+  background-color: #f5f5f5;
+}
+
+.dropdown-menu button {
+  background: none;
+  border: none;
+  font-size: inherit;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+}

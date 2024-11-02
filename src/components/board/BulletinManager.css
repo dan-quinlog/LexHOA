@@ -1,0 +1,67 @@
+
+.bulletin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.bulletin-header button {
+  padding: 8px 16px;
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.bulletin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.bulletin-item {
+  display: flex;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 15px;
+}
+
+.bulletin-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-right: 15px;
+}
+
+.bulletin-actions button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.bulletin-actions button:first-child {
+  background-color: #2196f3;
+  color: white;
+}
+
+.bulletin-actions button:last-child {
+  background-color: #f44336;
+  color: white;
+}
+
+.bulletin-content {
+  flex: 1;
+}
+
+.bulletin-content h3 {
+  margin: 0 0 10px 0;
+}
+
+.bulletin-content span {
+  color: #666;
+  font-size: 0.9em;
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "groupName": "BOARD",
+    "precedence": 1
+  },
+  {
+    "groupName": "OWNERS",
+    "precedence": 2
+  },
+  {
+    "groupName": "RESIDENTS",
+    "precedence": 3
+  }
+]

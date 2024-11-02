@@ -1,0 +1,11 @@
+{
+  "AppSyncApiName": "lexhoa",
+  "DynamoDBBillingMode": "PAY_PER_REQUEST",
+  "DynamoDBEnableServerSideEncryption": false,
+  "AuthCognitoUserPoolId": {
+    "Fn::GetAtt": [
+      "authlexhoa53b91044",
+      "Outputs.UserPoolId"
+    ]
+  }
+}

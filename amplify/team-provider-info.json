@@ -1,0 +1,24 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-lexhoa-dev-c9fcb-authRole",
+      "UnauthRoleArn": "arn:aws:iam::324037289979:role/amplify-lexhoa-dev-c9fcb-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::324037289979:role/amplify-lexhoa-dev-c9fcb-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-lexhoa-dev-c9fcb-deployment",
+      "UnauthRoleName": "amplify-lexhoa-dev-c9fcb-unauthRole",
+      "StackName": "amplify-lexhoa-dev-c9fcb",
+      "StackId": "arn:aws:cloudformation:us-east-1:324037289979:stack/amplify-lexhoa-dev-c9fcb/e7613000-8c3b-11ef-bd60-0e69ed00086f",
+      "AmplifyAppId": "d2d1u8ikevboll"
+    },
+    "categories": {
+      "auth": {
+        "lexhoa53b91044": {},
+        "userPoolGroups": {}
+      },
+      "api": {
+        "lexhoa": {}
+      }
+    }
+  }
+}

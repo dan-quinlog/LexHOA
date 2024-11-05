@@ -16,8 +16,16 @@ import { createAuthLink } from 'aws-appsync-auth-link';
 import { createSubscriptionHandshakeLink } from 'aws-appsync-subscription-link';
 import { ApolloLink } from '@apollo/client';
 import { GET_LATEST_BULLETINS } from './queries/queries';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.bubble.css';
 
-Amplify.configure(awsmobile);
+Amplify.configure({
+  ...awsmobile,
+  Auth: {
+    region: 'us-east-1',
+    mandatorySignIn: false
+  }
+});
 
 const url = awsmobile.aws_appsync_graphqlEndpoint;
 const region = awsmobile.aws_appsync_region;
@@ -77,14 +85,12 @@ function App() {
           setUserGroups(groups);
         }
       } catch (error) {
-        // User is not authenticated - this is an expected state
         setUser(null);
         setUserGroups([]);
       }
     };
 
     handleRedirect();
-
   }, []);
 
   useEffect(() => {
@@ -137,24 +143,28 @@ function App() {
       client: user ? authenticatedClient : publicClient
     });
 
-    const BulletinSection = () => {
-      if (loading) return <p>Loading bulletins...</p>;
-      if (error) return <p>Error loading bulletins. Please try again later.</p>;
-      if (!data || !data.listBulletins) return <p>No bulletins available</p>;
+const BulletinSection = () => {
+  if (loading) return <p>Loading bulletins...</p>;
+  if (error) return <p>Error loading bulletins. Please try again later.</p>;
+  if (!data || !data.listBulletins) return <p>No bulletins available</p>;
 
-      return (
-        <ul>
-          {data.listBulletins.items.map(bulletin => (
-            <li key={bulletin.id}>
-              <h3>{bulletin.title}</h3>
-              <p>{bulletin.content}</p>
-              <p>{new Date(bulletin.datePosted).toLocaleDateString()}</p>
-            </li>
-          ))}
-        </ul>
-      );
-    };
-
+  return (
+    <ul className="bulletin-list">
+      {data.listBulletins.items.map(bulletin => (
+        <li key={bulletin.id} className="bulletin-card">
+          <h3>{bulletin.title}</h3>
+          <ReactQuill 
+            value={bulletin.content}
+            readOnly={true}
+            theme="bubble"
+            modules={{ toolbar: false }}
+          />
+          <p className="bulletin-date">{new Date(bulletin.datePosted).toLocaleDateString()}</p>
+        </li>
+      ))}
+    </ul>
+  );
+};
     return (
       <main className="content">
         <div className="main-content">

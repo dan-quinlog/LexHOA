@@ -55,3 +55,16 @@ export const GET_BULLETINS = gql`
   }
 `;
 
+
+export const LIST_PEOPLE = gql`
+  query ListPeople {
+    listPeople {
+      items {
+        id
+        name
+        email
+        cognitoId
+      }
+    }
+  }
+`;

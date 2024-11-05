@@ -3,6 +3,8 @@ import { useQuery } from '@apollo/client';
 import { GET_BULLETINS } from '../../queries/queries';
 import BulletinModal from './BulletinModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.bubble.css';
 import './BulletinManager.css';
 
 const BulletinManager = () => {
@@ -61,26 +63,36 @@ const BulletinManager = () => {
       
       <div className="bulletin-list">
         {data?.listBulletins.items.map((bulletin, index) => (
-          <div 
-            key={bulletin.id} 
+          <div
+            key={bulletin.id}
             ref={index === data.listBulletins.items.length - 1 ? lastBulletinRef : null}
             className="bulletin-item"
           >
-            <div className="bulletin-actions">
-              <button onClick={() => handleEdit(bulletin)}>Edit</button>
-              <button onClick={() => handleDelete(bulletin)}>Delete</button>
+            <div className="bulletin-header">
+              <div className="bulletin-actions">
+                <button onClick={() => handleEdit(bulletin)}>Edit</button>
+                <button onClick={() => handleDelete(bulletin)}>Delete</button>
+              </div>
+              <div className="bulletin-metadata">
+                <span className="bulletin-date">{new Date(bulletin.datePosted).toLocaleString()}</span>
+                <span className="bulletin-audience">{bulletin.audience}</span>
+              </div>
             </div>
             <div className="bulletin-content">
               <h3>{bulletin.title}</h3>
-              <p>{bulletin.content}</p>
-              <span>{new Date(bulletin.datePosted).toLocaleString()}</span>
+              <ReactQuill 
+                value={bulletin.content}
+                readOnly={true}
+                theme="bubble"
+                modules={{ toolbar: false }}
+              />
             </div>
           </div>
         ))}
       </div>
 
       {modalOpen && (
-        <BulletinModal 
+        <BulletinModal
           bulletin={selectedBulletin}
           onClose={() => {
             setModalOpen(false);

@@ -25,24 +25,32 @@ const BulletinModal = ({ bulletin, onClose }) => {
 
   const [createBulletin] = useMutation(CREATE_BULLETIN, {
     update(cache, { data: { createBulletin } }) {
-      const existingData = cache.readQuery({ 
-        query: GET_BULLETINS,
-        variables: { limit: 10 }
-      });
-      
-      if (existingData && existingData.listBulletins) {
-        cache.writeQuery({
+      try {
+        const existingData = cache.readQuery({
           query: GET_BULLETINS,
-          variables: { limit: 10 },
-          data: {
-            listBulletins: {
-              ...existingData.listBulletins,
-              items: [createBulletin, ...existingData.listBulletins.items]
-            }
-          }
+          variables: { limit: 10 }
         });
+
+        if (existingData && existingData.listBulletins) {
+          cache.writeQuery({
+            query: GET_BULLETINS,
+            variables: { limit: 10 },
+            data: {
+              listBulletins: {
+                ...existingData.listBulletins,
+                items: [createBulletin, ...existingData.listBulletins.items],
+                nextToken: existingData.listBulletins.nextToken
+              }
+            }
+          });
+        }
+      } catch (error) {
+        // Silent fail - cache will be updated by refetchQueries
       }
-    }
+    },
+    refetchQueries: [
+      {query: GET_BULLETINS, variables: { limit: 10 }}
+    ]
   });
   const [updateBulletin] = useMutation(UPDATE_BULLETIN);
   const [showNotification, setShowNotification] = useState(false);
@@ -58,6 +66,14 @@ const BulletinModal = ({ bulletin, onClose }) => {
   }, [bulletin]);
 
   const handleSubmit = async () => {
+    const bulletinSize = new TextEncoder().encode(JSON.stringify(formData)).length;
+    const maxSize = 400000;
+    
+    if (bulletinSize > maxSize) {
+      setShowNotification(`Content size (${Math.round(bulletinSize/1024)}KB) exceeds maximum allowed size (${Math.round(maxSize/1024)}KB)`);
+      return;
+    }
+
     try {
       if (bulletin) {
         await updateBulletin({
@@ -72,20 +88,24 @@ const BulletinModal = ({ bulletin, onClose }) => {
       } else {
         await createBulletin({
           variables: {
-            input: formData
+            input: {
+              title: formData.title,
+              content: formData.content,
+              audience: formData.audience
+            }
           }
         });
         setShowNotification('Bulletin posted successfully');
       }
+      
       setTimeout(() => {
         setShowNotification(false);
         onClose();
       }, 2000);
     } catch (error) {
-      console.error('Error saving bulletin:', error);
+      setShowNotification(`Error: Unable to save bulletin`);
     }
   };
-
   return (
     <>
       <Modal onClose={onClose}>

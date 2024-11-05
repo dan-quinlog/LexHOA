@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import BulletinManager from '../components/board/BulletinManager';
 import PersonManager from '../components/board/PersonManager';
 import './Board.css';
+import { searchUsers } from '../utils/userSearch';
+import { useQuery } from '@apollo/client';
+import { LIST_PEOPLE } from '../queries/queries';
 
 const TOOLS = [
   { id: 'bulletins', label: 'Bulletins' },
@@ -11,6 +14,8 @@ const TOOLS = [
 const Board = () => {
   const [selectedTool, setSelectedTool] = useState('bulletins');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const { data: peopleData } = useQuery(LIST_PEOPLE);
 
   const handleToolSelect = (toolId) => {
     setSelectedTool(toolId);
@@ -26,6 +31,18 @@ const Board = () => {
       default:
         return null;
     }
+  };
+
+  const handleSearch = async (email) => {
+    const cognitoUsers = await searchUsers(email);
+    const matchingPeople = peopleData?.listPeople?.items.filter(p => 
+      p.email.toLowerCase().includes(email.toLowerCase())
+    );
+    
+    setSearchResults([
+      ...cognitoUsers.map(u => ({ ...u, source: 'cognito' })),
+      ...matchingPeople.map(p => ({ ...p, source: 'person' }))
+    ]);
   };
 
   return (

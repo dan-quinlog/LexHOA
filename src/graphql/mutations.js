@@ -10,7 +10,11 @@ export const createPerson = /* GraphQL */ `
       id
       name
       email
-      address
+      add1
+      add2
+      city
+      state
+      zip
       phoneCall
       phoneText
       contactPref
@@ -30,7 +34,11 @@ export const updatePerson = /* GraphQL */ `
       id
       name
       email
-      address
+      add1
+      add2
+      city
+      state
+      zip
       phoneCall
       phoneText
       contactPref
@@ -50,7 +58,11 @@ export const deletePerson = /* GraphQL */ `
       id
       name
       email
-      address
+      add1
+      add2
+      city
+      state
+      zip
       phoneCall
       phoneText
       contactPref
@@ -68,32 +80,13 @@ export const createAccount = /* GraphQL */ `
   ) {
     createAccount(input: $input, condition: $condition) {
       id
-      owner {
-        id
-        name
-        email
-        address
-        phoneCall
-        phoneText
-        contactPref
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      properties {
-        nextToken
-        __typename
-      }
+      accountOwnerId
+      accountName
       billingFreq
       balance
-      paymentList {
-        nextToken
-        __typename
-      }
       createdAt
       updatedAt
-      accountOwnerId
+      owner
       __typename
     }
   }
@@ -105,32 +98,13 @@ export const updateAccount = /* GraphQL */ `
   ) {
     updateAccount(input: $input, condition: $condition) {
       id
-      owner {
-        id
-        name
-        email
-        address
-        phoneCall
-        phoneText
-        contactPref
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      properties {
-        nextToken
-        __typename
-      }
+      accountOwnerId
+      accountName
       billingFreq
       balance
-      paymentList {
-        nextToken
-        __typename
-      }
       createdAt
       updatedAt
-      accountOwnerId
+      owner
       __typename
     }
   }
@@ -142,32 +116,13 @@ export const deleteAccount = /* GraphQL */ `
   ) {
     deleteAccount(input: $input, condition: $condition) {
       id
-      owner {
-        id
-        name
-        email
-        address
-        phoneCall
-        phoneText
-        contactPref
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      properties {
-        nextToken
-        __typename
-      }
+      accountOwnerId
+      accountName
       billingFreq
       balance
-      paymentList {
-        nextToken
-        __typename
-      }
       createdAt
       updatedAt
-      accountOwnerId
+      owner
       __typename
     }
   }
@@ -180,32 +135,10 @@ export const createProperty = /* GraphQL */ `
     createProperty(input: $input, condition: $condition) {
       id
       address
-      ownerAcc {
-        id
-        billingFreq
-        balance
-        createdAt
-        updatedAt
-        accountOwnerId
-        __typename
-      }
-      tenant {
-        id
-        name
-        email
-        address
-        phoneCall
-        phoneText
-        contactPref
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      createdAt
-      updatedAt
       accountPropertiesId
       propertyTenantId
+      createdAt
+      updatedAt
       owner
       __typename
     }
@@ -219,32 +152,10 @@ export const updateProperty = /* GraphQL */ `
     updateProperty(input: $input, condition: $condition) {
       id
       address
-      ownerAcc {
-        id
-        billingFreq
-        balance
-        createdAt
-        updatedAt
-        accountOwnerId
-        __typename
-      }
-      tenant {
-        id
-        name
-        email
-        address
-        phoneCall
-        phoneText
-        contactPref
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      createdAt
-      updatedAt
       accountPropertiesId
       propertyTenantId
+      createdAt
+      updatedAt
       owner
       __typename
     }
@@ -258,32 +169,10 @@ export const deleteProperty = /* GraphQL */ `
     deleteProperty(input: $input, condition: $condition) {
       id
       address
-      ownerAcc {
-        id
-        billingFreq
-        balance
-        createdAt
-        updatedAt
-        accountOwnerId
-        __typename
-      }
-      tenant {
-        id
-        name
-        email
-        address
-        phoneCall
-        phoneText
-        contactPref
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      createdAt
-      updatedAt
       accountPropertiesId
       propertyTenantId
+      createdAt
+      updatedAt
       owner
       __typename
     }
@@ -296,20 +185,11 @@ export const createPayment = /* GraphQL */ `
   ) {
     createPayment(input: $input, condition: $condition) {
       id
-      amount
-      date
-      acc {
-        id
-        billingFreq
-        balance
-        createdAt
-        updatedAt
-        accountOwnerId
-        __typename
-      }
+      checkDate
+      checkNumber
+      checkAmount
       createdAt
       updatedAt
-      accountPaymentListId
       owner
       __typename
     }
@@ -322,20 +202,11 @@ export const updatePayment = /* GraphQL */ `
   ) {
     updatePayment(input: $input, condition: $condition) {
       id
-      amount
-      date
-      acc {
-        id
-        billingFreq
-        balance
-        createdAt
-        updatedAt
-        accountOwnerId
-        __typename
-      }
+      checkDate
+      checkNumber
+      checkAmount
       createdAt
       updatedAt
-      accountPaymentListId
       owner
       __typename
     }
@@ -348,72 +219,12 @@ export const deletePayment = /* GraphQL */ `
   ) {
     deletePayment(input: $input, condition: $condition) {
       id
-      amount
-      date
-      acc {
-        id
-        billingFreq
-        balance
-        createdAt
-        updatedAt
-        accountOwnerId
-        __typename
-      }
+      checkDate
+      checkNumber
+      checkAmount
       createdAt
       updatedAt
-      accountPaymentListId
       owner
-      __typename
-    }
-  }
-`;
-export const createBulletin = /* GraphQL */ `
-  mutation CreateBulletin(
-    $input: CreateBulletinInput!
-    $condition: ModelBulletinConditionInput
-  ) {
-    createBulletin(input: $input, condition: $condition) {
-      id
-      title
-      content
-      audience
-      datePosted
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const updateBulletin = /* GraphQL */ `
-  mutation UpdateBulletin(
-    $input: UpdateBulletinInput!
-    $condition: ModelBulletinConditionInput
-  ) {
-    updateBulletin(input: $input, condition: $condition) {
-      id
-      title
-      content
-      audience
-      datePosted
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const deleteBulletin = /* GraphQL */ `
-  mutation DeleteBulletin(
-    $input: DeleteBulletinInput!
-    $condition: ModelBulletinConditionInput
-  ) {
-    deleteBulletin(input: $input, condition: $condition) {
-      id
-      title
-      content
-      audience
-      datePosted
-      createdAt
-      updatedAt
       __typename
     }
   }

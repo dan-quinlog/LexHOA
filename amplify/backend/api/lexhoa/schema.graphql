@@ -1,571 +1,70 @@
-schema {
-  query: Query
-}
 
-type Account @model {
-  accountOwnerId: ID!
-  balance: Float!
-  billingFreq: BillingFreq!
-  createdAt: AWSDateTime!
+type Person @model @auth(rules: [{allow: owner}]) {
   id: ID!
-  owner: Person!
-  paymentList(filter: ModelPaymentFilterInput, limit: Int, nextToken: String, sortDirection: ModelSortDirection): ModelPaymentConnection
-  properties(filter: ModelPropertyFilterInput, limit: Int, nextToken: String, sortDirection: ModelSortDirection): ModelPropertyConnection
-  updatedAt: AWSDateTime!
-}
-
-type Bulletin @model {
-  audience: Audience!
-  content: String!
-  createdAt: AWSDateTime!
-  datePosted: AWSDateTime!
-  id: ID!
-  title: String!
-  updatedAt: AWSDateTime!
-}
-
-type ModelAccountConnection {
-  items: [Account]!
-  nextToken: String
-}
-
-type ModelBulletinConnection {
-  items: [Bulletin]!
-  nextToken: String
-}
-
-type ModelPaymentConnection {
-  items: [Payment]!
-  nextToken: String
-}
-
-type ModelPersonConnection {
-  items: [Person]!
-  nextToken: String
-}
-
-type ModelPropertyConnection {
-  items: [Property]!
-  nextToken: String
-}
-
-type Payment @model {
-  acc: Account!
-  accountPaymentListId: ID
-  amount: Float!
-  createdAt: AWSDateTime!
-  date: AWSDateTime!
-  id: ID!
-  owner: String
-  updatedAt: AWSDateTime!
-}
-
-type Person @model {
-  id: ID! @primaryKey
   name: String!
-  email: String!
-  address: String
+  email: String
+  add1: String
+  add2: String
+  city: String
+  state: String
+  zip: String
   phoneCall: String
   phoneText: String
-  contactPref: ContactPrefs!
-  cognitoId: String @index(name: "byCognitoId")
+  contactPref: ContactPrefs
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
   owner: String
 }
 
-type Property @model {
-  accountPropertiesId: ID
-  address: String!
-  createdAt: AWSDateTime!
+type Account @model @auth(rules: [{allow: owner}]) {
   id: ID!
-  owner: String
-  ownerAcc: Account!
-  propertyTenantId: ID
-  tenant: Person
+  accountOwnerId: ID!
+  accountName: String
+  billingFreq: BillingFreq!
+  balance: Float!
+  createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
+  owner: String
 }
 
-type Query {
-  getPersonByCognitoId(cognitoId: String!): Person
+type Property @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  address: String!
+  accountPropertiesId: ID!
+  propertyTenantId: ID
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  owner: String
+}
+
+type Payment @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  checkDate: AWSDate!
+  checkNumber: String!
+  checkAmount: Float!
+}
+
+enum ContactPrefs {
+  CALL
+  TEXT
+  EMAIL
+  PHYSICAL
+}
+
+enum BillingFreq {
+  MONTHLY
+  QUARTERLY
+  SEMI
+  ANNUAL
 }
 
 enum Audience {
   BOARD
   OWNERS
-  PUBLIC
   RESIDENTS
+  PUBLIC
 }
 
-enum BillingFreq {
-  ANNUAL
-  MONTHLY
-  QUARTERLY
-  SEMI
-}
-
-enum ContactPrefs {
-  CALL
-  EMAIL
-  PHYSICAL
-  TEXT
-}
-
-enum ModelAttributeTypes {
-  _null
-  binary
-  binarySet
-  bool
-  list
-  map
-  number
-  numberSet
-  string
-  stringSet
-}
-
-enum ModelSortDirection {
-  ASC
-  DESC
-}
-
-input CreateAccountInput {
-  accountOwnerId: ID!
-  balance: Float!
-  billingFreq: BillingFreq!
-  id: ID
-}
-
-input CreateBulletinInput {
-  audience: Audience!
-  content: String!
-  datePosted: AWSDateTime!
-  id: ID
-  title: String!
-}
-
-input CreatePaymentInput {
-  accountPaymentListId: ID
-  amount: Float!
-  date: AWSDateTime!
-  id: ID
-}
-
-input CreatePersonInput {
-  address: String
-  cognitoId: String
-  contactPref: ContactPrefs!
-  email: String!
-  id: ID
-  name: String!
-  phoneCall: String
-  phoneText: String
-}
-
-input CreatePropertyInput {
-  accountPropertiesId: ID
-  address: String!
-  id: ID
-  propertyTenantId: ID
-}
-
-input DeleteAccountInput {
-  id: ID!
-}
-
-input DeleteBulletinInput {
-  id: ID!
-}
-
-input DeletePaymentInput {
-  id: ID!
-}
-
-input DeletePersonInput {
-  id: ID!
-}
-
-input DeletePropertyInput {
-  id: ID!
-}
-
-input ModelAccountConditionInput {
-  accountOwnerId: ModelIDInput
-  and: [ModelAccountConditionInput]
-  balance: ModelFloatInput
-  billingFreq: ModelBillingFreqInput
-  createdAt: ModelStringInput
-  not: ModelAccountConditionInput
-  or: [ModelAccountConditionInput]
-  owner: ModelStringInput
-  updatedAt: ModelStringInput
-}
-
-input ModelAccountFilterInput {
-  accountOwnerId: ModelIDInput
-  and: [ModelAccountFilterInput]
-  balance: ModelFloatInput
-  billingFreq: ModelBillingFreqInput
-  createdAt: ModelStringInput
-  id: ModelIDInput
-  not: ModelAccountFilterInput
-  or: [ModelAccountFilterInput]
-  owner: ModelStringInput
-  updatedAt: ModelStringInput
-}
-
-input ModelAudienceInput {
-  eq: Audience
-  ne: Audience
-}
-
-input ModelBillingFreqInput {
-  eq: BillingFreq
-  ne: BillingFreq
-}
-
-input ModelBooleanInput {
-  attributeExists: Boolean
-  attributeType: ModelAttributeTypes
-  eq: Boolean
-  ne: Boolean
-}
-
-input ModelBulletinConditionInput {
-  and: [ModelBulletinConditionInput]
-  audience: ModelAudienceInput
-  content: ModelStringInput
-  createdAt: ModelStringInput
-  datePosted: ModelStringInput
-  not: ModelBulletinConditionInput
-  or: [ModelBulletinConditionInput]
-  title: ModelStringInput
-  updatedAt: ModelStringInput
-}
-
-input ModelBulletinFilterInput {
-  and: [ModelBulletinFilterInput]
-  audience: ModelAudienceInput
-  content: ModelStringInput
-  createdAt: ModelStringInput
-  datePosted: ModelStringInput
-  id: ModelIDInput
-  not: ModelBulletinFilterInput
-  or: [ModelBulletinFilterInput]
-  title: ModelStringInput
-  updatedAt: ModelStringInput
-}
-
-input ModelContactPrefsInput {
-  eq: ContactPrefs
-  ne: ContactPrefs
-}
-
-input ModelFloatInput {
-  attributeExists: Boolean
-  attributeType: ModelAttributeTypes
-  between: [Float]
-  eq: Float
-  ge: Float
-  gt: Float
-  le: Float
-  lt: Float
-  ne: Float
-}
-
-input ModelIDInput {
-  attributeExists: Boolean
-  attributeType: ModelAttributeTypes
-  beginsWith: ID
-  between: [ID]
-  contains: ID
-  eq: ID
-  ge: ID
-  gt: ID
-  le: ID
-  lt: ID
-  ne: ID
-  notContains: ID
-  size: ModelSizeInput
-}
-
-input ModelIntInput {
-  attributeExists: Boolean
-  attributeType: ModelAttributeTypes
-  between: [Int]
-  eq: Int
-  ge: Int
-  gt: Int
-  le: Int
-  lt: Int
-  ne: Int
-}
-
-input ModelPaymentConditionInput {
-  accountPaymentListId: ModelIDInput
-  amount: ModelFloatInput
-  and: [ModelPaymentConditionInput]
-  createdAt: ModelStringInput
-  date: ModelStringInput
-  not: ModelPaymentConditionInput
-  or: [ModelPaymentConditionInput]
-  owner: ModelStringInput
-  updatedAt: ModelStringInput
-}
-
-input ModelPaymentFilterInput {
-  accountPaymentListId: ModelIDInput
-  amount: ModelFloatInput
-  and: [ModelPaymentFilterInput]
-  createdAt: ModelStringInput
-  date: ModelStringInput
-  id: ModelIDInput
-  not: ModelPaymentFilterInput
-  or: [ModelPaymentFilterInput]
-  owner: ModelStringInput
-  updatedAt: ModelStringInput
-}
-
-input ModelPersonConditionInput {
-  address: ModelStringInput
-  and: [ModelPersonConditionInput]
-  contactPref: ModelContactPrefsInput
-  createdAt: ModelStringInput
-  email: ModelStringInput
-  name: ModelStringInput
-  not: ModelPersonConditionInput
-  or: [ModelPersonConditionInput]
-  owner: ModelStringInput
-  phoneCall: ModelStringInput
-  phoneText: ModelStringInput
-  updatedAt: ModelStringInput
-}
-
-input ModelPersonFilterInput {
-  address: ModelStringInput
-  and: [ModelPersonFilterInput]
-  contactPref: ModelContactPrefsInput
-  createdAt: ModelStringInput
-  email: ModelStringInput
-  id: ModelIDInput
-  name: ModelStringInput
-  not: ModelPersonFilterInput
-  or: [ModelPersonFilterInput]
-  owner: ModelStringInput
-  phoneCall: ModelStringInput
-  phoneText: ModelStringInput
-  updatedAt: ModelStringInput
-}
-
-input ModelPropertyConditionInput {
-  accountPropertiesId: ModelIDInput
-  address: ModelStringInput
-  and: [ModelPropertyConditionInput]
-  createdAt: ModelStringInput
-  not: ModelPropertyConditionInput
-  or: [ModelPropertyConditionInput]
-  owner: ModelStringInput
-  propertyTenantId: ModelIDInput
-  updatedAt: ModelStringInput
-}
-
-input ModelPropertyFilterInput {
-  accountPropertiesId: ModelIDInput
-  address: ModelStringInput
-  and: [ModelPropertyFilterInput]
-  createdAt: ModelStringInput
-  id: ModelIDInput
-  not: ModelPropertyFilterInput
-  or: [ModelPropertyFilterInput]
-  owner: ModelStringInput
-  propertyTenantId: ModelIDInput
-  updatedAt: ModelStringInput
-}
-
-input ModelSizeInput {
-  between: [Int]
-  eq: Int
-  ge: Int
-  gt: Int
-  le: Int
-  lt: Int
-  ne: Int
-}
-
-input ModelStringInput {
-  attributeExists: Boolean
-  attributeType: ModelAttributeTypes
-  beginsWith: String
-  between: [String]
-  contains: String
-  eq: String
-  ge: String
-  gt: String
-  le: String
-  lt: String
-  ne: String
-  notContains: String
-  size: ModelSizeInput
-}
-
-input ModelSubscriptionAccountFilterInput {
-  accountOwnerId: ModelSubscriptionIDInput
-  accountPaymentListId: ModelSubscriptionIDInput
-  accountPropertiesId: ModelSubscriptionIDInput
-  and: [ModelSubscriptionAccountFilterInput]
-  balance: ModelSubscriptionFloatInput
-  billingFreq: ModelSubscriptionStringInput
-  createdAt: ModelSubscriptionStringInput
-  id: ModelSubscriptionIDInput
-  or: [ModelSubscriptionAccountFilterInput]
-  owner: ModelStringInput
-  updatedAt: ModelSubscriptionStringInput
-}
-
-input ModelSubscriptionBooleanInput {
-  eq: Boolean
-  ne: Boolean
-}
-
-input ModelSubscriptionBulletinFilterInput {
-  and: [ModelSubscriptionBulletinFilterInput]
-  audience: ModelSubscriptionStringInput
-  content: ModelSubscriptionStringInput
-  createdAt: ModelSubscriptionStringInput
-  datePosted: ModelSubscriptionStringInput
-  id: ModelSubscriptionIDInput
-  or: [ModelSubscriptionBulletinFilterInput]
-  title: ModelSubscriptionStringInput
-  updatedAt: ModelSubscriptionStringInput
-}
-
-input ModelSubscriptionFloatInput {
-  between: [Float]
-  eq: Float
-  ge: Float
-  gt: Float
-  in: [Float]
-  le: Float
-  lt: Float
-  ne: Float
-  notIn: [Float]
-}
-
-input ModelSubscriptionIDInput {
-  beginsWith: ID
-  between: [ID]
-  contains: ID
-  eq: ID
-  ge: ID
-  gt: ID
-  in: [ID]
-  le: ID
-  lt: ID
-  ne: ID
-  notContains: ID
-  notIn: [ID]
-}
-
-input ModelSubscriptionIntInput {
-  between: [Int]
-  eq: Int
-  ge: Int
-  gt: Int
-  in: [Int]
-  le: Int
-  lt: Int
-  ne: Int
-  notIn: [Int]
-}
-
-input ModelSubscriptionPaymentFilterInput {
-  amount: ModelSubscriptionFloatInput
-  and: [ModelSubscriptionPaymentFilterInput]
-  createdAt: ModelSubscriptionStringInput
-  date: ModelSubscriptionStringInput
-  id: ModelSubscriptionIDInput
-  or: [ModelSubscriptionPaymentFilterInput]
-  owner: ModelStringInput
-  updatedAt: ModelSubscriptionStringInput
-}
-
-input ModelSubscriptionPersonFilterInput {
-  address: ModelSubscriptionStringInput
-  and: [ModelSubscriptionPersonFilterInput]
-  contactPref: ModelSubscriptionStringInput
-  createdAt: ModelSubscriptionStringInput
-  email: ModelSubscriptionStringInput
-  id: ModelSubscriptionIDInput
-  name: ModelSubscriptionStringInput
-  or: [ModelSubscriptionPersonFilterInput]
-  owner: ModelStringInput
-  phoneCall: ModelSubscriptionStringInput
-  phoneText: ModelSubscriptionStringInput
-  updatedAt: ModelSubscriptionStringInput
-}
-
-input ModelSubscriptionPropertyFilterInput {
-  address: ModelSubscriptionStringInput
-  and: [ModelSubscriptionPropertyFilterInput]
-  createdAt: ModelSubscriptionStringInput
-  id: ModelSubscriptionIDInput
-  or: [ModelSubscriptionPropertyFilterInput]
-  owner: ModelStringInput
-  propertyTenantId: ModelSubscriptionIDInput
-  updatedAt: ModelSubscriptionStringInput
-}
-
-input ModelSubscriptionStringInput {
-  beginsWith: String
-  between: [String]
-  contains: String
-  eq: String
-  ge: String
-  gt: String
-  in: [String]
-  le: String
-  lt: String
-  ne: String
-  notContains: String
-  notIn: [String]
-}
-
-input UpdateAccountInput {
-  accountOwnerId: ID
-  balance: Float
-  billingFreq: BillingFreq
-  id: ID!
-}
-
-input UpdateBulletinInput {
-  audience: Audience
-  content: String
-  datePosted: AWSDateTime
-  id: ID!
-  title: String
-}
-
-input UpdatePaymentInput {
-  accountPaymentListId: ID
-  amount: Float
-  date: AWSDateTime
-  id: ID!
-}
-
-input UpdatePersonInput {
-  address: String
-  cognitoId: String
-  contactPref: ContactPrefs
-  email: String
-  id: ID!
-  name: String
-  phoneCall: String
-  phoneText: String
-}
-
-input UpdatePropertyInput {
-  accountPropertiesId: ID
-  address: String
-  id: ID!
-  propertyTenantId: ID
+type Query {
+  getPersonByCognitoId(cognitoId: String!): Person
 }

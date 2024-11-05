@@ -10,7 +10,11 @@ export const onCreatePerson = /* GraphQL */ `
       id
       name
       email
-      address
+      add1
+      add2
+      city
+      state
+      zip
       phoneCall
       phoneText
       contactPref
@@ -30,7 +34,11 @@ export const onUpdatePerson = /* GraphQL */ `
       id
       name
       email
-      address
+      add1
+      add2
+      city
+      state
+      zip
       phoneCall
       phoneText
       contactPref
@@ -50,7 +58,11 @@ export const onDeletePerson = /* GraphQL */ `
       id
       name
       email
-      address
+      add1
+      add2
+      city
+      state
+      zip
       phoneCall
       phoneText
       contactPref
@@ -68,32 +80,13 @@ export const onCreateAccount = /* GraphQL */ `
   ) {
     onCreateAccount(filter: $filter, owner: $owner) {
       id
-      owner {
-        id
-        name
-        email
-        address
-        phoneCall
-        phoneText
-        contactPref
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      properties {
-        nextToken
-        __typename
-      }
+      accountOwnerId
+      accountName
       billingFreq
       balance
-      paymentList {
-        nextToken
-        __typename
-      }
       createdAt
       updatedAt
-      accountOwnerId
+      owner
       __typename
     }
   }
@@ -105,32 +98,13 @@ export const onUpdateAccount = /* GraphQL */ `
   ) {
     onUpdateAccount(filter: $filter, owner: $owner) {
       id
-      owner {
-        id
-        name
-        email
-        address
-        phoneCall
-        phoneText
-        contactPref
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      properties {
-        nextToken
-        __typename
-      }
+      accountOwnerId
+      accountName
       billingFreq
       balance
-      paymentList {
-        nextToken
-        __typename
-      }
       createdAt
       updatedAt
-      accountOwnerId
+      owner
       __typename
     }
   }
@@ -142,32 +116,13 @@ export const onDeleteAccount = /* GraphQL */ `
   ) {
     onDeleteAccount(filter: $filter, owner: $owner) {
       id
-      owner {
-        id
-        name
-        email
-        address
-        phoneCall
-        phoneText
-        contactPref
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      properties {
-        nextToken
-        __typename
-      }
+      accountOwnerId
+      accountName
       billingFreq
       balance
-      paymentList {
-        nextToken
-        __typename
-      }
       createdAt
       updatedAt
-      accountOwnerId
+      owner
       __typename
     }
   }
@@ -180,32 +135,10 @@ export const onCreateProperty = /* GraphQL */ `
     onCreateProperty(filter: $filter, owner: $owner) {
       id
       address
-      ownerAcc {
-        id
-        billingFreq
-        balance
-        createdAt
-        updatedAt
-        accountOwnerId
-        __typename
-      }
-      tenant {
-        id
-        name
-        email
-        address
-        phoneCall
-        phoneText
-        contactPref
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      createdAt
-      updatedAt
       accountPropertiesId
       propertyTenantId
+      createdAt
+      updatedAt
       owner
       __typename
     }
@@ -219,32 +152,10 @@ export const onUpdateProperty = /* GraphQL */ `
     onUpdateProperty(filter: $filter, owner: $owner) {
       id
       address
-      ownerAcc {
-        id
-        billingFreq
-        balance
-        createdAt
-        updatedAt
-        accountOwnerId
-        __typename
-      }
-      tenant {
-        id
-        name
-        email
-        address
-        phoneCall
-        phoneText
-        contactPref
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      createdAt
-      updatedAt
       accountPropertiesId
       propertyTenantId
+      createdAt
+      updatedAt
       owner
       __typename
     }
@@ -258,32 +169,10 @@ export const onDeleteProperty = /* GraphQL */ `
     onDeleteProperty(filter: $filter, owner: $owner) {
       id
       address
-      ownerAcc {
-        id
-        billingFreq
-        balance
-        createdAt
-        updatedAt
-        accountOwnerId
-        __typename
-      }
-      tenant {
-        id
-        name
-        email
-        address
-        phoneCall
-        phoneText
-        contactPref
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      createdAt
-      updatedAt
       accountPropertiesId
       propertyTenantId
+      createdAt
+      updatedAt
       owner
       __typename
     }
@@ -296,20 +185,11 @@ export const onCreatePayment = /* GraphQL */ `
   ) {
     onCreatePayment(filter: $filter, owner: $owner) {
       id
-      amount
-      date
-      acc {
-        id
-        billingFreq
-        balance
-        createdAt
-        updatedAt
-        accountOwnerId
-        __typename
-      }
+      checkDate
+      checkNumber
+      checkAmount
       createdAt
       updatedAt
-      accountPaymentListId
       owner
       __typename
     }
@@ -322,20 +202,11 @@ export const onUpdatePayment = /* GraphQL */ `
   ) {
     onUpdatePayment(filter: $filter, owner: $owner) {
       id
-      amount
-      date
-      acc {
-        id
-        billingFreq
-        balance
-        createdAt
-        updatedAt
-        accountOwnerId
-        __typename
-      }
+      checkDate
+      checkNumber
+      checkAmount
       createdAt
       updatedAt
-      accountPaymentListId
       owner
       __typename
     }
@@ -348,63 +219,12 @@ export const onDeletePayment = /* GraphQL */ `
   ) {
     onDeletePayment(filter: $filter, owner: $owner) {
       id
-      amount
-      date
-      acc {
-        id
-        billingFreq
-        balance
-        createdAt
-        updatedAt
-        accountOwnerId
-        __typename
-      }
+      checkDate
+      checkNumber
+      checkAmount
       createdAt
       updatedAt
-      accountPaymentListId
       owner
-      __typename
-    }
-  }
-`;
-export const onCreateBulletin = /* GraphQL */ `
-  subscription OnCreateBulletin($filter: ModelSubscriptionBulletinFilterInput) {
-    onCreateBulletin(filter: $filter) {
-      id
-      title
-      content
-      audience
-      datePosted
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const onUpdateBulletin = /* GraphQL */ `
-  subscription OnUpdateBulletin($filter: ModelSubscriptionBulletinFilterInput) {
-    onUpdateBulletin(filter: $filter) {
-      id
-      title
-      content
-      audience
-      datePosted
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const onDeleteBulletin = /* GraphQL */ `
-  subscription OnDeleteBulletin($filter: ModelSubscriptionBulletinFilterInput) {
-    onDeleteBulletin(filter: $filter) {
-      id
-      title
-      content
-      audience
-      datePosted
-      createdAt
-      updatedAt
       __typename
     }
   }

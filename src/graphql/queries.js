@@ -1,13 +1,38 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
+export const getPersonByCognitoId = /* GraphQL */ `
+  query GetPersonByCognitoId($cognitoId: String!) {
+    getPersonByCognitoId(cognitoId: $cognitoId) {
+      id
+      name
+      email
+      add1
+      add2
+      city
+      state
+      zip
+      phoneCall
+      phoneText
+      contactPref
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
 export const getPerson = /* GraphQL */ `
   query GetPerson($id: ID!) {
     getPerson(id: $id) {
       id
       name
       email
-      address
+      add1
+      add2
+      city
+      state
+      zip
       phoneCall
       phoneText
       contactPref
@@ -29,7 +54,11 @@ export const listPeople = /* GraphQL */ `
         id
         name
         email
-        address
+        add1
+        add2
+        city
+        state
+        zip
         phoneCall
         phoneText
         contactPref
@@ -47,32 +76,13 @@ export const getAccount = /* GraphQL */ `
   query GetAccount($id: ID!) {
     getAccount(id: $id) {
       id
-      owner {
-        id
-        name
-        email
-        address
-        phoneCall
-        phoneText
-        contactPref
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      properties {
-        nextToken
-        __typename
-      }
+      accountOwnerId
+      accountName
       billingFreq
       balance
-      paymentList {
-        nextToken
-        __typename
-      }
       createdAt
       updatedAt
-      accountOwnerId
+      owner
       __typename
     }
   }
@@ -86,11 +96,13 @@ export const listAccounts = /* GraphQL */ `
     listAccounts(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
+        accountOwnerId
+        accountName
         billingFreq
         balance
         createdAt
         updatedAt
-        accountOwnerId
+        owner
         __typename
       }
       nextToken
@@ -103,32 +115,10 @@ export const getProperty = /* GraphQL */ `
     getProperty(id: $id) {
       id
       address
-      ownerAcc {
-        id
-        billingFreq
-        balance
-        createdAt
-        updatedAt
-        accountOwnerId
-        __typename
-      }
-      tenant {
-        id
-        name
-        email
-        address
-        phoneCall
-        phoneText
-        contactPref
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      createdAt
-      updatedAt
       accountPropertiesId
       propertyTenantId
+      createdAt
+      updatedAt
       owner
       __typename
     }
@@ -144,10 +134,10 @@ export const listProperties = /* GraphQL */ `
       items {
         id
         address
-        createdAt
-        updatedAt
         accountPropertiesId
         propertyTenantId
+        createdAt
+        updatedAt
         owner
         __typename
       }
@@ -160,20 +150,11 @@ export const getPayment = /* GraphQL */ `
   query GetPayment($id: ID!) {
     getPayment(id: $id) {
       id
-      amount
-      date
-      acc {
-        id
-        billingFreq
-        balance
-        createdAt
-        updatedAt
-        accountOwnerId
-        __typename
-      }
+      checkDate
+      checkNumber
+      checkAmount
       createdAt
       updatedAt
-      accountPaymentListId
       owner
       __typename
     }
@@ -188,48 +169,12 @@ export const listPayments = /* GraphQL */ `
     listPayments(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
-        amount
-        date
+        checkDate
+        checkNumber
+        checkAmount
         createdAt
         updatedAt
-        accountPaymentListId
         owner
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const getBulletin = /* GraphQL */ `
-  query GetBulletin($id: ID!) {
-    getBulletin(id: $id) {
-      id
-      title
-      content
-      audience
-      datePosted
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const listBulletins = /* GraphQL */ `
-  query ListBulletins(
-    $filter: ModelBulletinFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    listBulletins(filter: $filter, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        title
-        content
-        audience
-        datePosted
-        createdAt
-        updatedAt
         __typename
       }
       nextToken

@@ -135,11 +135,15 @@ function App() {
 
     return menuItems
       .filter(item => !item.group || userGroups.includes(item.group))
-      .map((item, index) => (
-        <Link key={index} to={item.path} onClick={() => setIsMenuOpen(false)}>
-          {item.label}
-        </Link>
-      ));
+      .map((item, index) => {
+        console.log('User Groups:', userGroups);
+        console.log('Menu Item Group:', item.group);
+        return (
+          <Link key={index} to={item.path} onClick={() => setIsMenuOpen(false)}>
+            {item.label}
+          </Link>
+        );
+      });
   };
 
   const HomePage = () => {

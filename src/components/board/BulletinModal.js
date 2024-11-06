@@ -11,8 +11,8 @@ import NotificationModal from '../NotificationModal';
 
 const AUDIENCE_OPTIONS = [
   { value: 'PUBLIC', label: 'Public' },
-  { value: 'RESIDENT', label: 'Resident' },
-  { value: 'OWNER', label: 'Owner' },
+  { value: 'RESIDENTS', label: 'Resident' },
+  { value: 'OWNERS', label: 'Owner' },
   { value: 'BOARD', label: 'Board' }
 ];
 

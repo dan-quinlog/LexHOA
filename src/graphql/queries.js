@@ -182,3 +182,41 @@ export const listPayments = /* GraphQL */ `
     }
   }
 `;
+export const getBulletin = /* GraphQL */ `
+  query GetBulletin($id: ID!) {
+    getBulletin(id: $id) {
+      id
+      title
+      content
+      audience
+      datePosted
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const listBulletins = /* GraphQL */ `
+  query ListBulletins(
+    $filter: ModelBulletinFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listBulletins(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        title
+        content
+        audience
+        datePosted
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;

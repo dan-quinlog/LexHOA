@@ -44,6 +44,17 @@ type Payment @model @auth(rules: [{allow: owner}]) {
   checkAmount: Float!
 }
 
+type Bulletin @model @auth(rules: [{allow: groups, groups: ["BOARD"]}]) {
+  id: ID!
+  title: String!
+  content: String!
+  audience: Audience!
+  datePosted: AWSDateTime
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+  owner: String
+}
+
 enum ContactPrefs {
   CALL
   TEXT

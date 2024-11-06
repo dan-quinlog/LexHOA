@@ -229,3 +229,57 @@ export const deletePayment = /* GraphQL */ `
     }
   }
 `;
+export const createBulletin = /* GraphQL */ `
+  mutation CreateBulletin(
+    $input: CreateBulletinInput!
+    $condition: ModelBulletinConditionInput
+  ) {
+    createBulletin(input: $input, condition: $condition) {
+      id
+      title
+      content
+      audience
+      datePosted
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const updateBulletin = /* GraphQL */ `
+  mutation UpdateBulletin(
+    $input: UpdateBulletinInput!
+    $condition: ModelBulletinConditionInput
+  ) {
+    updateBulletin(input: $input, condition: $condition) {
+      id
+      title
+      content
+      audience
+      datePosted
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const deleteBulletin = /* GraphQL */ `
+  mutation DeleteBulletin(
+    $input: DeleteBulletinInput!
+    $condition: ModelBulletinConditionInput
+  ) {
+    deleteBulletin(input: $input, condition: $condition) {
+      id
+      title
+      content
+      audience
+      datePosted
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;

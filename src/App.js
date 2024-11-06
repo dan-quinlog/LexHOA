@@ -216,7 +216,7 @@ const BulletinSection = () => {
               <nav className="desktop-menu">
                 <Link to="/amenities">Amenities</Link>
                 <Link to="/contact">Contact</Link>
-                <Login>
+                <Login />
               </nav>
             )}
           </header>

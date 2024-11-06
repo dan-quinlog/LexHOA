@@ -29,6 +29,10 @@ Amplify.configure({
 
 const url = awsmobile.aws_appsync_graphqlEndpoint;
 const region = awsmobile.aws_appsync_region;
+const BOARD_GROUP = process.env.BOARD_GROUP_NAME;
+const OWNERS_GROUP = process.env.OWNERS_GROUP_NAME;
+const RESIDENTS_GROUP = process.env.RESIDENTS_GROUP_NAME;
+
 
 function App() {
   const [user, setUser] = useState(null);
@@ -121,10 +125,10 @@ function App() {
 
   const renderMenuItems = () => {
     const menuItems = [
-      { label: 'Profile', path: '/profile' }, // Move Profile first
-      { label: 'Board', path: '/board', group: 'BOARD' },
-      { label: 'Account', path: '/account', group: 'OWNERS' },
-      { label: 'Property', path: '/property', group: 'RESIDENTS' },
+      { label: 'Profile', path: '/profile' },
+      { label: 'Board', path: '/board', group: BOARD_GROUP },
+      { label: 'Account', path: '/account', group: OWNERS_GROUP },
+      { label: 'Property', path: '/property', group: RESIDENTS_GROUP },
       { label: 'Amenities', path: '/amenities' },
       { label: 'Contact', path: '/contact' }
     ];
@@ -207,7 +211,7 @@ const BulletinSection = () => {
               <nav className="desktop-menu">
                 <Link to="/amenities">Amenities</Link>
                 <Link to="/contact">Contact</Link>
-                <button onClick={() => signInWithRedirect()}>Login</button>
+                <Login />
               </nav>
             )}
           </header>

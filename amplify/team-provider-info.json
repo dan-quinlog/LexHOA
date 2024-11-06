@@ -20,5 +20,27 @@
         "lexhoa": {}
       }
     }
+  },
+  "lexdev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-lexhoa-lexdev-ecd70-authRole",
+      "UnauthRoleArn": "arn:aws:iam::324037289979:role/amplify-lexhoa-lexdev-ecd70-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::324037289979:role/amplify-lexhoa-lexdev-ecd70-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-lexhoa-lexdev-ecd70-deployment",
+      "UnauthRoleName": "amplify-lexhoa-lexdev-ecd70-unauthRole",
+      "StackName": "amplify-lexhoa-lexdev-ecd70",
+      "StackId": "arn:aws:cloudformation:us-east-1:324037289979:stack/amplify-lexhoa-lexdev-ecd70/8525e5e0-9b7f-11ef-99d7-0affc0d36e9d",
+      "AmplifyAppId": "d365ztc4el2qzx"
+    },
+    "categories": {
+      "auth": {
+        "lexhoaauth": {},
+        "userPoolGroups": {}
+      },
+      "api": {
+        "lexhoa": {}
+      }
+    }
   }
 }

@@ -32,6 +32,11 @@ const region = awsmobile.aws_appsync_region;
 const BOARD_GROUP = process.env.BOARD_GROUP_NAME;
 const OWNERS_GROUP = process.env.OWNERS_GROUP_NAME;
 const RESIDENTS_GROUP = process.env.RESIDENTS_GROUP_NAME;
+console.log({
+  BOARD_GROUP: process.env.BOARD_GROUP_NAME,
+  OWNERS_GROUP: process.env.OWNERS_GROUP_NAME,
+  RESIDENTS_GROUP: process.env.RESIDENTS_GROUP_NAME
+});
 
 
 function App() {
@@ -135,15 +140,11 @@ function App() {
 
     return menuItems
       .filter(item => !item.group || userGroups.includes(item.group))
-      .map((item, index) => {
-        console.log('User Groups:', userGroups);
-        console.log('Menu Item Group:', item.group);
-        return (
-          <Link key={index} to={item.path} onClick={() => setIsMenuOpen(false)}>
-            {item.label}
-          </Link>
-        );
-      });
+      .map((item, index) => (
+        <Link key={index} to={item.path} onClick={() => setIsMenuOpen(false)}>
+          {item.label}
+        </Link>
+      ));
   };
 
   const HomePage = () => {
@@ -215,7 +216,7 @@ const BulletinSection = () => {
               <nav className="desktop-menu">
                 <Link to="/amenities">Amenities</Link>
                 <Link to="/contact">Contact</Link>
-                <Login />
+                <Login>
               </nav>
             )}
           </header>

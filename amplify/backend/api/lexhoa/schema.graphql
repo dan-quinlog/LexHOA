@@ -48,7 +48,11 @@ type Payment @model @auth(rules: [{allow: owner}]) {
   ownerPaymentsId: ID!
 }
 
-type Bulletin @model @auth(rules: [{allow: groups, groups: ["BOARD"]}]) {
+type Bulletin @model 
+  @auth(rules: [
+    {allow: public, operations: [read]},
+    {allow: groups, groups: ["BOARD", "OWNERS", "RESIDENTS"]}
+  ]) {
   id: ID!
   bulletin: String @default(value: "post") 
     @index(
@@ -64,6 +68,8 @@ type Bulletin @model @auth(rules: [{allow: groups, groups: ["BOARD"]}]) {
   updatedAt: AWSDateTime
   owner: String
 }
+
+
 
 enum ContactPrefs {
   CALL

@@ -31,10 +31,11 @@ const url = awsmobile.aws_appsync_graphqlEndpoint;
 const region = awsmobile.aws_appsync_region;
 const BOARD_GROUP = process.env.REACT_APP_BOARD_GROUP_NAME;
 const OWNERS_GROUP = process.env.REACT_APP_OWNERS_GROUP_NAME;
-const RESIDENTS_GROUP = process.env.REACT_APP_RESIDENTS_GROUP_NAME;console.log({
-  BOARD_GROUP: process.env.BOARD_GROUP_NAME,
-  OWNERS_GROUP: process.env.OWNERS_GROUP_NAME,
-  RESIDENTS_GROUP: process.env.RESIDENTS_GROUP_NAME
+const RESIDENTS_GROUP = process.env.REACT_APP_RESIDENTS_GROUP_NAME;
+console.log({
+  BOARD_GROUP: process.env.REACT_APP_BOARD_GROUP_NAME,
+  OWNERS_GROUP: process.env.REACT_APP_OWNERS_GROUP_NAME,
+  RESIDENTS_GROUP: process.env.REACT_APP_RESIDENTS_GROUP_NAME
 });
 
 

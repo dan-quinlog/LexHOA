@@ -25,7 +25,7 @@ export const CREATE_BULLETIN = gql`
       title
       content
       audience
-      datePosted
+      bulletin
     }
   }
 `;
@@ -37,7 +37,6 @@ export const UPDATE_BULLETIN = gql`
       title
       content
       audience
-      datePosted
     }
   }
 `;

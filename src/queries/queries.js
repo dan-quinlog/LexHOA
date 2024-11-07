@@ -1,12 +1,10 @@
 import { gql } from '@apollo/client';
 
 export const GET_LATEST_BULLETINS = gql`
-query GetLatestBulletins {
+  query GetLatestBulletins {
     listBulletins(
-      limit: 3, 
-      sortDirection: DESC, 
-      sortField: "datePosted",
-      filter: { datePosted: { ne: null } }
+      limit: 3,
+      sortDirection: DESC
     ) {
       items {
         id

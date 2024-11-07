@@ -36,10 +36,11 @@ export const GET_PROFILE = gql`
 
 export const GET_BULLETINS = gql`
   query GetBulletins($limit: Int, $nextToken: String) {
-    listBulletins(
+    bulletinsByDate(
+      bulletin: "post",
+      sortDirection: DESC,
       limit: $limit,
-      nextToken: $nextToken,
-      filter: { bulletin: { eq: "post" } }
+      nextToken: $nextToken
     ) {
       items {
         id

@@ -46,7 +46,12 @@ type Payment @model @auth(rules: [{allow: owner}]) {
 
 type Bulletin @model @auth(rules: [{allow: groups, groups: ["BOARD"]}]) {
   id: ID!
-  bulletin: String @default(value: "post") @index(name: "byDate", sortKeyFields: ["datePosted"])
+  bulletin: String @default(value: "post") 
+    @index(
+      name: "byDate",
+      queryField: "bulletinsByDate"
+      sortKeyFields: ["datePosted"]
+    )
   title: String!
   content: String!
   audience: Audience!
@@ -55,7 +60,6 @@ type Bulletin @model @auth(rules: [{allow: groups, groups: ["BOARD"]}]) {
   updatedAt: AWSDateTime
   owner: String
 }
-
 
 enum ContactPrefs {
   CALL

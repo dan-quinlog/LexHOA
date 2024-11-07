@@ -222,8 +222,8 @@ export const listBulletins = /* GraphQL */ `
     }
   }
 `;
-export const bulletinsByBulletinAndDatePosted = /* GraphQL */ `
-  query BulletinsByBulletinAndDatePosted(
+export const bulletinsByDate = /* GraphQL */ `
+  query BulletinsByDate(
     $bulletin: String!
     $datePosted: ModelStringKeyConditionInput
     $sortDirection: ModelSortDirection
@@ -231,7 +231,7 @@ export const bulletinsByBulletinAndDatePosted = /* GraphQL */ `
     $limit: Int
     $nextToken: String
   ) {
-    bulletinsByBulletinAndDatePosted(
+    bulletinsByDate(
       bulletin: $bulletin
       datePosted: $datePosted
       sortDirection: $sortDirection

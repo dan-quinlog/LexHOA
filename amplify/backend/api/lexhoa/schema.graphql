@@ -2,6 +2,7 @@
 type Person @model @auth(rules: [{allow: owner}]) {
   id: ID!
   name: String!
+  cognitoID: String
   email: String
   add1: String
   add2: String
@@ -11,8 +12,8 @@ type Person @model @auth(rules: [{allow: owner}]) {
   phoneCall: String
   phoneText: String
   contactPref: ContactPrefs
-  createdAt: AWSDateTime!
-  updatedAt: AWSDateTime!
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
   owner: String
 }
 
@@ -22,18 +23,18 @@ type Account @model @auth(rules: [{allow: owner}]) {
   accountName: String
   billingFreq: BillingFreq!
   balance: Float!
-  createdAt: AWSDateTime!
-  updatedAt: AWSDateTime!
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
   owner: String
 }
 
 type Property @model @auth(rules: [{allow: owner}]) {
   id: ID!
   address: String!
-  accountPropertiesId: ID!
+  accountPropertiesId: ID
   propertyTenantId: ID
-  createdAt: AWSDateTime!
-  updatedAt: AWSDateTime!
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
   owner: String
 }
 
@@ -42,6 +43,9 @@ type Payment @model @auth(rules: [{allow: owner}]) {
   checkDate: AWSDate!
   checkNumber: String!
   checkAmount: Float!
+  invoiceNumber: String!
+  invoiceAmount: Float!
+  ownerPaymentsId: ID!
 }
 
 type Bulletin @model @auth(rules: [{allow: groups, groups: ["BOARD"]}]) {

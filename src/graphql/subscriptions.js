@@ -9,6 +9,7 @@ export const onCreatePerson = /* GraphQL */ `
     onCreatePerson(filter: $filter, owner: $owner) {
       id
       name
+      cognitoID
       email
       add1
       add2
@@ -33,6 +34,7 @@ export const onUpdatePerson = /* GraphQL */ `
     onUpdatePerson(filter: $filter, owner: $owner) {
       id
       name
+      cognitoID
       email
       add1
       add2
@@ -57,6 +59,7 @@ export const onDeletePerson = /* GraphQL */ `
     onDeletePerson(filter: $filter, owner: $owner) {
       id
       name
+      cognitoID
       email
       add1
       add2
@@ -188,6 +191,9 @@ export const onCreatePayment = /* GraphQL */ `
       checkDate
       checkNumber
       checkAmount
+      invoiceNumber
+      invoiceAmount
+      ownerPaymentsId
       createdAt
       updatedAt
       owner
@@ -205,6 +211,9 @@ export const onUpdatePayment = /* GraphQL */ `
       checkDate
       checkNumber
       checkAmount
+      invoiceNumber
+      invoiceAmount
+      ownerPaymentsId
       createdAt
       updatedAt
       owner
@@ -222,6 +231,9 @@ export const onDeletePayment = /* GraphQL */ `
       checkDate
       checkNumber
       checkAmount
+      invoiceNumber
+      invoiceAmount
+      ownerPaymentsId
       createdAt
       updatedAt
       owner

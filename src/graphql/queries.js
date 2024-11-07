@@ -6,6 +6,7 @@ export const getPersonByCognitoId = /* GraphQL */ `
     getPersonByCognitoId(cognitoId: $cognitoId) {
       id
       name
+      cognitoID
       email
       add1
       add2
@@ -27,6 +28,7 @@ export const getPerson = /* GraphQL */ `
     getPerson(id: $id) {
       id
       name
+      cognitoID
       email
       add1
       add2
@@ -53,6 +55,7 @@ export const listPeople = /* GraphQL */ `
       items {
         id
         name
+        cognitoID
         email
         add1
         add2
@@ -153,6 +156,9 @@ export const getPayment = /* GraphQL */ `
       checkDate
       checkNumber
       checkAmount
+      invoiceNumber
+      invoiceAmount
+      ownerPaymentsId
       createdAt
       updatedAt
       owner
@@ -172,6 +178,9 @@ export const listPayments = /* GraphQL */ `
         checkDate
         checkNumber
         checkAmount
+        invoiceNumber
+        invoiceAmount
+        ownerPaymentsId
         createdAt
         updatedAt
         owner

@@ -4,7 +4,7 @@ export const GET_LATEST_BULLETINS = gql`
   query GetLatestBulletins {
     listBulletins(
       limit: 3,
-      sortDirection: DESC
+      filter: { bulletin: { eq: "post" } }
     ) {
       items {
         id

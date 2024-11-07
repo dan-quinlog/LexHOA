@@ -39,7 +39,7 @@ export const GET_BULLETINS = gql`
     listBulletins(
       limit: $limit,
       nextToken: $nextToken,
-      sortDirection: DESC
+      filter: { bulletin: { eq: "post" } }
     ) {
       items {
         id

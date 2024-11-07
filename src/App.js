@@ -154,14 +154,14 @@ function App() {
 const BulletinSection = () => {
   if (loading) return <p>Loading bulletins...</p>;
   if (error) return <p>Error loading bulletins. Please try again later.</p>;
-  if (!data || !data.listBulletins) return <p>No bulletins available</p>;
+  if (!data || !data.bulletinsByDate) return <p>No bulletins available</p>;
 
   return (
     <ul className="bulletin-list">
-      {data.listBulletins.items.map(bulletin => (
+      {data.bulletinsByDate.items.map(bulletin => (
         <li key={bulletin.id} className="bulletin-card">
           <h3>{bulletin.title}</h3>
-          <ReactQuill 
+          <ReactQuill
             value={bulletin.content}
             readOnly={true}
             theme="bubble"
@@ -172,8 +172,7 @@ const BulletinSection = () => {
       ))}
     </ul>
   );
-};
-    return (
+};    return (
       <main className="content">
         <div className="main-content">
           <div className="image-map-container">

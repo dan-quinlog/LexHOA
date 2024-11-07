@@ -5,24 +5,23 @@ import ProfileEditForm from '../profile/ProfileEditForm';
 import './PersonManager.css';
 import { CognitoIdentityProviderClient, ListUsersCommand } from "@aws-sdk/client-cognito-identity-provider";
 import { fetchAuthSession } from '@aws-amplify/auth';
+import awsmobile from '../../aws-exports';
 
 const searchCognitoUserByEmail = async (email) => {
-  const session = await fetchAuthSession();
-  
-  const client = new CognitoIdentityProviderClient({ 
-    region: "us-east-1",
-    credentials: session.credentials
-  });
-  
-  const command = new ListUsersCommand({
-    UserPoolId: "us-east-1_4BdH7SB79",
-    Filter: `email = "${email}"`,
-    Limit: 1,
+  const credentials = await fetchAuthSession();
+  const client = new CognitoIdentityProviderClient({
+    region: awsmobile.aws_cognito_region,
+    credentials: credentials.credentials
   });
 
-  const response = await client.send(command);
-  return response.Users?.[0];
+  const command = new ListUsersCommand({
+    UserPoolId: awsmobile.aws_user_pools_id,
+    Filter: `email = "${email}"`
+  });
+
+  return client.send(command);
 };
+
 const PersonManager = () => {
   const [email, setEmail] = useState('');
   const [showProfile, setShowProfile] = useState(false);
@@ -33,13 +32,13 @@ const PersonManager = () => {
       console.log('Starting search for email:', email);
       const cognitoUser = await searchCognitoUserByEmail(email);
       console.log('Cognito user found:', cognitoUser);
-      
+
       if (cognitoUser) {
         console.log('Searching profile with:', {
           email: email,
           cognitoId: cognitoUser.Username
         });
-        
+
         await searchProfile({
           variables: {
             email: email,
@@ -72,7 +71,7 @@ const PersonManager = () => {
 
       {showProfile && data?.getPersonByCognitoId && (
         <div className="profile-section">
-          <ProfileEditForm 
+          <ProfileEditForm
             profile={data.getPersonByCognitoId}
             onCancel={() => setShowProfile(false)}
             onSave={() => {

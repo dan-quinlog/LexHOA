@@ -21,19 +21,19 @@ const BulletinManager = () => {
     if (loading) return;
     if (observer.current) observer.current.disconnect();
     observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && data.listBulletins.nextToken) {
+      if (entries[0].isIntersecting && data.bulletinsByDate.nextToken) {
         fetchMore({
           variables: {
-            nextToken: data.listBulletins.nextToken
+            nextToken: data.bulletinsByDate.nextToken
           },
           updateQuery: (prev, { fetchMoreResult }) => {
             if (!fetchMoreResult) return prev;
             return {
-              listBulletins: {
-                ...fetchMoreResult.listBulletins,
+              bulletinsByDate: {
+                ...fetchMoreResult.bulletinsByDate,
                 items: [
-                  ...prev.listBulletins.items,
-                  ...fetchMoreResult.listBulletins.items
+                  ...prev.bulletinsByDate.items,
+                  ...fetchMoreResult.bulletinsByDate.items
                 ]
               }
             };
@@ -60,14 +60,13 @@ const BulletinManager = () => {
         <h2>Bulletin Management</h2>
         <button onClick={() => setModalOpen(true)}>Create Bulletin</button>
       </div>
-      
-      <div className="bulletin-list">
-        {data?.listBulletins.items.map((bulletin, index) => (
-          <div
-            key={bulletin.id}
-            ref={index === data.listBulletins.items.length - 1 ? lastBulletinRef : null}
-            className="bulletin-item"
-          >
+              <div className="bulletin-list">
+                {data?.bulletinsByDate.items.map((bulletin, index) => (
+                  <div
+                    key={bulletin.id}
+                    ref={index === data.bulletinsByDate.items.length - 1 ? lastBulletinRef : null}
+                    className="bulletin-item"
+                  >
             <div className="bulletin-header">
               <div className="bulletin-actions">
                 <button onClick={() => handleEdit(bulletin)}>Edit</button>

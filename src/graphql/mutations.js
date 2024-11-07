@@ -236,6 +236,7 @@ export const createBulletin = /* GraphQL */ `
   ) {
     createBulletin(input: $input, condition: $condition) {
       id
+      bulletin
       title
       content
       audience
@@ -254,6 +255,7 @@ export const updateBulletin = /* GraphQL */ `
   ) {
     updateBulletin(input: $input, condition: $condition) {
       id
+      bulletin
       title
       content
       audience
@@ -272,6 +274,7 @@ export const deleteBulletin = /* GraphQL */ `
   ) {
     deleteBulletin(input: $input, condition: $condition) {
       id
+      bulletin
       title
       content
       audience

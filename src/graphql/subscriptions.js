@@ -233,6 +233,7 @@ export const onCreateBulletin = /* GraphQL */ `
   subscription OnCreateBulletin($filter: ModelSubscriptionBulletinFilterInput) {
     onCreateBulletin(filter: $filter) {
       id
+      bulletin
       title
       content
       audience
@@ -248,6 +249,7 @@ export const onUpdateBulletin = /* GraphQL */ `
   subscription OnUpdateBulletin($filter: ModelSubscriptionBulletinFilterInput) {
     onUpdateBulletin(filter: $filter) {
       id
+      bulletin
       title
       content
       audience
@@ -263,6 +265,7 @@ export const onDeleteBulletin = /* GraphQL */ `
   subscription OnDeleteBulletin($filter: ModelSubscriptionBulletinFilterInput) {
     onDeleteBulletin(filter: $filter) {
       id
+      bulletin
       title
       content
       audience

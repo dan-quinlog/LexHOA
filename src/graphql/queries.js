@@ -186,6 +186,7 @@ export const getBulletin = /* GraphQL */ `
   query GetBulletin($id: ID!) {
     getBulletin(id: $id) {
       id
+      bulletin
       title
       content
       audience
@@ -206,6 +207,41 @@ export const listBulletins = /* GraphQL */ `
     listBulletins(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
+        bulletin
+        title
+        content
+        audience
+        datePosted
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const bulletinsByBulletinAndDatePosted = /* GraphQL */ `
+  query BulletinsByBulletinAndDatePosted(
+    $bulletin: String!
+    $datePosted: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelBulletinFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    bulletinsByBulletinAndDatePosted(
+      bulletin: $bulletin
+      datePosted: $datePosted
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        bulletin
         title
         content
         audience

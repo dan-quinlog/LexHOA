@@ -1,0 +1,35 @@
+## [Start] Authorization Steps. **
+$util.qr($ctx.stash.put("hasAuth", true))
+#set( $isAuthorized = false )
+#set( $primaryFieldMap = {} )
+
+#if( $util.authType() == "API Key Authorization" )
+  #set( $isAuthorized = true )
+  #set( $ctx.stash.authFilter = {
+    "audience": { "eq": "PUBLIC" }
+  })
+  #set( $ctx.args.limit = 5 )
+#end
+
+#if( $util.authType() == "User Pool Authorization" )
+  #set( $isAuthorized = true )
+  #set( $userGroups = $util.defaultIfNull($ctx.identity.claims.get("cognito:groups"), []))
+  #if( $userGroups.contains("BOARD") )
+    #set( $ctx.stash.authFilter = {} )
+  #elseif( $userGroups.contains("OWNERS") )
+    #set( $ctx.stash.authFilter = {
+      "audience": { "in": ["PUBLIC", "OWNERS"] }
+    })
+  #elseif( $userGroups.contains("RESIDENTS") )
+    #set( $ctx.stash.authFilter = {
+      "audience": { "in": ["PUBLIC", "RESIDENTS"] }
+    })
+  #else
+    #set( $ctx.stash.authFilter = {
+      "audience": { "eq": "PUBLIC" }
+    })
+  #end
+#end
+
+$util.toJson({"version":"2018-05-29","payload":{}})
+## [End] Authorization Steps. **

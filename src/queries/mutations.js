@@ -25,7 +25,6 @@ export const CREATE_BULLETIN = gql`
       title
       content
       audience
-      bulletin
     }
   }
 `;

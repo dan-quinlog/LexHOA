@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { DELETE_BULLETIN } from '../../queries/mutations';
-import { GET_BULLETINS } from '../../queries/queries';
+import { GET_LATEST_BULLETINS } from '../../queries/queries';
 
 import Modal from '../Modal';
 import './DeleteConfirmModal.css';
@@ -10,19 +10,19 @@ const DeleteConfirmModal = ({ bulletin, onClose }) => {
   const [confirmText, setConfirmText] = useState('');
   const [deleteBulletin] = useMutation(DELETE_BULLETIN, {
     update(cache, { data: { deleteBulletin } }) {
-      const existingData = cache.readQuery({ 
-        query: GET_BULLETINS,
+      const existingData = cache.readQuery({
+        query: GET_LATEST_BULLETINS,
         variables: { limit: 10 }
       });
       
-      if (existingData && existingData.listBulletins) {
+      if (existingData && existingData.bulletinsByDate) {
         cache.writeQuery({
-          query: GET_BULLETINS,
+          query: GET_LATEST_BULLETINS,
           variables: { limit: 10 },
           data: {
-            listBulletins: {
-              ...existingData.listBulletins,
-              items: existingData.listBulletins.items.filter(item => item.id !== deleteBulletin.id)
+            bulletinsByDate: {
+              ...existingData.bulletinsByDate,
+              items: existingData.bulletinsByDate.items.filter(item => item.id !== deleteBulletin.id)
             }
           }
         });

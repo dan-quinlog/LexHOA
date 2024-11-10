@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation } from '@apollo/client';
 import { CREATE_BULLETIN, UPDATE_BULLETIN } from '../../queries/mutations';
-import { GET_BULLETINS } from '../../queries/queries';
+import { GET_LATEST_BULLETINS } from '../../queries/queries';
 import Modal from '../Modal';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -20,39 +20,38 @@ const BulletinModal = ({ bulletin, onClose }) => {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    audience: 'PUBLIC'
+    audience: ['PUBLIC'] // Now an array
   });
 
   const [createBulletin] = useMutation(CREATE_BULLETIN, {
     update(cache, { data: { createBulletin } }) {
       try {
         const existingData = cache.readQuery({
-          query: GET_BULLETINS,
+          query: GET_LATEST_BULLETINS,
           variables: { limit: 10 }
         });
 
-        if (existingData && existingData.listBulletins) {
+        if (existingData && existingData.bulletinsByDate) {
           cache.writeQuery({
-            query: GET_BULLETINS,
+            query: GET_LATEST_BULLETINS,
             variables: { limit: 10 },
             data: {
-              listBulletins: {
-                ...existingData.listBulletins,
-                items: [createBulletin, ...existingData.listBulletins.items],
-                nextToken: existingData.listBulletins.nextToken
+              bulletinsByDate: {
+                ...existingData.bulletinsByDate,
+                items: [createBulletin, ...existingData.bulletinsByDate.items],
+                nextToken: existingData.bulletinsByDate.nextToken
               }
             }
           });
         }
       } catch (error) {
-        // Silent fail - cache will be updated by refetchQueries
+        // Cache will be updated by refetchQueries
       }
     },
     refetchQueries: [
-      {query: GET_BULLETINS, variables: { limit: 10 }}
+      {query: GET_LATEST_BULLETINS, variables: { limit: 10 }}
     ]
-  });
-  const [updateBulletin] = useMutation(UPDATE_BULLETIN);
+  });  const [updateBulletin] = useMutation(UPDATE_BULLETIN);
   const [showNotification, setShowNotification] = useState(false);
 
   useEffect(() => {
@@ -60,12 +59,17 @@ const BulletinModal = ({ bulletin, onClose }) => {
       setFormData({
         title: bulletin.title,
         content: bulletin.content,
-        audience: bulletin.audience
+        audience: Array.isArray(bulletin.audience) ? bulletin.audience : [bulletin.audience]
       });
     }
   }, [bulletin]);
 
   const handleSubmit = async () => {
+    if (formData.audience.length === 0) {
+      setShowNotification('Please select at least one audience');
+      return;
+    }
+
     const bulletinSize = new TextEncoder().encode(JSON.stringify(formData)).length;
     const maxSize = 400000;
     
@@ -106,6 +110,24 @@ const BulletinModal = ({ bulletin, onClose }) => {
       setShowNotification(`Error: Unable to save bulletin`);
     }
   };
+
+  const handleAudienceChange = (value) => {
+    setFormData(prevData => {
+      const currentAudiences = prevData.audience || [];
+      if (currentAudiences.includes(value)) {
+        return {
+          ...prevData,
+          audience: currentAudiences.filter(a => a !== value)
+        };
+      } else {
+        return {
+          ...prevData,
+          audience: [...currentAudiences, value]
+        };
+      }
+    });
+  };
+
   return (
     <>
       <Modal onClose={onClose}>
@@ -122,17 +144,19 @@ const BulletinModal = ({ bulletin, onClose }) => {
           </div>
           <div className="form-group">
             <label>Audience</label>
-            <select
-              value={formData.audience}
-              onChange={(e) => setFormData({ ...formData, audience: e.target.value })}
-              tabIndex={2}
-            >
+            <div className="checkbox-group">
               {AUDIENCE_OPTIONS.map(option => (
-                <option key={option.value} value={option.value}>
+                <label key={option.value} className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={formData.audience.includes(option.value)}
+                    onChange={() => handleAudienceChange(option.value)}
+                    tabIndex={2}
+                  />
                   {option.label}
-                </option>
+                </label>
               ))}
-            </select>
+            </div>
           </div>
           <div className="form-group">
             <label>Content</label>

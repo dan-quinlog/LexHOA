@@ -1,5 +1,9 @@
 
-type Person @model @auth(rules: [{allow: owner}]) {
+type Person @model @auth(rules: [
+  { allow: owner, operations: [read, update] },
+  { allow: groups, groups: ["BOARD"], operations: [create, read, update, delete] },
+  { allow: public, operations: [read] }
+]) {
   id: ID!
   name: String!
   cognitoID: String
@@ -16,6 +20,7 @@ type Person @model @auth(rules: [{allow: owner}]) {
   updatedAt: AWSDateTime
   owner: String
 }
+
 
 type Account @model @auth(rules: [{allow: owner}]) {
   id: ID!
@@ -49,27 +54,46 @@ type Payment @model @auth(rules: [{allow: owner}]) {
 }
 
 type Bulletin @model 
-  @auth(rules: [
-    {allow: public, operations: [read]},
-    {allow: groups, groups: ["BOARD", "OWNERS", "RESIDENTS"]}
-  ]) {
+  @auth(
+    rules: [
+      { allow: public, provider: apiKey, operations: [read] },
+      { allow: private, provider: userPools, operations: [read] },
+      { allow: groups, groups: ["BOARD"], operations: [create, update, delete, read] }
+    ]
+  )
+{
   id: ID!
-  bulletin: String @default(value: "post") 
-    @index(
-      name: "byDate",
-      queryField: "bulletinsByDate"
-      sortKeyFields: ["datePosted"]
-    )
   title: String!
   content: String!
-  audience: Audience!
-  datePosted: AWSDateTime
-  createdAt: AWSDateTime
-  updatedAt: AWSDateTime
-  owner: String
+  type: String @default(value: "Bulletin")
+    @index(
+      name: "bulletinsByDate"
+      queryField: "bulletinsByDate"
+      sortKeyFields: ["createdAt"]
+    )
+  audience: [Audience]!
+  createdAt: AWSDateTime!
 }
 
+type Query {
+  getPersonByCognitoId(cognitoId: String!): Person
+}
 
+type ModelBulletinConnection {
+  items: [Bulletin]
+  nextToken: String
+}
+
+input ModelAudienceInput {
+  eq: Audience
+  ne: Audience
+  contains: Audience
+}
+
+enum ModelSortDirection {
+  ASC
+  DESC
+}
 
 enum ContactPrefs {
   CALL
@@ -92,6 +116,3 @@ enum Audience {
   PUBLIC
 }
 
-type Query {
-  getPersonByCognitoId(cognitoId: String!): Person
-}

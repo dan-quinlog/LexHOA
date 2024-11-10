@@ -1,6 +1,8 @@
 {
-  "whyContinueWithGen1": "I am a current Gen 1 user",
-  "projectName": "lexhoa",
+  "providers": [
+    "awscloudformation"
+  ],
+  "projectName": "lexhoaCommunityApp",
   "version": "3.1",
   "frontend": "javascript",
   "javascript": {
@@ -11,8 +13,5 @@
       "BuildCommand": "npm.cmd run-script build",
       "StartCommand": "npm.cmd run-script start"
     }
-  },
-  "providers": [
-    "awscloudformation"
-  ]
+  }
 }

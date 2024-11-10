@@ -23,58 +23,6 @@ export const getPersonByCognitoId = /* GraphQL */ `
     }
   }
 `;
-export const getPerson = /* GraphQL */ `
-  query GetPerson($id: ID!) {
-    getPerson(id: $id) {
-      id
-      name
-      cognitoID
-      email
-      add1
-      add2
-      city
-      state
-      zip
-      phoneCall
-      phoneText
-      contactPref
-      createdAt
-      updatedAt
-      owner
-      __typename
-    }
-  }
-`;
-export const listPeople = /* GraphQL */ `
-  query ListPeople(
-    $filter: ModelPersonFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    listPeople(filter: $filter, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        name
-        cognitoID
-        email
-        add1
-        add2
-        city
-        state
-        zip
-        phoneCall
-        phoneText
-        contactPref
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
 export const getAccount = /* GraphQL */ `
   query GetAccount($id: ID!) {
     getAccount(id: $id) {
@@ -191,18 +139,68 @@ export const listPayments = /* GraphQL */ `
     }
   }
 `;
+export const getPerson = /* GraphQL */ `
+  query GetPerson($id: ID!) {
+    getPerson(id: $id) {
+      id
+      name
+      cognitoID
+      email
+      add1
+      add2
+      city
+      state
+      zip
+      phoneCall
+      phoneText
+      contactPref
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const listPeople = /* GraphQL */ `
+  query ListPeople(
+    $filter: ModelPersonFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listPeople(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        name
+        cognitoID
+        email
+        add1
+        add2
+        city
+        state
+        zip
+        phoneCall
+        phoneText
+        contactPref
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
 export const getBulletin = /* GraphQL */ `
   query GetBulletin($id: ID!) {
     getBulletin(id: $id) {
       id
-      bulletin
       title
       content
+      type
       audience
-      datePosted
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
@@ -216,14 +214,12 @@ export const listBulletins = /* GraphQL */ `
     listBulletins(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
-        bulletin
         title
         content
+        type
         audience
-        datePosted
         createdAt
         updatedAt
-        owner
         __typename
       }
       nextToken
@@ -233,16 +229,16 @@ export const listBulletins = /* GraphQL */ `
 `;
 export const bulletinsByDate = /* GraphQL */ `
   query BulletinsByDate(
-    $bulletin: String!
-    $datePosted: ModelStringKeyConditionInput
+    $type: String!
+    $createdAt: ModelStringKeyConditionInput
     $sortDirection: ModelSortDirection
     $filter: ModelBulletinFilterInput
     $limit: Int
     $nextToken: String
   ) {
     bulletinsByDate(
-      bulletin: $bulletin
-      datePosted: $datePosted
+      type: $type
+      createdAt: $createdAt
       sortDirection: $sortDirection
       filter: $filter
       limit: $limit
@@ -250,14 +246,12 @@ export const bulletinsByDate = /* GraphQL */ `
     ) {
       items {
         id
-        bulletin
         title
         content
+        type
         audience
-        datePosted
         createdAt
         updatedAt
-        owner
         __typename
       }
       nextToken

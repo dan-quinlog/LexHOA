@@ -1,18 +1,16 @@
 import { gql } from '@apollo/client';
 
 export const GET_LATEST_BULLETINS = gql`
-  query GetLatestBulletins {
-    bulletinsByDate(
-      bulletin: "post",
-      sortDirection: DESC,
-      limit: 3
-    ) {
+  query BulletinsByDate($limit: Int!, $nextToken: String, $filter: ModelBulletinFilterInput) {
+    bulletinsByDate(type: "Bulletin", sortDirection: DESC, limit: $limit, nextToken: $nextToken, filter: $filter) {
       items {
         id
         title
         content
-        datePosted
+        audience
+        createdAt
       }
+      nextToken
     }
   }
 `;

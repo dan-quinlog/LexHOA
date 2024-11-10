@@ -1,81 +1,6 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
-export const onCreatePerson = /* GraphQL */ `
-  subscription OnCreatePerson(
-    $filter: ModelSubscriptionPersonFilterInput
-    $owner: String
-  ) {
-    onCreatePerson(filter: $filter, owner: $owner) {
-      id
-      name
-      cognitoID
-      email
-      add1
-      add2
-      city
-      state
-      zip
-      phoneCall
-      phoneText
-      contactPref
-      createdAt
-      updatedAt
-      owner
-      __typename
-    }
-  }
-`;
-export const onUpdatePerson = /* GraphQL */ `
-  subscription OnUpdatePerson(
-    $filter: ModelSubscriptionPersonFilterInput
-    $owner: String
-  ) {
-    onUpdatePerson(filter: $filter, owner: $owner) {
-      id
-      name
-      cognitoID
-      email
-      add1
-      add2
-      city
-      state
-      zip
-      phoneCall
-      phoneText
-      contactPref
-      createdAt
-      updatedAt
-      owner
-      __typename
-    }
-  }
-`;
-export const onDeletePerson = /* GraphQL */ `
-  subscription OnDeletePerson(
-    $filter: ModelSubscriptionPersonFilterInput
-    $owner: String
-  ) {
-    onDeletePerson(filter: $filter, owner: $owner) {
-      id
-      name
-      cognitoID
-      email
-      add1
-      add2
-      city
-      state
-      zip
-      phoneCall
-      phoneText
-      contactPref
-      createdAt
-      updatedAt
-      owner
-      __typename
-    }
-  }
-`;
 export const onCreateAccount = /* GraphQL */ `
   subscription OnCreateAccount(
     $filter: ModelSubscriptionAccountFilterInput
@@ -241,18 +166,91 @@ export const onDeletePayment = /* GraphQL */ `
     }
   }
 `;
+export const onCreatePerson = /* GraphQL */ `
+  subscription OnCreatePerson(
+    $filter: ModelSubscriptionPersonFilterInput
+    $owner: String
+  ) {
+    onCreatePerson(filter: $filter, owner: $owner) {
+      id
+      name
+      cognitoID
+      email
+      add1
+      add2
+      city
+      state
+      zip
+      phoneCall
+      phoneText
+      contactPref
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const onUpdatePerson = /* GraphQL */ `
+  subscription OnUpdatePerson(
+    $filter: ModelSubscriptionPersonFilterInput
+    $owner: String
+  ) {
+    onUpdatePerson(filter: $filter, owner: $owner) {
+      id
+      name
+      cognitoID
+      email
+      add1
+      add2
+      city
+      state
+      zip
+      phoneCall
+      phoneText
+      contactPref
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const onDeletePerson = /* GraphQL */ `
+  subscription OnDeletePerson(
+    $filter: ModelSubscriptionPersonFilterInput
+    $owner: String
+  ) {
+    onDeletePerson(filter: $filter, owner: $owner) {
+      id
+      name
+      cognitoID
+      email
+      add1
+      add2
+      city
+      state
+      zip
+      phoneCall
+      phoneText
+      contactPref
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
 export const onCreateBulletin = /* GraphQL */ `
   subscription OnCreateBulletin($filter: ModelSubscriptionBulletinFilterInput) {
     onCreateBulletin(filter: $filter) {
       id
-      bulletin
       title
       content
+      type
       audience
-      datePosted
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
@@ -261,14 +259,12 @@ export const onUpdateBulletin = /* GraphQL */ `
   subscription OnUpdateBulletin($filter: ModelSubscriptionBulletinFilterInput) {
     onUpdateBulletin(filter: $filter) {
       id
-      bulletin
       title
       content
+      type
       audience
-      datePosted
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
@@ -277,14 +273,12 @@ export const onDeleteBulletin = /* GraphQL */ `
   subscription OnDeleteBulletin($filter: ModelSubscriptionBulletinFilterInput) {
     onDeleteBulletin(filter: $filter) {
       id
-      bulletin
       title
       content
+      type
       audience
-      datePosted
       createdAt
       updatedAt
-      owner
       __typename
     }
   }

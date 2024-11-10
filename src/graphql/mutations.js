@@ -248,14 +248,12 @@ export const createBulletin = /* GraphQL */ `
   ) {
     createBulletin(input: $input, condition: $condition) {
       id
-      bulletin
       title
       content
+      type
       audience
-      datePosted
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
@@ -267,14 +265,12 @@ export const updateBulletin = /* GraphQL */ `
   ) {
     updateBulletin(input: $input, condition: $condition) {
       id
-      bulletin
       title
       content
+      type
       audience
-      datePosted
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
@@ -286,14 +282,12 @@ export const deleteBulletin = /* GraphQL */ `
   ) {
     deleteBulletin(input: $input, condition: $condition) {
       id
-      bulletin
       title
       content
+      type
       audience
-      datePosted
       createdAt
       updatedAt
-      owner
       __typename
     }
   }

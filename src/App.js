@@ -79,7 +79,7 @@ function App() {
     uri: url,
     cache: new InMemoryCache(),
     headers: {
-      'x-api-key': 'da2-a72v2rhxifbdvfaluuqhxiheaq'
+      'x-api-key': awsmobile.aws_appsync_apiKey
     }
   });
 
@@ -148,32 +148,22 @@ function App() {
   };
 
   const HomePage = () => {
+    const filter = user
+      ? {
+          or: [
+            { audience: { contains: "PUBLIC" } },
+            ...userGroups.map(group => ({ audience: { contains: group } }))
+          ]
+        }
+      : {
+          or: [{ audience: { contains: "PUBLIC" } }]
+        };
+
     const { loading, error, data } = useQuery(GET_LATEST_BULLETINS, {
+      variables: { limit: 10, filter },
       client: user ? authenticatedClient : publicClient
     });
-
-const BulletinSection = () => {
-  if (loading) return <p>Loading bulletins...</p>;
-  if (error) return <p>Error loading bulletins. Please try again later.</p>;
-  if (!data || !data.bulletinsByDate) return <p>No bulletins available</p>;
-
-  return (
-    <ul className="bulletin-list">
-      {data.bulletinsByDate.items.map(bulletin => (
-        <li key={bulletin.id} className="bulletin-card">
-          <h3>{bulletin.title}</h3>
-          <ReactQuill
-            value={bulletin.content}
-            readOnly={true}
-            theme="bubble"
-            modules={{ toolbar: false }}
-          />
-          <p className="bulletin-date">{new Date(bulletin.datePosted).toLocaleDateString()}</p>
-        </li>
-      ))}
-    </ul>
-  );
-};    return (
+    return (
       <main className="content">
         <div className="main-content">
           <div className="image-map-container">
@@ -186,65 +176,83 @@ const BulletinSection = () => {
           </div>
           <div className="bulletins">
             <h2>Recent Bulletins</h2>
-            <BulletinSection />
+            {loading && <p>Loading bulletins...</p>}
+            {error && <p>Error loading bulletins. Please try again later.</p>}
+            {!loading && !error && data?.bulletinsByDate && (
+              <ul className="bulletin-list">
+                {data.bulletinsByDate.items.map(bulletin => (
+                  <li key={bulletin.id} className="bulletin-card">
+                    <h3>{bulletin.title}</h3>
+                    <ReactQuill
+                      value={bulletin.content}
+                      readOnly={true}
+                      theme="bubble"
+                      modules={{ toolbar: false }}
+                    />
+                    <p className="bulletin-date">
+                      {new Date(bulletin.createdAt).toLocaleDateString()}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </main>
     );
   };
-
-  return (
-    <ApolloProvider client={user ? authenticatedClient : publicClient}>
-      <BrowserRouter>
-        <div className="App">
-          <header className="top-bar">
-            <Link to="/" className="site-title">
-              <h1>Lexington Commons HOA</h1>
-            </Link>
+return (
+  <ApolloProvider client={user ? authenticatedClient : publicClient}>
+    <BrowserRouter>
+      <div className="App">
+        <header className="top-bar">
+          <Link to="/" className="site-title">
+            <h1>Lexington Commons HOA</h1>
+          </Link>
+          {user ? (
+            <div className="hamburger-menu" ref={menuRef}>
+              <button onClick={toggleMenu}>☰</button>
+              {isMenuOpen && (
+                <div className="dropdown-menu">
+                  {renderMenuItems()}
+                  <button onClick={handleSignOut}>Sign Out</button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <nav className="desktop-menu">
+              <Link to="/amenities">Amenities</Link>
+              <Link to="/contact">Contact</Link>
+              <Login />
+            </nav>
+          )}
+        </header>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/profile" element={<Profile cognitoId={user?.username} />} />
+          <Route path="/amenities" element={<Amenities />} />
+          <Route path="/board" element={<Board />} />
+          <Route path="/contact" element={<Contact />} />
+        </Routes>
+        <footer className="bottom-bar">
+          <nav className="mobile-menu">
             {user ? (
-              <div className="hamburger-menu" ref={menuRef}>
-                <button onClick={toggleMenu}>☰</button>
-                {isMenuOpen && (
-                  <div className="dropdown-menu">
-                    {renderMenuItems()}
-                    <button onClick={handleSignOut}>Sign Out</button>
-                  </div>
-                )}
-              </div>
+              <>
+                {renderMenuItems()}
+                <button onClick={handleSignOut}>Sign Out</button>
+              </>
             ) : (
-              <nav className="desktop-menu">
+              <>
                 <Link to="/amenities">Amenities</Link>
                 <Link to="/contact">Contact</Link>
                 <Login />
-              </nav>
+              </>
             )}
-          </header>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/profile" element={<Profile cognitoId={user?.username} />} />
-            <Route path="/amenities" element={<Amenities />} />
-            <Route path="/board" element={<Board />} />
-            <Route path="/contact" element={<Contact />} />
-          </Routes>
-          <footer className="bottom-bar">
-            <nav className="mobile-menu">
-              {user ? (
-                <>
-                  {renderMenuItems()}
-                  <button onClick={handleSignOut}>Sign Out</button>
-                </>
-              ) : (
-                <>
-                  <Link to="/amenities">Amenities</Link>
-                  <Link to="/contact">Contact</Link>
-                  <Login />
-                </>
-              )}
-            </nav>
-          </footer>
-        </div>
-      </BrowserRouter>
-    </ApolloProvider>
-  );
+          </nav>
+        </footer>
+      </div>
+    </BrowserRouter>
+  </ApolloProvider>
+);
 }
 export default App;

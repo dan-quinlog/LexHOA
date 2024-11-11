@@ -160,9 +160,13 @@ function App() {
         };
 
     const { loading, error, data } = useQuery(GET_LATEST_BULLETINS, {
-      variables: { limit: 10, filter },
+      variables: { 
+        limit: user ? 10 : 3,  // Set limit to 3 for public users
+        filter 
+      },
       client: user ? authenticatedClient : publicClient
     });
+  
     return (
       <main className="content">
         <div className="main-content">
@@ -200,8 +204,7 @@ function App() {
         </div>
       </main>
     );
-  };
-return (
+  };return (
   <ApolloProvider client={user ? authenticatedClient : publicClient}>
     <BrowserRouter>
       <div className="App">

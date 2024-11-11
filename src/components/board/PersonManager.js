@@ -5,17 +5,17 @@ import ProfileEditForm from '../profile/ProfileEditForm';
 import './PersonManager.css';
 import { CognitoIdentityProviderClient, ListUsersCommand } from "@aws-sdk/client-cognito-identity-provider";
 import { fetchAuthSession } from '@aws-amplify/auth';
-import awsmobile from '../../aws-exports';
+import amplifyConfig from '../../config/amplify-config';
 
 const searchCognitoUserByEmail = async (email) => {
   const credentials = await fetchAuthSession();
   const client = new CognitoIdentityProviderClient({
-    region: awsmobile.aws_cognito_region,
+    region: amplifyConfig.aws_cognito_region,
     credentials: credentials.credentials
   });
 
   const command = new ListUsersCommand({
-    UserPoolId: awsmobile.aws_user_pools_id,
+    UserPoolId: amplifyConfig.aws_user_pools_id,
     Filter: `email = "${email}"`
   });
 

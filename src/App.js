@@ -11,7 +11,7 @@ import Contact from './Contact';
 import Login from './Login';
 import Profile from './pages/Profile';
 import Board from './pages/Board';
-import awsmobile from './aws-exports';
+import amplifyConfig from './config/amplify-config';
 import { createAuthLink } from 'aws-appsync-auth-link';
 import { createSubscriptionHandshakeLink } from 'aws-appsync-subscription-link';
 import { ApolloLink } from '@apollo/client';
@@ -20,15 +20,15 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.bubble.css';
 
 Amplify.configure({
-  ...awsmobile,
+  ...amplifyConfig,
   Auth: {
     region: 'us-east-1',
     mandatorySignIn: false
   }
 });
 
-const url = awsmobile.aws_appsync_graphqlEndpoint;
-const region = awsmobile.aws_appsync_region;
+const url = amplifyConfig.aws_appsync_graphqlEndpoint;
+const region = amplifyConfig.aws_appsync_region;
 const BOARD_GROUP = process.env.REACT_APP_BOARD_GROUP_NAME;
 const OWNERS_GROUP = process.env.REACT_APP_OWNERS_GROUP_NAME;
 const RESIDENTS_GROUP = process.env.REACT_APP_RESIDENTS_GROUP_NAME;
@@ -46,7 +46,7 @@ function App() {
   const menuRef = useRef(null);
 
   const auth = {
-    type: user ? awsmobile.aws_appsync_authenticationType : 'API_KEY',
+    type: user ? amplifyConfig.aws_appsync_authenticationType : 'API_KEY',
     apiKey: 'da2-a72v2rhxifbdvfaluuqhxiheaq',
     jwtToken: async () => {
       if (user) {
@@ -79,7 +79,7 @@ function App() {
     uri: url,
     cache: new InMemoryCache(),
     headers: {
-      'x-api-key': awsmobile.aws_appsync_apiKey
+      'x-api-key': amplifyConfig.aws_appsync_apiKey
     }
   });
 

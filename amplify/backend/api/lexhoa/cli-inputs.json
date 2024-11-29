@@ -5,19 +5,16 @@
     "serviceName": "AppSync",
     "defaultAuthType": {
       "mode": "AMAZON_COGNITO_USER_POOLS",
-      "cognitoUserPoolId": "authlexhoaauth"
+      "cognitoUserPoolId": "authlexhoa"
     },
     "additionalAuthTypes": [
       {
         "mode": "API_KEY",
-        "expirationTime": 365,
-        "apiKeyExpirationDate": "2025-11-05T13:46:40.256Z",
+        "expirationTime": 30,
+        "apiKeyExpirationDate": "2024-12-25T01:44:48.120Z",
         "keyDescription": "LexHOApublicAPI"
       }
-    ]
-  },
-  "oAuthSettings": {
-    "redirectSignIn": "${process.env.SIGN_IN_URI}",
-    "redirectSignOut": "${process.env.SIGN_OUT_URI}"
+    ],
+    "conflictResolution": {}
   }
 }

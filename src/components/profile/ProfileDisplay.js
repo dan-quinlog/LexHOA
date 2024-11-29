@@ -1,6 +1,9 @@
 import React from 'react';
 
 const ProfileDisplay = ({ profile }) => {
+  // Split address into lines
+  const [addressLine1, addressLine2] = profile.address ? profile.address.split('|') : ['', ''];
+
   return (
     <div className="profile-content">
       <div className="left-column">
@@ -8,12 +11,12 @@ const ProfileDisplay = ({ profile }) => {
           <div className="field-label">Name</div>
           <div className="field-value">{profile.name}</div>
         </div>
-        
+       
         <div className="field-group">
           <div className="field-label">Address</div>
           <div className="field-value">
-            <div>{profile.address1}</div>
-            {profile.address2 && <div>{profile.address2}</div>}
+            <div>{addressLine1}</div>
+            {addressLine2 && <div>{addressLine2}</div>}
             <div>{`${profile.city}, ${profile.state} ${profile.zip}`}</div>
           </div>
         </div>
@@ -26,13 +29,13 @@ const ProfileDisplay = ({ profile }) => {
         </div>
 
         <div className="field-group">
-          <div className="field-label">Phone (Call)</div>
-          <div className="field-value">{profile.phoneCall}</div>
-        </div>
-
-        <div className="field-group">
-          <div className="field-label">Phone (Text)</div>
-          <div className="field-value">{profile.phoneText}</div>
+          <div className="field-label">Phone</div>
+          <div className="field-value">
+            {profile.phone}
+            <div className="text-consent">
+              {profile.allowText ? 'Text messages enabled' : 'No text consent'}
+            </div>
+          </div>
         </div>
 
         <div className="field-group">

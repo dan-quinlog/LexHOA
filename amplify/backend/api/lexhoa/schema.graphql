@@ -1,56 +1,69 @@
-
-type Person @model @auth(rules: [
-  { allow: owner, operations: [read, update] },
-  { allow: groups, groups: ["BOARD"], operations: [create, read, update, delete] },
-  { allow: public, operations: [read] }
-]) {
+type Person @aws_api_key @aws_cognito_user_pools @model
+  @auth(rules: [
+    { allow: private, operations: [create, read] },
+    { allow: owner, operations: [update] },
+    { allow: groups, groups: ["BOARD"], operations: [update, delete] }
+  ])
+{
   id: ID!
-  name: String!
-  cognitoID: String
-  email: String
-  add1: String
-  add2: String
+  cognitoID: String @index(name: "byCognitoID", queryField: "personByCognitoID")
+  name: String @index(name: "byName", queryField: "personByName")
+  email: String @index(name: "byEmail", queryField: "personByEmail")
+  address: String
   city: String
   state: String
   zip: String
-  phoneCall: String
-  phoneText: String
+  phone: String @index(name: "byPhoneCall", queryField: "personByPhoneCall")
+  allowText: Boolean
   contactPref: ContactPrefs
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
   owner: String
 }
-
-
-type Account @model @auth(rules: [{allow: owner}]) {
-  id: ID!
-  accountOwnerId: ID!
-  accountName: String
-  billingFreq: BillingFreq!
-  balance: Float!
-  createdAt: AWSDateTime
-  updatedAt: AWSDateTime
-  owner: String
+type Account @model 
+  @auth(rules: [
+    { allow: private, operations: [read] },
+    { allow: owner, operations: [update] },
+    { allow: groups, groups: ["BOARD"], operations: [create, update, delete] }
+  ]) {
+    id: ID!
+    accountOwnerId: ID! @index(name: "byAccountOwner", queryField: "accountByOwner")
+    accountName: String
+    billingFreq: BillingFreq!
+    balance: Float!
+    createdAt: AWSDateTime
+    updatedAt: AWSDateTime
+    owner: String
 }
 
-type Property @model @auth(rules: [{allow: owner}]) {
+type Property @model 
+@auth(rules: [
+  { allow: private, operations: [read] },
+  { allow: groups, groups: ["BOARD"], operations: [create, update, delete] }
+]) {
   id: ID!
   address: String!
-  accountPropertiesId: ID
-  propertyTenantId: ID
+  accountPropertiesId: ID @index(name: "byAccountProperties", queryField: "propertyByAccount")
+  propertyTenantId: ID @index(name: "byTenant", queryField: "propertyByTenant")
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
   owner: String
 }
 
-type Payment @model @auth(rules: [{allow: owner}]) {
+type Payment @model 
+@auth(rules: [
+  { allow: owner, operations: [read] },
+  { allow: groups, groups: ["BOARD"], operations: [create, read, update, delete] }
+]) {
   id: ID!
   checkDate: AWSDate!
   checkNumber: String!
   checkAmount: Float!
   invoiceNumber: String!
   invoiceAmount: Float!
-  ownerPaymentsId: ID!
+  ownerPaymentsId: ID! @index(name: "byOwnerPayments", queryField: "paymentsByOwner")
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
 }
 
 type Bulletin @model 
@@ -75,26 +88,6 @@ type Bulletin @model
   createdAt: AWSDateTime!
 }
 
-type Query {
-  getPersonByCognitoId(cognitoId: String!): Person
-}
-
-type ModelBulletinConnection {
-  items: [Bulletin]
-  nextToken: String
-}
-
-input ModelAudienceInput {
-  eq: Audience
-  ne: Audience
-  contains: Audience
-}
-
-enum ModelSortDirection {
-  ASC
-  DESC
-}
-
 enum ContactPrefs {
   CALL
   TEXT
@@ -115,4 +108,3 @@ enum Audience {
   RESIDENTS
   PUBLIC
 }
-

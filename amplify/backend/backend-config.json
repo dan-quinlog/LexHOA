@@ -7,7 +7,7 @@
             "UserPoolId"
           ],
           "category": "auth",
-          "resourceName": "lexhoaauth"
+          "resourceName": "lexhoa"
         }
       ],
       "output": {
@@ -15,8 +15,8 @@
           "additionalAuthenticationProviders": [
             {
               "apiKeyConfig": {
-                "apiKeyExpirationDate": "2025-11-05T13:46:40.256Z",
-                "apiKeyExpirationDays": 365,
+                "apiKeyExpirationDate": "2024-12-25T01:44:48.120Z",
+                "apiKeyExpirationDays": 30,
                 "description": "LexHOApublicAPI"
               },
               "authenticationType": "API_KEY"
@@ -25,7 +25,7 @@
           "defaultAuthentication": {
             "authenticationType": "AMAZON_COGNITO_USER_POOLS",
             "userPoolConfig": {
-              "userPoolId": "authlexhoaauth"
+              "userPoolId": "authlexhoa"
             }
           }
         }
@@ -35,9 +35,19 @@
     }
   },
   "auth": {
-    "lexhoaauth": {
+    "lexhoa": {
       "customAuth": false,
-      "dependsOn": [],
+      "dependsOn": [
+        {
+          "attributes": [
+            "Arn",
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "lexhoaPostConfirmation",
+          "triggerProvider": "Cognito"
+        }
+      ],
       "frontendAuthConfig": {
         "mfaConfiguration": "OPTIONAL",
         "mfaTypes": [
@@ -48,7 +58,8 @@
           "passwordPolicyMinLength": 8
         },
         "signupAttributes": [
-          "EMAIL"
+          "EMAIL",
+          "NAME"
         ],
         "socialProviders": [],
         "usernameAttributes": [
@@ -70,11 +81,53 @@
             "AppClientID"
           ],
           "category": "auth",
-          "resourceName": "lexhoaauth"
+          "resourceName": "lexhoa"
         }
       ],
       "providerPlugin": "awscloudformation",
       "service": "Cognito-UserPool-Groups"
+    }
+  },
+  "function": {
+    "lexhoaPostConfirmation": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput"
+          ],
+          "category": "api",
+          "resourceName": "lexhoa"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    }
+  },
+  "parameters": {
+    "AMPLIFY_function_lexhoaPostConfirmation_apiLexhoaPersontableName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "lexhoaPostConfirmation"
+        }
+      ]
+    },
+    "AMPLIFY_function_lexhoaPostConfirmation_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "lexhoaPostConfirmation"
+        }
+      ]
+    },
+    "AMPLIFY_function_lexhoaPostConfirmation_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "lexhoaPostConfirmation"
+        }
+      ]
     }
   }
 }

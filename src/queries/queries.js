@@ -16,19 +16,20 @@ export const GET_LATEST_BULLETINS = gql`
 `;
 
 export const GET_PROFILE = gql`
-  query GetProfile($cognitoId: String!) {
-    getPersonByCognitoId(cognitoId: $cognitoId) {
-      id
-      name
-      email
-      address1
-      address2
-      city
-      state
-      zip
-      phoneCall
-      phoneText
-      contactPref
+  query GetProfile($cognitoID: String!) {
+    personByCognitoID(cognitoID: $cognitoID) {
+      items {
+        id
+        name
+        email
+        address
+        city
+        state
+        zip
+        phone
+        allowText
+        contactPref
+      }
     }
   }
 `;
@@ -52,7 +53,6 @@ export const GET_BULLETINS = gql`
     }
   }
 `;
-
 
 export const LIST_PEOPLE = gql`
   query ListPeople {

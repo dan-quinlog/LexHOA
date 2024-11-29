@@ -1,24 +1,52 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
-export const getPersonByCognitoId = /* GraphQL */ `
-  query GetPersonByCognitoId($cognitoId: String!) {
-    getPersonByCognitoId(cognitoId: $cognitoId) {
+export const getPerson = /* GraphQL */ `
+  query GetPerson($id: ID!) {
+    getPerson(id: $id) {
       id
-      name
       cognitoID
+      name
       email
-      add1
-      add2
+      address
       city
       state
       zip
-      phoneCall
-      phoneText
+      phone
+      allowText
       contactPref
       createdAt
       updatedAt
       owner
+      __typename
+    }
+  }
+`;
+export const listPeople = /* GraphQL */ `
+  query ListPeople(
+    $filter: ModelPersonFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listPeople(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        cognitoID
+        name
+        email
+        address
+        city
+        state
+        zip
+        phone
+        allowText
+        contactPref
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
       __typename
     }
   }
@@ -139,48 +167,268 @@ export const listPayments = /* GraphQL */ `
     }
   }
 `;
-export const getPerson = /* GraphQL */ `
-  query GetPerson($id: ID!) {
-    getPerson(id: $id) {
-      id
-      name
-      cognitoID
-      email
-      add1
-      add2
-      city
-      state
-      zip
-      phoneCall
-      phoneText
-      contactPref
-      createdAt
-      updatedAt
-      owner
-      __typename
-    }
-  }
-`;
-export const listPeople = /* GraphQL */ `
-  query ListPeople(
+export const personByCognitoID = /* GraphQL */ `
+  query PersonByCognitoID(
+    $cognitoID: String!
+    $sortDirection: ModelSortDirection
     $filter: ModelPersonFilterInput
     $limit: Int
     $nextToken: String
   ) {
-    listPeople(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    personByCognitoID(
+      cognitoID: $cognitoID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
       items {
         id
-        name
         cognitoID
+        name
         email
-        add1
-        add2
+        address
         city
         state
         zip
-        phoneCall
-        phoneText
+        phone
+        allowText
         contactPref
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const personByName = /* GraphQL */ `
+  query PersonByName(
+    $name: String!
+    $sortDirection: ModelSortDirection
+    $filter: ModelPersonFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    personByName(
+      name: $name
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        cognitoID
+        name
+        email
+        address
+        city
+        state
+        zip
+        phone
+        allowText
+        contactPref
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const personByEmail = /* GraphQL */ `
+  query PersonByEmail(
+    $email: String!
+    $sortDirection: ModelSortDirection
+    $filter: ModelPersonFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    personByEmail(
+      email: $email
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        cognitoID
+        name
+        email
+        address
+        city
+        state
+        zip
+        phone
+        allowText
+        contactPref
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const personByPhoneCall = /* GraphQL */ `
+  query PersonByPhoneCall(
+    $phone: String!
+    $sortDirection: ModelSortDirection
+    $filter: ModelPersonFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    personByPhoneCall(
+      phone: $phone
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        cognitoID
+        name
+        email
+        address
+        city
+        state
+        zip
+        phone
+        allowText
+        contactPref
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const accountByOwner = /* GraphQL */ `
+  query AccountByOwner(
+    $accountOwnerId: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelAccountFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    accountByOwner(
+      accountOwnerId: $accountOwnerId
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        accountOwnerId
+        accountName
+        billingFreq
+        balance
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const propertyByAccount = /* GraphQL */ `
+  query PropertyByAccount(
+    $accountPropertiesId: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelPropertyFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    propertyByAccount(
+      accountPropertiesId: $accountPropertiesId
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        address
+        accountPropertiesId
+        propertyTenantId
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const propertyByTenant = /* GraphQL */ `
+  query PropertyByTenant(
+    $propertyTenantId: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelPropertyFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    propertyByTenant(
+      propertyTenantId: $propertyTenantId
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        address
+        accountPropertiesId
+        propertyTenantId
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const paymentsByOwner = /* GraphQL */ `
+  query PaymentsByOwner(
+    $ownerPaymentsId: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelPaymentFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    paymentsByOwner(
+      ownerPaymentsId: $ownerPaymentsId
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        checkDate
+        checkNumber
+        checkAmount
+        invoiceNumber
+        invoiceAmount
+        ownerPaymentsId
         createdAt
         updatedAt
         owner

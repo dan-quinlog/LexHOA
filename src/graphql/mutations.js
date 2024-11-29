@@ -8,16 +8,15 @@ export const createPerson = /* GraphQL */ `
   ) {
     createPerson(input: $input, condition: $condition) {
       id
-      name
       cognitoID
+      name
       email
-      add1
-      add2
+      address
       city
       state
       zip
-      phoneCall
-      phoneText
+      phone
+      allowText
       contactPref
       createdAt
       updatedAt
@@ -33,16 +32,15 @@ export const updatePerson = /* GraphQL */ `
   ) {
     updatePerson(input: $input, condition: $condition) {
       id
-      name
       cognitoID
+      name
       email
-      add1
-      add2
+      address
       city
       state
       zip
-      phoneCall
-      phoneText
+      phone
+      allowText
       contactPref
       createdAt
       updatedAt
@@ -58,16 +56,15 @@ export const deletePerson = /* GraphQL */ `
   ) {
     deletePerson(input: $input, condition: $condition) {
       id
-      name
       cognitoID
+      name
       email
-      add1
-      add2
+      address
       city
       state
       zip
-      phoneCall
-      phoneText
+      phone
+      allowText
       contactPref
       createdAt
       updatedAt

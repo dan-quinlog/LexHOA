@@ -1,19 +1,22 @@
 import { gql } from '@apollo/client';
 
 export const UPDATE_PROFILE = gql`
-  mutation UpdateProfile($input: UpdatePersonInput!) {
+  mutation UpdatePerson($input: UpdatePersonInput!) {
     updatePerson(input: $input) {
       id
+      cognitoID
       name
       email
-      address1
-      address2
+      address
       city
       state
       zip
-      phoneCall
-      phoneText
+      phone
+      allowText
       contactPref
+      createdAt
+      updatedAt
+      owner
     }
   }
 `;

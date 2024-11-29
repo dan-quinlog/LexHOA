@@ -1,0 +1,29 @@
+{
+  "trigger": true,
+  "modules": [
+    "custom"
+  ],
+  "parentResource": "lexhoa",
+  "functionName": "lexhoaPostConfirmation",
+  "resourceName": "lexhoaPostConfirmation",
+  "parentStack": "auth",
+  "triggerEnvs": "[]",
+  "triggerDir": "C:\\snapshot\\amplify-cli\\build\\node_modules\\@aws-amplify\\amplify-category-auth\\provider-utils\\awscloudformation\\triggers\\PostConfirmation",
+  "triggerTemplate": "PostConfirmation.json.ejs",
+  "triggerEventPath": "PostConfirmation.event.json",
+  "roleName": "lexhoaPostConfirmation",
+  "skipEdit": true,
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "apiLexhoaPersontableName",
+      "environmentVariableName": "API_LEXHOA_PERSONTABLE_NAME"
+    }
+  ],
+  "permissions": {
+    "storage": {
+      "Person:@model(appsync)": [
+        "create"
+      ]
+    }
+  }
+}

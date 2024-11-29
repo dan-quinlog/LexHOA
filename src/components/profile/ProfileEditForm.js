@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { UPDATE_PROFILE } from '../../queries/mutations';
 
@@ -10,24 +10,24 @@ const US_STATES = [
 ];
 
 const ProfileEditForm = ({ profile, onCancel, onSave }) => {
+    // Split initial address if it exists
+    const initialAddressParts = profile?.address ? profile.address.split('|') : ['', ''];
+    
     const [formData, setFormData] = useState({
         name: profile?.name || '',
         email: profile?.email || '',
-        address1: profile?.address1 || '',
-        address2: profile?.address2 || '',
+        address: profile?.address || '',
         city: profile?.city || '',
         state: profile?.state || '',
         zip: profile?.zip || '',
-        phoneCall: profile?.phoneCall || '',
-        phoneText: profile?.phoneText || '',
-        contactPref: profile?.contactPref || '',
-        sameAsCall: false
+        phone: profile?.phone || '',
+        allowText: profile?.allowText || false,
+        contactPref: profile?.contactPref || ''
     });
 
     const [errors, setErrors] = useState({});
     const [updateProfile] = useMutation(UPDATE_PROFILE);
 
-    // Phone number formatting
     const formatPhoneNumber = (value) => {
         const numbers = value.replace(/\D/g, '');
         if (numbers.length <= 3) return numbers;
@@ -35,47 +35,77 @@ const ProfileEditForm = ({ profile, onCancel, onSave }) => {
         return `${numbers.slice(0, 3)}-${numbers.slice(3, 6)}-${numbers.slice(6, 10)}`;
     };
 
-    // Form validation
     const validateForm = () => {
         const newErrors = {};
-       
+        
         if (!formData.email) {
             newErrors.email = 'Email is required';
         } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
             newErrors.email = 'Invalid email format';
+        }
+        
+        if (!formData.address) {
+            newErrors.address = 'Address is required';
+        }
+        
+        if (!formData.city) {
+            newErrors.city = 'City is required';
+        }
+        
+        if (!formData.state) {
+            newErrors.state = 'State is required';
+        }
+        
+        if (!formData.zip) {
+            newErrors.zip = 'ZIP code is required';
+        }
+        
+        if (!formData.phone) {
+            newErrors.phone = 'Phone number is required';
+        }
+        
+        if (!formData.contactPref) {
+            newErrors.contactPref = 'Contact preference is required';
         }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    // Handle form submission
+    const handleAddressChange = (line1, line2) => {
+        const newAddress = line1 + (line2 ? `|${line2}` : '');
+        setFormData(prev => ({ ...prev, address: newAddress }));
+    };
+
     const handleSubmit = async () => {
         if (validateForm()) {
             try {
-                await updateProfile({
+                const mutationInput = {
                     variables: {
                         input: {
                             id: profile.id,
                             email: formData.email,
-                            name: formData.name || null,
-                            address1: formData.address1 || null,
-                            address2: formData.address2 || null,
-                            city: formData.city || null,
-                            state: formData.state || null,
-                            zip: formData.zip || null,
-                            phoneCall: formData.phoneCall || null,
-                            phoneText: formData.phoneText || null,
-                            contactPref: formData.contactPref || null
+                            name: formData.name,
+                            address: formData.address,
+                            city: formData.city,
+                            state: formData.state,
+                            zip: formData.zip,
+                            phone: formData.phone,
+                            allowText: formData.allowText,
+                            contactPref: formData.contactPref,
+                            owner: profile.owner
                         }
                     }
-                });
+                };
+                await updateProfile(mutationInput);
                 onSave('Profile updated successfully');
             } catch (error) {
+                console.log('Mutation Error:', error);
                 onSave('Error updating profile', true);
             }
         }
     };
+
     return (
         <>
             <div className="profile-header">
@@ -96,20 +126,20 @@ const ProfileEditForm = ({ profile, onCancel, onSave }) => {
                         />
                         {errors.name && <span className="error-text">{errors.name}</span>}
                     </div>
-
+                    
                     <div className="field-group">
                         <div className="field-label">Address</div>
                         <input
                             type="text"
                             placeholder="Address Line 1"
-                            value={formData.address1}
-                            onChange={(e) => setFormData({ ...formData, address1: e.target.value })}
+                            value={formData.address.split('|')[0]}
+                            onChange={(e) => handleAddressChange(e.target.value, formData.address.split('|')[1])}
                         />
                         <input
                             type="text"
                             placeholder="Address Line 2"
-                            value={formData.address2}
-                            onChange={(e) => setFormData({ ...formData, address2: e.target.value })}
+                            value={formData.address.split('|')[1] || ''}
+                            onChange={(e) => handleAddressChange(formData.address.split('|')[0], e.target.value)}
                         />
                         <div className="address-row">
                             <input
@@ -149,38 +179,29 @@ const ProfileEditForm = ({ profile, onCancel, onSave }) => {
                     </div>
 
                     <div className="field-group">
-                        <div className="field-label">Phone (Call)</div>
+                        <div className="field-label">Phone Number</div>
                         <input
                             type="text"
-                            value={formData.phoneCall}
+                            value={formData.phone}
                             onChange={(e) => {
                                 const formatted = formatPhoneNumber(e.target.value);
-                                setFormData({ ...formData, phoneCall: formatted });
+                                setFormData({ ...formData, phone: formatted });
                             }}
                         />
                     </div>
 
                     <div className="field-group">
-                        <div className="field-label">Phone (Text)</div>
-                        <div className="phone-text-group">
+                        <label>
                             <input
-                                type="text"
-                                value={formData.phoneText}
-                                disabled={formData.sameAsCall}
-                                onChange={(e) => {
-                                    const formatted = formatPhoneNumber(e.target.value);
-                                    setFormData({ ...formData, phoneText: formatted });
-                                }}
+                                type="checkbox"
+                                checked={formData.allowText}
+                                onChange={(e) => setFormData(prev => ({
+                                    ...prev,
+                                    allowText: e.target.checked
+                                }))}
                             />
-                            <label className="same-as-call">
-                                <input
-                                    type="checkbox"
-                                    checked={formData.sameAsCall}
-                                    onChange={(e) => setFormData({ ...formData, sameAsCall: e.target.checked })}
-                                />
-                                <span>Same as calling</span>
-                            </label>
-                        </div>
+                            I agree to receive text messages
+                        </label>
                     </div>
 
                     <div className="field-group">

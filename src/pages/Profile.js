@@ -12,7 +12,7 @@ const Profile = ({ cognitoId }) => {
   const [isEditing, setIsEditing] = useState(false);
   
   const { loading, error, data } = useQuery(GET_PROFILE, {
-    variables: { cognitoId }
+    variables: { cognitoID: cognitoId }
   });
 
   const handleSave = (message, isError = false) => {
@@ -25,9 +25,11 @@ const Profile = ({ cognitoId }) => {
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error loading profile</div>;
-  if (!data?.getPersonByCognitoId) {
+  if (!data?.personByCognitoID?.items?.[0]) {
     return <div className="validation-message">Contact HOA Board to validate profile.</div>;
   }
+
+  // Use data.personByCognitoID.items[0] for the profile data
   return (
     <div className="profile-container">
       {!isEditing && (
@@ -40,12 +42,12 @@ const Profile = ({ cognitoId }) => {
       )}
       {isEditing ? (
         <ProfileEditForm
-          profile={data.getPersonByCognitoId}
+          profile={data.personByCognitoID.items[0]}
           onCancel={() => setIsEditing(false)}
           onSave={handleSave}
         />
       ) : (
-        <ProfileDisplay profile={data.getPersonByCognitoId} />
+        <ProfileDisplay profile={data.personByCognitoID.items[0]} />
       )}
       {showModal && (
         <Modal 
@@ -58,3 +60,4 @@ const Profile = ({ cognitoId }) => {
 };
 
 export default Profile;
+

@@ -9,15 +9,23 @@
       "UnauthRoleName": "amplify-lexhoa-lexdev-ecd70-unauthRole",
       "StackName": "amplify-lexhoa-lexdev-ecd70",
       "StackId": "arn:aws:cloudformation:us-east-1:324037289979:stack/amplify-lexhoa-lexdev-ecd70/8525e5e0-9b7f-11ef-99d7-0affc0d36e9d",
-      "AmplifyAppId": "d365ztc4el2qzx"
+      "AmplifyAppId": "d365ztc4el2qzx",
+      "AuthTriggerTemplateURL": "https://s3.amazonaws.com/amplify-lexhoa-lexdev-ecd70-deployment/amplify-cfn-templates/auth/auth-trigger-cloudformation-template.json"
     },
     "categories": {
       "auth": {
-        "lexhoaauth": {},
+        "lexhoa": {},
         "userPoolGroups": {}
       },
       "api": {
         "lexhoa": {}
+      },
+      "function": {
+        "lexhoaPostConfirmation": {
+          "deploymentBucketName": "amplify-lexhoa-lexdev-ecd70-deployment",
+          "s3Key": "amplify-builds/lexhoaPostConfirmation-58594b7a6f4742746544-build.zip",
+          "apiLexhoaPersontableName": "Person-gp5bkgxgsnhetdab5zqy2wgnqe-lexdev"
+        }
       }
     }
   },

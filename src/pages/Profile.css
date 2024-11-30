@@ -179,3 +179,18 @@
   font-size: 1.2em;
   color: #666;
 }
+  .text-consent-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .text-consent-row input[type="checkbox"] {
+    margin: 4px;
+    width: auto;
+    flex: 0 0 auto;
+  }
+
+  .text-consent-row span {
+    flex: 1;
+  }

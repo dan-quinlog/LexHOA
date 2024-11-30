@@ -12,7 +12,7 @@ const US_STATES = [
 const ProfileEditForm = ({ profile, onCancel, onSave }) => {
     // Split initial address if it exists
     const initialAddressParts = profile?.address ? profile.address.split('|') : ['', ''];
-    
+
     const [formData, setFormData] = useState({
         name: profile?.name || '',
         email: profile?.email || '',
@@ -37,33 +37,33 @@ const ProfileEditForm = ({ profile, onCancel, onSave }) => {
 
     const validateForm = () => {
         const newErrors = {};
-        
+
         if (!formData.email) {
             newErrors.email = 'Email is required';
         } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
             newErrors.email = 'Invalid email format';
         }
-        
+
         if (!formData.address) {
             newErrors.address = 'Address is required';
         }
-        
+
         if (!formData.city) {
             newErrors.city = 'City is required';
         }
-        
+
         if (!formData.state) {
             newErrors.state = 'State is required';
         }
-        
+
         if (!formData.zip) {
             newErrors.zip = 'ZIP code is required';
         }
-        
+
         if (!formData.phone) {
             newErrors.phone = 'Phone number is required';
         }
-        
+
         if (!formData.contactPref) {
             newErrors.contactPref = 'Contact preference is required';
         }
@@ -126,7 +126,7 @@ const ProfileEditForm = ({ profile, onCancel, onSave }) => {
                         />
                         {errors.name && <span className="error-text">{errors.name}</span>}
                     </div>
-                    
+
                     <div className="field-group">
                         <div className="field-label">Address</div>
                         <input
@@ -191,7 +191,7 @@ const ProfileEditForm = ({ profile, onCancel, onSave }) => {
                     </div>
 
                     <div className="field-group">
-                        <label>
+                        <div className="text-consent-row">
                             <input
                                 type="checkbox"
                                 checked={formData.allowText}
@@ -200,8 +200,8 @@ const ProfileEditForm = ({ profile, onCancel, onSave }) => {
                                     allowText: e.target.checked
                                 }))}
                             />
-                            I agree to receive text messages
-                        </label>
+                            <span>I agree to receive text messages</span>
+                        </div>
                     </div>
 
                     <div className="field-group">

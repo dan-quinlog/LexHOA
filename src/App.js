@@ -150,23 +150,23 @@ function App() {
   const HomePage = () => {
     const filter = user
       ? {
-          or: [
-            { audience: { contains: "PUBLIC" } },
-            ...userGroups.map(group => ({ audience: { contains: group } }))
-          ]
-        }
+        or: [
+          { audience: { contains: "PUBLIC" } },
+          ...userGroups.map(group => ({ audience: { contains: group } }))
+        ]
+      }
       : {
-          or: [{ audience: { contains: "PUBLIC" } }]
-        };
+        or: [{ audience: { contains: "PUBLIC" } }]
+      };
 
     const { loading, error, data } = useQuery(GET_LATEST_BULLETINS, {
-      variables: { 
+      variables: {
         limit: user ? 10 : 3,  // Set limit to 3 for public users
-        filter 
+        filter
       },
       client: user ? authenticatedClient : publicClient
     });
-  
+
     return (
       <main className="content">
         <div className="main-content">
@@ -204,58 +204,58 @@ function App() {
         </div>
       </main>
     );
-  };return (
-  <ApolloProvider client={user ? authenticatedClient : publicClient}>
-    <BrowserRouter>
-      <div className="App">
-        <header className="top-bar">
-          <Link to="/" className="site-title">
-            <h1>Lexington Commons HOA</h1>
-          </Link>
-          {user ? (
-            <div className="hamburger-menu" ref={menuRef}>
-              <button onClick={toggleMenu}>☰</button>
-              {isMenuOpen && (
-                <div className="dropdown-menu">
-                  {renderMenuItems()}
-                  <button onClick={handleSignOut}>Sign Out</button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <nav className="desktop-menu">
-              <Link to="/amenities">Amenities</Link>
-              <Link to="/contact">Contact</Link>
-              <Login />
-            </nav>
-          )}
-        </header>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/profile" element={<Profile cognitoId={user?.username} />} />
-          <Route path="/amenities" element={<Amenities />} />
-          <Route path="/board" element={<Board />} />
-          <Route path="/contact" element={<Contact />} />
-        </Routes>
-        <footer className="bottom-bar">
-          <nav className="mobile-menu">
+  }; return (
+    <ApolloProvider client={user ? authenticatedClient : publicClient}>
+      <BrowserRouter>
+        <div className="App">
+          <header className="top-bar">
+            <Link to="/" className="site-title">
+              <h1>Lexington Commons HOA</h1>
+            </Link>
             {user ? (
-              <>
-                {renderMenuItems()}
-                <button onClick={handleSignOut}>Sign Out</button>
-              </>
+              <div className="hamburger-menu" ref={menuRef}>
+                <button onClick={toggleMenu}>☰</button>
+                {isMenuOpen && (
+                  <div className="dropdown-menu">
+                    {renderMenuItems()}
+                    <button onClick={handleSignOut}>Sign Out</button>
+                  </div>
+                )}
+              </div>
             ) : (
-              <>
+              <nav className="desktop-menu">
                 <Link to="/amenities">Amenities</Link>
                 <Link to="/contact">Contact</Link>
                 <Login />
-              </>
+              </nav>
             )}
-          </nav>
-        </footer>
-      </div>
-    </BrowserRouter>
-  </ApolloProvider>
-);
+          </header>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/profile" element={<Profile cognitoId={user?.username} />} />
+            <Route path="/amenities" element={<Amenities />} />
+            <Route path="/board" element={<Board />} />
+            <Route path="/contact" element={<Contact />} />
+          </Routes>
+          <footer className="bottom-bar">
+            <nav className="mobile-menu">
+              {user ? (
+                <>
+                  {renderMenuItems()}
+                  <button onClick={handleSignOut}>Sign Out</button>
+                </>
+              ) : (
+                <>
+                  <Link to="/amenities">Amenities</Link>
+                  <Link to="/contact">Contact</Link>
+                  <Login />
+                </>
+              )}
+            </nav>
+          </footer>
+        </div>
+      </BrowserRouter>
+    </ApolloProvider>
+  );
 }
 export default App;

@@ -108,3 +108,9 @@ enum Audience {
   RESIDENTS
   PUBLIC
 }
+
+input ModelAudienceInput {
+  eq: Audience
+  ne: Audience
+  contains: Audience
+}

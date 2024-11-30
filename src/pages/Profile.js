@@ -4,13 +4,13 @@ import { GET_PROFILE } from '../queries/queries';
 import './Profile.css';
 import ProfileDisplay from '../components/profile/ProfileDisplay';
 import ProfileEditForm from '../components/profile/ProfileEditForm';
-import Modal from '../components/Modal';
+import NotificationModal from '../components/NotificationModal';
 
 const Profile = ({ cognitoId }) => {
   const [modalMessage, setModalMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  
+ 
   const { loading, error, data } = useQuery(GET_PROFILE, {
     variables: { cognitoID: cognitoId }
   });
@@ -29,7 +29,6 @@ const Profile = ({ cognitoId }) => {
     return <div className="validation-message">Contact HOA Board to validate profile.</div>;
   }
 
-  // Use data.personByCognitoID.items[0] for the profile data
   return (
     <div className="profile-container">
       {!isEditing && (
@@ -50,7 +49,7 @@ const Profile = ({ cognitoId }) => {
         <ProfileDisplay profile={data.personByCognitoID.items[0]} />
       )}
       {showModal && (
-        <Modal 
+        <NotificationModal
           message={modalMessage}
           onClose={() => setShowModal(false)}
         />
@@ -60,4 +59,3 @@ const Profile = ({ cognitoId }) => {
 };
 
 export default Profile;
-

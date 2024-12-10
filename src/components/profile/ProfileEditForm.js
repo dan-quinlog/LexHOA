@@ -1,13 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { UPDATE_PROFILE } from '../../queries/mutations';
-
-const US_STATES = [
-    { value: 'AL', label: 'Alabama' },
-    { value: 'AK', label: 'Alaska' },
-    // ... add all states in alphabetical order
-    { value: 'WY', label: 'Wyoming' }
-];
+import { US_STATES } from '../../utils/constants';
 
 const ProfileEditForm = ({ profile, onCancel, onSave }) => {
     // Split initial address if it exists

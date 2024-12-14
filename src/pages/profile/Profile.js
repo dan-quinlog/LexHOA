@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
-import { GET_PROFILE } from '../queries/queries';
+import { GET_PROFILE } from '../../queries/queries';
 import './Profile.css';
-import ProfileDisplay from '../components/profile/ProfileDisplay';
-import ProfileEditForm from '../components/profile/ProfileEditForm';
-import NotificationModal from '../components/NotificationModal';
+import ProfileDisplay from '../../components/user/ProfileDisplay';
+import ProfileEditForm from '../../components/forms/ProfileEditForm';
+import NotificationModal from '../../components/modals/NotificationModal';
 
 const Profile = ({ cognitoId }) => {
   const [modalMessage, setModalMessage] = useState('');

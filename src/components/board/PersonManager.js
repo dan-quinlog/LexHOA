@@ -5,8 +5,8 @@ import {
   SEARCH_PEOPLE_BY_NAME, 
   SEARCH_PEOPLE_BY_PHONE 
 } from '../../queries/queries';
-import ProfileEditForm from '../profile/ProfileEditForm';
-import Modal from '../common/Modal'; // You'll need to create this
+import ProfileEditForm from '../forms/ProfileEditForm';
+import Modal from '../shared/Modal';
 import './PersonManager.css';
 
 const PersonManager = () => {

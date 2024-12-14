@@ -1,58 +1,75 @@
 .person-manager {
-  padding: 20px;
+  padding: var(--spacing-large);
 }
 
 .search-section {
-  margin-bottom: 30px;
+  margin-bottom: var(--spacing-xl);
+}
+
+.search-controls {
+  display: flex;
+  gap: var(--spacing-medium);
+  margin-top: var(--spacing-medium);
+}
+
+.search-controls input,
+.search-controls select {
+  padding: var(--spacing-small);
+  border: var(--input-border);
+  border-radius: var(--border-radius);
 }
 
 .search-box {
   display: flex;
-  gap: 10px;
-  margin-top: 15px;
+  gap: var(--spacing-small);
+  margin-top: var(--spacing-medium);
 }
 
 .search-box input {
   flex: 1;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: var(--spacing-small);
+  border: var(--input-border);
+  border-radius: var(--border-radius);
 }
 
 .search-box button {
-  padding: 8px 16px;
-  background-color: #1976d2;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+  padding: var(--spacing-small) var(--spacing-medium);
+  background-color: var(--primary-color);
+  color: var(--background-white);
+  border-radius: var(--border-radius);
+  transition: background-color var(--transition-fast) ease;
 }
 
 .search-box button:disabled {
-  background-color: #ccc;
+  background-color: var(--secondary-color);
 }
 
 .profile-section {
-  background-color: white;
-  border-radius: 8px;
+  background-color: var(--background-white);
+  border-radius: var(--border-radius);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  padding: 20px;
+  padding: var(--spacing-large);
 }
 
 .profile-card {
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  padding: 20px;
-  margin: 10px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  background-color: white;
+  background: var(--background-white);
+  padding: var(--spacing-large);
+  border: var(--input-border);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--spacing-medium);
 }
 
 .search-results {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-  padding: 15px;
-  background-color: #f5f5f5;
-  border-radius: 8px;
+  gap: var(--spacing-large);
+  padding: var(--spacing-medium);
+  background-color: var(--border-color);
+  border-radius: var(--border-radius);
+}
+
+.error-message {
+  color: var(--error-color);
+  margin-top: var(--spacing-small);
 }

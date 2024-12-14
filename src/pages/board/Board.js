@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import BulletinManager from '../components/board/BulletinManager';
-import PersonManager from '../components/board/PersonManager';
+import BulletinManager from '../../components/board/BulletinManager'
+import PersonManager from '../../components/board/PersonManager';
 import './Board.css';
-import { searchUsers } from '../utils/userSearch';
+import { searchUsers } from '../../utils/userSearch';
 import { useQuery } from '@apollo/client';
-import { LIST_PEOPLE } from '../queries/queries';
+import { LIST_PEOPLE } from '../../queries/queries';
 
 const TOOLS = [
   { id: 'bulletins', label: 'Bulletins' },

@@ -8,27 +8,27 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  margin-top: 85px;
+  margin-top: var(--header-height);
 }
 
 .board-header {
   position: relative;
-  padding: 15px;
-  border-bottom: 1px solid #ddd;
+  padding: var(--spacing-medium);
+  border-bottom: var(--input-border);
 }
 
 .tool-selector {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  background: #f5f5f5;
-  border-radius: 4px;
+  padding: var(--spacing-small);
+  background: var(--secondary-color);
+  border-radius: var(--border-radius);
   cursor: pointer;
 }
 
 .caret {
-  transition: transform 0.2s ease;
+  transition: transform var(--transition-fast) ease;
 }
 
 .caret.open {
@@ -41,11 +41,11 @@
   top: 100%;
   left: 0;
   right: 0;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin: 5px 15px;
-  z-index: 100;
+  background: var(--background-white);
+  border: var(--input-border);
+  border-radius: var(--border-radius);
+  margin: var(--spacing-small) var(--spacing-medium);
+  z-index: var(--z-index-dropdown);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -54,39 +54,39 @@
 }
 
 .tool-item {
-  padding: 12px;
+  padding: var(--spacing-small);
   cursor: pointer;
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-  margin: 5px 0;
-  border-radius: 4px;
-  transition: all 0.2s ease;
+  background: var(--background-white);
+  border: var(--input-border);
+  margin: var(--spacing-small) 0;
+  border-radius: var(--border-radius);
+  transition: all var(--transition-fast) ease;
 }
 
 .tool-item:hover {
-  background: #e9ecef;
+  background: var(--hover-color);
   transform: translateY(-1px);
 }
 
 .board-content {
   flex: 1;
-  padding: 20px;
+  padding: var(--spacing-large);
 }
 
 @media (min-width: 768px) {
   .board-container {
-    margin-top: 110px;
+    margin-top: calc(var(--header-height) + var(--spacing-xl));
     flex-direction: row;
-    height: calc(100vh - 110px);
+    height: calc(100vh - calc(var(--header-height) + var(--spacing-xl)));
   }
 
   .board-header {
     width: 15%;
     min-width: 200px;
     height: 100%;
-    border-right: 1px solid #ddd;
+    border-right: var(--input-border);
     border-bottom: none;
-    background: #f5f5f5;
+    background: var(--header-background);
   }
 
   .tool-selector {
@@ -103,7 +103,7 @@
   }
 
   .tool-item {
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: var(--input-border);
   }
 
   .tool-item:last-child {

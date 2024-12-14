@@ -1,0 +1,31 @@
+.notification-modal {
+  position: fixed;
+  top: var(--spacing-large);
+  right: var(--spacing-large);
+  z-index: var(--z-index-notification);
+  animation: slideIn var(--transition-normal) ease-out;
+}
+
+.notification-content {
+  background: var(--background-white);
+  padding: var(--spacing-medium);
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  animation: fadeOut var(--transition-slow) ease-in forwards;
+  animation-delay: var(--transition-slow);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+  }
+}

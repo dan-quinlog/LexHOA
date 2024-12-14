@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { DELETE_BULLETIN } from '../../queries/mutations';
 import { GET_LATEST_BULLETINS } from '../../queries/queries';
-
-import Modal from '../Modal';
+import Modal from '../shared/Modal';
 import './DeleteConfirmModal.css';
 
 const DeleteConfirmModal = ({ bulletin, onClose }) => {

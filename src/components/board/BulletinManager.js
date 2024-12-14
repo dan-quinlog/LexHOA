@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_LATEST_BULLETINS } from '../../queries/queries';
-import BulletinModal from './BulletinModal';
-import DeleteConfirmModal from './DeleteConfirmModal';
+import BulletinModal from '../modals/BulletinModal';
+import DeleteConfirmModal from '../modals/DeleteConfirmModal';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.bubble.css';
 import './BulletinManager.css';

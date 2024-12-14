@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useMutation } from '@apollo/client';
 import { CREATE_BULLETIN, UPDATE_BULLETIN } from '../../queries/mutations';
 import { GET_LATEST_BULLETINS } from '../../queries/queries';
-import Modal from '../Modal';
+import Modal from '../shared/Modal';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './BulletinModal.css';
-import NotificationModal from '../NotificationModal';
+import NotificationModal from '../modals/NotificationModal';
 
 
 const AUDIENCE_OPTIONS = [

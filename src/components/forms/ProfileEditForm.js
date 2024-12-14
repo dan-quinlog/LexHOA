@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { UPDATE_PROFILE } from '../../queries/mutations';
 import { US_STATES } from '../../utils/constants';
+import './ProfileEditForm.css';
 
 const ProfileEditForm = ({ profile, onCancel, onSave }) => {
     // Split initial address if it exists
@@ -120,46 +121,51 @@ const ProfileEditForm = ({ profile, onCancel, onSave }) => {
                         />
                         {errors.name && <span className="error-text">{errors.name}</span>}
                     </div>
-
-                    <div className="field-group">
-                        <div className="field-label">Address</div>
-                        <input
-                            type="text"
-                            placeholder="Address Line 1"
-                            value={formData.address.split('|')[0]}
-                            onChange={(e) => handleAddressChange(e.target.value, formData.address.split('|')[1])}
-                        />
-                        <input
-                            type="text"
-                            placeholder="Address Line 2"
-                            value={formData.address.split('|')[1] || ''}
-                            onChange={(e) => handleAddressChange(formData.address.split('|')[0], e.target.value)}
-                        />
-                        <div className="address-row">
-                            <input
-                                type="text"
-                                placeholder="City"
-                                value={formData.city}
-                                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                            />
-                            <select
-                                value={formData.state}
-                                onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                            >
-                                <option value="">State</option>
-                                {US_STATES.map(state => (
-                                    <option key={state.value} value={state.value}>{state.label}</option>
-                                ))}
-                            </select>
-                            <input
-                                type="text"
-                                placeholder="ZIP"
-                                value={formData.zip}
-                                onChange={(e) => setFormData({ ...formData, zip: e.target.value })}
-                            />
-                        </div>
-                    </div>
-                </div>
+                      <div className="field-group">
+                          <div className="field-label">Address</div>
+                          <div className="address-group">
+                              <div className="address-line">
+                                  <input
+                                      type="text"
+                                      placeholder="Address Line 1"
+                                      value={formData.address.split('|')[0]}
+                                      onChange={(e) => handleAddressChange(e.target.value, formData.address.split('|')[1])}
+                                  />
+                              </div>
+                              <div className="address-line">
+                                  <input
+                                      type="text"
+                                      placeholder="Address Line 2"
+                                      value={formData.address.split('|')[1] || ''}
+                                      onChange={(e) => handleAddressChange(formData.address.split('|')[0], e.target.value)}
+                                  />
+                              </div>
+                              <div className="city-state-zip">
+                                  <input
+                                      type="text"
+                                      placeholder="City"
+                                      value={formData.city}
+                                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                                  />
+                                  <select
+                                      value={formData.state}
+                                      onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                                  >
+                                      <option value="">State</option>
+                                      {US_STATES.map(state => (
+                                          <option key={state.value} value={state.value}>{state.label}</option>
+                                      ))}
+                                  </select>
+                                  <input
+                                      type="text"
+                                      placeholder="ZIP"
+                                      value={formData.zip}
+                                      onChange={(e) => setFormData({ ...formData, zip: e.target.value })}
+                                  />
+                              </div>
+                          </div>
+                      </div>
+                  </div>
 
                 <div className="right-column">
                     <div className="field-group">

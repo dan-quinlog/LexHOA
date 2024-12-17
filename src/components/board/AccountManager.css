@@ -1,0 +1,50 @@
+.account-manager {
+  padding: var(--spacing-large);
+}
+
+.section-title {
+  font-size: var(--header-font-size);
+  margin-bottom: var(--spacing-large);
+  color: var(--text-color);
+}
+
+.search-controls {
+  display: flex;
+  gap: var(--spacing-medium);
+  margin-bottom: var(--spacing-large);
+}
+
+.search-type {
+  height: var(--input-height);
+  padding: var(--input-padding);
+  border: var(--input-border);
+  border-radius: var(--border-radius);
+}
+
+.search-input {
+  flex-grow: 1;
+  padding: var(--input-padding);
+  border: var(--input-border);
+  border-radius: var(--border-radius);
+}
+
+.search-button {
+  height: var(--input-height);
+  padding: 0 var(--spacing-large);
+  background-color: var(--primary-color);
+  color: var(--background-white);
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.search-button:hover {
+  background-color: var(--hover-color);
+}
+  .accounts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: var(--spacing-large);
+    margin: 0 calc(-1 * var(--spacing-medium));
+  }

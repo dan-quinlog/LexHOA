@@ -20,6 +20,7 @@ type Person @aws_api_key @aws_cognito_user_pools @model
   updatedAt: AWSDateTime
   owner: String
 }
+
 type Account @model 
   @auth(rules: [
     { allow: private, operations: [read] },

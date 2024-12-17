@@ -1,0 +1,64 @@
+.account-card {
+  width: 120%;
+  border: var(--input-border);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-medium);
+  background-color: var(--background-white);
+}
+
+.card-header h3 {
+  margin: 0;
+  margin-bottom: var(--spacing-small);
+  font-size: var(--font-size-large);
+  color: var(--text-color);
+}
+
+.card-header p {
+  margin: var(--spacing-small) 0;
+  color: var(--text-color);
+  font-size: var(--font-size-base);
+}
+
+.properties-section {
+  margin-top: var(--spacing-medium);
+}
+
+.properties-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: var(--spacing-small) 0;
+}
+
+.caret {
+  transition: transform var(--transition-normal);
+}
+
+.caret.open {
+  transform: rotate(180deg);
+}
+
+.properties-list {
+  margin-top: var(--spacing-small);
+  padding-left: var(--spacing-medium);
+}
+
+.property-item {
+  padding: var(--spacing-small) 0;
+}
+
+.edit-button {
+  margin-top: var(--spacing-medium);
+  padding: var(--spacing-small) var(--spacing-medium);
+  cursor: pointer;
+  background-color: var(--primary-color);
+  color: var(--background-white);
+  border: none;
+  border-radius: var(--border-radius);
+  transition: background-color var(--transition-fast);
+}
+
+.edit-button:hover {
+  background-color: var(--hover-color);
+}

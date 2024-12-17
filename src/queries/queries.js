@@ -127,3 +127,67 @@ export const SEARCH_PEOPLE_BY_PHONE = gql`
     }
   }
 `;
+
+export const SEARCH_ACCOUNTS = gql`
+  query SearchAccounts($filter: ModelAccountFilterInput, $limit: Int, $nextToken: String) {
+    listAccounts(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        accountOwnerId
+        accountName
+        billingFreq
+        balance
+        createdAt
+        updatedAt
+      }
+      nextToken
+    }
+  }
+`;
+
+export const SEARCH_PROPERTIES = gql`
+  query SearchProperties($unitNumber: String, $accountId: ID, $tenantId: ID, $limit: Int, $nextToken: String) {
+    listProperties(filter: {
+      or: [
+        { address: { contains: $unitNumber } },
+        { accountPropertiesId: { eq: $accountId } },
+        { propertyTenantId: { eq: $tenantId } }
+      ]
+    }, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        address
+        account {
+          id
+          accountName
+          owner {
+            id
+            name
+          }
+        }
+        tenant {
+          id
+          name
+        }
+      }
+      nextToken
+    }
+  }
+`;
+
+export const SEARCH_PAYMENTS = gql`
+  query SearchPayments($accountId: ID, $paymentId: ID, $limit: Int, $nextToken: String) {
+    paymentsByOwner(ownerPaymentsId: $accountId, sortDirection: DESC, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        checkDate
+        checkNumber
+        checkAmount
+        invoiceNumber
+        invoiceAmount
+        ownerPaymentsId
+      }
+      nextToken
+    }
+  }
+`;

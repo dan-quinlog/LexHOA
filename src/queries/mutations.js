@@ -50,3 +50,40 @@ export const DELETE_BULLETIN = gql`
     }
   }
 `;
+
+export const UPDATE_ACCOUNT = gql`
+  mutation UpdateAccount($input: UpdateAccountInput!) {
+    updateAccount(input: $input) {
+      id
+      accountOwnerId
+      accountName
+      billingFreq
+      balance
+    }
+  }
+`;
+
+export const UPDATE_PROPERTY = gql`
+  mutation UpdateProperty($input: UpdatePropertyInput!) {
+    updateProperty(input: $input) {
+      id
+      address
+      accountPropertiesId
+      propertyTenantId
+    }
+  }
+`;
+
+export const UPDATE_PAYMENT = gql`
+  mutation UpdatePayment($input: UpdatePaymentInput!) {
+    updatePayment(input: $input) {
+      id
+      checkDate
+      checkNumber
+      checkAmount
+      invoiceNumber
+      invoiceAmount
+      ownerPaymentsId
+    }
+  }
+`;

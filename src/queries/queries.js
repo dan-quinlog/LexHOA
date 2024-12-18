@@ -146,35 +146,49 @@ export const SEARCH_ACCOUNTS = gql`
 `;
 
 export const SEARCH_PROPERTIES = gql`
-  query SearchProperties($unitNumber: String, $accountId: ID, $tenantId: ID, $limit: Int, $nextToken: String) {
-    listProperties(filter: {
-      or: [
-        { address: { contains: $unitNumber } },
-        { accountPropertiesId: { eq: $accountId } },
-        { propertyTenantId: { eq: $tenantId } }
-      ]
-    }, limit: $limit, nextToken: $nextToken) {
+  query ListProperties($filter: ModelPropertyFilterInput) {
+    listProperties(filter: $filter) {
       items {
         id
         address
-        account {
-          id
-          accountName
-          owner {
-            id
-            name
-          }
-        }
-        tenant {
-          id
-          name
-        }
+        accountPropertiesId
+        propertyTenantId
+        createdAt
+        updatedAt
       }
-      nextToken
     }
   }
 `;
 
+export const SEARCH_PROPERTIES_BY_ACCOUNT = gql`
+  query PropertyByAccount($accountPropertiesId: ID!) {
+    propertyByAccount(accountPropertiesId: $accountPropertiesId) {
+      items {
+        id
+        address
+        accountPropertiesId
+        propertyTenantId
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
+export const SEARCH_PROPERTIES_BY_TENANT = gql`
+  query PropertyByTenant($propertyTenantId: ID!) {
+    propertyByTenant(propertyTenantId: $propertyTenantId) {
+      items {
+        id
+        address
+        accountPropertiesId
+        propertyTenantId
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
 export const SEARCH_PAYMENTS = gql`
   query SearchPayments($accountId: ID, $paymentId: ID, $limit: Int, $nextToken: String) {
     paymentsByOwner(ownerPaymentsId: $accountId, sortDirection: DESC, limit: $limit, nextToken: $nextToken) {
@@ -186,6 +200,23 @@ export const SEARCH_PAYMENTS = gql`
         invoiceNumber
         invoiceAmount
         ownerPaymentsId
+      }
+      nextToken
+    }
+  }
+`;
+
+export const SEARCH_ACCOUNTS_BY_OWNER = gql`
+  query AccountByOwner($accountOwnerId: ID!) {
+    accountByOwner(accountOwnerId: $accountOwnerId) {
+      items {
+        id
+        accountOwnerId
+        accountName
+        billingFreq
+        balance
+        createdAt
+        updatedAt
       }
       nextToken
     }

@@ -1,0 +1,74 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--hover-background);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: var(--z-index-modal);
+}
+
+.modal-content {
+  background-color: var(--background-white);
+  padding: var(--spacing-large);
+  border-radius: var(--border-radius);
+  width: var(--modal-width-desktop);
+  max-width: var(--form-max-width);
+}
+
+.form-group {
+  margin-bottom: var(--spacing-medium);
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: var(--form-label-margin);
+  color: var(--text-color);
+}
+
+.form-group input {
+  width: 100%;
+  padding: var(--input-padding);
+  border: var(--input-border);
+  border-radius: var(--border-radius);
+  height: var(--input-height);
+}
+
+.form-group input:focus {
+  border-color: var(--input-focus-color);
+  outline: none;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-medium);
+  margin-top: var(--spacing-large);
+}
+
+.cancel-button,
+.save-button {
+  padding: var(--spacing-small) var(--spacing-medium);
+  cursor: pointer;
+  border-radius: var(--border-radius);
+  transition: background-color var(--transition-fast);
+}
+
+.cancel-button {
+  background-color: var(--secondary-color);
+  color: var(--background-white);
+  border: none;
+}
+
+.save-button {
+  background-color: var(--primary-color);
+  color: var(--background-white);
+  border: none;
+}
+
+.save-button:hover {
+  background-color: var(--hover-color);
+}

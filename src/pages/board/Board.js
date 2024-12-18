@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import BulletinManager from '../../components/board/BulletinManager'
 import PersonManager from '../../components/board/PersonManager';
 import AccountManager from '../../components/board/AccountManager';
+import PropertyManager from '../../components/board/PropertyManager';
 import './Board.css';
 import { searchUsers } from '../../utils/userSearch';
 import { useQuery } from '@apollo/client';
@@ -10,7 +11,8 @@ import { LIST_PEOPLE } from '../../queries/queries';
 const TOOLS = [
   { id: 'bulletins', label: 'Bulletins' },
   { id: 'persons', label: 'Person Management' },
-  { id: 'accounts', label: 'Account Management' }
+  { id: 'accounts', label: 'Account Management' },
+  { id: 'properties', label: 'Property Management' }
 ];
 
 const Board = () => {
@@ -32,6 +34,8 @@ const Board = () => {
         return <PersonManager />;
       case 'accounts':
         return <AccountManager />;
+      case 'properties':
+        return <PropertyManager />;
       default:
         return null;
     }

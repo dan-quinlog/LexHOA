@@ -70,6 +70,8 @@ export const UPDATE_PROPERTY = gql`
       address
       accountPropertiesId
       propertyTenantId
+      createdAt
+      updatedAt
     }
   }
 `;

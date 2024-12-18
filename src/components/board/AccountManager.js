@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useQuery } from '@apollo/client';
-import { SEARCH_ACCOUNTS } from '../../queries/queries';
+import { useLazyQuery } from '@apollo/client';
+import { SEARCH_ACCOUNTS, SEARCH_ACCOUNTS_BY_OWNER } from '../../queries/queries';
 import AccountCard from './AccountCard';
 import AccountEditModal from './AccountEditModal';
 import './AccountManager.css';
@@ -10,50 +10,46 @@ const AccountManager = () => {
   const [searchType, setSearchType] = useState('accountId');
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [filter, setFilter] = useState(null);
+  const [searchResults, setSearchResults] = useState([]);
 
-  const { loading, error, data, refetch } = useQuery(SEARCH_ACCOUNTS, {
-    variables: { filter },
-    fetchPolicy: 'network-only'
-  });
+  const [searchAccounts] = useLazyQuery(SEARCH_ACCOUNTS);
+  const [searchByOwner] = useLazyQuery(SEARCH_ACCOUNTS_BY_OWNER);
 
-  const handleSearch = () => {
-    if (!searchTerm) {
-      setFilter(null);
-      return;
-    }
+  const handleSearch = async () => {
+    if (!searchTerm) return;
 
-    let newFilter = {
+    let filter = {
       or: []
     };
 
     switch(searchType) {
       case 'accountId':
-        newFilter.or.push({ id: { contains: searchTerm } });
+        filter.or.push({ id: { contains: searchTerm } });
         break;
       case 'ownerId':
-        newFilter.or.push({ accountOwnerId: { eq: searchTerm } });
-        break;
+        const ownerResponse = await searchByOwner({ 
+          variables: { accountOwnerId: searchTerm }
+        });
+        setSearchResults(ownerResponse.data?.accountByOwner?.items || []);
+        return;
       case 'propertyId':
-        newFilter.or.push({ 
-          properties: { 
-            some: { 
-              id: { eq: searchTerm } 
-            } 
-          } 
+        filter.or.push({
+          properties: {
+            some: {
+              id: { eq: searchTerm }
+            }
+          }
         });
         break;
       default:
         break;
     }
 
-    setFilter(newFilter);
-    refetch({ filter: newFilter });
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleSearch();
+    try {
+      const response = await searchAccounts({ variables: { filter } });
+      setSearchResults(response.data?.listAccounts?.items || []);
+    } catch (error) {
+      console.error('Search error:', error);
     }
   };
 
@@ -66,7 +62,7 @@ const AccountManager = () => {
     <div className="account-manager">
       <h2 className="section-title">Account Search</h2>
       <div className="search-controls">
-        <select 
+        <select
           value={searchType}
           onChange={(e) => setSearchType(e.target.value)}
           className="search-type"
@@ -80,33 +76,34 @@ const AccountManager = () => {
           placeholder="Search Accounts"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              handleSearch();
+            }
+          }}
           className="search-input"
         />
         <button onClick={handleSearch} className="search-button">Search</button>
       </div>
       
       <div className="accounts-grid">
-        {loading ? (
-          <div>Loading...</div>
-        ) : error ? (
-          <div>Error loading accounts</div>
-        ) : (
-          data?.listAccounts.items.map((account) => (
-            <AccountCard 
-              key={account.id}
-              account={account} 
-              onEdit={() => handleEdit(account)}
-            />
-          ))
-        )}
+        {searchResults.map((account) => (
+          <AccountCard
+            key={account.id}
+            account={account}
+            onEdit={() => handleEdit(account)}
+          />
+        ))}
       </div>
 
       {showEditModal && (
         <AccountEditModal
           account={selectedAccount}
           show={showEditModal}
-          onClose={() => setShowEditModal(false)}
+          onClose={() => {
+            setShowEditModal(false)
+            handleSearch(); // Refresh results after edit
+          }}
         />
       )}
     </div>

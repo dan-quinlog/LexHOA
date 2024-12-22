@@ -9,42 +9,46 @@ import PropertyCard from './PropertyCard';
 import PropertyEditModal from './PropertyEditModal';
 import './PropertyManager.css';
 
-const PropertyManager = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchType, setSearchType] = useState('propertyId');
+const PropertyManager = ({ searchState, setSearchState }) => {
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [searchResults, setSearchResults] = useState([]);
 
   const [searchProperties] = useLazyQuery(SEARCH_PROPERTIES);
   const [searchByAccount] = useLazyQuery(SEARCH_PROPERTIES_BY_ACCOUNT);
   const [searchByTenant] = useLazyQuery(SEARCH_PROPERTIES_BY_TENANT);
 
   const handleSearch = async () => {
-    if (!searchTerm) return;
+    if (!searchState.searchTerm) return;
 
     try {
       let response;
-      switch(searchType) {
+      switch(searchState.searchType) {
         case 'propertyId':
           response = await searchProperties({
-            variables: { filter: { id: { contains: searchTerm } } }
+            variables: { filter: { id: { contains: searchState.searchTerm } } }
           });
-          setSearchResults(response.data?.listProperties?.items || []);
+          setSearchState({
+            ...searchState,
+            searchResults: response.data?.listProperties?.items || []
+          });
           break;
         case 'accountId':
           response = await searchByAccount({
-            variables: { accountPropertiesId: searchTerm }
+            variables: { accountPropertiesId: searchState.searchTerm }
           });
-          setSearchResults(response.data?.propertyByAccount?.items || []);
+          setSearchState({
+            ...searchState,
+            searchResults: response.data?.propertyByAccount?.items || []
+          });
           break;
         case 'tenantId':
           response = await searchByTenant({
-            variables: { propertyTenantId: searchTerm }
+            variables: { propertyTenantId: searchState.searchTerm }
           });
-          setSearchResults(response.data?.propertyByTenant?.items || []);
-          break;
-        default:
+          setSearchState({
+            ...searchState,
+            searchResults: response.data?.propertyByTenant?.items || []
+          });
           break;
       }
     } catch (error) {
@@ -62,8 +66,11 @@ const PropertyManager = () => {
       <h2 className="section-title">Property Search</h2>
       <div className="search-controls">
         <select
-          value={searchType}
-          onChange={(e) => setSearchType(e.target.value)}
+          value={searchState.searchType}
+          onChange={(e) => setSearchState({
+            ...searchState,
+            searchType: e.target.value
+          })}
           className="search-type"
         >
           <option value="propertyId">Property ID</option>
@@ -73,8 +80,11 @@ const PropertyManager = () => {
         <input
           type="text"
           placeholder="Search Properties"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={searchState.searchTerm}
+          onChange={(e) => setSearchState({
+            ...searchState,
+            searchTerm: e.target.value
+          })}
           onKeyPress={(e) => {
             if (e.key === 'Enter') {
               handleSearch();
@@ -86,7 +96,7 @@ const PropertyManager = () => {
       </div>
       
       <div className="properties-grid">
-        {searchResults.map((property) => (
+        {searchState.searchResults.map((property) => (
           <PropertyCard
             key={property.id}
             property={property}

@@ -3,6 +3,7 @@ import BulletinManager from '../../components/board/BulletinManager'
 import PersonManager from '../../components/board/PersonManager';
 import AccountManager from '../../components/board/AccountManager';
 import PropertyManager from '../../components/board/PropertyManager';
+import PaymentManager from '../../components/board/PaymentManager';
 import './Board.css';
 import { searchUsers } from '../../utils/userSearch';
 import { useQuery } from '@apollo/client';
@@ -12,13 +13,40 @@ const TOOLS = [
   { id: 'bulletins', label: 'Bulletins' },
   { id: 'persons', label: 'Person Management' },
   { id: 'accounts', label: 'Account Management' },
-  { id: 'properties', label: 'Property Management' }
+  { id: 'properties', label: 'Property Management' },
+  { id: 'payments', label: 'Payment Management' }
 ];
 
 const Board = () => {
   const [selectedTool, setSelectedTool] = useState('bulletins');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchResults, setSearchResults] = useState([]);
+  
+  // New state management
+  const [personSearchState, setPersonSearchState] = useState({
+    searchType: 'email',
+    searchValue: '',
+    searchResults: []
+  });
+
+  const [accountSearchState, setAccountSearchState] = useState({
+    searchType: 'accountId',
+    searchTerm: '',
+    searchResults: []
+  });
+
+  const [propertySearchState, setPropertySearchState] = useState({
+    searchType: 'propertyId',
+    searchTerm: '',
+    searchResults: []
+  });
+
+  // Add payment search state
+  const [paymentSearchState, setPaymentSearchState] = useState({
+    searchType: 'paymentId',
+    searchTerm: '',
+    searchResults: []
+  });
+
   const { data: peopleData } = useQuery(LIST_PEOPLE);
 
   const handleToolSelect = (toolId) => {
@@ -31,32 +59,34 @@ const Board = () => {
       case 'bulletins':
         return <BulletinManager />;
       case 'persons':
-        return <PersonManager />;
+        return <PersonManager 
+          searchState={personSearchState}
+          setSearchState={setPersonSearchState}
+        />;
       case 'accounts':
-        return <AccountManager />;
+        return <AccountManager 
+          searchState={accountSearchState}
+          setSearchState={setAccountSearchState}
+        />;
       case 'properties':
-        return <PropertyManager />;
+        return <PropertyManager 
+          searchState={propertySearchState}
+          setSearchState={setPropertySearchState}
+        />;
+      case 'payments':
+        return <PaymentManager 
+          searchState={paymentSearchState}
+          setSearchState={setPaymentSearchState}
+        />;
       default:
         return null;
     }
   };
 
-  const handleSearch = async (email) => {
-    const cognitoUsers = await searchUsers(email);
-    const matchingPeople = peopleData?.listPeople?.items.filter(p => 
-      p.email.toLowerCase().includes(email.toLowerCase())
-    );
-    
-    setSearchResults([
-      ...cognitoUsers.map(u => ({ ...u, source: 'cognito' })),
-      ...matchingPeople.map(p => ({ ...p, source: 'person' }))
-    ]);
-  };
-
   return (
     <div className="board-container">
       <div className="board-header">
-        <div 
+        <div
           className="tool-selector"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
@@ -65,7 +95,7 @@ const Board = () => {
         </div>
         <div className={`tool-dropdown ${isMenuOpen ? 'show' : ''}`}>
           {TOOLS.map(tool => (
-            <div 
+            <div
               key={tool.id}
               className="tool-item"
               onClick={() => handleToolSelect(tool.id)}
@@ -81,5 +111,4 @@ const Board = () => {
     </div>
   );
 };
-
 export default Board;

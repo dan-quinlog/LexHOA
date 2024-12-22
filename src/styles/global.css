@@ -236,7 +236,7 @@ select {
 /* Media Queries - Mobile First */
 @media (max-width: 767px) {
   .top-bar {
-    padding: var(--spacing-medium);
+    padding: 0px var(--spacing-medium);
     justify-content: center;
   }
 

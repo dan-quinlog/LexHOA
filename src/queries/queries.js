@@ -72,6 +72,7 @@ export const SEARCH_PEOPLE_BY_EMAIL = gql`
     personByEmail(email: $email) {
       items {
         id
+        cognitoID
         name
         email
         address
@@ -83,36 +84,16 @@ export const SEARCH_PEOPLE_BY_EMAIL = gql`
         contactPref
         owner
       }
-      nextToken
     }
   }
 `;
 
-export const SEARCH_PEOPLE_BY_NAME = gql`
-  query PersonByName($name: String!) {
-    personByName(name: $name) {
-      items {
-        id
-        name
-        email
-        address
-        city
-        state
-        zip
-        phone
-        allowText
-        contactPref
-        owner
-      }
-      nextToken
-    }
-  }
-`;
 export const SEARCH_PEOPLE_BY_PHONE = gql`
   query SearchPeopleByPhone($phone: String!) {
     personByPhone(phone: $phone) {
       items {
         id
+        cognitoID
         name
         email
         address
@@ -124,6 +105,25 @@ export const SEARCH_PEOPLE_BY_PHONE = gql`
         contactPref
         owner
       }
+    }
+  }
+`;
+
+export const SEARCH_PEOPLE_BY_ID = gql`
+  query GetPerson($id: ID!) {
+    getPerson(id: $id) {
+      id
+      cognitoID
+      name
+      email
+      address
+      city
+      state
+      zip
+      phone
+      allowText
+      contactPref
+      owner
     }
   }
 `;
@@ -190,8 +190,8 @@ export const SEARCH_PROPERTIES_BY_TENANT = gql`
   }
 `;
 export const SEARCH_PAYMENTS = gql`
-  query SearchPayments($accountId: ID, $paymentId: ID, $limit: Int, $nextToken: String) {
-    paymentsByOwner(ownerPaymentsId: $accountId, sortDirection: DESC, limit: $limit, nextToken: $nextToken) {
+  query SearchPayments($filter: ModelPaymentFilterInput, $limit: Int, $nextToken: String) {
+    listPayments(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
         checkDate
@@ -219,6 +219,70 @@ export const SEARCH_ACCOUNTS_BY_OWNER = gql`
         updatedAt
       }
       nextToken
+    }
+  }
+`;
+
+export const SEARCH_PAYMENTS_BY_OWNER = gql`
+  query PaymentsByOwner($ownerPaymentsId: ID!) {
+    paymentsByOwner(ownerPaymentsId: $ownerPaymentsId) {
+      items {
+        id
+        checkDate
+        checkNumber
+        checkAmount
+        invoiceNumber
+        invoiceAmount
+        ownerPaymentsId
+        createdAt
+        updatedAt
+      }
+      nextToken
+    }
+  }
+`;
+
+export const SEARCH_PEOPLE_BY_NAME = gql`
+  query PersonByName($name: String!) {
+    personByName(name: $name) {
+      items {
+        id
+        cognitoID
+        name
+        email
+        address
+        city
+        state
+        zip
+        phone
+        allowText
+        contactPref
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+
+export const SEARCH_PEOPLE_BY_COGNITO = gql`
+  query PersonByCognitoID($cognitoID: String!) {
+    personByCognitoID(cognitoID: $cognitoID) {
+      items {
+        id
+        cognitoID
+        name
+        email
+        address
+        city
+        state
+        zip
+        phone
+        allowText
+        contactPref
+        owner
+      }
     }
   }
 `;

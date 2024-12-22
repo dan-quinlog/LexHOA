@@ -1,0 +1,113 @@
+.merge-modal-content {
+  width: 100%;
+  height: 100%;
+  background: var(--background-white);
+  overflow-y: auto;
+}
+
+.profiles-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-medium);
+  margin-bottom: var(--spacing-large);
+  padding: var(--spacing-medium);
+}
+
+.profile-column {
+  border: var(--input-border);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-medium);
+}
+
+.profile-info {
+  margin-top: var(--spacing-medium);
+}
+
+.merge-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-medium);
+  padding: 0 var(--spacing-medium);
+}
+
+.merge-field {
+  padding: var(--spacing-medium);
+  border: var(--input-border);
+  border-radius: var(--border-radius);
+}
+
+.field-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-medium);
+}
+
+.field-options label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-small);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-medium);
+  margin-top: var(--spacing-large);
+}
+
+.merge-button {
+  background: var(--primary-color);
+  color: white;
+}
+
+.cancel-button {
+  background: var(--background-light);
+}
+  @media (max-width: 768px) {
+    .merge-modal-content {
+      padding: 0;
+    }
+
+    .profiles-grid {
+      grid-template-columns: 1fr;
+      padding: var(--spacing-small);
+    }
+
+    .profile-column:first-child {
+      text-align: left;
+    }
+
+    .profile-column:last-child {
+      text-align: right;
+    }
+
+    .field-options {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .field-options label {
+      width: 100%;
+      display: flex;
+    }
+
+    .field-options label:first-child {
+      justify-content: flex-start;
+    }
+
+    .field-options label:last-child {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--spacing-small);
+    }
+
+    .field-options label:last-child span {
+      order: 1;
+    }
+
+    .field-options label:last-child input {
+      order: 2;
+    }
+  }
+  

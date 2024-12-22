@@ -198,6 +198,7 @@ export const createPayment = /* GraphQL */ `
     }
   }
 `;
+
 export const updatePayment = /* GraphQL */ `
   mutation UpdatePayment(
     $input: UpdatePaymentInput!
@@ -218,6 +219,7 @@ export const updatePayment = /* GraphQL */ `
     }
   }
 `;
+
 export const deletePayment = /* GraphQL */ `
   mutation DeletePayment(
     $input: DeletePaymentInput!

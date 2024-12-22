@@ -5,49 +5,38 @@ import AccountCard from './AccountCard';
 import AccountEditModal from './AccountEditModal';
 import './AccountManager.css';
 
-const AccountManager = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchType, setSearchType] = useState('accountId');
+const AccountManager = ({ searchState, setSearchState }) => {
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [searchResults, setSearchResults] = useState([]);
 
   const [searchAccounts] = useLazyQuery(SEARCH_ACCOUNTS);
   const [searchByOwner] = useLazyQuery(SEARCH_ACCOUNTS_BY_OWNER);
 
   const handleSearch = async () => {
-    if (!searchTerm) return;
-
-    let filter = {
-      or: []
-    };
-
-    switch(searchType) {
-      case 'accountId':
-        filter.or.push({ id: { contains: searchTerm } });
-        break;
-      case 'ownerId':
-        const ownerResponse = await searchByOwner({ 
-          variables: { accountOwnerId: searchTerm }
-        });
-        setSearchResults(ownerResponse.data?.accountByOwner?.items || []);
-        return;
-      case 'propertyId':
-        filter.or.push({
-          properties: {
-            some: {
-              id: { eq: searchTerm }
-            }
-          }
-        });
-        break;
-      default:
-        break;
-    }
+    if (!searchState.searchTerm) return;
 
     try {
-      const response = await searchAccounts({ variables: { filter } });
-      setSearchResults(response.data?.listAccounts?.items || []);
+      let response;
+      switch (searchState.searchType) {
+        case 'accountId':
+          response = await searchAccounts({
+            variables: { filter: { id: { contains: searchState.searchTerm } } }
+          });
+          setSearchState({
+            ...searchState,
+            searchResults: response.data?.listAccounts?.items || []
+          });
+          break;
+        case 'ownerId':
+          response = await searchByOwner({
+            variables: { accountOwnerId: searchState.searchTerm }
+          });
+          setSearchState({
+            ...searchState,
+            searchResults: response.data?.accountByOwner?.items || []
+          });
+          break;
+      }
     } catch (error) {
       console.error('Search error:', error);
     }
@@ -60,39 +49,43 @@ const AccountManager = () => {
 
   return (
     <div className="account-manager">
-      <h2 className="section-title">Account Search</h2>
+      <h2>Account Search</h2>
       <div className="search-controls">
         <select
-          value={searchType}
-          onChange={(e) => setSearchType(e.target.value)}
-          className="search-type"
+          value={searchState.searchType}
+          onChange={(e) => setSearchState({
+            ...searchState,
+            searchType: e.target.value
+          })}
         >
           <option value="accountId">Account ID</option>
           <option value="ownerId">Owner ID</option>
-          <option value="propertyId">Property ID</option>
         </select>
         <input
           type="text"
-          placeholder="Search Accounts"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={searchState.searchTerm}
+          onChange={(e) => setSearchState({
+            ...searchState,
+            searchTerm: e.target.value
+          })}
           onKeyPress={(e) => {
-            if (e.key === 'Enter') {
-              handleSearch();
-            }
+            if (e.key === 'Enter') handleSearch()
           }}
-          className="search-input"
+          placeholder="Search accounts..."
         />
-        <button onClick={handleSearch} className="search-button">Search</button>
+        <button onClick={handleSearch}>Search</button>
       </div>
-      
+
       <div className="accounts-grid">
-        {searchResults.map((account) => (
-          <AccountCard
-            key={account.id}
-            account={account}
-            onEdit={() => handleEdit(account)}
-          />
+        {searchState.searchResults.map((account) => (
+          <div key={account.id} className="account-card">
+            <h3>{account.accountName}</h3>
+            <p><strong>Account ID: {account.id}</strong></p>
+            <p>Owner ID: {account.accountOwnerId}</p>
+            <p>Balance: ${account.balance}</p>
+            <p>Billing Frequency: {account.billingFreq}</p>
+            <button onClick={() => handleEdit(account)}>Edit</button>
+          </div>
         ))}
       </div>
 
@@ -101,13 +94,12 @@ const AccountManager = () => {
           account={selectedAccount}
           show={showEditModal}
           onClose={() => {
-            setShowEditModal(false)
-            handleSearch(); // Refresh results after edit
+            setShowEditModal(false);
+            handleSearch();
           }}
         />
       )}
     </div>
   );
 };
-
 export default AccountManager;

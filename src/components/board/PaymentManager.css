@@ -1,0 +1,44 @@
+.payment-manager {
+  padding: var(--spacing-medium);
+}
+
+.payments-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-medium);
+  margin-top: var(--spacing-medium);
+}
+
+.payment-card {
+  background-color: var(--background-white);
+  border: var(--input-border);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-medium);
+  width: 100%;
+}
+
+.payment-edit-modal {
+  padding: var(--spacing-medium);
+}
+
+.payment-edit-modal .form-group {
+  margin-bottom: var(--spacing-medium);
+}
+
+.payment-edit-modal label {
+  display: block;
+  margin-bottom: var(--spacing-small);
+}
+
+.payment-edit-modal input {
+  width: 100%;
+  padding: var(--spacing-small);
+  border: var(--input-border);
+  border-radius: var(--border-radius);
+}
+
+.button-group {
+  display: flex;
+  gap: var(--spacing-medium);
+  margin-top: var(--spacing-medium);
+}

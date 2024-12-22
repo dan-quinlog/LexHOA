@@ -89,3 +89,25 @@ export const UPDATE_PAYMENT = gql`
     }
   }
 `;
+
+export const DELETE_PROFILE = gql`
+  mutation DeletePerson(
+    $input: DeletePersonInput!
+    $condition: ModelPersonConditionInput
+  ) {
+    deletePerson(input: $input, condition: $condition) {
+      id
+      cognitoID
+      name
+      email
+      address
+      city
+      state
+      zip
+      phone
+      allowText
+      contactPref
+      owner
+    }
+  }
+`;

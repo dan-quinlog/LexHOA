@@ -15,7 +15,6 @@
 }
 
 .search-type {
-  height: var(--input-height);
   padding: var(--input-padding);
   border: var(--input-border);
   border-radius: var(--border-radius);
@@ -23,7 +22,6 @@
 
 .search-input {
   flex-grow: 1;
-  height: var(--input-height);
   padding: var(--input-padding);
   border: var(--input-border);
   border-radius: var(--border-radius);

@@ -92,7 +92,7 @@ const PropertyManager = ({ searchState, setSearchState }) => {
           }}
           className="search-input"
         />
-        <button onClick={handleSearch} className="search-button">Search</button>
+        <button onClick={handleSearch} className="button">Search</button>
       </div>
       
       <div className="properties-grid">

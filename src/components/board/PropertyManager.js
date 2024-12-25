@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { useLazyQuery } from '@apollo/client';
-import { 
-  SEARCH_PROPERTIES, 
-  SEARCH_PROPERTIES_BY_ACCOUNT, 
-  SEARCH_PROPERTIES_BY_TENANT 
+import {
+  SEARCH_PROPERTIES,
+  SEARCH_PROPERTIES_BY_ACCOUNT,
+  SEARCH_PROPERTIES_BY_TENANT
 } from '../../queries/queries';
 import PropertyCard from './PropertyCard';
 import PropertyEditModal from './PropertyEditModal';
-import './PropertyManager.css';
+import './shared/BoardTools.css';
+import BoardCard from './shared/BoardCard';
 
 const PropertyManager = ({ searchState, setSearchState }) => {
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [properties, setProperties] = useState([]);
 
   const [searchProperties] = useLazyQuery(SEARCH_PROPERTIES);
   const [searchByAccount] = useLazyQuery(SEARCH_PROPERTIES_BY_ACCOUNT);
@@ -22,7 +24,7 @@ const PropertyManager = ({ searchState, setSearchState }) => {
 
     try {
       let response;
-      switch(searchState.searchType) {
+      switch (searchState.searchType) {
         case 'propertyId':
           response = await searchProperties({
             variables: { filter: { id: { contains: searchState.searchTerm } } }
@@ -61,9 +63,13 @@ const PropertyManager = ({ searchState, setSearchState }) => {
     setShowEditModal(true);
   };
 
+  const handleDelete = (property) => {
+    // Delete property logic
+  };
+
   return (
-    <div className="property-manager">
-      <h2 className="section-title">Property Search</h2>
+    <div className="board-tool">
+      <h1 className="section-title">Property Search</h1>
       <div className="search-controls">
         <select
           value={searchState.searchType}
@@ -94,17 +100,28 @@ const PropertyManager = ({ searchState, setSearchState }) => {
         />
         <button onClick={handleSearch} className="button">Search</button>
       </div>
-      
-      <div className="properties-grid">
-        {searchState.searchResults.map((property) => (
-          <PropertyCard
+
+      <div className="results-grid">
+        {searchState.searchResults.map(property => (
+          <BoardCard
             key={property.id}
-            property={property}
-            onEdit={() => handleEdit(property)}
+            header={<h3>Property #{property.id}</h3>}
+            content={
+              <>
+                <div>Owner: {property.owner}</div>
+                <div>Unit: {property.unit}</div>
+                <div>Address: {property.address}</div>
+              </>
+            }
+            actions={
+              <>
+                <button onClick={() => handleEdit(property)}>Edit</button>
+                <button onClick={() => handleDelete(property)}>Delete</button>
+              </>
+            }
           />
         ))}
       </div>
-
       {showEditModal && (
         <PropertyEditModal
           property={selectedProperty}
@@ -118,5 +135,4 @@ const PropertyManager = ({ searchState, setSearchState }) => {
     </div>
   );
 };
-
 export default PropertyManager;

@@ -1,49 +1,43 @@
-.account-manager {
-  padding: var(--spacing-large);
+/* Account balance display */
+.balance-display {
+  font-size: 1.4em;
+  font-weight: bold;
 }
 
-.section-title {
-  font-size: var(--header-font-size);
-  margin-bottom: var(--spacing-large);
-  color: var(--text-color);
+.balance-positive {
+  color: var(--success-color);
 }
 
-.search-controls {
-  display: flex;
-  gap: var(--spacing-medium);
-  margin-bottom: var(--spacing-large);
+.balance-negative {
+  color: var(--error-color);
 }
 
-.search-type {
-  padding: var(--input-padding);
-  border: var(--input-border);
+/* Transaction history */
+.transaction-list {
+  border-top: 1px solid var(--border-color);
+}
+
+.transaction-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  padding: var(--spacing-medium);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Account status indicator */
+.account-status {
+  display: inline-block;
+  padding: 4px 8px;
   border-radius: var(--border-radius);
+  font-size: 0.9em;
 }
 
-.search-input {
-  flex-grow: 1;
-  padding: var(--input-padding);
-  border: var(--input-border);
-  border-radius: var(--border-radius);
+.status-current {
+  background-color: var(--success-color);
+  color: white;
 }
 
-.search-button {
-  height: var(--input-height);
-  padding: 0 var(--spacing-large);
-  background-color: var(--primary-color);
-  color: var(--background-white);
-  border: none;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  transition: background-color var(--transition-fast);
+.status-overdue {
+  background-color: var(--error-color);
+  color: white;
 }
-
-.search-button:hover {
-  background-color: var(--hover-color);
-}
-  .accounts-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-    gap: var(--spacing-large);
-    margin: 0 calc(-1 * var(--spacing-medium));
-  }

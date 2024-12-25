@@ -1,100 +1,83 @@
-.person-manager {
-  padding: var(--spacing-large);
-}
-
-.search-section {
-  margin-bottom: var(--spacing-xl);
-}
-  .search-controls {
-    display: flex;
-    gap: var(--spacing-medium);
-    align-items: center;
-  }
-
-  .search-controls input,
-  .search-controls select {
-    padding: var(--spacing-small);
-    border: var(--input-border);
-    border-radius: var(--border-radius);
-  }
-
-  .search-controls button.merge-button {
-    background-color: #cccccc;
-    color: #666666;
-    border: none;
-    padding: var(--spacing-small) var(--spacing-medium);
-    border-radius: var(--border-radius);
-    transition: background-color 0.3s ease;
-  }
-
-  .search-controls button.merge-button:enabled {
-    background-color: var(--primary-color);
-    color: white;
-    cursor: pointer;
-  }
-
-  @media (max-width: 768px) {
-    .search-controls {
-      flex-direction: column;
-    }
-
-    .search-controls button.merge-button {
-      display: none;
-    }
-
-    .search-controls button.merge-button:enabled {
-      display: block;
-      width: 100%;
-      margin-top: var(--spacing-medium);
-    }
-  }.search-box {
-  display: flex;
-  gap: var(--spacing-small);
-  margin-top: var(--spacing-medium);
-}
-
-.search-box input {
-  flex: 1;
-  padding: var(--spacing-small);
-  border: var(--input-border);
-  border-radius: var(--border-radius);
-}
-
-.search-box button {
+/* Unique merge button styling */
+.search-controls button.merge-button {
+  background-color: #cccccc;
+  color: #666666;
+  border: none;
   padding: var(--spacing-small) var(--spacing-medium);
-  background-color: var(--primary-color);
-  color: var(--background-white);
   border-radius: var(--border-radius);
-  transition: background-color var(--transition-fast) ease;
+  transition: background-color 0.3s ease;
 }
 
-.search-box button:disabled {
-  background-color: var(--secondary-color);
+.search-controls button.merge-button:enabled {
+  background-color: var(--primary-color);
+  color: white;
+  cursor: pointer;
 }
 
+/* Profile specific styling */
 .profile-section {
   background-color: var(--background-white);
   border-radius: var(--border-radius);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   padding: var(--spacing-large);
 }
-  .profile-card {
-    background-color: var(--background-white);
-    border: var(--input-border);
-    border-radius: var(--border-radius);
-    padding: var(--spacing-medium);
-    margin-bottom: var(--spacing-medium);
-    width: 100%;
+
+.profile-card {
+  background-color: var(--background-white);
+  border: var(--input-border);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-medium);
+  margin-bottom: var(--spacing-medium);
+  width: 100%;
+}
+
+/* Mobile responsiveness for merge functionality */
+@media (max-width: 768px) {
+  .search-controls button.merge-button {
+    display: none;
   }
 
-  .search-results {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-medium);
-    background-color: var(--background-white);
-    padding: var(--spacing-medium);
+  .search-controls button.merge-button:enabled {
+    display: block;
+    width: 100%;
+    margin-top: var(--spacing-medium);
   }
-.error-message {
-  color: var(--error-color);
-  margin-top: var(--spacing-small);
+}
+
+.selected-profiles-section {
+  margin: var(--spacing-large) 0;
+  padding: var(--spacing-medium);
+  background-color: var(--background-light);
+  border-radius: var(--border-radius);
+}
+
+.selected-profiles-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-small);
+}
+
+.selected-profile-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-small);
+}
+
+.remove-profile {
+  padding: 4px 8px;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--error-color);
+  color: white;
+  cursor: pointer;
+}
+
+.apply-merge-button {
+  margin-top: var(--spacing-medium);
+  padding: var(--spacing-small) var(--spacing-medium);
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
 }

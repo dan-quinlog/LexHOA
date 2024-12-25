@@ -1,0 +1,104 @@
+/* Common Layout */
+.board-tool {
+  padding: var(--spacing-large);
+}
+
+.section-title {
+  font-size: var(--header-font-size);
+  margin-bottom: var(--spacing-large);
+  color: var(--text-color);
+}
+
+/* Search Controls */
+.search-controls {
+  display: flex;
+  gap: var(--spacing-medium);
+  margin-bottom: var(--spacing-large);
+}
+
+.search-type {
+  padding: var(--input-padding);
+  border: var(--input-border);
+  border-radius: var(--border-radius);
+}
+
+.search-input {
+  flex-grow: 1;
+  padding: var(--input-padding);
+  border: var(--input-border);
+  border-radius: var(--border-radius);
+}
+
+.search-button {
+  height: var(--input-height);
+  padding: 0 var(--spacing-large);
+  background-color: var(--primary-color);
+  color: var(--background-white);
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.search-button:hover {
+  background-color: var(--hover-color);
+}
+
+/* Results Display */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: var(--spacing-large);
+}
+
+/* Common Card Styles */
+.item-card {
+  background-color: var(--background-white);
+  border: var(--card-border);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-large);
+  margin-bottom: var(--spacing-medium);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-small);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-medium);
+}
+
+.card-content {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-medium);
+}
+
+.card-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-medium);
+  margin-top: var(--spacing-medium);
+}
+
+/* Action Buttons */
+.action-button {
+  padding: var(--spacing-small) var(--spacing-medium);
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.edit-button {
+  background-color: var(--secondary-color);
+  color: var(--background-white);
+}
+
+.delete-button {
+  background-color: var(--danger-color);
+  color: var(--background-white);
+}

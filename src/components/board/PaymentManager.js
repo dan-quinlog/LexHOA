@@ -3,6 +3,13 @@ import { useLazyQuery } from '@apollo/client';
 import { SEARCH_PAYMENTS, SEARCH_PAYMENTS_BY_OWNER } from '../../queries/queries';
 import PaymentCard from './PaymentCard';
 import PaymentEditModal from './PaymentEditModal';
+import BoardCard from './shared/BoardCard';
+import './PaymentManager.css';
+import './shared/BoardTools.css';
+
+const handleDelete = (payment) => {
+  console.log('Deleting payment:', payment.id);
+};
 
 const PaymentManager = ({ searchState, setSearchState }) => {
   const [selectedPayment, setSelectedPayment] = useState(null);
@@ -16,11 +23,11 @@ const PaymentManager = ({ searchState, setSearchState }) => {
 
     try {
       let response;
-      switch(searchState.searchType) {
+      switch (searchState.searchType) {
         case 'paymentId':
           response = await searchPayments({
-            variables: { 
-              filter: { 
+            variables: {
+              filter: {
                 id: { eq: searchState.searchTerm }
               }
             }
@@ -50,9 +57,17 @@ const PaymentManager = ({ searchState, setSearchState }) => {
     setShowEditModal(true);
   };
 
+  const handleProcess = (payment) => {
+    // Payment processing logic
+  };
+
+  const handleView = (payment) => {
+    // View details logic
+  };
+
   return (
-    <div className="payment-manager">
-      <h2>Payment Search</h2>
+    <div className="board-tool">
+      <h1 className="section-title">Payment Search</h1>
       <div className="search-controls">
         <select
           value={searchState.searchType}
@@ -66,6 +81,7 @@ const PaymentManager = ({ searchState, setSearchState }) => {
         </select>
         <input
           type="text"
+          className="search-input"
           value={searchState.searchTerm}
           onChange={(e) => setSearchState({
             ...searchState,
@@ -78,17 +94,28 @@ const PaymentManager = ({ searchState, setSearchState }) => {
         />
         <button onClick={handleSearch}>Search</button>
       </div>
-
-      <div className="payments-grid">
-        {searchState.searchResults.map((payment) => (
-          <PaymentCard
+      <div className="results-grid">
+        {searchState.searchResults.map(payment => (
+          <BoardCard
             key={payment.id}
-            payment={payment}
-            onEdit={() => handleEdit(payment)}
+            header={<h3>Payment #{payment.id}</h3>}
+            content={
+              <>
+                <div>Entered On: {payment.createdAt}</div>
+                <div>Check Date: {payment.checkDate}</div>
+                <div>Check Amount: ${payment.amount}</div>
+                <div>Owner ID: {payment.ownerID}</div>
+              </>
+            }
+            actions={
+              <>
+                <button onClick={() => handleEdit(payment)}>Edit</button>
+                <button onClick={() => handleDelete(payment)}>Delete</button>
+              </>
+            }
           />
         ))}
       </div>
-
       {showEditModal && (
         <PaymentEditModal
           payment={selectedPayment}
@@ -104,3 +131,4 @@ const PaymentManager = ({ searchState, setSearchState }) => {
 };
 
 export default PaymentManager;
+

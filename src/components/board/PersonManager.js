@@ -9,13 +9,15 @@ import {
 } from '../../queries/queries';
 import ProfileEditForm from '../forms/ProfileEditForm';
 import Modal from '../shared/Modal';
+import BoardCard from './shared/BoardCard';
 import './PersonManager.css';
+import './shared/BoardTools.css';
+
 import MergeProfilesModal from './MergeProfilesModal';
 const PersonManager = ({ searchState, setSearchState }) => {
   const [showModal, setShowModal] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [errors, setErrors] = useState({});
-  // Add new state for selected profiles
   const [selectedProfiles, setSelectedProfiles] = useState([]);
   const [showMergeModal, setShowMergeModal] = useState(false);
 
@@ -25,12 +27,18 @@ const PersonManager = ({ searchState, setSearchState }) => {
   const [searchById] = useLazyQuery(SEARCH_PEOPLE_BY_ID);
   const [searchByCognito] = useLazyQuery(SEARCH_PEOPLE_BY_COGNITO);
 
+  const handleDelete = (person) => {
+    // Delete person logic will be implemented here
+    console.log('Deleting person:', person.id);
+  };
+  
   const handleSearch = async () => {
     setErrors({});
     if (!searchState.searchValue) {
       setErrors({ search: 'Search value is required' });
       return;
     }
+
 
     try {
       let response;
@@ -82,7 +90,6 @@ const PersonManager = ({ searchState, setSearchState }) => {
     setShowModal(true);
   };
 
-  // Add handler for profile selection
   const handleProfileSelect = (profile) => {
     if (selectedProfiles.find(p => p.id === profile.id)) {
       setSelectedProfiles(selectedProfiles.filter(p => p.id !== profile.id));
@@ -91,10 +98,41 @@ const PersonManager = ({ searchState, setSearchState }) => {
     }
   };
 
+  const SelectedProfilesSection = () => {
+    if (selectedProfiles.length === 0) return null;
+
+    return (
+      <div className="selected-profiles-section">
+        <h3>Selected Profiles for Merge</h3>
+        <div className="selected-profiles-list">
+          {selectedProfiles.map(profile => (
+            <div key={profile.id} className="selected-profile-item">
+              <button
+                className="remove-profile"
+                onClick={() => handleProfileSelect(profile)}
+              >
+                X
+              </button>
+              <span>{profile.name} (ID: {profile.id})</span>
+            </div>
+          ))}
+        </div>
+        {selectedProfiles.length === 2 && (
+          <button
+            className="apply-merge-button"
+            onClick={() => setShowMergeModal(true)}
+          >
+            Apply Merge
+          </button>
+        )}
+      </div>
+    );
+  };
+
   return (
-    <div className="person-manager">
+    <div className="board-tool">
       <div className="search-section">
-        <h2>Person Search</h2>
+        <h1 className="section-title">Person Search</h1>
         <div className="search-controls">
           <select
             value={searchState.searchType}
@@ -111,6 +149,7 @@ const PersonManager = ({ searchState, setSearchState }) => {
           </select>
           <input
             type="text"
+            className="search-input"
             value={searchState.searchValue}
             onChange={(e) => setSearchState({
               ...searchState,
@@ -124,38 +163,38 @@ const PersonManager = ({ searchState, setSearchState }) => {
             placeholder={`Search by ${searchState.searchType}...`}
           />
           <button onClick={handleSearch}>Search</button>
-          <button
-            className="merge-button"
-            disabled={selectedProfiles.length !== 2}
-            onClick={() => setShowMergeModal(true)}
-          >
-            Merge Selected Profiles
-          </button>
         </div>
         {errors.search && <div className="error-message">{errors.search}</div>}
       </div>
-      
-      <div className="search-results">
-        {searchState.searchResults.map((profile) => (
-          <div key={profile.id} className="profile-card">
-            <div className="profile-header">
-              <input
-                type="checkbox"
-                checked={selectedProfiles.some(p => p.id === profile.id)}
-                onChange={() => handleProfileSelect(profile)}
-              />
-              <h3>{profile.name}</h3>
-            </div>
-            <p>ID: {profile.id}</p>
-            <p>Cognito ID: {profile.cognitoID}</p>
-            <p>{profile.email}</p>
-            <p>{profile.address}</p>
-            <p>{profile.phone}</p>
-            <button onClick={() => handleEdit(profile)}>Edit</button>
-          </div>
+      <SelectedProfilesSection />
+      <div className="results-grid">
+        {searchState.searchResults.map(person => (
+          <BoardCard
+            key={person.id}
+            header={<h3>{person.name}</h3>}
+            content={
+              <>
+                <div>Cognito ID: {person.cognitoID}</div>
+                <div>Email: {person.email}</div>
+                <div>Phone: {person.phone}</div>
+                <div>Role: {person.role}</div>
+              </>
+            }
+            status={person.status}
+            actions={
+              <>
+                <button onClick={() => handleEdit(person)}>Edit</button>
+                <button onClick={() => handleDelete(person)}>Delete</button>
+                <button onClick={() => handleProfileSelect(person)}>
+                  {selectedProfiles.find(p => p.id === person.id)
+                    ? 'Unselect'
+                    : 'Select for Merge'}
+                </button>
+              </>
+            }
+          />
         ))}
       </div>
-
       {showModal && (
         <Modal onClose={() => setShowModal(false)}>
           <ProfileEditForm
@@ -183,4 +222,6 @@ const PersonManager = ({ searchState, setSearchState }) => {
       )}
     </div>
   );
-};export default PersonManager;
+};
+
+export default PersonManager;

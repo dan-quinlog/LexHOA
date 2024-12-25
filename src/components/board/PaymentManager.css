@@ -1,44 +1,35 @@
-.payment-manager {
-  padding: var(--spacing-medium);
+/* Payment amount display */
+.payment-amount {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: var(--success-color);
 }
 
-.payments-grid {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-medium);
-  margin-top: var(--spacing-medium);
-}
-
-.payment-card {
-  background-color: var(--background-white);
-  border: var(--input-border);
+/* Status indicators */
+.payment-status {
+  display: inline-block;
+  padding: 4px 8px;
   border-radius: var(--border-radius);
-  padding: var(--spacing-medium);
-  width: 100%;
+  font-size: 0.9em;
 }
 
-.payment-edit-modal {
-  padding: var(--spacing-medium);
+.status-pending {
+  background-color: #ffd700;
+  color: #000;
 }
 
-.payment-edit-modal .form-group {
-  margin-bottom: var(--spacing-medium);
+.status-completed {
+  background-color: var(--success-color);
+  color: white;
 }
 
-.payment-edit-modal label {
-  display: block;
-  margin-bottom: var(--spacing-small);
+.status-failed {
+  background-color: var(--error-color);
+  color: white;
 }
 
-.payment-edit-modal input {
-  width: 100%;
-  padding: var(--spacing-small);
-  border: var(--input-border);
-  border-radius: var(--border-radius);
-}
-
-.button-group {
-  display: flex;
-  gap: var(--spacing-medium);
-  margin-top: var(--spacing-medium);
+/* Transaction date formatting */
+.transaction-date {
+  font-size: 0.9em;
+  color: var(--text-secondary);
 }

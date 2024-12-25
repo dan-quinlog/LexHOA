@@ -6,6 +6,7 @@ import DeleteConfirmModal from '../modals/DeleteConfirmModal';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.bubble.css';
 import './BulletinManager.css';
+import './shared/BoardTools.css';
 
 const BulletinManager = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -59,10 +60,10 @@ const BulletinManager = () => {
   };
 
   return (
-    <div className="bulletin-manager">
+    <div className="board-tool">
       <div className="bulletin-header">
-        <h2>Bulletin Management</h2>
-        <button onClick={() => setModalOpen(true)}>Create Bulletin</button>
+        <h1 className="section-title">Bulletin Management</h1>
+        <button className="search-controls" onClick={() => setModalOpen(true)}>Create Bulletin</button>
       </div>
       <div className="bulletin-list">
         {data?.bulletinsByDate.items.map((bulletin, index) => (

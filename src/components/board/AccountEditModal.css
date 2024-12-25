@@ -34,7 +34,6 @@
   padding: var(--input-padding);
   border: var(--input-border);
   border-radius: var(--border-radius);
-  height: var(--input-height);
 }
 
 .form-group input:focus {

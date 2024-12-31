@@ -98,7 +98,11 @@ const PropertyManager = ({ searchState, setSearchState }) => {
           }}
           className="search-input"
         />
-        <button onClick={handleSearch} className="button">Search</button>
+        <button onClick={handleSearch}>Search</button>
+        <button onClick={() => {
+          setSelectedProperty(null);
+          setShowEditModal(true);
+        }}>Create New</button>
       </div>
 
       <div className="results-grid">

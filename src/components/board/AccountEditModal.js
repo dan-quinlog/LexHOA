@@ -10,12 +10,12 @@ const BILLING_OPTIONS = [
   { value: 'ANNUAL', label: 'Annually' }
 ];
 
-const AccountEditModal = ({ account, show, onClose }) => {
+const AccountEditModal = ({ account, onClose, show }) => {
   const [formData, setFormData] = useState({
-    id: account.id,
-    accountName: account.accountName,
-    billingFreq: account.billingFreq,
-    balance: account.balance
+    accountOwnerID: account?.accountOwnerID || '',
+    balance: account?.balance || 0,
+    billingFrequency: account?.billingFrequency || '',
+    status: account?.status || 'ACTIVE'
   });
 
   const [updateAccount] = useMutation(UPDATE_ACCOUNT);
@@ -94,8 +94,10 @@ const AccountEditModal = ({ account, show, onClose }) => {
           />
         </div>
         <div className="modal-actions">
-          <button className="cancel-button" onClick={onClose}>Cancel</button>
-          <button className="save-button" onClick={handleSubmit}>Save</button>
+          <button onClick={handleSubmit}>
+            {account?.id ? 'Save' : 'Create'}
+          </button>
+          <button onClick={onClose}>Cancel</button>
         </div>
       </div>
     </div>

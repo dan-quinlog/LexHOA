@@ -3,7 +3,7 @@ import { useQuery, useMutation } from '@apollo/client';
 import { GET_PROFILE } from '../../queries/queries';
 import './Profile.css';
 import ProfileDisplay from '../../components/user/ProfileDisplay';
-import ProfileEditForm from '../../components/forms/ProfileEditForm';
+import ProfileEditForm from '../../components/board/ProfileEditForm';
 import NotificationModal from '../../components/modals/NotificationModal';
 
 const Profile = ({ cognitoId }) => {

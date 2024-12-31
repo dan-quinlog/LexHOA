@@ -3,13 +3,13 @@ import { useMutation } from '@apollo/client';
 import { UPDATE_PROPERTY } from '../../queries/mutations';
 import './PropertyEditModal.css';
 
-const PropertyEditModal = ({ property, show, onClose }) => {
+const PropertyEditModal = ({ property, onClose }) => {
   const modalRef = useRef(null);
   const [formData, setFormData] = useState({
-    id: property.id,
-    address: property.address,
-    accountPropertiesId: property.accountPropertiesId,
-    propertyTenantId: property.propertyTenantId
+    id: property?.id,
+    address: property?.address || '',
+    accountPropertiesId: property?.accountPropertiesId || '',
+    propertyTenantId: property?.propertyTenantId || ''
   });
 
   const [updateProperty] = useMutation(UPDATE_PROPERTY);
@@ -47,10 +47,12 @@ const PropertyEditModal = ({ property, show, onClose }) => {
     }
   };
 
+  const isCreating = !property?.id;
+
   return (
     <div className="modal-overlay">
       <div className="modal-content" ref={modalRef}>
-        <h2>Edit Property</h2>
+        <h2>{isCreating ? 'Create New' : 'Edit'} Property</h2>
         <div className="form-group">
           <label>Address</label>
           <input
@@ -79,8 +81,10 @@ const PropertyEditModal = ({ property, show, onClose }) => {
           />
         </div>
         <div className="modal-actions">
-          <button className="cancel-button" onClick={onClose}>Cancel</button>
-          <button className="save-button" onClick={handleSubmit}>Save</button>
+          <button onClick={handleSubmit}>
+            {property?.id ? 'Save' : 'Create'}
+          </button>
+          <button onClick={onClose}>Cancel</button>
         </div>
       </div>
     </div>

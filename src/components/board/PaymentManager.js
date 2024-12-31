@@ -93,6 +93,10 @@ const PaymentManager = ({ searchState, setSearchState }) => {
           placeholder="Search payments..."
         />
         <button onClick={handleSearch}>Search</button>
+        <button onClick={() => {
+          setSelectedPayment(null)
+          setShowEditModal(true)
+        }}>Create New</button>
       </div>
       <div className="results-grid">
         {searchState.searchResults.map(payment => (

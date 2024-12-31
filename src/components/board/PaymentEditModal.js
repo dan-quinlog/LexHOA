@@ -3,14 +3,13 @@ import { useMutation } from '@apollo/client';
 import { UPDATE_PAYMENT } from '../../queries/mutations';
 import Modal from '../shared/Modal';
 
-const PaymentEditModal = ({ payment, show, onClose }) => {
+const PaymentEditModal = ({ payment, onClose, show }) => {
   const [formData, setFormData] = useState({
-    checkDate: payment.checkDate || '',
-    checkNumber: payment.checkNumber || '',
-    checkAmount: payment.checkAmount || '',
-    invoiceNumber: payment.invoiceNumber || '',
-    invoiceAmount: payment.invoiceAmount || '',
-    ownerPaymentsId: payment.ownerPaymentsId || ''
+    checkDate: payment?.checkDate || '',
+    checkNumber: payment?.checkNumber || '',
+    amount: payment?.amount || '',
+    ownerID: payment?.ownerID || '',
+    notes: payment?.notes || ''
   });
 
   const [updatePayment] = useMutation(UPDATE_PAYMENT);
@@ -102,9 +101,11 @@ const PaymentEditModal = ({ payment, show, onClose }) => {
               disabled
             />
           </div>
-          <div className="button-group">
-            <button type="submit">Save Changes</button>
-            <button type="button" onClick={onClose}>Cancel</button>
+          <div className="modal-actions">
+            <button onClick={handleSubmit}>
+              {payment?.id ? 'Save' : 'Create'}
+            </button>
+            <button onClick={onClose}>Cancel</button>
           </div>
         </form>
       </div>

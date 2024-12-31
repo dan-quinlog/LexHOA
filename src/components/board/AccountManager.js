@@ -83,6 +83,10 @@ const AccountManager = ({ searchState, setSearchState }) => {
             placeholder="Search accounts..."
           />
           <button onClick={handleSearch}>Search</button>
+          <button onClick={() => {
+            setSelectedAccount(null)
+            setShowEditModal(true)
+          }}>Create New</button>
         </div>
           <div className="results-grid">
             {searchState.searchResults.map(account => (

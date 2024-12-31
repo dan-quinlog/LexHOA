@@ -7,7 +7,7 @@ import {
   SEARCH_PEOPLE_BY_ID,
   SEARCH_PEOPLE_BY_COGNITO
 } from '../../queries/queries';
-import ProfileEditForm from '../forms/ProfileEditForm';
+import ProfileEditForm from './ProfileEditForm';
 import Modal from '../shared/Modal';
 import BoardCard from './shared/BoardCard';
 import './PersonManager.css';

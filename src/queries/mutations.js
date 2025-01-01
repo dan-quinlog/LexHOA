@@ -90,24 +90,46 @@ export const UPDATE_PAYMENT = gql`
   }
 `;
 
-export const DELETE_PROFILE = gql`
-  mutation DeletePerson(
-    $input: DeletePersonInput!
-    $condition: ModelPersonConditionInput
-  ) {
-    deletePerson(input: $input, condition: $condition) {
+export const CREATE_PERSON = gql`
+  mutation CreatePerson($input: CreatePersonInput!) {
+    createPerson(input: $input) {
       id
-      cognitoID
       name
       email
-      address
-      city
-      state
-      zip
       phone
-      allowText
-      contactPref
-      owner
+      role
+      status
+      cognitoID
+    }
+  }
+`;
+
+export const UPDATE_PERSON = gql`
+  mutation UpdatePerson($input: UpdatePersonInput!) {
+    updatePerson(input: $input) {
+      id
+      name
+      email
+      phone
+      role
+      status
+      cognitoID
+    }
+  }
+`;
+
+export const DELETE_PERSON = gql`
+  mutation DeletePerson($input: DeletePersonInput!) {
+    deletePerson(input: $input) {
+      id
+    }
+  }
+`;
+
+export const DELETE_PROFILE = gql`
+  mutation DeleteProfile($input: DeleteProfileInput!) {
+    deleteProfile(input: $input) {
+      id
     }
   }
 `;

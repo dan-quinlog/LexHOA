@@ -286,3 +286,17 @@ export const SEARCH_PEOPLE_BY_COGNITO = gql`
     }
   }
 `;
+
+export const SEARCH_PERSONS = gql`
+  query SearchPersons($searchType: String!, $searchTerm: String!) {
+    searchPersons(searchType: $searchType, searchTerm: $searchTerm) {
+      id
+      name
+      email
+      phone
+      role
+      status
+      cognitoID
+    }
+  }
+`;

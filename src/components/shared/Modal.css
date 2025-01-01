@@ -41,3 +41,13 @@
     cursor: pointer;
     transition: color var(--transition-fast) ease;
 }
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  box-sizing: border-box;
+  height: 38px;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}

@@ -1,4 +1,3 @@
-/* Custom button styling */
 .cancel-button,
 .save-button {
   padding: var(--spacing-small) var(--spacing-medium);
@@ -18,10 +17,4 @@
 
 .save-button:hover {
   background-color: var(--hover-color);
-}
-
-/* Focus states */
-.form-group input:focus {
-  border-color: var(--input-focus-color);
-  outline: none;
 }

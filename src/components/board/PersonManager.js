@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { useLazyQuery, useMutation } from '@apollo/client';
-import { 
+import {
   SEARCH_PEOPLE_BY_EMAIL,
   SEARCH_PEOPLE_BY_NAME,
   SEARCH_PEOPLE_BY_PHONE,
   SEARCH_PEOPLE_BY_ID,
-  SEARCH_PEOPLE_BY_COGNITO 
+  SEARCH_PEOPLE_BY_COGNITO
 } from '../../queries/queries';
 import { CREATE_PERSON, UPDATE_PERSON, DELETE_PERSON } from '../../queries/mutations';
-import PersonEditModal from './PersonEditModal';
 import BoardCard from './shared/BoardCard';
+import PersonEditModal from './PersonEditModal';
+import DeleteConfirmationModal from '../shared/DeleteConfirmationModal';
 import './PersonManager.css';
 import './shared/BoardTools.css';
 
@@ -31,15 +32,23 @@ const PersonManager = ({ searchState, setSearchState }) => {
   // Add mutations
   const [createPerson] = useMutation(CREATE_PERSON);
   const [updatePerson] = useMutation(UPDATE_PERSON);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [personToDelete, setPersonToDelete] = useState(null);
   const [deletePerson] = useMutation(DELETE_PERSON);
 
-  // Add handlers
-  const handleDelete = async (person) => {
+  const handleDelete = (person) => {
+    setPersonToDelete(person);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
     try {
       await deletePerson({
-        variables: { input: { id: person.id } }
+        variables: { input: { id: personToDelete.id } }
       });
-      // Update cache/state as needed
+      setShowDeleteModal(false);
+      setPersonToDelete(null);
+      handleSearch(); // Refresh the list
     } catch (error) {
       console.error('Error deleting person:', error);
     }
@@ -161,18 +170,18 @@ const PersonManager = ({ searchState, setSearchState }) => {
             header={<h3>{person.name}</h3>}
             content={
               <>
+                <div>Account ID: {person.id}</div>
                 <div>Cognito ID: {person.cognitoID}</div>
                 <div>Email: {person.email}</div>
                 <div>Phone: {person.phone}</div>
-                <div>Role: {person.role}</div>
               </>
             }
             status={person.status}
             actions={
               <>
                 <button onClick={() => {
-                  setSelectedPerson(person);
-                  setShowEditModal(true);
+                  setSelectedPerson(person)
+                  setShowEditModal(true)
                 }}>Edit</button>
                 <button onClick={() => handleDelete(person)}>Delete</button>
                 <button onClick={() => handleProfileSelect(person)}>
@@ -183,7 +192,6 @@ const PersonManager = ({ searchState, setSearchState }) => {
           />
         ))}
       </div>
-
       {showEditModal && (
         <PersonEditModal
           person={selectedPerson}
@@ -203,7 +211,16 @@ const PersonManager = ({ searchState, setSearchState }) => {
           }}
         />
       )}
+      {showDeleteModal && (
+        <DeleteConfirmationModal
+          id={personToDelete?.id}
+          onConfirm={confirmDelete}
+          onClose={() => setShowDeleteModal(false)}
+        />
+      )}
     </div>
   );
 };
 export default PersonManager;
+
+

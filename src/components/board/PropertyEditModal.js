@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useMutation } from '@apollo/client';
-import { UPDATE_PROPERTY } from '../../queries/mutations';
+import { CREATE_PROPERTY, UPDATE_PROPERTY } from '../../queries/mutations';
 import './PropertyEditModal.css';
 
 const PropertyEditModal = ({ property, onClose }) => {
@@ -13,6 +13,7 @@ const PropertyEditModal = ({ property, onClose }) => {
   });
 
   const [updateProperty] = useMutation(UPDATE_PROPERTY);
+  const [createProperty] = useMutation(CREATE_PROPERTY);
 
   const handleClickOutside = (event) => {
     if (modalRef.current && !modalRef.current.contains(event.target)) {
@@ -27,24 +28,29 @@ const PropertyEditModal = ({ property, onClose }) => {
     };
   }, []);
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
   const handleSubmit = async () => {
-    try {
-      await updateProperty({
-        variables: {
-          input: formData
-        }
-      });
-      onClose();
-    } catch (err) {
-      console.error('Error updating property:', err);
+    if (!formData.address) {
+      console.log('Address is required');
+      return;
     }
+
+    const input = Object.entries(formData).reduce((acc, [key, value]) => {
+      if (value !== '' && value !== null && value !== undefined) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
+
+    if (property?.id) {
+      await updateProperty({
+        variables: { input: { id: property.id, ...input } }
+      });
+    } else {
+      await createProperty({
+        variables: { input }
+      });
+    }
+    onClose();
   };
 
   const isCreating = !property?.id;
@@ -53,32 +59,45 @@ const PropertyEditModal = ({ property, onClose }) => {
     <div className="modal-overlay">
       <div className="modal-content" ref={modalRef}>
         <h2>{isCreating ? 'Create New' : 'Edit'} Property</h2>
-        <div className="form-group">
-          <label>Address</label>
-          <input
-            type="text"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-          />
-        </div>
-        <div className="form-group">
-          <label>Account ID</label>
-          <input
-            type="text"
-            name="accountPropertiesId"
-            value={formData.accountPropertiesId}
-            onChange={handleChange}
-          />
-        </div>
-        <div className="form-group">
-          <label>Tenant ID</label>
-          <input
-            type="text"
-            name="propertyTenantId"
-            value={formData.propertyTenantId}
-            onChange={handleChange}
-          />
+        <div className="form-container">
+          <div className="form-section">
+            <div className="form-group">
+              <label>Property ID</label>
+              <input 
+                type="text" 
+                value={formData.id} 
+                disabled={!!property?.id}
+                onChange={(e) => setFormData({ ...formData, id: e.target.value })} 
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Account ID</label>
+              <input 
+                type="text" 
+                value={formData.accountPropertiesId} 
+                onChange={(e) => setFormData({ ...formData, accountPropertiesId: e.target.value })} 
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Tenant ID</label>
+              <input 
+                type="text" 
+                value={formData.propertyTenantId} 
+                onChange={(e) => setFormData({ ...formData, propertyTenantId: e.target.value })} 
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Address*</label>
+              <input 
+                type="text" 
+                value={formData.address} 
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })} 
+              />
+            </div>
+          </div>
         </div>
         <div className="modal-actions">
           <button onClick={handleSubmit}>

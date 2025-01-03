@@ -1,0 +1,48 @@
+.delete-confirmation {
+  padding: var(--spacing-large);
+  text-align: center;
+}
+
+.delete-confirmation h2 {
+  color: var(--text-color);
+  margin-bottom: var(--spacing-medium);
+}
+
+.delete-confirmation p {
+  margin-bottom: var(--spacing-medium);
+}
+
+.delete-confirmation input {
+  width: 100%;
+  padding: var(--input-padding);
+  border: var(--input-border);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--spacing-large);
+}
+  .delete-confirmation .modal-actions {
+    display: flex;
+    gap: var(--spacing-medium);
+    justify-content: center;
+  }
+
+  .delete-confirmation .modal-actions button {
+    padding: var(--spacing-medium) var(--spacing-large);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+  }
+
+  .delete-confirmation .modal-actions button:first-child {
+    background-color: var(--primary-color);
+    color: var(--background-white);
+    border: none;
+  }
+
+  .delete-confirmation .modal-actions button:last-child {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+  }
+
+  .delete-confirmation .modal-actions button:hover {
+    background-color: var(--hover-color);
+  }

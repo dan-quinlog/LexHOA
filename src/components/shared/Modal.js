@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import './Modal.css';
 
-const Modal = ({ children, onClose }) => {
+const Modal = ({ children, onClose, show }) => {
   const modalRef = useRef();
 
   useEffect(() => {
@@ -14,6 +14,8 @@ const Modal = ({ children, onClose }) => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose]);
+
+  if (!show) return null;
 
   return (
     <div className="modal-overlay">

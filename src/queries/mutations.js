@@ -97,9 +97,13 @@ export const CREATE_PERSON = gql`
       name
       email
       phone
-      role
-      status
       cognitoID
+      address
+      city
+      state
+      zip
+      allowText
+      contactPref
     }
   }
 `;
@@ -129,6 +133,66 @@ export const DELETE_PERSON = gql`
 export const DELETE_PROFILE = gql`
   mutation DeleteProfile($input: DeleteProfileInput!) {
     deleteProfile(input: $input) {
+      id
+    }
+  }
+`;
+
+export const CREATE_ACCOUNT = gql`
+  mutation CreateAccount($input: CreateAccountInput!) {
+    createAccount(input: $input) {
+      id
+      accountOwnerId
+      balance
+      billingFreq
+    }
+  }
+`;
+
+export const CREATE_PROPERTY = gql`
+  mutation CreateProperty($input: CreatePropertyInput!) {
+    createProperty(input: $input) {
+      id
+      address
+      accountPropertiesId
+      propertyTenantId
+    }
+  }
+`;
+
+export const CREATE_PAYMENT = gql`
+  mutation CreatePayment($input: CreatePaymentInput!) {
+    createPayment(input: $input) {
+      id
+      checkNumber
+      checkDate
+      checkAmount
+      invoiceNumber
+      invoiceAmount
+      ownerPaymentsId
+    }
+  }
+`;
+
+export const DELETE_ACCOUNT = gql`
+  mutation DeleteAccount($input: DeleteAccountInput!) {
+    deleteAccount(input: $input) {
+      id
+    }
+  }
+`;
+
+export const DELETE_PROPERTY = gql`
+  mutation DeleteProperty($input: DeletePropertyInput!) {
+    deleteProperty(input: $input) {
+      id
+    }
+  }
+`;
+
+export const DELETE_PAYMENT = gql`
+  mutation DeletePayment($input: DeletePaymentInput!) {
+    deletePayment(input: $input) {
       id
     }
   }

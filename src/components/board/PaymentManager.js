@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
-import { useLazyQuery } from '@apollo/client';
+import { useLazyQuery, useMutation } from '@apollo/client';
 import { SEARCH_PAYMENTS, SEARCH_PAYMENTS_BY_OWNER } from '../../queries/queries';
+import { DELETE_PAYMENT } from '../../queries/mutations';
 import PaymentCard from './PaymentCard';
 import PaymentEditModal from './PaymentEditModal';
 import BoardCard from './shared/BoardCard';
+import DeleteConfirmationModal from '../shared/DeleteConfirmationModal';
 import './PaymentManager.css';
 import './shared/BoardTools.css';
-
-const handleDelete = (payment) => {
-  console.log('Deleting payment:', payment.id);
-};
 
 const PaymentManager = ({ searchState, setSearchState }) => {
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [paymentToDelete, setPaymentToDelete] = useState(null);
 
   const [searchPayments] = useLazyQuery(SEARCH_PAYMENTS);
   const [searchByOwner] = useLazyQuery(SEARCH_PAYMENTS_BY_OWNER);
+  const [deletePayment] = useMutation(DELETE_PAYMENT);
 
   const handleSearch = async () => {
     if (!searchState.searchTerm) return;
@@ -55,6 +56,24 @@ const PaymentManager = ({ searchState, setSearchState }) => {
   const handleEdit = (payment) => {
     setSelectedPayment(payment);
     setShowEditModal(true);
+  };
+
+  const handleDelete = (payment) => {
+    setPaymentToDelete(payment);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await deletePayment({
+        variables: { input: { id: paymentToDelete.id } }
+      });
+      setShowDeleteModal(false);
+      setPaymentToDelete(null);
+      handleSearch(); // Refresh the list
+    } catch (error) {
+      console.error('Error deleting payment:', error);
+    }
   };
 
   const handleProcess = (payment) => {
@@ -102,13 +121,13 @@ const PaymentManager = ({ searchState, setSearchState }) => {
         {searchState.searchResults.map(payment => (
           <BoardCard
             key={payment.id}
-            header={<h3>Payment #{payment.id}</h3>}
+            header={<h3>Payment {payment.id}</h3>}
             content={
               <>
-                <div>Entered On: {payment.createdAt}</div>
+                <div>Account: {payment.ownerPaymentsId}</div>
+                <div>Invoice ID: {payment.invoiceNumber}</div>
+                <div>Amount: ${payment.invoiceAmount.toFixed(2)}</div>
                 <div>Check Date: {payment.checkDate}</div>
-                <div>Check Amount: ${payment.amount}</div>
-                <div>Owner ID: {payment.ownerID}</div>
               </>
             }
             actions={
@@ -128,6 +147,13 @@ const PaymentManager = ({ searchState, setSearchState }) => {
             setShowEditModal(false);
             handleSearch();
           }}
+        />
+      )}
+      {showDeleteModal && (
+        <DeleteConfirmationModal
+          id={paymentToDelete?.id}
+          onConfirm={confirmDelete}
+          onClose={() => setShowDeleteModal(false)}
         />
       )}
     </div>

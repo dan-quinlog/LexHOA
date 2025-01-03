@@ -1,23 +1,28 @@
 import React, { useState } from 'react';
-import { useLazyQuery } from '@apollo/client';
+import { useLazyQuery, useMutation } from '@apollo/client';
 import {
   SEARCH_PROPERTIES,
   SEARCH_PROPERTIES_BY_ACCOUNT,
   SEARCH_PROPERTIES_BY_TENANT
 } from '../../queries/queries';
+import { DELETE_PROPERTY } from '../../queries/mutations';
 import PropertyCard from './PropertyCard';
 import PropertyEditModal from './PropertyEditModal';
 import './shared/BoardTools.css';
 import BoardCard from './shared/BoardCard';
+import DeleteConfirmationModal from '../shared/DeleteConfirmationModal';
 
 const PropertyManager = ({ searchState, setSearchState }) => {
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [properties, setProperties] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [propertyToDelete, setPropertyToDelete] = useState(null);
 
   const [searchProperties] = useLazyQuery(SEARCH_PROPERTIES);
   const [searchByAccount] = useLazyQuery(SEARCH_PROPERTIES_BY_ACCOUNT);
   const [searchByTenant] = useLazyQuery(SEARCH_PROPERTIES_BY_TENANT);
+  const [deleteProperty] = useMutation(DELETE_PROPERTY);
 
   const handleSearch = async () => {
     if (!searchState.searchTerm) return;
@@ -64,8 +69,32 @@ const PropertyManager = ({ searchState, setSearchState }) => {
   };
 
   const handleDelete = (property) => {
-    // Delete property logic
+    setPropertyToDelete(property);
+    setShowDeleteModal(true);
   };
+
+  const confirmDelete = async () => {
+    try {
+      await deleteProperty({
+        variables: { input: { id: propertyToDelete.id } }
+      });
+      setShowDeleteModal(false);
+      setPropertyToDelete(null);
+      handleSearch(); // Refresh the list
+    } catch (error) {
+      console.error('Error deleting property:', error);
+    }
+  };
+
+  {
+    showDeleteModal && (
+      <DeleteConfirmationModal
+        id={propertyToDelete?.id}
+        onConfirm={confirmDelete}
+        onClose={() => setShowDeleteModal(false)}
+      />
+    )
+  }
 
   return (
     <div className="board-tool">
@@ -109,11 +138,11 @@ const PropertyManager = ({ searchState, setSearchState }) => {
         {searchState.searchResults.map(property => (
           <BoardCard
             key={property.id}
-            header={<h3>Property #{property.id}</h3>}
+            header={<h3>Property {property.id}</h3>}
             content={
               <>
-                <div>Owner: {property.owner}</div>
-                <div>Unit: {property.unit}</div>
+                <div>Account: {property.accountPropertiesId}</div>
+                <div>Tenant: {property.propertyTenantId}</div>
                 <div>Address: {property.address}</div>
               </>
             }
@@ -132,8 +161,16 @@ const PropertyManager = ({ searchState, setSearchState }) => {
           show={showEditModal}
           onClose={() => {
             setShowEditModal(false);
-            handleSearch(); // Refresh results after edit
+            handleSearch();
           }}
+        />
+      )}
+
+      {showDeleteModal && (
+        <DeleteConfirmationModal
+          id={propertyToDelete?.id}
+          onConfirm={confirmDelete}
+          onClose={() => setShowDeleteModal(false)}
         />
       )}
     </div>

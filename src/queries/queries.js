@@ -266,26 +266,7 @@ export const SEARCH_PEOPLE_BY_NAME = gql`
   }
 `;
 
-export const SEARCH_PEOPLE_BY_COGNITO = gql`
-  query PersonByCognitoID($cognitoID: String!) {
-    personByCognitoID(cognitoID: $cognitoID) {
-      items {
-        id
-        cognitoID
-        name
-        email
-        address
-        city
-        state
-        zip
-        phone
-        allowText
-        contactPref
-        owner
-      }
-    }
-  }
-`;
+
 
 export const SEARCH_PERSONS = gql`
   query SearchPersons($searchType: String!, $searchTerm: String!) {
@@ -297,6 +278,20 @@ export const SEARCH_PERSONS = gql`
       role
       status
       cognitoID
+    }
+  }
+`;
+
+export const GET_ACCOUNT_BY_OWNER = gql`
+  query AccountByOwner($accountOwnerId: ID!) {
+    accountByOwner(accountOwnerId: $accountOwnerId) {
+      items {
+        id
+        accountName
+        accountOwnerId
+        balance
+        billingFreq
+      }
     }
   }
 `;

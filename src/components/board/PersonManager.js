@@ -5,7 +5,7 @@ import {
   SEARCH_PEOPLE_BY_NAME,
   SEARCH_PEOPLE_BY_PHONE,
   SEARCH_PEOPLE_BY_ID,
-  SEARCH_PEOPLE_BY_COGNITO
+  GET_PROFILE
 } from '../../queries/queries';
 import { CREATE_PERSON, UPDATE_PERSON, DELETE_PERSON } from '../../queries/mutations';
 import BoardCard from './shared/BoardCard';
@@ -27,7 +27,7 @@ const PersonManager = ({ searchState, setSearchState }) => {
   const [searchByName] = useLazyQuery(SEARCH_PEOPLE_BY_NAME);
   const [searchByPhone] = useLazyQuery(SEARCH_PEOPLE_BY_PHONE);
   const [searchById] = useLazyQuery(SEARCH_PEOPLE_BY_ID);
-  const [searchByCognito] = useLazyQuery(SEARCH_PEOPLE_BY_COGNITO);
+  const [searchByCognito] = useLazyQuery(GET_PROFILE);
 
   // Add mutations
   const [createPerson] = useMutation(CREATE_PERSON);
@@ -40,7 +40,6 @@ const PersonManager = ({ searchState, setSearchState }) => {
     setPersonToDelete(person);
     setShowDeleteModal(true);
   };
-
   const confirmDelete = async () => {
     try {
       await deletePerson({

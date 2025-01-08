@@ -1,0 +1,37 @@
+
+.user-card {
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-large);
+  margin-bottom: var(--spacing-medium);
+}
+
+.user-card h3 {
+  margin-bottom: var(--spacing-small);
+  color: var(--text-primary);
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-small);
+}
+
+.card-content.two-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-large);
+}
+
+.left-column, .right-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-medium);
+}
+
+@media (max-width: 768px) {
+  .card-content.two-column {
+    grid-template-columns: 1fr;
+  }
+}

@@ -18,6 +18,7 @@ import { createSubscriptionHandshakeLink } from 'aws-appsync-subscription-link';
 import { ApolloLink } from '@apollo/client';
 import { GET_LATEST_BULLETINS } from './queries/queries';
 import ReactQuill from 'react-quill';
+import MenuState from './components/menu/MenuState';
 import 'react-quill/dist/quill.bubble.css';
 
 Amplify.configure({
@@ -214,15 +215,11 @@ function App() {
               <h1>Lexington Commons HOA</h1>
             </Link>
             {user ? (
-              <div className="hamburger-menu" ref={menuRef}>
-                <button onClick={toggleMenu}>☰</button>
-                {isMenuOpen && (
-                  <div className="dropdown-menu">
-                    {renderMenuItems()}
-                    <button onClick={handleSignOut}>Sign Out</button>
-                  </div>
-                )}
-              </div>
+              <MenuState 
+                userGroups={userGroups}
+                onSignOut={handleSignOut}
+                renderMenuItems={renderMenuItems}
+              />
             ) : (
               <nav className="desktop-menu">
                 <Link to="/amenities">Amenities</Link>

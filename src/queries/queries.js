@@ -266,8 +266,6 @@ export const SEARCH_PEOPLE_BY_NAME = gql`
   }
 `;
 
-
-
 export const SEARCH_PERSONS = gql`
   query SearchPersons($searchType: String!, $searchTerm: String!) {
     searchPersons(searchType: $searchType, searchTerm: $searchTerm) {

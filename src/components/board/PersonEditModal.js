@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import Modal from '../shared/Modal';
 import './PersonEditModal.css';
 import { useMutation } from '@apollo/client';
-import { CREATE_PERSON } from '../../queries/mutations';
+import { CREATE_PERSON, UPDATE_PERSON } from '../../queries/mutations';
 import { US_STATES } from '../../utils/constants';
+
 const PersonEditModal = ({ person, onClose, show }) => {
     const [formData, setFormData] = useState({
         name: person?.name || '',
@@ -24,6 +25,7 @@ const PersonEditModal = ({ person, onClose, show }) => {
     };
 
     const [createPerson] = useMutation(CREATE_PERSON);
+    const [updatePerson] = useMutation(UPDATE_PERSON);
 
     const handleSubmit = async () => {
         try {
@@ -41,11 +43,24 @@ const PersonEditModal = ({ person, onClose, show }) => {
                 return;
             }
 
-            await createPerson({
-                variables: {
-                    input
-                }
-            });
+            if (person?.id) {
+                // Update existing person
+                await updatePerson({
+                    variables: {
+                        input: {
+                            id: person.id,
+                            ...input
+                        }
+                    }
+                });
+            } else {
+                // Create new person
+                await createPerson({
+                    variables: {
+                        input
+                    }
+                });
+            }
             onClose();
         } catch (error) {
             console.error('Error saving person:', error);

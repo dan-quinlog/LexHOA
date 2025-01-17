@@ -1,5 +1,5 @@
-import React from 'react';
-import { useQuery } from '@apollo/client';
+import React, { useState } from 'react';
+import ProfileEditModal from '../../components/user/ProfileEditModal';import { useQuery } from '@apollo/client';
 import {
   GET_ACCOUNT_BY_OWNER,
   SEARCH_PROPERTIES_BY_ACCOUNT,
@@ -8,10 +8,11 @@ import {
 } from '../../queries/queries'; import PersonCard from '../../components/user/PersonCard';
 import AccountCard from '../../components/user/AccountCard';
 import PropertyCard from '../../components/user/PropertyCard';
-import '../../components/user/UserCards.css';
 import './Profile.css';
 
 const Profile = ({ cognitoId }) => {
+  const [showEditModal, setShowEditModal] = useState(false);
+
   // Get person data first
   const { data: personData } = useQuery(GET_PROFILE, {
     variables: { cognitoID: cognitoId },
@@ -36,15 +37,30 @@ const Profile = ({ cognitoId }) => {
     skip: !personData?.personByCognitoID?.items[0]?.id || accountData?.accountByOwner?.items?.length > 0
   });
 
-
   const isOwner = accountData?.accountByOwner?.items?.length > 0;
   const account = isOwner ? accountData.accountByOwner.items[0] : null;
   const property = isOwner ? propertyData?.propertyByAccount?.items[0] : tenantPropertyData?.propertyByTenant?.items[0];
     return (
       <div className="profile-page">
         <div className="profile-cards">
+          <div className="profile-header">
+            <h2>Profile</h2>
+            <button
+              className="edit-button"
+              onClick={() => setShowEditModal(true)}
+            >
+              Edit Profile
+            </button>
+          </div>
           {personData?.personByCognitoID?.items[0] && (
-            <PersonCard person={personData.personByCognitoID.items[0]} />
+            <>
+              <PersonCard person={personData.personByCognitoID.items[0]} />
+              <ProfileEditModal
+                person={personData.personByCognitoID.items[0]}
+                show={showEditModal}
+                onClose={() => setShowEditModal(false)}
+              />
+            </>
           )}
           {accountData?.accountByOwner?.items[0] && (
             <AccountCard account={accountData.accountByOwner.items[0]} />

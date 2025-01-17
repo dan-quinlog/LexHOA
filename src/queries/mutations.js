@@ -115,8 +115,12 @@ export const UPDATE_PERSON = gql`
       name
       email
       phone
-      role
-      status
+      address
+      city
+      state
+      zip
+      allowText
+      contactPref
       cognitoID
     }
   }

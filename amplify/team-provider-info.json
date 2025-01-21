@@ -23,7 +23,7 @@
       "function": {
         "lexhoaPostConfirmation": {
           "deploymentBucketName": "amplify-lexhoa-lexdev-ecd70-deployment",
-          "s3Key": "amplify-builds/lexhoaPostConfirmation-58594b7a6f4742746544-build.zip",
+          "s3Key": "amplify-builds/lexhoaPostConfirmation-386344577437386d4658-build.zip",
           "apiLexhoaPersontableName": "Person-gp5bkgxgsnhetdab5zqy2wgnqe-lexdev"
         }
       }

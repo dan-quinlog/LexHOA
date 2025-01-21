@@ -151,6 +151,19 @@ const ProfileEditModal = ({ person, show, onClose }) => {
             />
             <label>Allow Text Messages</label>
           </div>
+          <div className="profile-form-group">
+            <label>Billing Frequency</label>
+            <select
+              value={formData.billingFreq || ''}
+              onChange={(e) => setFormData({ ...formData, billingFreq: e.target.value })}
+            >
+              <option value="">Select Frequency</option>
+              <option value="MONTHLY">Monthly</option>
+              <option value="QUARTERLY">Quarterly</option>
+              <option value="SEMI">Semi-Annual</option>
+              <option value="ANNUAL">Annual</option>
+            </select>
+          </div>
         </div>
       </div>
       <div className="modal-actions">

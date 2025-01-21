@@ -56,8 +56,6 @@ export const UPDATE_ACCOUNT = gql`
     updateAccount(input: $input) {
       id
       accountOwnerId
-      accountName
-      billingFreq
       balance
     }
   }
@@ -122,6 +120,7 @@ export const UPDATE_PERSON = gql`
       allowText
       contactPref
       cognitoID
+      billingFreq
     }
   }
 `;
@@ -148,7 +147,6 @@ export const CREATE_ACCOUNT = gql`
       id
       accountOwnerId
       balance
-      billingFreq
     }
   }
 `;
@@ -198,6 +196,15 @@ export const DELETE_PAYMENT = gql`
   mutation DeletePayment($input: DeletePaymentInput!) {
     deletePayment(input: $input) {
       id
+    }
+  }
+`;
+
+export const UPDATE_BILLING_FREQ = gql`
+  mutation UpdateAccount($input: UpdateAccountInput!) {
+    updateAccount(input: $input) {
+      id
+      billingFreq
     }
   }
 `;

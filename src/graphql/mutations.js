@@ -18,6 +18,7 @@ export const createPerson = /* GraphQL */ `
       phone
       allowText
       contactPref
+      billingFreq
       createdAt
       updatedAt
       owner
@@ -42,6 +43,7 @@ export const updatePerson = /* GraphQL */ `
       phone
       allowText
       contactPref
+      billingFreq
       createdAt
       updatedAt
       owner
@@ -66,6 +68,7 @@ export const deletePerson = /* GraphQL */ `
       phone
       allowText
       contactPref
+      billingFreq
       createdAt
       updatedAt
       owner
@@ -81,8 +84,6 @@ export const createAccount = /* GraphQL */ `
     createAccount(input: $input, condition: $condition) {
       id
       accountOwnerId
-      accountName
-      billingFreq
       balance
       createdAt
       updatedAt
@@ -99,8 +100,6 @@ export const updateAccount = /* GraphQL */ `
     updateAccount(input: $input, condition: $condition) {
       id
       accountOwnerId
-      accountName
-      billingFreq
       balance
       createdAt
       updatedAt
@@ -117,8 +116,6 @@ export const deleteAccount = /* GraphQL */ `
     deleteAccount(input: $input, condition: $condition) {
       id
       accountOwnerId
-      accountName
-      billingFreq
       balance
       createdAt
       updatedAt
@@ -198,7 +195,6 @@ export const createPayment = /* GraphQL */ `
     }
   }
 `;
-
 export const updatePayment = /* GraphQL */ `
   mutation UpdatePayment(
     $input: UpdatePaymentInput!
@@ -219,7 +215,6 @@ export const updatePayment = /* GraphQL */ `
     }
   }
 `;
-
 export const deletePayment = /* GraphQL */ `
   mutation DeletePayment(
     $input: DeletePaymentInput!

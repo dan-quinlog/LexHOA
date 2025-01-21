@@ -15,6 +15,7 @@ export const onCreatePerson = /* GraphQL */ `
       phone
       allowText
       contactPref
+      billingFreq
       createdAt
       updatedAt
       owner
@@ -36,6 +37,7 @@ export const onUpdatePerson = /* GraphQL */ `
       phone
       allowText
       contactPref
+      billingFreq
       createdAt
       updatedAt
       owner
@@ -57,6 +59,7 @@ export const onDeletePerson = /* GraphQL */ `
       phone
       allowText
       contactPref
+      billingFreq
       createdAt
       updatedAt
       owner
@@ -69,8 +72,6 @@ export const onCreateAccount = /* GraphQL */ `
     onCreateAccount(filter: $filter) {
       id
       accountOwnerId
-      accountName
-      billingFreq
       balance
       createdAt
       updatedAt
@@ -84,8 +85,6 @@ export const onUpdateAccount = /* GraphQL */ `
     onUpdateAccount(filter: $filter) {
       id
       accountOwnerId
-      accountName
-      billingFreq
       balance
       createdAt
       updatedAt
@@ -99,8 +98,6 @@ export const onDeleteAccount = /* GraphQL */ `
     onDeleteAccount(filter: $filter) {
       id
       accountOwnerId
-      accountName
-      billingFreq
       balance
       createdAt
       updatedAt

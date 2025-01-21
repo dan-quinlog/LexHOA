@@ -29,6 +29,7 @@ export const GET_PROFILE = gql`
         phone
         allowText
         contactPref
+        billingFreq
       }
     }
   }
@@ -134,7 +135,6 @@ export const SEARCH_ACCOUNTS = gql`
       items {
         id
         accountOwnerId
-        accountName
         billingFreq
         balance
         createdAt
@@ -212,7 +212,6 @@ export const SEARCH_ACCOUNTS_BY_OWNER = gql`
       items {
         id
         accountOwnerId
-        accountName
         billingFreq
         balance
         createdAt
@@ -285,10 +284,8 @@ export const GET_ACCOUNT_BY_OWNER = gql`
     accountByOwner(accountOwnerId: $accountOwnerId) {
       items {
         id
-        accountName
         accountOwnerId
         balance
-        billingFreq
       }
     }
   }

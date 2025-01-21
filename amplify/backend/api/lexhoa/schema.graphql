@@ -16,6 +16,7 @@ type Person @aws_api_key @aws_cognito_user_pools @model
   phone: String @index(name: "byPhoneCall", queryField: "personByPhoneCall")
   allowText: Boolean
   contactPref: ContactPrefs
+  billingFreq: BillingFreq
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
   owner: String
@@ -24,13 +25,10 @@ type Person @aws_api_key @aws_cognito_user_pools @model
 type Account @model 
   @auth(rules: [
     { allow: private, operations: [read] },
-    { allow: owner, operations: [update] },
     { allow: groups, groups: ["BOARD"], operations: [create, update, delete] }
   ]) {
     id: ID!
     accountOwnerId: ID! @index(name: "byAccountOwner", queryField: "accountByOwner")
-    accountName: String
-    billingFreq: BillingFreq!
     balance: Float!
     createdAt: AWSDateTime
     updatedAt: AWSDateTime
@@ -60,7 +58,7 @@ type Payment @model
   checkDate: AWSDate!
   checkNumber: String!
   checkAmount: Float!
-  invoiceNumber: String!
+  invoiceNumber: String! @index(name: "byInvoiceNumber", queryField: "paymentsByInvoiceNumber")
   invoiceAmount: Float!
   ownerPaymentsId: ID! @index(name: "byOwnerPayments", queryField: "paymentsByOwner")
   createdAt: AWSDateTime

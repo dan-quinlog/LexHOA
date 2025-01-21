@@ -15,6 +15,7 @@ export const getPerson = /* GraphQL */ `
       phone
       allowText
       contactPref
+      billingFreq
       createdAt
       updatedAt
       owner
@@ -41,6 +42,7 @@ export const listPeople = /* GraphQL */ `
         phone
         allowText
         contactPref
+        billingFreq
         createdAt
         updatedAt
         owner
@@ -56,8 +58,6 @@ export const getAccount = /* GraphQL */ `
     getAccount(id: $id) {
       id
       accountOwnerId
-      accountName
-      billingFreq
       balance
       createdAt
       updatedAt
@@ -76,8 +76,6 @@ export const listAccounts = /* GraphQL */ `
       items {
         id
         accountOwnerId
-        accountName
-        billingFreq
         balance
         createdAt
         updatedAt
@@ -194,6 +192,7 @@ export const personByCognitoID = /* GraphQL */ `
         phone
         allowText
         contactPref
+        billingFreq
         createdAt
         updatedAt
         owner
@@ -231,6 +230,7 @@ export const personByName = /* GraphQL */ `
         phone
         allowText
         contactPref
+        billingFreq
         createdAt
         updatedAt
         owner
@@ -268,6 +268,7 @@ export const personByEmail = /* GraphQL */ `
         phone
         allowText
         contactPref
+        billingFreq
         createdAt
         updatedAt
         owner
@@ -305,6 +306,7 @@ export const personByPhoneCall = /* GraphQL */ `
         phone
         allowText
         contactPref
+        billingFreq
         createdAt
         updatedAt
         owner
@@ -333,8 +335,6 @@ export const accountByOwner = /* GraphQL */ `
       items {
         id
         accountOwnerId
-        accountName
-        billingFreq
         balance
         createdAt
         updatedAt
@@ -396,6 +396,39 @@ export const propertyByTenant = /* GraphQL */ `
         address
         accountPropertiesId
         propertyTenantId
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const paymentsByInvoiceNumber = /* GraphQL */ `
+  query PaymentsByInvoiceNumber(
+    $invoiceNumber: String!
+    $sortDirection: ModelSortDirection
+    $filter: ModelPaymentFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    paymentsByInvoiceNumber(
+      invoiceNumber: $invoiceNumber
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        checkDate
+        checkNumber
+        checkAmount
+        invoiceNumber
+        invoiceAmount
+        ownerPaymentsId
         createdAt
         updatedAt
         owner

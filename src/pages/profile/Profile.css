@@ -16,21 +16,44 @@
   width: 100%;
   margin-bottom: var(--spacing-medium);
 }
-  .profile-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 80vw;
-    margin-bottom: var(--spacing-medium);
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 80vw;
+  margin-bottom: var(--spacing-medium);
+}
+
+.edit-button {
+  padding: var(--spacing-small) var(--spacing-medium);
+  border-radius: var(--border-radius);
+  background-color: var(--primary-color);
+  color: white;
+  cursor: pointer;
+}
+  .property-section {
+    border: var(--input-border);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-large);
+    margin-top: var(--spacing-medium);
+    overflow: hidden;
   }
 
-  .edit-button {
-    padding: var(--spacing-small) var(--spacing-medium);
-    border-radius: var(--border-radius);
-    background-color: var(--primary-color);
-    color: white;
-    cursor: pointer;
+  .user-card {
+    max-width: 100%;
+    margin: var(--spacing-small) 0;
   }
+
+  .property-card {
+    width: 100%;
+    box-sizing: border-box;
+  }
+.property-section h3 {
+  color: var(--text-color);
+  margin-bottom: var(--spacing-medium);
+}
+
 .profile-content {
   border: var(--input-border);
   border-radius: var(--border-radius);

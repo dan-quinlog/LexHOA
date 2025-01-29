@@ -1,79 +1,96 @@
-type Person @aws_api_key @aws_cognito_user_pools @model
+type Profile @model
   @auth(rules: [
     { allow: private, operations: [create, read] },
     { allow: owner, operations: [update] },
     { allow: groups, groups: ["BOARD"], operations: [update, delete] }
-  ])
-{
+  ]) {
   id: ID!
-  cognitoID: String @index(name: "byCognitoID", queryField: "personByCognitoID")
-  name: String @index(name: "byName", queryField: "personByName")
-  email: String @index(name: "byEmail", queryField: "personByEmail")
+  type: String @default(value: "PROFILE")
+    @index(
+      name: "byType"
+      queryField: "profilesByType"
+      sortKeyFields: ["name", "balance", "createdAt"]
+    )
+  cognitoID: String @index(name: "byCognitoID", queryField: "profileByCognitoID")
+  name: String @index(name: "byName", queryField: "profileByName")
+  email: String @index(name: "byEmail", queryField: "profileByEmail")
+  phone: String @index(name: "byPhone", queryField: "profileByPhone")
   address: String
   city: String
   state: String
   zip: String
-  phone: String @index(name: "byPhoneCall", queryField: "personByPhoneCall")
-  allowText: Boolean
-  contactPref: ContactPrefs
-  billingFreq: BillingFreq
+  contactPref: ContactPrefs @default(value: "EMAIL")
+  billingFreq: BillingFreq @default(value: "MONTHLY")
+  balance: Float @auth(rules: [
+    { allow: private, operations: [create, read] },
+    { allow: groups, groups: ["BOARD"], operations: [create, update] }
+  ])
+  @default(value:"0.00")
+  @index(
+    name: "byBalance"
+    queryField: "profilesByBalance"
+    sortKeyFields: ["name", "email", "phone", "createdAt"]
+  )
+  ownedProperties: [Property] @hasMany(indexName: "byOwner", fields: ["id"])
+  payments: [Payment] @hasMany(indexName: "byOwnerPayments", fields: ["id"])
+  tenantAt: Property @belongsTo(fields: ["tenantAtId"])
+  tenantAtId: ID @index(name: "byTenantAt")
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
-  owner: String
 }
 
-type Account @model 
+type Property @model
   @auth(rules: [
     { allow: private, operations: [read] },
     { allow: groups, groups: ["BOARD"], operations: [create, update, delete] }
   ]) {
-    id: ID!
-    accountOwnerId: ID! @index(name: "byAccountOwner", queryField: "accountByOwner")
-    balance: Float!
-    createdAt: AWSDateTime
-    updatedAt: AWSDateTime
-    owner: String
-}
-
-type Property @model 
-@auth(rules: [
-  { allow: private, operations: [read] },
-  { allow: groups, groups: ["BOARD"], operations: [create, update, delete] }
-]) {
   id: ID!
-  address: String!
-  accountPropertiesId: ID @index(name: "byAccountProperties", queryField: "propertyByAccount")
-  propertyTenantId: ID @index(name: "byTenant", queryField: "propertyByTenant")
+  type: String @default(value: "PROPERTY")
+    @index(
+      name: "byType"
+      queryField: "propertiesByType"
+      sortKeyFields: ["id"]
+    )
+  address: String! @index(name: "byAddress", queryField: "propertyByAddress")
+  owner: Profile @belongsTo(fields: ["ownerId"])
+  ownerId: ID @index(name: "byOwner")
+  tenant: Profile @hasOne(fields: ["tenantId"])
+  tenantId: ID @index(name: "byTenant")
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
-  owner: String
 }
 
-type Payment @model 
-@auth(rules: [
-  { allow: owner, operations: [read] },
-  { allow: groups, groups: ["BOARD"], operations: [create, read, update, delete] }
-]) {
+type Payment @model
+  @auth(rules: [
+    { allow: owner, operations: [read] },
+    { allow: groups, groups: ["BOARD"], operations: [create, read, update, delete] }
+  ]) {
   id: ID!
-  checkDate: AWSDate!
-  checkNumber: String!
+  type: String @default(value: "PAYMENT")
+    @index(
+      name: "byType"
+      queryField: "paymentsByType"
+      sortKeyFields: ["createdAt", "checkDate", "invoiceNumber"]
+    )
+  checkDate: AWSDate! @index(name: "byCheckDate", queryField: "paymentsByCheckDate")
+  checkNumber: String! @index(name: "byCheckNumber", queryField: "paymentsByCheckNumber")
   checkAmount: Float!
   invoiceNumber: String! @index(name: "byInvoiceNumber", queryField: "paymentsByInvoiceNumber")
   invoiceAmount: Float!
-  ownerPaymentsId: ID! @index(name: "byOwnerPayments", queryField: "paymentsByOwner")
+  ownerPayments: Profile @belongsTo(fields: ["ownerPaymentsId"])
+  ownerPaymentsId: ID! @index(name: "byOwnerPayments", queryField: "paymentsByOwner", sortKeyFields: ["checkDate", "invoiceNumber"])
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
 }
 
-type Bulletin @model 
+type Bulletin @model
   @auth(
     rules: [
       { allow: public, provider: apiKey, operations: [read] },
       { allow: private, provider: userPools, operations: [read] },
       { allow: groups, groups: ["BOARD"], operations: [create, update, delete, read] }
     ]
-  )
-{
+  ) {
   id: ID!
   title: String!
   content: String!
@@ -85,6 +102,34 @@ type Bulletin @model
     )
   audience: [Audience]!
   createdAt: AWSDateTime!
+}
+
+type Ping @model
+  @auth(
+    rules: [
+      { allow: private, provider: userPools, operations: [create] },
+      { allow: groups, groups: ["BOARD"], operations: [create, update, delete, read] }
+    ]
+  ) {
+  id: ID!
+  type: String @default(value: "Ping")
+    @index(
+      name: "pingByDate"
+      queryField: "pingByDate"
+      sortKeyFields: ["createdAt"]
+    )
+  items: [String]
+  instruction: String
+  status: PingStatus @default(value: "PENDING")
+  createdBy: ID! @index(name: "byCreator", queryField: "pingsByCreator")
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+enum PingStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 enum ContactPrefs {

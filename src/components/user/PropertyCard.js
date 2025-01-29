@@ -1,8 +1,8 @@
 import { useQuery } from '@apollo/client';
-import { SEARCH_PEOPLE_BY_ID } from '../../queries/queries';
+import { GET_PROFILE } from '../../queries/queries';
 
 const PropertyCard = ({ property }) => {
-  const { data: tenantData } = useQuery(SEARCH_PEOPLE_BY_ID, {
+  const { data: tenantData } = useQuery(GET_PROFILE, {
     variables: { id: property.propertyTenantId },
     skip: !property.propertyTenantId
   });

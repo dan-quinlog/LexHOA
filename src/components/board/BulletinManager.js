@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useQuery } from '@apollo/client';
-import { GET_LATEST_BULLETINS } from '../../queries/queries';
+import { BULLETINS_BY_DATE } from '../../queries/queries';
 import BulletinModal from '../modals/BulletinModal';
 import DeleteConfirmModal from '../modals/DeleteConfirmModal';
 import ReactQuill from 'react-quill';
@@ -14,7 +14,7 @@ const BulletinManager = () => {
   const [selectedBulletin, setSelectedBulletin] = useState(null);
   const loadingRef = useRef(null);
 
-  const { loading, error, data, fetchMore } = useQuery(GET_LATEST_BULLETINS, {
+  const { loading, error, data, fetchMore } = useQuery(BULLETINS_BY_DATE, {
     variables: { limit: 10 }
   });
 

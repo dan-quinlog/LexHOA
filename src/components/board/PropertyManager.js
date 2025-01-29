@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useLazyQuery, useMutation } from '@apollo/client';
 import {
-  SEARCH_PROPERTIES,
-  SEARCH_PROPERTIES_BY_ACCOUNT,
-  SEARCH_PROPERTIES_BY_TENANT
+  LIST_PROPERTIES,
+  PROPERTY_BY_ADDRESS
 } from '../../queries/queries';
 import { DELETE_PROPERTY } from '../../queries/mutations';
 import PropertyCard from './PropertyCard';
@@ -19,9 +18,8 @@ const PropertyManager = ({ searchState, setSearchState }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [propertyToDelete, setPropertyToDelete] = useState(null);
 
-  const [searchProperties] = useLazyQuery(SEARCH_PROPERTIES);
-  const [searchByAccount] = useLazyQuery(SEARCH_PROPERTIES_BY_ACCOUNT);
-  const [searchByTenant] = useLazyQuery(SEARCH_PROPERTIES_BY_TENANT);
+  const [searchProperties] = useLazyQuery(LIST_PROPERTIES);
+  const [searchByAddress] = useLazyQuery(PROPERTY_BY_ADDRESS);
   const [deleteProperty] = useMutation(DELETE_PROPERTY);
 
   const handleSearch = async () => {
@@ -39,24 +37,23 @@ const PropertyManager = ({ searchState, setSearchState }) => {
             searchResults: response.data?.listProperties?.items || []
           });
           break;
-        case 'accountId':
-          response = await searchByAccount({
-            variables: { accountPropertiesId: searchState.searchTerm }
+        case 'address':
+          response = await searchByAddress({
+            variables: { address: searchState.searchTerm }
           });
           setSearchState({
             ...searchState,
-            searchResults: response.data?.propertyByAccount?.items || []
+            searchResults: response.data?.propertyByAddress?.items || []
           });
           break;
-        case 'tenantId':
-          response = await searchByTenant({
-            variables: { propertyTenantId: searchState.searchTerm }
+        default:
+          response = await searchProperties({
+            variables: { filter: { id: { contains: searchState.searchTerm } } }
           });
           setSearchState({
             ...searchState,
-            searchResults: response.data?.propertyByTenant?.items || []
+            searchResults: response.data?.listProperties?.items || []
           });
-          break;
       }
     } catch (error) {
       console.error('Search error:', error);
@@ -80,21 +77,11 @@ const PropertyManager = ({ searchState, setSearchState }) => {
       });
       setShowDeleteModal(false);
       setPropertyToDelete(null);
-      handleSearch(); // Refresh the list
+      handleSearch();
     } catch (error) {
       console.error('Error deleting property:', error);
     }
   };
-
-  {
-    showDeleteModal && (
-      <DeleteConfirmationModal
-        id={propertyToDelete?.id}
-        onConfirm={confirmDelete}
-        onClose={() => setShowDeleteModal(false)}
-      />
-    )
-  }
 
   return (
     <div className="board-tool">
@@ -109,8 +96,7 @@ const PropertyManager = ({ searchState, setSearchState }) => {
           className="search-type"
         >
           <option value="propertyId">Property ID</option>
-          <option value="accountId">Account ID</option>
-          <option value="tenantId">Tenant ID</option>
+          <option value="address">Address</option>
         </select>
         <input
           type="text"
@@ -141,8 +127,8 @@ const PropertyManager = ({ searchState, setSearchState }) => {
             header={<h3>Property {property.id}</h3>}
             content={
               <>
-                <div>Account: {property.accountPropertiesId}</div>
-                <div>Tenant: {property.propertyTenantId}</div>
+                <div>Owner: {property.ownerId}</div>
+                <div>Tenant: {property.tenantId}</div>
                 <div>Address: {property.address}</div>
               </>
             }
@@ -176,4 +162,5 @@ const PropertyManager = ({ searchState, setSearchState }) => {
     </div>
   );
 };
+
 export default PropertyManager;

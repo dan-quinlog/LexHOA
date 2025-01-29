@@ -19,11 +19,5 @@
       "environmentVariableName": "API_LEXHOA_PERSONTABLE_NAME"
     }
   ],
-  "permissions": {
-    "storage": {
-      "Person:@model(appsync)": [
-        "create"
-      ]
-    }
-  }
+  "permissions": {}
 }

@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import BulletinManager from '../../components/board/BulletinManager'
 import PersonManager from '../../components/board/PersonManager';
-import AccountManager from '../../components/board/AccountManager';
 import PropertyManager from '../../components/board/PropertyManager';
 import PaymentManager from '../../components/board/PaymentManager';
-import './Board.css';
-import { searchUsers } from '../../utils/userSearch';
 import { useQuery } from '@apollo/client';
-import { LIST_PEOPLE } from '../../queries/queries';
+import { LIST_PROFILES } from '../../queries/queries';
+import './Board.css';
 
 const TOOLS = [
   { id: 'bulletins', label: 'Bulletins' },
@@ -47,7 +45,7 @@ const Board = () => {
     searchResults: []
   });
 
-  const { data: peopleData } = useQuery(LIST_PEOPLE);
+  const { data: peopleData } = useQuery(LIST_PROFILES);
 
   const handleToolSelect = (toolId) => {
     setSelectedTool(toolId);
@@ -62,11 +60,6 @@ const Board = () => {
         return <PersonManager 
           searchState={personSearchState}
           setSearchState={setPersonSearchState}
-        />;
-      case 'accounts':
-        return <AccountManager 
-          searchState={accountSearchState}
-          setSearchState={setAccountSearchState}
         />;
       case 'properties':
         return <PropertyManager 

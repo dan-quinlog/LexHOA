@@ -17,15 +17,15 @@
         "lexhoa": {},
         "userPoolGroups": {}
       },
-      "api": {
-        "lexhoa": {}
-      },
       "function": {
         "lexhoaPostConfirmation": {
           "deploymentBucketName": "amplify-lexhoa-lexdev-ecd70-deployment",
-          "s3Key": "amplify-builds/lexhoaPostConfirmation-386344577437386d4658-build.zip",
+          "s3Key": "amplify-builds/lexhoaPostConfirmation-463935307a6b47703269-build.zip",
           "apiLexhoaPersontableName": "Person-gp5bkgxgsnhetdab5zqy2wgnqe-lexdev"
         }
+      },
+      "api": {
+        "lexhoa": {}
       }
     }
   },

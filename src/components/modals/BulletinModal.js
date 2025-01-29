@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation } from '@apollo/client';
 import { CREATE_BULLETIN, UPDATE_BULLETIN } from '../../queries/mutations';
-import { GET_LATEST_BULLETINS } from '../../queries/queries';
+import { BULLETINS_BY_DATE } from '../../queries/queries';
 import Modal from '../shared/Modal';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -27,13 +27,13 @@ const BulletinModal = ({ bulletin, onClose }) => {
     update(cache, { data: { createBulletin } }) {
       try {
         const existingData = cache.readQuery({
-          query: GET_LATEST_BULLETINS,
+          query: BULLETINS_BY_DATE,
           variables: { limit: 10 }
         });
 
         if (existingData && existingData.bulletinsByDate) {
           cache.writeQuery({
-            query: GET_LATEST_BULLETINS,
+            query: BULLETINS_BY_DATE,
             variables: { limit: 10 },
             data: {
               bulletinsByDate: {
@@ -49,7 +49,7 @@ const BulletinModal = ({ bulletin, onClose }) => {
       }
     },
     refetchQueries: [
-      {query: GET_LATEST_BULLETINS, variables: { limit: 10 }}
+      {query: BULLETINS_BY_DATE, variables: { limit: 10 }}
     ]
   });  const [updateBulletin] = useMutation(UPDATE_BULLETIN);
   const [showNotification, setShowNotification] = useState(false);

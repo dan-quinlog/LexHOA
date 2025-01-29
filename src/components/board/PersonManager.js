@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { useLazyQuery, useMutation } from '@apollo/client';
 import {
-  SEARCH_PEOPLE_BY_EMAIL,
-  SEARCH_PEOPLE_BY_NAME,
-  SEARCH_PEOPLE_BY_PHONE,
-  SEARCH_PEOPLE_BY_ID,
-  GET_PROFILE
+  PROFILE_BY_EMAIL,
+  PROFILE_BY_NAME,
+  PROFILE_BY_PHONE,
+  GET_PROFILE,
+  PROFILE_BY_COGNITO_ID
 } from '../../queries/queries';
-import { CREATE_PERSON, UPDATE_PERSON, DELETE_PERSON } from '../../queries/mutations';
+import { CREATE_PROFILE, UPDATE_PROFILE, DELETE_PROFILE } from '../../queries/mutations';
 import BoardCard from './shared/BoardCard';
-import PersonEditModal from './PersonEditModal';
+import ProfileEditModal from '../shared/ProfileEditModal';
 import DeleteConfirmationModal from '../shared/DeleteConfirmationModal';
 import './PersonManager.css';
 import './shared/BoardTools.css';
@@ -23,18 +23,18 @@ const PersonManager = ({ searchState, setSearchState }) => {
   const [showMergeModal, setShowMergeModal] = useState(false);
 
   // Initialize all query hooks
-  const [searchByEmail] = useLazyQuery(SEARCH_PEOPLE_BY_EMAIL);
-  const [searchByName] = useLazyQuery(SEARCH_PEOPLE_BY_NAME);
-  const [searchByPhone] = useLazyQuery(SEARCH_PEOPLE_BY_PHONE);
-  const [searchById] = useLazyQuery(SEARCH_PEOPLE_BY_ID);
-  const [searchByCognito] = useLazyQuery(GET_PROFILE);
+  const [searchByEmail] = useLazyQuery(PROFILE_BY_EMAIL);
+  const [searchByName] = useLazyQuery(PROFILE_BY_NAME);
+  const [searchByPhone] = useLazyQuery(PROFILE_BY_PHONE);
+  const [searchById] = useLazyQuery(GET_PROFILE);
+  const [searchByCognito] = useLazyQuery(PROFILE_BY_COGNITO_ID);
 
   // Add mutations
-  const [createPerson] = useMutation(CREATE_PERSON);
-  const [updatePerson] = useMutation(UPDATE_PERSON);
+  const [createPerson] = useMutation(CREATE_PROFILE);
+  const [updatePerson] = useMutation(UPDATE_PROFILE);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [personToDelete, setPersonToDelete] = useState(null);
-  const [deletePerson] = useMutation(DELETE_PERSON);
+  const [deletePerson] = useMutation(DELETE_PROFILE);
 
   const handleDelete = (person) => {
     setPersonToDelete(person);
@@ -192,10 +192,11 @@ const PersonManager = ({ searchState, setSearchState }) => {
         ))}
       </div>
       {showEditModal && (
-        <PersonEditModal
-          person={selectedPerson}
-          show={showEditModal}
+        <ProfileEditModal 
+          show={showEditModal} 
           onClose={() => setShowEditModal(false)}
+          person={selectedPerson}
+          isBoard={true}
         />
       )}
       {showMergeModal && (

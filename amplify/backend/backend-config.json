@@ -15,9 +15,9 @@
           "additionalAuthenticationProviders": [
             {
               "apiKeyConfig": {
-                "apiKeyExpirationDate": "2024-12-25T01:44:48.120Z",
+                "apiKeyExpirationDate": "2025-02-27T04:24:19.969Z",
                 "apiKeyExpirationDays": 30,
-                "description": "LexHOApublicAPI"
+                "description": "api key for testing"
               },
               "authenticationType": "API_KEY"
             }
@@ -91,15 +91,7 @@
   "function": {
     "lexhoaPostConfirmation": {
       "build": true,
-      "dependsOn": [
-        {
-          "attributes": [
-            "GraphQLAPIIdOutput"
-          ],
-          "category": "api",
-          "resourceName": "lexhoa"
-        }
-      ],
+      "dependsOn": [],
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     }

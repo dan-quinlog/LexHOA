@@ -16,9 +16,10 @@ import amplifyConfig from './services/amplify-config';
 import { createAuthLink } from 'aws-appsync-auth-link';
 import { createSubscriptionHandshakeLink } from 'aws-appsync-subscription-link';
 import { ApolloLink } from '@apollo/client';
-import { GET_LATEST_BULLETINS } from './queries/queries';
+import { BULLETINS_BY_DATE } from './queries/queries';
 import ReactQuill from 'react-quill';
 import MenuState from './components/menu/MenuState';
+import { ClearButton } from './components/dev/DatabaseClear'
 import 'react-quill/dist/quill.bubble.css';
 
 Amplify.configure({
@@ -161,7 +162,7 @@ function App() {
         or: [{ audience: { contains: "PUBLIC" } }]
       };
 
-    const { loading, error, data } = useQuery(GET_LATEST_BULLETINS, {
+    const { loading, error, data } = useQuery(BULLETINS_BY_DATE, {
       variables: {
         limit: user ? 10 : 3,  // Set limit to 3 for public users
         filter
@@ -206,7 +207,8 @@ function App() {
         </div>
       </main>
     );
-  }; return (
+  };
+  return (
     <ApolloProvider client={user ? authenticatedClient : publicClient}>
       <BrowserRouter>
         <div className="App">
@@ -214,8 +216,9 @@ function App() {
             <Link to="/" className="site-title">
               <h1>Lexington Commons HOA</h1>
             </Link>
+            <ClearButton />
             {user ? (
-              <MenuState 
+              <MenuState
                 userGroups={userGroups}
                 onSignOut={handleSignOut}
                 renderMenuItems={renderMenuItems}

@@ -1,19 +1,26 @@
 import { gql } from '@apollo/client';
 
-export const UPDATE_PROFILE = gql`
-  mutation UpdatePerson($input: UpdatePersonInput!) {
-    updatePerson(input: $input) {
+// Profile Mutations
+export const CREATE_PROFILE = gql`
+  mutation CreateProfile(
+    $input: CreateProfileInput!
+    $condition: ModelProfileConditionInput
+  ) {
+    createProfile(input: $input, condition: $condition) {
       id
+      type
       cognitoID
       name
       email
+      phone
       address
       city
       state
       zip
-      phone
-      allowText
       contactPref
+      billingFreq
+      balance
+      tenantAtId
       createdAt
       updatedAt
       owner
@@ -21,190 +28,224 @@ export const UPDATE_PROFILE = gql`
   }
 `;
 
-export const CREATE_BULLETIN = gql`
-  mutation CreateBulletin($input: CreateBulletinInput!) {
-    createBulletin(input: $input) {
+export const UPDATE_PROFILE = gql`
+  mutation UpdateProfile(
+    $input: UpdateProfileInput!
+    $condition: ModelProfileConditionInput
+  ) {
+    updateProfile(input: $input, condition: $condition) {
       id
-      title
-      content
-      audience
-    }
-  }
-`;
-
-export const UPDATE_BULLETIN = gql`
-  mutation UpdateBulletin($input: UpdateBulletinInput!) {
-    updateBulletin(input: $input) {
-      id
-      title
-      content
-      audience
-    }
-  }
-`;
-
-export const DELETE_BULLETIN = gql`
-  mutation DeleteBulletin($input: DeleteBulletinInput!) {
-    deleteBulletin(input: $input) {
-      id
-    }
-  }
-`;
-
-export const UPDATE_ACCOUNT = gql`
-  mutation UpdateAccount($input: UpdateAccountInput!) {
-    updateAccount(input: $input) {
-      id
-      accountOwnerId
-      balance
-    }
-  }
-`;
-
-export const UPDATE_PROPERTY = gql`
-  mutation UpdateProperty($input: UpdatePropertyInput!) {
-    updateProperty(input: $input) {
-      id
+      type
+      cognitoID
+      name
+      email
+      phone
       address
-      accountPropertiesId
-      propertyTenantId
+      city
+      state
+      zip
+      contactPref
+      billingFreq
+      balance
+      tenantAtId
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+
+export const DELETE_PROFILE = gql`
+  mutation DeleteProfile(
+    $input: DeleteProfileInput!
+    $condition: ModelProfileConditionInput
+  ) {
+    deleteProfile(input: $input, condition: $condition) {
+      id
+      type
+      cognitoID
+      name
+      email
+      phone
+      address
+      city
+      state
+      zip
+      contactPref
+      billingFreq
+      balance
+      tenantAtId
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+
+// Property Mutations
+export const CREATE_PROPERTY = gql`
+  mutation CreateProperty(
+    $input: CreatePropertyInput!
+    $condition: ModelPropertyConditionInput
+  ) {
+    createProperty(input: $input, condition: $condition) {
+      id
+      type
+      address
+      ownerId
+      tenantId
       createdAt
       updatedAt
     }
   }
 `;
 
-export const UPDATE_PAYMENT = gql`
-  mutation UpdatePayment($input: UpdatePaymentInput!) {
-    updatePayment(input: $input) {
+export const UPDATE_PROPERTY = gql`
+  mutation UpdateProperty(
+    $input: UpdatePropertyInput!
+    $condition: ModelPropertyConditionInput
+  ) {
+    updateProperty(input: $input, condition: $condition) {
       id
-      checkDate
-      checkNumber
-      checkAmount
-      invoiceNumber
-      invoiceAmount
-      ownerPaymentsId
-    }
-  }
-`;
-
-export const CREATE_PERSON = gql`
-  mutation CreatePerson($input: CreatePersonInput!) {
-    createPerson(input: $input) {
-      id
-      name
-      email
-      phone
-      cognitoID
+      type
       address
-      city
-      state
-      zip
-      allowText
-      contactPref
-    }
-  }
-`;
-
-export const UPDATE_PERSON = gql`
-  mutation UpdatePerson($input: UpdatePersonInput!) {
-    updatePerson(input: $input) {
-      id
-      name
-      email
-      phone
-      address
-      city
-      state
-      zip
-      allowText
-      contactPref
-      cognitoID
-      billingFreq
-    }
-  }
-`;
-
-export const DELETE_PERSON = gql`
-  mutation DeletePerson($input: DeletePersonInput!) {
-    deletePerson(input: $input) {
-      id
-    }
-  }
-`;
-
-export const DELETE_PROFILE = gql`
-  mutation DeleteProfile($input: DeleteProfileInput!) {
-    deleteProfile(input: $input) {
-      id
-    }
-  }
-`;
-
-export const CREATE_ACCOUNT = gql`
-  mutation CreateAccount($input: CreateAccountInput!) {
-    createAccount(input: $input) {
-      id
-      accountOwnerId
-      balance
-    }
-  }
-`;
-
-export const CREATE_PROPERTY = gql`
-  mutation CreateProperty($input: CreatePropertyInput!) {
-    createProperty(input: $input) {
-      id
-      address
-      accountPropertiesId
-      propertyTenantId
-    }
-  }
-`;
-
-export const CREATE_PAYMENT = gql`
-  mutation CreatePayment($input: CreatePaymentInput!) {
-    createPayment(input: $input) {
-      id
-      checkNumber
-      checkDate
-      checkAmount
-      invoiceNumber
-      invoiceAmount
-      ownerPaymentsId
-    }
-  }
-`;
-
-export const DELETE_ACCOUNT = gql`
-  mutation DeleteAccount($input: DeleteAccountInput!) {
-    deleteAccount(input: $input) {
-      id
+      ownerId
+      tenantId
+      createdAt
+      updatedAt
     }
   }
 `;
 
 export const DELETE_PROPERTY = gql`
-  mutation DeleteProperty($input: DeletePropertyInput!) {
-    deleteProperty(input: $input) {
+  mutation DeleteProperty(
+    $input: DeletePropertyInput!
+    $condition: ModelPropertyConditionInput
+  ) {
+    deleteProperty(input: $input, condition: $condition) {
       id
+      type
+      address
+      ownerId
+      tenantId
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+// Payment Mutations
+export const CREATE_PAYMENT = gql`
+  mutation CreatePayment(
+    $input: CreatePaymentInput!
+    $condition: ModelPaymentConditionInput
+  ) {
+    createPayment(input: $input, condition: $condition) {
+      id
+      type
+      checkDate
+      checkNumber
+      checkAmount
+      invoiceNumber
+      invoiceAmount
+      ownerPaymentsId
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+
+export const UPDATE_PAYMENT = gql`
+  mutation UpdatePayment(
+    $input: UpdatePaymentInput!
+    $condition: ModelPaymentConditionInput
+  ) {
+    updatePayment(input: $input, condition: $condition) {
+      id
+      type
+      checkDate
+      checkNumber
+      checkAmount
+      invoiceNumber
+      invoiceAmount
+      ownerPaymentsId
+      createdAt
+      updatedAt
+      owner
     }
   }
 `;
 
 export const DELETE_PAYMENT = gql`
-  mutation DeletePayment($input: DeletePaymentInput!) {
-    deletePayment(input: $input) {
+  mutation DeletePayment(
+    $input: DeletePaymentInput!
+    $condition: ModelPaymentConditionInput
+  ) {
+    deletePayment(input: $input, condition: $condition) {
       id
+      type
+      checkDate
+      checkNumber
+      checkAmount
+      invoiceNumber
+      invoiceAmount
+      ownerPaymentsId
+      createdAt
+      updatedAt
+      owner
     }
   }
 `;
 
-export const UPDATE_BILLING_FREQ = gql`
-  mutation UpdateAccount($input: UpdateAccountInput!) {
-    updateAccount(input: $input) {
+// Bulletin Mutations
+export const CREATE_BULLETIN = gql`
+  mutation CreateBulletin(
+    $input: CreateBulletinInput!
+    $condition: ModelBulletinConditionInput
+  ) {
+    createBulletin(input: $input, condition: $condition) {
       id
-      billingFreq
+      title
+      content
+      type
+      audience
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const UPDATE_BULLETIN = gql`
+  mutation UpdateBulletin(
+    $input: UpdateBulletinInput!
+    $condition: ModelBulletinConditionInput
+  ) {
+    updateBulletin(input: $input, condition: $condition) {
+      id
+      title
+      content
+      type
+      audience
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const DELETE_BULLETIN = gql`
+  mutation DeleteBulletin(
+    $input: DeleteBulletinInput!
+    $condition: ModelBulletinConditionInput
+  ) {
+    deleteBulletin(input: $input, condition: $condition) {
+      id
+      title
+      content
+      type
+      audience
+      createdAt
+      updatedAt
     }
   }
 `;

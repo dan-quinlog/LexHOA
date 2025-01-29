@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLazyQuery, useMutation } from '@apollo/client';
-import { SEARCH_PAYMENTS, SEARCH_PAYMENTS_BY_OWNER } from '../../queries/queries';
+import { LIST_PAYMENTS, PAYMENTS_BY_OWNER } from '../../queries/queries';
 import { DELETE_PAYMENT } from '../../queries/mutations';
 import PaymentCard from './PaymentCard';
 import PaymentEditModal from './PaymentEditModal';
@@ -15,8 +15,8 @@ const PaymentManager = ({ searchState, setSearchState }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [paymentToDelete, setPaymentToDelete] = useState(null);
 
-  const [searchPayments] = useLazyQuery(SEARCH_PAYMENTS);
-  const [searchByOwner] = useLazyQuery(SEARCH_PAYMENTS_BY_OWNER);
+  const [searchPayments] = useLazyQuery(LIST_PAYMENTS);
+  const [searchByOwner] = useLazyQuery(PAYMENTS_BY_OWNER);
   const [deletePayment] = useMutation(DELETE_PAYMENT);
 
   const handleSearch = async () => {

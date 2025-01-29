@@ -1,292 +1,498 @@
 import { gql } from '@apollo/client';
 
-export const GET_LATEST_BULLETINS = gql`
-  query BulletinsByDate($limit: Int!, $nextToken: String, $filter: ModelBulletinFilterInput) {
-    bulletinsByDate(type: "Bulletin", sortDirection: DESC, limit: $limit, nextToken: $nextToken, filter: $filter) {
+// Profile Queries
+export const GET_PROFILE = gql`
+  query GetProfile($id: ID!) {
+    getProfile(id: $id) {
+      id
+      type
+      cognitoID
+      name
+      email
+      phone
+      address
+      city
+      state
+      zip
+      contactPref
+      billingFreq
+      balance
+      ownedProperties {
+        items {
+          id
+          type
+          address
+          ownerId
+          tenantId
+          createdAt
+          updatedAt
+        }
+      }
+      tenantAt {
+        id
+        type
+        address
+        ownerId
+        tenantId
+        createdAt
+        updatedAt
+      }
+      tenantAtId
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+
+export const LIST_PROFILES = gql`
+  query ListProfiles($filter: ModelProfileFilterInput, $limit: Int, $nextToken: String) {
+    listProfiles(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
-        title
-        content
-        audience
+        type
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
         createdAt
+        updatedAt
+        owner
       }
       nextToken
     }
   }
 `;
 
-export const GET_PROFILE = gql`
-  query GetProfile($cognitoID: String!) {
-    personByCognitoID(cognitoID: $cognitoID) {
+export const PROFILE_BY_COGNITO_ID = gql`
+  query ProfileByCognitoID(
+    $cognitoID: String!
+    $sortDirection: ModelSortDirection
+    $filter: ModelProfileFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    profileByCognitoID(
+      cognitoID: $cognitoID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
       items {
         id
+        type
+        cognitoID
         name
         email
+        phone
         address
         city
         state
         zip
-        phone
-        allowText
         contactPref
         billingFreq
+        balance
+        ownedProperties {
+          items {
+            id
+            type
+            address
+            ownerId
+            tenantId
+            createdAt
+            updatedAt
+          }
+        }
+        tenantAt {
+          id
+          type
+          address
+          ownerId
+          tenantId
+          createdAt
+          updatedAt
+        }
+        tenantAtId
+        createdAt
+        updatedAt
+        owner
       }
+      nextToken
     }
   }
 `;
 
-export const GET_BULLETINS = gql`
-  query GetBulletins($limit: Int, $nextToken: String) {
+export const PROFILE_BY_NAME = gql`
+  query ProfileByName(
+    $name: String!
+    $sortDirection: ModelSortDirection
+    $filter: ModelProfileFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    profileByName(
+      name: $name
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        type
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        owner
+      }
+      nextToken
+    }
+  }
+`;
+
+export const PROFILE_BY_EMAIL = gql`
+  query ProfileByEmail(
+    $email: String!
+    $sortDirection: ModelSortDirection
+    $filter: ModelProfileFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    profileByEmail(
+      email: $email
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        type
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        owner
+      }
+      nextToken
+    }
+  }
+`;
+
+export const PROFILE_BY_PHONE = gql`
+  query ProfileByPhone(
+    $phone: String!
+    $sortDirection: ModelSortDirection
+    $filter: ModelProfileFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    profileByPhone(
+      phone: $phone
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        type
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        owner
+      }
+      nextToken
+    }
+  }
+`;
+
+// Property Queries
+export const GET_PROPERTY = gql`
+  query GetProperty($id: ID!) {
+    getProperty(id: $id) {
+      id
+      type
+      address
+      owner {
+        id
+        name
+        email
+        phone
+      }
+      ownerId
+      tenant {
+        id
+        name
+        email
+        phone
+      }
+      tenantId
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const LIST_PROPERTIES = gql`
+  query ListProperties($filter: ModelPropertyFilterInput, $limit: Int, $nextToken: String) {
+    listProperties(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        type
+        address
+        ownerId
+        tenantId
+        createdAt
+        updatedAt
+      }
+      nextToken
+    }
+  }
+`;
+
+export const PROPERTY_BY_ADDRESS = gql`
+  query PropertyByAddress(
+    $address: String!
+    $sortDirection: ModelSortDirection
+    $filter: ModelPropertyFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    propertyByAddress(
+      address: $address
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        type
+        address
+        ownerId
+        tenantId
+        createdAt
+        updatedAt
+      }
+      nextToken
+    }
+  }
+`;
+
+// Payment Queries
+export const GET_PAYMENT = gql`
+  query GetPayment($id: ID!) {
+    getPayment(id: $id) {
+      id
+      type
+      checkDate
+      checkNumber
+      checkAmount
+      invoiceNumber
+      invoiceAmount
+      ownerPayments {
+        id
+        name
+        email
+      }
+      ownerPaymentsId
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+
+export const LIST_PAYMENTS = gql`
+  query ListPayments($filter: ModelPaymentFilterInput, $limit: Int, $nextToken: String) {
+    listPayments(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        type
+        checkDate
+        checkNumber
+        checkAmount
+        invoiceNumber
+        invoiceAmount
+        ownerPaymentsId
+        createdAt
+        updatedAt
+        owner
+      }
+      nextToken
+    }
+  }
+`;
+
+export const PAYMENTS_BY_OWNER = gql`
+  query PaymentsByOwner(
+    $ownerPaymentsId: ID!
+    $checkDate: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelPaymentFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    paymentsByOwner(
+      ownerPaymentsId: $ownerPaymentsId
+      checkDate: $checkDate
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        type
+        checkDate
+        checkNumber
+        checkAmount
+        invoiceNumber
+        invoiceAmount
+        ownerPaymentsId
+        createdAt
+        updatedAt
+        owner
+      }
+      nextToken
+    }
+  }
+`;
+
+export const PAYMENTS_BY_INVOICE_NUMBER = gql`
+  query PaymentsByInvoiceNumber(
+    $invoiceNumber: String!
+    $sortDirection: ModelSortDirection
+    $filter: ModelPaymentFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    paymentsByInvoiceNumber(
+      invoiceNumber: $invoiceNumber
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        type
+        checkDate
+        checkNumber
+        checkAmount
+        invoiceNumber
+        invoiceAmount
+        ownerPaymentsId
+        createdAt
+        updatedAt
+        owner
+      }
+      nextToken
+    }
+  }
+  `;
+
+// Bulletin Queries
+export const GET_BULLETIN = gql`
+  query GetBulletin($id: ID!) {
+    getBulletin(id: $id) {
+      id
+      title
+      content
+      type
+      audience
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const LIST_BULLETINS = gql`
+  query ListBulletins($filter: ModelBulletinFilterInput, $limit: Int, $nextToken: String) {
+    listBulletins(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        title
+        content
+        type
+        audience
+        createdAt
+        updatedAt
+      }
+      nextToken
+    }
+  }
+`;
+
+export const BULLETINS_BY_DATE = gql`
+  query BulletinsByDate(
+    $type: String!
+    $createdAt: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelBulletinFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
     bulletinsByDate(
-      bulletin: "post",
-      sortDirection: DESC,
-      limit: $limit,
+      type: $type
+      createdAt: $createdAt
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
       nextToken: $nextToken
     ) {
       items {
         id
         title
         content
+        type
         audience
-        datePosted
-      }
-      nextToken
-    }
-  }
-`;
-
-export const LIST_PEOPLE = gql`
-  query ListPeople {
-    listPeople {
-      items {
-        id
-        name
-        email
-        cognitoId
-      }
-    }
-  }
-`;
-
-export const SEARCH_PEOPLE_BY_EMAIL = gql`
-  query PersonByEmail($email: String!) {
-    personByEmail(email: $email) {
-      items {
-        id
-        cognitoID
-        name
-        email
-        address
-        city
-        state
-        zip
-        phone
-        allowText
-        contactPref
-        owner
-      }
-    }
-  }
-`;
-
-export const SEARCH_PEOPLE_BY_PHONE = gql`
-  query SearchPeopleByPhone($phone: String!) {
-    personByPhone(phone: $phone) {
-      items {
-        id
-        cognitoID
-        name
-        email
-        address
-        city
-        state
-        zip
-        phone
-        allowText
-        contactPref
-        owner
-      }
-    }
-  }
-`;
-
-export const SEARCH_PEOPLE_BY_ID = gql`
-  query GetPerson($id: ID!) {
-    getPerson(id: $id) {
-      id
-      cognitoID
-      name
-      email
-      address
-      city
-      state
-      zip
-      phone
-      allowText
-      contactPref
-      owner
-    }
-  }
-`;
-
-export const SEARCH_ACCOUNTS = gql`
-  query SearchAccounts($filter: ModelAccountFilterInput, $limit: Int, $nextToken: String) {
-    listAccounts(filter: $filter, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        accountOwnerId
-        billingFreq
-        balance
         createdAt
         updatedAt
       }
       nextToken
-    }
-  }
-`;
-
-export const SEARCH_PROPERTIES = gql`
-  query ListProperties($filter: ModelPropertyFilterInput) {
-    listProperties(filter: $filter) {
-      items {
-        id
-        address
-        accountPropertiesId
-        propertyTenantId
-        createdAt
-        updatedAt
-      }
-    }
-  }
-`;
-
-export const SEARCH_PROPERTIES_BY_ACCOUNT = gql`
-  query PropertyByAccount($accountPropertiesId: ID!) {
-    propertyByAccount(accountPropertiesId: $accountPropertiesId) {
-      items {
-        id
-        address
-        accountPropertiesId
-        propertyTenantId
-        createdAt
-        updatedAt
-      }
-    }
-  }
-`;
-
-export const SEARCH_PROPERTIES_BY_TENANT = gql`
-  query PropertyByTenant($propertyTenantId: ID!) {
-    propertyByTenant(propertyTenantId: $propertyTenantId) {
-      items {
-        id
-        address
-        accountPropertiesId
-        propertyTenantId
-        createdAt
-        updatedAt
-      }
-    }
-  }
-`;
-export const SEARCH_PAYMENTS = gql`
-  query SearchPayments($filter: ModelPaymentFilterInput, $limit: Int, $nextToken: String) {
-    listPayments(filter: $filter, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        checkDate
-        checkNumber
-        checkAmount
-        invoiceNumber
-        invoiceAmount
-        ownerPaymentsId
-      }
-      nextToken
-    }
-  }
-`;
-
-export const SEARCH_ACCOUNTS_BY_OWNER = gql`
-  query AccountByOwner($accountOwnerId: ID!) {
-    accountByOwner(accountOwnerId: $accountOwnerId) {
-      items {
-        id
-        accountOwnerId
-        billingFreq
-        balance
-        createdAt
-        updatedAt
-      }
-      nextToken
-    }
-  }
-`;
-
-export const SEARCH_PAYMENTS_BY_OWNER = gql`
-  query PaymentsByOwner($ownerPaymentsId: ID!) {
-    paymentsByOwner(ownerPaymentsId: $ownerPaymentsId) {
-      items {
-        id
-        checkDate
-        checkNumber
-        checkAmount
-        invoiceNumber
-        invoiceAmount
-        ownerPaymentsId
-        createdAt
-        updatedAt
-      }
-      nextToken
-    }
-  }
-`;
-
-export const SEARCH_PEOPLE_BY_NAME = gql`
-  query PersonByName($name: String!) {
-    personByName(name: $name) {
-      items {
-        id
-        cognitoID
-        name
-        email
-        address
-        city
-        state
-        zip
-        phone
-        allowText
-        contactPref
-        owner
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-
-export const SEARCH_PERSONS = gql`
-  query SearchPersons($searchType: String!, $searchTerm: String!) {
-    searchPersons(searchType: $searchType, searchTerm: $searchTerm) {
-      id
-      name
-      email
-      phone
-      role
-      status
-      cognitoID
-    }
-  }
-`;
-
-export const GET_ACCOUNT_BY_OWNER = gql`
-  query AccountByOwner($accountOwnerId: ID!) {
-    accountByOwner(accountOwnerId: $accountOwnerId) {
-      items {
-        id
-        accountOwnerId
-        balance
-      }
     }
   }
 `;

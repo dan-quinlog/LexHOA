@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
-import { UPDATE_PROFILE, DELETE_PROFILE } from '../../queries/mutations';
+import { UPDATE_PROFILE, DELETE_PROFILE  } from '../../queries/mutations';
 import Modal from '../shared/Modal';
 import './MergeProfilesModal.css';
 
@@ -21,7 +21,7 @@ const MergeProfilesModal = ({ profiles, show, onClose }) => {
   });
 
   const [updateProfile] = useMutation(UPDATE_PROFILE);
-  const [deleteProfile] = useMutation(DELETE_PROFILE);
+  const [deleteProfile] = useMutation(DELETE_PROFILE );
 
   const handleSelect = (field, value, profileId) => {
     setMergedData(prev => ({

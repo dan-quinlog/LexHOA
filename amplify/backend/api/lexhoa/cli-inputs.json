@@ -11,8 +11,8 @@
       {
         "mode": "API_KEY",
         "expirationTime": 30,
-        "apiKeyExpirationDate": "2024-12-25T01:44:48.120Z",
-        "keyDescription": "LexHOApublicAPI"
+        "apiKeyExpirationDate": "2025-02-27T04:24:19.969Z",
+        "keyDescription": "api key for testing"
       }
     ],
     "conflictResolution": {}

@@ -1,6 +1,7 @@
   import React, { useState } from 'react';
-  import { useQuery } from '@apollo/client';
+  import { useQuery, useMutation } from '@apollo/client';
   import { PROFILE_BY_COGNITO_ID } from '../../queries/queries';
+  import { UPDATE_PROFILE } from '../../queries/mutations';
   import ProfileCard from '../../components/user/ProfileCard';
   import PropertyCard from '../../components/user/PropertyCard';
   import ProfileEditModal from '../../components/shared/ProfileEditModal';
@@ -8,6 +9,7 @@
 
   const Profile = ({ cognitoId }) => {
     const [showEditModal, setShowEditModal] = useState(false);
+    const [updateProfile] = useMutation(UPDATE_PROFILE);
 
     const { data: profileData } = useQuery(PROFILE_BY_COGNITO_ID, {
       variables: { cognitoID: cognitoId },
@@ -15,6 +17,18 @@
     });
 
     const profile = profileData?.profileByCognitoID?.items[0];
+
+    const handleProfileUpdate = async (formData) => {
+      await updateProfile({
+        variables: {
+          input: {
+            id: profile.id,
+            ...formData
+          }
+        }
+      });
+      setShowEditModal(false);
+    };
 
     return (
       <div className="profile-page">
@@ -28,14 +42,15 @@
               Edit Profile
             </button>
           </div>
-       
+     
           {profile && (
             <>
               <ProfileCard profile={profile} />
               <ProfileEditModal
                 show={showEditModal}
                 onClose={() => setShowEditModal(false)}
-                profile={profile}
+                onSubmit={handleProfileUpdate}
+                initialValues={profile}
                 isBoard={true}
               />
             </>

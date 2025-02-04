@@ -1,3 +1,7 @@
+# This "input" configures a global authorization rule to enable public access to
+# all models in this schema. Learn more about authorization rules here: https://docs.amplify.aws/cli/graphql/authorization-rules
+input AMPLIFY { globalAuthRule: AuthRule = { allow: public } } # FOR TESTING ONLY!
+
 type Profile @model
   @auth(rules: [
     { allow: private, operations: [create, read] },
@@ -11,6 +15,7 @@ type Profile @model
       queryField: "profilesByType"
       sortKeyFields: ["name", "balance", "createdAt"]
     )
+  owner: String
   cognitoID: String @index(name: "byCognitoID", queryField: "profileByCognitoID")
   name: String @index(name: "byName", queryField: "profileByName")
   email: String @index(name: "byEmail", queryField: "profileByEmail")
@@ -29,7 +34,7 @@ type Profile @model
   @index(
     name: "byBalance"
     queryField: "profilesByBalance"
-    sortKeyFields: ["name", "email", "phone", "createdAt"]
+    sortKeyFields: ["name"]
   )
   ownedProperties: [Property] @hasMany(indexName: "byOwner", fields: ["id"])
   payments: [Payment] @hasMany(indexName: "byOwnerPayments", fields: ["id"])
@@ -42,8 +47,9 @@ type Profile @model
 type Property @model
   @auth(rules: [
     { allow: private, operations: [read] },
-    { allow: groups, groups: ["BOARD"], operations: [create, update, delete] }
-  ]) {
+    { allow: groups, groups: ["BOARD"], operations: [create, update, delete] },
+  ])
+{
   id: ID!
   type: String @default(value: "PROPERTY")
     @index(
@@ -51,11 +57,14 @@ type Property @model
       queryField: "propertiesByType"
       sortKeyFields: ["id"]
     )
+  owner: String
   address: String! @index(name: "byAddress", queryField: "propertyByAddress")
-  owner: Profile @belongsTo(fields: ["ownerId"])
-  ownerId: ID @index(name: "byOwner")
-  tenant: Profile @hasOne(fields: ["tenantId"])
-  tenantId: ID @index(name: "byTenant")
+  profOwner: Profile @belongsTo(fields: ["profOwnerId"])
+  profOwnerId: ID @index(name: "byOwner")
+  profTenant: Profile @hasOne(fields: ["profTenantId"])
+  profTenantId: ID @index(name: "byTenant")
+    @auth(rules: [{ allow: owner, operations: [update] },
+    { allow: groups, groups: ["BOARD"], operations: [update] }])
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
 }

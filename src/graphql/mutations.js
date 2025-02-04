@@ -1,125 +1,140 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
-export const createPerson = /* GraphQL */ `
-  mutation CreatePerson(
-    $input: CreatePersonInput!
-    $condition: ModelPersonConditionInput
+export const createProfile = /* GraphQL */ `
+  mutation CreateProfile(
+    $input: CreateProfileInput!
+    $condition: ModelProfileConditionInput
   ) {
-    createPerson(input: $input, condition: $condition) {
+    createProfile(input: $input, condition: $condition) {
       id
+      type
+      owner
       cognitoID
       name
       email
+      phone
       address
       city
       state
       zip
-      phone
-      allowText
       contactPref
       billingFreq
+      balance
+      ownedProperties {
+        nextToken
+        __typename
+      }
+      payments {
+        nextToken
+        __typename
+      }
+      tenantAt {
+        id
+        type
+        owner
+        address
+        profOwnerId
+        profTenantId
+        createdAt
+        updatedAt
+        __typename
+      }
+      tenantAtId
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
 `;
-export const updatePerson = /* GraphQL */ `
-  mutation UpdatePerson(
-    $input: UpdatePersonInput!
-    $condition: ModelPersonConditionInput
+export const updateProfile = /* GraphQL */ `
+  mutation UpdateProfile(
+    $input: UpdateProfileInput!
+    $condition: ModelProfileConditionInput
   ) {
-    updatePerson(input: $input, condition: $condition) {
+    updateProfile(input: $input, condition: $condition) {
       id
+      type
+      owner
       cognitoID
       name
       email
+      phone
       address
       city
       state
       zip
-      phone
-      allowText
       contactPref
       billingFreq
+      balance
+      ownedProperties {
+        nextToken
+        __typename
+      }
+      payments {
+        nextToken
+        __typename
+      }
+      tenantAt {
+        id
+        type
+        owner
+        address
+        profOwnerId
+        profTenantId
+        createdAt
+        updatedAt
+        __typename
+      }
+      tenantAtId
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
 `;
-export const deletePerson = /* GraphQL */ `
-  mutation DeletePerson(
-    $input: DeletePersonInput!
-    $condition: ModelPersonConditionInput
+export const deleteProfile = /* GraphQL */ `
+  mutation DeleteProfile(
+    $input: DeleteProfileInput!
+    $condition: ModelProfileConditionInput
   ) {
-    deletePerson(input: $input, condition: $condition) {
+    deleteProfile(input: $input, condition: $condition) {
       id
+      type
+      owner
       cognitoID
       name
       email
+      phone
       address
       city
       state
       zip
-      phone
-      allowText
       contactPref
       billingFreq
-      createdAt
-      updatedAt
-      owner
-      __typename
-    }
-  }
-`;
-export const createAccount = /* GraphQL */ `
-  mutation CreateAccount(
-    $input: CreateAccountInput!
-    $condition: ModelAccountConditionInput
-  ) {
-    createAccount(input: $input, condition: $condition) {
-      id
-      accountOwnerId
       balance
+      ownedProperties {
+        nextToken
+        __typename
+      }
+      payments {
+        nextToken
+        __typename
+      }
+      tenantAt {
+        id
+        type
+        owner
+        address
+        profOwnerId
+        profTenantId
+        createdAt
+        updatedAt
+        __typename
+      }
+      tenantAtId
       createdAt
       updatedAt
-      owner
-      __typename
-    }
-  }
-`;
-export const updateAccount = /* GraphQL */ `
-  mutation UpdateAccount(
-    $input: UpdateAccountInput!
-    $condition: ModelAccountConditionInput
-  ) {
-    updateAccount(input: $input, condition: $condition) {
-      id
-      accountOwnerId
-      balance
-      createdAt
-      updatedAt
-      owner
-      __typename
-    }
-  }
-`;
-export const deleteAccount = /* GraphQL */ `
-  mutation DeleteAccount(
-    $input: DeleteAccountInput!
-    $condition: ModelAccountConditionInput
-  ) {
-    deleteAccount(input: $input, condition: $condition) {
-      id
-      accountOwnerId
-      balance
-      createdAt
-      updatedAt
-      owner
       __typename
     }
   }
@@ -131,12 +146,53 @@ export const createProperty = /* GraphQL */ `
   ) {
     createProperty(input: $input, condition: $condition) {
       id
+      type
+      owner
       address
-      accountPropertiesId
-      propertyTenantId
+      profOwner {
+        id
+        type
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      profOwnerId
+      profTenant {
+        id
+        type
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      profTenantId
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
@@ -148,12 +204,53 @@ export const updateProperty = /* GraphQL */ `
   ) {
     updateProperty(input: $input, condition: $condition) {
       id
+      type
+      owner
       address
-      accountPropertiesId
-      propertyTenantId
+      profOwner {
+        id
+        type
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      profOwnerId
+      profTenant {
+        id
+        type
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      profTenantId
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
@@ -165,12 +262,53 @@ export const deleteProperty = /* GraphQL */ `
   ) {
     deleteProperty(input: $input, condition: $condition) {
       id
+      type
+      owner
       address
-      accountPropertiesId
-      propertyTenantId
+      profOwner {
+        id
+        type
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      profOwnerId
+      profTenant {
+        id
+        type
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      profTenantId
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
@@ -182,11 +320,32 @@ export const createPayment = /* GraphQL */ `
   ) {
     createPayment(input: $input, condition: $condition) {
       id
+      type
       checkDate
       checkNumber
       checkAmount
       invoiceNumber
       invoiceAmount
+      ownerPayments {
+        id
+        type
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
       ownerPaymentsId
       createdAt
       updatedAt
@@ -202,11 +361,32 @@ export const updatePayment = /* GraphQL */ `
   ) {
     updatePayment(input: $input, condition: $condition) {
       id
+      type
       checkDate
       checkNumber
       checkAmount
       invoiceNumber
       invoiceAmount
+      ownerPayments {
+        id
+        type
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
       ownerPaymentsId
       createdAt
       updatedAt
@@ -222,11 +402,32 @@ export const deletePayment = /* GraphQL */ `
   ) {
     deletePayment(input: $input, condition: $condition) {
       id
+      type
       checkDate
       checkNumber
       checkAmount
       invoiceNumber
       invoiceAmount
+      ownerPayments {
+        id
+        type
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
       ownerPaymentsId
       createdAt
       updatedAt
@@ -280,6 +481,60 @@ export const deleteBulletin = /* GraphQL */ `
       content
       type
       audience
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const createPing = /* GraphQL */ `
+  mutation CreatePing(
+    $input: CreatePingInput!
+    $condition: ModelPingConditionInput
+  ) {
+    createPing(input: $input, condition: $condition) {
+      id
+      type
+      items
+      instruction
+      status
+      createdBy
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updatePing = /* GraphQL */ `
+  mutation UpdatePing(
+    $input: UpdatePingInput!
+    $condition: ModelPingConditionInput
+  ) {
+    updatePing(input: $input, condition: $condition) {
+      id
+      type
+      items
+      instruction
+      status
+      createdBy
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deletePing = /* GraphQL */ `
+  mutation DeletePing(
+    $input: DeletePingInput!
+    $condition: ModelPingConditionInput
+  ) {
+    deletePing(input: $input, condition: $condition) {
+      id
+      type
+      items
+      instruction
+      status
+      createdBy
       createdAt
       updatedAt
       __typename

@@ -101,11 +101,8 @@ export const CREATE_PROPERTY = gql`
 `;
 
 export const UPDATE_PROPERTY = gql`
-  mutation UpdateProperty(
-    $input: UpdatePropertyInput!
-    $condition: ModelPropertyConditionInput
-  ) {
-    updateProperty(input: $input, condition: $condition) {
+  mutation UpdateProperty($input: UpdatePropertyInput!) {
+    updateProperty(input: $input) {
       id
       type
       address
@@ -113,9 +110,15 @@ export const UPDATE_PROPERTY = gql`
       tenantId
       createdAt
       updatedAt
+      tenant {
+        id
+        name
+        phone
+      }
     }
   }
 `;
+
 
 export const DELETE_PROPERTY = gql`
   mutation DeleteProperty(

@@ -1,107 +1,131 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
-export const onCreatePerson = /* GraphQL */ `
-  subscription OnCreatePerson($filter: ModelSubscriptionPersonFilterInput) {
-    onCreatePerson(filter: $filter) {
+export const onCreateProfile = /* GraphQL */ `
+  subscription OnCreateProfile($filter: ModelSubscriptionProfileFilterInput) {
+    onCreateProfile(filter: $filter) {
       id
+      type
+      owner
       cognitoID
       name
       email
+      phone
       address
       city
       state
       zip
-      phone
-      allowText
       contactPref
       billingFreq
+      balance
+      ownedProperties {
+        nextToken
+        __typename
+      }
+      payments {
+        nextToken
+        __typename
+      }
+      tenantAt {
+        id
+        type
+        owner
+        address
+        profOwnerId
+        profTenantId
+        createdAt
+        updatedAt
+        __typename
+      }
+      tenantAtId
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
 `;
-export const onUpdatePerson = /* GraphQL */ `
-  subscription OnUpdatePerson($filter: ModelSubscriptionPersonFilterInput) {
-    onUpdatePerson(filter: $filter) {
+export const onUpdateProfile = /* GraphQL */ `
+  subscription OnUpdateProfile($filter: ModelSubscriptionProfileFilterInput) {
+    onUpdateProfile(filter: $filter) {
       id
+      type
+      owner
       cognitoID
       name
       email
+      phone
       address
       city
       state
       zip
-      phone
-      allowText
       contactPref
       billingFreq
+      balance
+      ownedProperties {
+        nextToken
+        __typename
+      }
+      payments {
+        nextToken
+        __typename
+      }
+      tenantAt {
+        id
+        type
+        owner
+        address
+        profOwnerId
+        profTenantId
+        createdAt
+        updatedAt
+        __typename
+      }
+      tenantAtId
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
 `;
-export const onDeletePerson = /* GraphQL */ `
-  subscription OnDeletePerson($filter: ModelSubscriptionPersonFilterInput) {
-    onDeletePerson(filter: $filter) {
+export const onDeleteProfile = /* GraphQL */ `
+  subscription OnDeleteProfile($filter: ModelSubscriptionProfileFilterInput) {
+    onDeleteProfile(filter: $filter) {
       id
+      type
+      owner
       cognitoID
       name
       email
+      phone
       address
       city
       state
       zip
-      phone
-      allowText
       contactPref
       billingFreq
-      createdAt
-      updatedAt
-      owner
-      __typename
-    }
-  }
-`;
-export const onCreateAccount = /* GraphQL */ `
-  subscription OnCreateAccount($filter: ModelSubscriptionAccountFilterInput) {
-    onCreateAccount(filter: $filter) {
-      id
-      accountOwnerId
       balance
+      ownedProperties {
+        nextToken
+        __typename
+      }
+      payments {
+        nextToken
+        __typename
+      }
+      tenantAt {
+        id
+        type
+        owner
+        address
+        profOwnerId
+        profTenantId
+        createdAt
+        updatedAt
+        __typename
+      }
+      tenantAtId
       createdAt
       updatedAt
-      owner
-      __typename
-    }
-  }
-`;
-export const onUpdateAccount = /* GraphQL */ `
-  subscription OnUpdateAccount($filter: ModelSubscriptionAccountFilterInput) {
-    onUpdateAccount(filter: $filter) {
-      id
-      accountOwnerId
-      balance
-      createdAt
-      updatedAt
-      owner
-      __typename
-    }
-  }
-`;
-export const onDeleteAccount = /* GraphQL */ `
-  subscription OnDeleteAccount($filter: ModelSubscriptionAccountFilterInput) {
-    onDeleteAccount(filter: $filter) {
-      id
-      accountOwnerId
-      balance
-      createdAt
-      updatedAt
-      owner
       __typename
     }
   }
@@ -110,12 +134,53 @@ export const onCreateProperty = /* GraphQL */ `
   subscription OnCreateProperty($filter: ModelSubscriptionPropertyFilterInput) {
     onCreateProperty(filter: $filter) {
       id
+      type
+      owner
       address
-      accountPropertiesId
-      propertyTenantId
+      profOwner {
+        id
+        type
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      profOwnerId
+      profTenant {
+        id
+        type
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      profTenantId
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
@@ -124,12 +189,53 @@ export const onUpdateProperty = /* GraphQL */ `
   subscription OnUpdateProperty($filter: ModelSubscriptionPropertyFilterInput) {
     onUpdateProperty(filter: $filter) {
       id
+      type
+      owner
       address
-      accountPropertiesId
-      propertyTenantId
+      profOwner {
+        id
+        type
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      profOwnerId
+      profTenant {
+        id
+        type
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      profTenantId
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
@@ -138,12 +244,53 @@ export const onDeleteProperty = /* GraphQL */ `
   subscription OnDeleteProperty($filter: ModelSubscriptionPropertyFilterInput) {
     onDeleteProperty(filter: $filter) {
       id
+      type
+      owner
       address
-      accountPropertiesId
-      propertyTenantId
+      profOwner {
+        id
+        type
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      profOwnerId
+      profTenant {
+        id
+        type
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      profTenantId
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
@@ -155,11 +302,32 @@ export const onCreatePayment = /* GraphQL */ `
   ) {
     onCreatePayment(filter: $filter, owner: $owner) {
       id
+      type
       checkDate
       checkNumber
       checkAmount
       invoiceNumber
       invoiceAmount
+      ownerPayments {
+        id
+        type
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
       ownerPaymentsId
       createdAt
       updatedAt
@@ -175,11 +343,32 @@ export const onUpdatePayment = /* GraphQL */ `
   ) {
     onUpdatePayment(filter: $filter, owner: $owner) {
       id
+      type
       checkDate
       checkNumber
       checkAmount
       invoiceNumber
       invoiceAmount
+      ownerPayments {
+        id
+        type
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
       ownerPaymentsId
       createdAt
       updatedAt
@@ -195,15 +384,81 @@ export const onDeletePayment = /* GraphQL */ `
   ) {
     onDeletePayment(filter: $filter, owner: $owner) {
       id
+      type
       checkDate
       checkNumber
       checkAmount
       invoiceNumber
       invoiceAmount
+      ownerPayments {
+        id
+        type
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
       ownerPaymentsId
       createdAt
       updatedAt
       owner
+      __typename
+    }
+  }
+`;
+export const onCreatePing = /* GraphQL */ `
+  subscription OnCreatePing($filter: ModelSubscriptionPingFilterInput) {
+    onCreatePing(filter: $filter) {
+      id
+      type
+      items
+      instruction
+      status
+      createdBy
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdatePing = /* GraphQL */ `
+  subscription OnUpdatePing($filter: ModelSubscriptionPingFilterInput) {
+    onUpdatePing(filter: $filter) {
+      id
+      type
+      items
+      instruction
+      status
+      createdBy
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeletePing = /* GraphQL */ `
+  subscription OnDeletePing($filter: ModelSubscriptionPingFilterInput) {
+    onDeletePing(filter: $filter) {
+      id
+      type
+      items
+      instruction
+      status
+      createdBy
+      createdAt
+      updatedAt
       __typename
     }
   }

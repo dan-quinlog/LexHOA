@@ -5,23 +5,22 @@ import Modal from './Modal';
 import { US_STATES } from '../../utils/constants';
 import './ProfileEditModal.css';
 
-const ProfileEditModal = ({ person, show, onClose, isBoard = false }) => {
+const ProfileEditModal = ({ 
+  show, 
+  onClose, 
+  onSubmit, 
+  initialValues = {}, 
+  isBoard = false 
+}) => {
   const [formData, setFormData] = useState({
-    name: person?.name || '',
-    email: person?.email || '',
-    phone: person?.phone || '',
-    cognitoID: person?.cognitoID || '',
-    address: person?.address || '',
-    city: person?.city || '',
-    state: person?.state || '',
-    zip: person?.zip || '',
-    allowText: person?.allowText || false,
-    contactPref: person?.contactPref || '',
-    billingFreq: person?.billingFreq || ''
+    name: initialValues.name || '',
+    email: initialValues.email || '',
+    phone: initialValues.phone || '',
+    address: initialValues.address || '',
+    city: initialValues.city || '',
+    state: initialValues.state || '',
+    zip: initialValues.zip || ''
   });
-
-  const [createPerson] = useMutation(CREATE_PROFILE);
-  const [updatePerson] = useMutation(UPDATE_PROFILE);
 
   const handlePhoneChange = (e) => {
     const phoneNumber = e.target.value.replace(/\D/g, '');
@@ -38,45 +37,22 @@ const ProfileEditModal = ({ person, show, onClose, isBoard = false }) => {
     setFormData(prev => ({ ...prev, address: newAddress }));
   };
 
-  const handleSubmit = async () => {
-    try {
-      const input = Object.entries(formData).reduce((acc, [key, value]) => {
-        if (value !== '' && value !== null && value !== undefined) {
-          acc[key] = value;
-        }
-        return acc;
-      }, {});
-
-      if (!input.name) {
-        console.error('Name is required');
-        return;
-      }
-
-      if (person?.id) {
-        await updatePerson({
-          variables: {
-            input: {
-              id: person.id,
-              ...input
-            }
-          }
-        });
-      } else {
-        await createPerson({
-          variables: {
-            input
-          }
-        });
-      }
-      onClose();
-    } catch (error) {
-      console.error('Error saving person:', error);
+  const handleSubmit = () => {
+    if (!formData.name) {
+      console.error('Name is required');
+      return;
     }
+    onSubmit(formData);
   };
+  
 
   return (
     <Modal show={show} onClose={onClose}>
-      <h2>{person?.id ? (isBoard ? 'Edit Resident' : 'Edit Profile') : 'Create New Person'}</h2>
+      <h2>
+        {initialValues?.id 
+          ? (isBoard ? 'Edit Resident' : 'Edit Profile') 
+          : 'Create New Person'}
+      </h2>
       <div className="form-container">
         <div className="form-section">
           <h3>Primary Information</h3>
@@ -193,7 +169,9 @@ const ProfileEditModal = ({ person, show, onClose, isBoard = false }) => {
         </div>
       </div>
       <div className="modal-actions">
-        <button onClick={handleSubmit}>{person?.id ? 'Save' : 'Create'}</button>
+        <button onClick={handleSubmit}>
+          {initialValues?.id ? 'Save' : 'Create'}
+        </button>
         <button onClick={onClose}>Cancel</button>
       </div>
     </Modal>

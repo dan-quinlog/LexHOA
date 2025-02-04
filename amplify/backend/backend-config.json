@@ -7,7 +7,7 @@
             "UserPoolId"
           ],
           "category": "auth",
-          "resourceName": "lexhoa"
+          "resourceName": "lexhoa4faca5b8"
         }
       ],
       "output": {
@@ -15,9 +15,9 @@
           "additionalAuthenticationProviders": [
             {
               "apiKeyConfig": {
-                "apiKeyExpirationDate": "2025-02-27T04:24:19.969Z",
+                "apiKeyExpirationDate": "2025-03-05T03:31:30.015Z",
                 "apiKeyExpirationDays": 30,
-                "description": "api key for testing"
+                "description": "test key"
               },
               "authenticationType": "API_KEY"
             }
@@ -25,7 +25,7 @@
           "defaultAuthentication": {
             "authenticationType": "AMAZON_COGNITO_USER_POOLS",
             "userPoolConfig": {
-              "userPoolId": "authlexhoa"
+              "userPoolId": "authlexhoa4faca5b8"
             }
           }
         }
@@ -35,19 +35,9 @@
     }
   },
   "auth": {
-    "lexhoa": {
+    "lexhoa4faca5b8": {
       "customAuth": false,
-      "dependsOn": [
-        {
-          "attributes": [
-            "Arn",
-            "Name"
-          ],
-          "category": "function",
-          "resourceName": "lexhoaPostConfirmation",
-          "triggerProvider": "Cognito"
-        }
-      ],
+      "dependsOn": [],
       "frontendAuthConfig": {
         "mfaConfiguration": "OPTIONAL",
         "mfaTypes": [
@@ -81,45 +71,11 @@
             "AppClientID"
           ],
           "category": "auth",
-          "resourceName": "lexhoa"
+          "resourceName": "lexhoa4faca5b8"
         }
       ],
       "providerPlugin": "awscloudformation",
       "service": "Cognito-UserPool-Groups"
-    }
-  },
-  "function": {
-    "lexhoaPostConfirmation": {
-      "build": true,
-      "dependsOn": [],
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda"
-    }
-  },
-  "parameters": {
-    "AMPLIFY_function_lexhoaPostConfirmation_apiLexhoaPersontableName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "lexhoaPostConfirmation"
-        }
-      ]
-    },
-    "AMPLIFY_function_lexhoaPostConfirmation_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "lexhoaPostConfirmation"
-        }
-      ]
-    },
-    "AMPLIFY_function_lexhoaPostConfirmation_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "lexhoaPostConfirmation"
-        }
-      ]
     }
   }
 }

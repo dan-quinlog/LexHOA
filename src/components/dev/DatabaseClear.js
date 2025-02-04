@@ -2,39 +2,39 @@ import { useApolloClient, gql } from '@apollo/client'
 import { useState } from 'react'
 import {
   DELETE_PROFILE,
-      DELETE_PROPERTY,
-      DELETE_PAYMENT
+  DELETE_PROPERTY,
+  DELETE_PAYMENT,
+  UPDATE_PROPERTY
 } from '../../queries/mutations'
 
-// Simplified queries that only fetch IDs
 const LIST_IDS = {
-    PEOPLE: gql`
-      query ListPeople {
-        listPeople {
-          items {
-            id
-          }
+  PEOPLE: gql`
+    query ListProfiles {
+      listProfiles {
+        items {
+          id
         }
       }
-    `,
-    PROPERTIES: gql`
-      query ListProperties {
-        listProperties {
-          items {
-            id
-          }
+    }
+  `,
+  PROPERTIES: gql`
+    query ListProperties {
+      listProperties {
+        items {
+          id
         }
       }
-    `,
-    PAYMENTS: gql`
-      query ListPayments {
-        listPayments {
-          items {
-            id
-          }
+    }
+  `,
+  PAYMENTS: gql`
+    query ListPayments {
+      listPayments {
+        items {
+          id
         }
       }
-    `
+    }
+  `
 }
 
 export const ClearButton = () => {
@@ -45,27 +45,36 @@ export const ClearButton = () => {
   const clearDatabase = async () => {
     setIsClearing(true)
     setStatus('Starting database clear...')
-    
+
     try {
       setStatus('Fetching records...')
       const { data: peopleData } = await client.query({ query: LIST_IDS.PEOPLE })
       const { data: propertiesData } = await client.query({ query: LIST_IDS.PROPERTIES })
       const { data: paymentsData } = await client.query({ query: LIST_IDS.PAYMENTS })
 
-      setStatus('Deleting records...')
-      const deletePromises = [
-        ...peopleData.listPeople.items.map(item => 
-          client.mutate({ mutation: DELETE_PROFILE, variables: { input: { id: item.id } } })
-        ),
-        ...propertiesData.listProperties.items.map(item =>
-          client.mutate({ mutation: DELETE_PROPERTY, variables: { input: { id: item.id } } })
-        ),
-        ...paymentsData.listPayments.items.map(item =>
-          client.mutate({ mutation: DELETE_PAYMENT, variables: { input: { id: item.id } } })
-        )
-      ]
+      setStatus('Clearing relationships...')
+      const clearPropertyRelations = propertiesData.listProperties.items.map(item =>
+        client.mutate({
+          mutation: UPDATE_PROPERTY,
+          variables: { input: { id: item.id, tenantId: null, ownerId: null } }
+        })
+      )
+      await Promise.all(clearPropertyRelations)
 
-      await Promise.all(deletePromises)
+          setStatus('Deleting records...')
+          // Delete in reverse dependency order: profiles, properties, payments
+          await Promise.all(peopleData.listProfiles.items.map(item =>
+            client.mutate({ mutation: DELETE_PROFILE, variables: { input: { id: item.id } } })
+          ))
+
+          await Promise.all(propertiesData.listProperties.items.map(item =>
+            client.mutate({ mutation: DELETE_PROPERTY, variables: { input: { id: item.id } } })
+          ))
+
+          await Promise.all(paymentsData.listPayments.items.map(item =>
+            client.mutate({ mutation: DELETE_PAYMENT, variables: { input: { id: item.id } } })
+          ))
+
       setStatus('Database cleared successfully!')
     } catch (error) {
       setStatus(`Error: ${error.message}`)
@@ -77,11 +86,11 @@ export const ClearButton = () => {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-      <button 
+      <button
         onClick={clearDatabase}
         disabled={isClearing}
-        style={{ 
-          backgroundColor: isClearing ? 'grey' : 'red', 
+        style={{
+          backgroundColor: isClearing ? 'grey' : 'red',
           color: 'white',
           padding: '0.5rem 1rem',
           border: 'none',
@@ -92,7 +101,7 @@ export const ClearButton = () => {
         {isClearing ? 'Clearing...' : 'Clear DB'}
       </button>
       {status && (
-        <span style={{ 
+        <span style={{
           color: status.includes('Error') ? 'red' : 'green',
           fontSize: '0.9rem'
         }}>

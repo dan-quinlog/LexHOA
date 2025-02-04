@@ -7,7 +7,7 @@ export type AmplifyDependentResourcesAttributes = {
     }
   },
   "auth": {
-    "lexhoa": {
+    "lexhoa4faca5b8": {
       "AppClientID": "string",
       "AppClientIDWeb": "string",
       "HostedUIDomain": "string",
@@ -15,15 +15,6 @@ export type AmplifyDependentResourcesAttributes = {
       "UserPoolArn": "string",
       "UserPoolId": "string",
       "UserPoolName": "string"
-    }
-  },
-  "function": {
-    "lexhoaPostConfirmation": {
-      "Arn": "string",
-      "LambdaExecutionRole": "string",
-      "LambdaExecutionRoleArn": "string",
-      "Name": "string",
-      "Region": "string"
     }
   }
 }

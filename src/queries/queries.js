@@ -110,6 +110,13 @@ export const PROFILE_BY_COGNITO_ID = gql`
             tenantId
             createdAt
             updatedAt
+            tenant {
+              id
+              name
+              email
+              phone
+              contactPref
+            }
           }
         }
         tenantAt {

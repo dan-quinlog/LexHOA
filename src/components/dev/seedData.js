@@ -51,18 +51,19 @@ export const testData = {
     {
       id: "28",
       ownerId: "a4a84408-20f1-709f-0272-c9d2b96be859",
+      owner: "a4a84408-20f1-709f-0272-c9d2b96be859",
       address: "468 south road st",
       type: "PROPERTY"
     },
     {
       id: "25",
       ownerId: "a4a84408-20f1-709f-0272-c9d2b96be859",
+      owner: "a4a84408-20f1-709f-0272-c9d2b96be859",
       tenantId: "e46844c8-5061-70e2-11e8-768fab589bea",
       address: "414 south road st",
       type: "PROPERTY"
     }
-  ],
-  payments: [
+  ],  payments: [
     {
       ownerPaymentsId: "a4a84408-20f1-709f-0272-c9d2b96be859",
       id: "389af32b-8e11-4e89-98ef-b56efe48dddd",

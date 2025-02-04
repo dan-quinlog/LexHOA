@@ -1,0 +1,18 @@
+.property-card .two-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-medium);
+}
+
+.add-tenant-button {
+  padding: var(--spacing-small) var(--spacing-medium);
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+}
+
+.add-tenant-button:hover {
+  background-color: var(--primary-color-dark);
+}

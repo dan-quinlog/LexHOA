@@ -1,6 +1,3 @@
-# This "input" configures a global authorization rule to enable public access to
-# all models in this schema. Learn more about authorization rules here: https://docs.amplify.aws/cli/graphql/authorization-rules
-input AMPLIFY { globalAuthRule: AuthRule = { allow: public } } # FOR TESTING ONLY!
 
 type Profile @model
   @auth(rules: [
@@ -28,7 +25,7 @@ type Profile @model
   billingFreq: BillingFreq @default(value: "MONTHLY")
   balance: Float @auth(rules: [
     { allow: private, operations: [create, read] },
-    { allow: groups, groups: ["BOARD"], operations: [create, update] }
+    { allow: groups, groups: ["BOARD"], operations: [create, update, delete] }
   ])
   @default(value:"0.00")
   @index(
@@ -63,8 +60,11 @@ type Property @model
   profOwnerId: ID @index(name: "byOwner")
   profTenant: Profile @hasOne(fields: ["profTenantId"])
   profTenantId: ID @index(name: "byTenant")
-    @auth(rules: [{ allow: owner, operations: [update] },
-    { allow: groups, groups: ["BOARD"], operations: [update] }])
+  @auth(rules: [
+    { allow: private, operations: [read] },
+    { allow: groups, groups: ["OWNERS"], operations: [read, create, update] },
+    { allow: groups, groups: ["BOARD"], operations: [create, read, update, delete] }
+  ])
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
 }

@@ -77,5 +77,41 @@
       "providerPlugin": "awscloudformation",
       "service": "Cognito-UserPool-Groups"
     }
+  },
+  "function": {
+    "GenerateProfileOnSignUp": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "lexhoa"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    }
+  },
+  "parameters": {
+    "AMPLIFY_function_GenerateProfileOnSignUp_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "GenerateProfileOnSignUp"
+        }
+      ]
+    },
+    "AMPLIFY_function_GenerateProfileOnSignUp_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "GenerateProfileOnSignUp"
+        }
+      ]
+    }
   }
 }

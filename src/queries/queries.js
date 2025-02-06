@@ -22,10 +22,17 @@ export const GET_PROFILE = gql`
           id
           type
           address
-          ownerId
-          tenantId
+          profOwnerId
+          profTenantId
           createdAt
           updatedAt
+          profTenant {
+            id
+            name
+            email
+            phone
+            contactPref
+          }
         }
       }
       tenantAt {
@@ -106,11 +113,11 @@ export const PROFILE_BY_COGNITO_ID = gql`
             id
             type
             address
-            ownerId
-            tenantId
+            profOwnerId
+            profTenantId
             createdAt
             updatedAt
-            tenant {
+            profTenant {
               id
               name
               email
@@ -123,8 +130,8 @@ export const PROFILE_BY_COGNITO_ID = gql`
           id
           type
           address
-          ownerId
-          tenantId
+          profOwnerId
+          profTenantId
           createdAt
           updatedAt
         }
@@ -262,20 +269,20 @@ export const GET_PROPERTY = gql`
       id
       type
       address
-      owner {
+      profOwner {
         id
         name
         email
         phone
       }
-      ownerId
-      tenant {
+      profOwnerId
+      profTenant {
         id
         name
         email
         phone
       }
-      tenantId
+      profTenantId
       createdAt
       updatedAt
     }

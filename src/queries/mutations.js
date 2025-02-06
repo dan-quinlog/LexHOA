@@ -92,8 +92,8 @@ export const CREATE_PROPERTY = gql`
       id
       type
       address
-      ownerId
-      tenantId
+      profOwnerId
+      profTenantId
       createdAt
       updatedAt
     }
@@ -106,11 +106,11 @@ export const UPDATE_PROPERTY = gql`
       id
       type
       address
-      ownerId
-      tenantId
+      profOwnerId
+      profTenantId
       createdAt
       updatedAt
-      tenant {
+      profTenant {
         id
         name
         phone

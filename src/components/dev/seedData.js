@@ -1,98 +1,103 @@
 export const testData = {
   profiles: [
     {
-      id: "54385478-b091-70d7-b6ab-ddc6b789b170",
-      email: "board@noemail.com",
-      name: "board",
-      balance: 0,
-      phone: "3218881515",
-      address: "123 east|apt 1",
-      billingFreq: "MONTHLY",
-      city: "Springfield",
-      cognitoID: "54385478-b091-70d7-b6ab-ddc6b789b170",
-      contactPref: "CALL",
+      id: "64c824e8-00b1-7080-e39e-f441cead3e4c",
+      cognitoID: "64c824e8-00b1-7080-e39e-f441cead3e4c",
+      owner: "64c824e8-00b1-7080-e39e-f441cead3e4c",
+      name: "James Wilson",
+      email: "jwilson@email.com",
+      phone: "8435551234",
+      address: "1234 Street St",
+      city: "West Columbia",
       state: "SC",
-      type: "PROFILE",
-      zip: "23456"
+      zip: "29169",
+      contactPref: "EMAIL",
+      billingFreq: "MONTHLY",
+      allowText: false,
+      balance: 0
     },
     {
-      id: "a4a84408-20f1-709f-0272-c9d2b96be859",
-      email: "owner@noemail.com",
-      name: "owner",
-      balance: 0,
-      phone: "4145551212",
-      address: "234 jplot rd",
-      billingFreq: "MONTHLY",
-      city: "Springfield",
-      cognitoID: "a4a84408-20f1-709f-0272-c9d2b96be859",
-      contactPref: "CALL",
+      id: "74b8d498-1071-70e1-dce4-d02b3a04e42b",
+      cognitoID: "74b8d498-1071-70e1-dce4-d02b3a04e42b",
+      owner: "74b8d498-1071-70e1-dce4-d02b3a04e42b",
+      name: "Sarah Martinez",
+      email: "smartinez@email.com",
+      phone: "8435556789",
+      address: "2345 Street St",
+      city: "West Columbia",
       state: "SC",
-      type: "PROFILE",
-      zip: "23456"
+      zip: "29169",
+      contactPref: "TEXT",
+      billingFreq: "MONTHLY",
+      allowText: true,
+      balance: 0
     },
     {
-      id: "e46844c8-5061-70e2-11e8-768fab589bea",
-      email: "resi@noemail.com",
-      name: "resi",
-      balance: 0,
-      phone: "4145551212",
-      address: "414 south road st",
-      billingFreq: "MONTHLY",
-      city: "ashville",
-      cognitoID: "e46844c8-5061-70e2-11e8-768fab589bea",
-      contactPref: "CALL",
+      id: "54d83448-b0c1-70d6-5afa-09d0a5d2582a",
+      cognitoID: "54d83448-b0c1-70d6-5afa-09d0a5d2582a",
+      owner: "54d83448-b0c1-70d6-5afa-09d0a5d2582a",
+      name: "Michael Chen",
+      email: "mchen@email.com",
+      phone: "8435552468",
+      address: "9012 Maple Court",
+      city: "West Columbia",
       state: "SC",
-      tenantAtId: "25",
-      type: "PROFILE",
-      zip: "98372"
+      zip: "29169",
+      contactPref: "CALL",
+      billingFreq: "MONTHLY",
+      allowText: false,
+      balance: 0
+    },
+    {
+      id: "tenant-no-login",
+      owner: "64c824e8-00b1-7080-e39e-f441cead3e4c",
+      name: "Robert Taylor",
+      email: "rtaylor@email.com",
+      phone: "8435553579",
+      address: "3456 Street St",
+      city: "West Columbia",
+      state: "SC",
+      zip: "29169",
+      contactPref: "EMAIL",
+      allowText: false
     }
   ],
   properties: [
     {
-      id: "28",
-      ownerId: "a4a84408-20f1-709f-0272-c9d2b96be859",
-      owner: "a4a84408-20f1-709f-0272-c9d2b96be859",
-      address: "468 south road st",
-      type: "PROPERTY"
+      id: "1234",
+      address: "1234 Street St",
+      profOwnerId: "64c824e8-00b1-7080-e39e-f441cead3e4c",
+      profTenantId: "64c824e8-00b1-7080-e39e-f441cead3e4c"
     },
     {
-      id: "25",
-      ownerId: "a4a84408-20f1-709f-0272-c9d2b96be859",
-      owner: "a4a84408-20f1-709f-0272-c9d2b96be859",
-      tenantId: "e46844c8-5061-70e2-11e8-768fab589bea",
-      address: "414 south road st",
-      type: "PROPERTY"
+      id: "2345",
+      address: "2345 Street St",
+      profOwnerId: "64c824e8-00b1-7080-e39e-f441cead3e4c",
+      profTenantId: "74b8d498-1071-70e1-dce4-d02b3a04e42b"
+    },
+    {
+      id: "3456",
+      address: "3456 Street St",
+      profOwnerId: "64c824e8-00b1-7080-e39e-f441cead3e4c",
+      profTenantId: "tenant-no-login"
+    },
+    {
+      id: "7582",
+      address: "7582 Street St",
+      profOwnerId: "64c824e8-00b1-7080-e39e-f441cead3e4c"
+    },
+    {
+      id: "4567",
+      address: "4567 Street St"
     }
-  ],  payments: [
+  ],
+  bulletins: [
     {
-      ownerPaymentsId: "a4a84408-20f1-709f-0272-c9d2b96be859",
-      id: "389af32b-8e11-4e89-98ef-b56efe48dddd",
-      checkDate: "2024-11-15",
-      invoiceNumber: "122",
-      checkAmount: 200,
-      checkNumber: "1001",
-      invoiceAmount: 1.5,
-      type: "PAYMENT"
-    },
-    {
-      ownerPaymentsId: "a4a84408-20f1-709f-0272-c9d2b96be859",
-      id: "89cfa96c-450a-4edd-b491-343eb4a83d08",
-      checkDate: "2024-12-15",
-      invoiceNumber: "122",
-      checkAmount: 200,
-      checkNumber: "1002",
-      invoiceAmount: 1.5,
-      type: "PAYMENT"
-    },
-    {
-      ownerPaymentsId: "a4a84408-20f1-709f-0272-c9d2b96be859",
-      id: "0eb2adf3-781f-4a62-9c9c-b6c3f0e056fb",
-      checkDate: "2025-01-15",
-      invoiceNumber: "134",
-      checkAmount: 200,
-      checkNumber: "1003",
-      invoiceAmount: 1.5,
-      type: "PAYMENT"
+      id: "welcome-bulletin",
+      title: "Welcome",
+      content: "Welcome to our HOA page!",
+      audience: ["PUBLIC"],
+      createdAt: "2025-02-01T12:00:00Z"
     }
   ]
 };

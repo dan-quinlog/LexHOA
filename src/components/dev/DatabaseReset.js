@@ -1,117 +1,154 @@
-import { useApolloClient, gql } from '@apollo/client'
-import { useState } from 'react'
-import { DELETE_PERSON, DELETE_PROPERTY, DELETE_PAYMENT } from '../../queries/mutations'
-import { CREATE_PERSON, CREATE_PROPERTY, CREATE_PAYMENT } from '../../queries/mutations'
-import { testData } from './seedData'
+import React, { useState } from 'react';
+import { useMutation, useQuery, gql } from '@apollo/client';
+import Modal from '../shared/Modal';
+import { testData } from './seedData';
+import {
+  CREATE_PROFILE,
+  CREATE_PROPERTY,
+  CREATE_BULLETIN,
+  DELETE_PROFILE,
+  DELETE_PROPERTY,
+  DELETE_BULLETIN
+} from '../../queries/mutations';
 
-const LIST_IDS = {
-    PEOPLE: gql`
-      query ListPeople {
-        listPeople {
-          items {
-            id
-          }
-        }
+const LIST_PROFILE_IDS = gql`
+  query ListProfiles {
+    listProfiles {
+      items {
+        id
       }
-    `,
-    PROPERTIES: gql`
-      query ListProperties {
-        listProperties {
-          items {
-            id
-          }
-        }
-      }
-    `,
-    PAYMENTS: gql`
-      query ListPayments {
-        listPayments {
-          items {
-            id
-          }
-        }
-      }
-    `
-}
-
-export const ResetButton = () => {
-  const client = useApolloClient()
-  const [isResetting, setIsResetting] = useState(false)
-  const [status, setStatus] = useState('')
-
-  const resetDatabase = async () => {
-    setIsResetting(true)
-    setStatus('Starting database reset...')
-   
-    try {
-      // Clear existing data
-      setStatus('Fetching records...')
-      const { data: peopleData } = await client.query({ query: LIST_IDS.PEOPLE })
-      const { data: propertiesData } = await client.query({ query: LIST_IDS.PROPERTIES })
-      const { data: paymentsData } = await client.query({ query: LIST_IDS.PAYMENTS })
-
-      setStatus('Deleting records...')
-      const deletePromises = [
-        ...paymentsData.listPayments.items.map(item =>
-          client.mutate({ mutation: DELETE_PAYMENT, variables: { input: { id: item.id } } })
-        ),
-        ...propertiesData.listProperties.items.map(item =>
-          client.mutate({ mutation: DELETE_PROPERTY, variables: { input: { id: item.id } } })
-        ),
-        ...peopleData.listPeople.items.map(item =>
-          client.mutate({ mutation: DELETE_PERSON, variables: { input: { id: item.id } } })
-        )
-      ]
-
-      await Promise.all(deletePromises)
-      
-      // Seed new data
-      setStatus('Seeding new data...')
-      const { profiles, properties, payments } = testData
-
-      for (const profile of profiles) {
-        await client.mutate({ mutation: CREATE_PERSON, variables: { input: profile } })
-      }
-      for (const property of properties) {
-        await client.mutate({ mutation: CREATE_PROPERTY, variables: { input: property } })
-      }
-      for (const payment of payments) {
-        await client.mutate({ mutation: CREATE_PAYMENT, variables: { input: payment } })
-      }
-
-      setStatus('Database reset successfully!')
-    } catch (error) {
-      setStatus(`Error: ${error.message}`)
-    } finally {
-      setIsResetting(false)
-      setTimeout(() => setStatus(''), 3000)
     }
   }
+`;
+
+const LIST_PROPERTY_IDS = gql`
+  query ListProperties {
+    listProperties {
+      items {
+        id
+      }
+    }
+  }
+`;
+
+const LIST_BULLETIN_IDS = gql`
+  query ListBulletins {
+    listBulletins {
+      items {
+        id
+      }
+    }
+  }
+`;
+
+const LIST_PAYMENT_IDS = gql`
+  query ListPayments {
+    listPayments {
+      items {
+        id
+      }
+    }
+  }
+`;
+
+const LIST_PING_IDS = gql`
+  query ListPings {
+    listPings {
+      items {
+        id
+      }
+    }
+  }
+`;
+
+
+const DatabaseReset = () => {
+  const [showModal, setShowModal] = useState(false);
+  const [status, setStatus] = useState('');
+
+  // Query hooks
+  const { data: profileData } = useQuery(LIST_PROFILE_IDS);
+  const { data: propertyData } = useQuery(LIST_PROPERTY_IDS);
+  const { data: bulletinData } = useQuery(LIST_BULLETIN_IDS);
+  const { data: paymentData } = useQuery(LIST_PAYMENT_IDS);
+  const { data: pingData } = useQuery(LIST_PING_IDS);
+
+  // Mutation hooks
+  const [createProfile] = useMutation(CREATE_PROFILE);
+  const [createProperty] = useMutation(CREATE_PROPERTY);
+  const [createBulletin] = useMutation(CREATE_BULLETIN);
+  const [deleteProfile] = useMutation(DELETE_PROFILE);
+  const [deleteProperty] = useMutation(DELETE_PROPERTY);
+  const [deleteBulletin] = useMutation(DELETE_BULLETIN);
+
+  const handleReset = async () => {
+    setShowModal(true);
+    try {
+      // Clear existing data
+      setStatus('Clearing database...');
+
+      // Delete profiles
+      await Promise.all(
+        profileData?.listProfiles?.items?.map(({ id }) =>
+          deleteProfile({ variables: { input: { id } } })
+        ) || []
+      );
+
+      // Delete properties
+      await Promise.all(
+        propertyData?.listProperties?.items?.map(({ id }) =>
+          deleteProperty({ variables: { input: { id } } })
+        ) || []
+      );
+
+      // Delete bulletins
+      await Promise.all(
+        bulletinData?.listBulletins?.items?.map(({ id }) =>
+          deleteBulletin({ variables: { input: { id } } })
+        ) || []
+      );
+
+      // Load new seed data
+      setStatus('Loading new data...');
+      setStatus('Loading profiles...');
+      await Promise.all(testData.profiles.map(profile =>
+        createProfile({ variables: { input: profile } })
+      ));
+
+      setStatus('Loading properties...');
+      await Promise.all(testData.properties.map(property =>
+        createProperty({ variables: { input: property } })
+      ));
+
+      setStatus('Loading bulletins...');
+      await Promise.all(testData.bulletins.map(bulletin =>
+        createBulletin({ variables: { input: bulletin } })
+      ));
+
+      setStatus('Database reset complete! This window will close automatically.');
+      setTimeout(() => setShowModal(false), 3000);
+    } catch (error) {
+      setStatus(`Reset failed: ${error.message}`);
+      console.error('Reset error:', error);
+      setTimeout(() => setShowModal(false), 3000);
+    }
+  };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-      <button
-        onClick={resetDatabase}
-        disabled={isResetting}
-        style={{
-          backgroundColor: isResetting ? 'grey' : 'orange',
-          color: 'white',
-          padding: '0.5rem 1rem',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: isResetting ? 'not-allowed' : 'pointer'
-        }}
+    <>
+      <button onClick={handleReset}>Reset Database</button>
+      <Modal
+        show={showModal}
+        onClose={() => { }}
+        closeOnOutsideClick={false}
       >
-        {isResetting ? 'Resetting...' : 'Reset DB'}
-      </button>
-      {status && (
-        <span style={{
-          color: status.includes('Error') ? 'red' : 'green',
-          fontSize: '0.9rem'
-        }}>
-          {status}
-        </span>
-      )}
-    </div>
-  )
-}
+        <div className="reset-status">
+          <h3>Database Reset in Progress</h3>
+          <p>{status}</p>
+        </div>
+      </Modal>
+    </>
+  );
+};
+
+export default DatabaseReset;

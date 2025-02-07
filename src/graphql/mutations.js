@@ -37,6 +37,9 @@ export const createProfile = /* GraphQL */ `
         type
         owner
         address
+        city
+        state
+        zip
         profOwnerId
         profTenantId
         createdAt
@@ -86,6 +89,9 @@ export const updateProfile = /* GraphQL */ `
         type
         owner
         address
+        city
+        state
+        zip
         profOwnerId
         profTenantId
         createdAt
@@ -135,6 +141,9 @@ export const deleteProfile = /* GraphQL */ `
         type
         owner
         address
+        city
+        state
+        zip
         profOwnerId
         profTenantId
         createdAt
@@ -158,6 +167,9 @@ export const createProperty = /* GraphQL */ `
       type
       owner
       address
+      city
+      state
+      zip
       profOwner {
         id
         byTypeName
@@ -222,6 +234,9 @@ export const updateProperty = /* GraphQL */ `
       type
       owner
       address
+      city
+      state
+      zip
       profOwner {
         id
         byTypeName
@@ -286,6 +301,9 @@ export const deleteProperty = /* GraphQL */ `
       type
       owner
       address
+      city
+      state
+      zip
       profOwner {
         id
         byTypeName

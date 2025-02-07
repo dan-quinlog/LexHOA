@@ -19,7 +19,7 @@ import { ApolloLink } from '@apollo/client';
 import { BULLETINS_BY_DATE } from './queries/queries';
 import ReactQuill from 'react-quill';
 import MenuState from './components/menu/MenuState';
-import { ClearButton } from './components/dev/DatabaseClear'
+import DatabaseReset from './components/dev/DatabaseReset'
 import 'react-quill/dist/quill.bubble.css';
 
 Amplify.configure({
@@ -164,7 +164,8 @@ function App() {
 
     const { loading, error, data } = useQuery(BULLETINS_BY_DATE, {
       variables: {
-        limit: user ? 10 : 3,  // Set limit to 3 for public users
+        limit: user ? 10 : 3,
+        type: "BULLETIN",
         filter
       },
       client: user ? authenticatedClient : publicClient
@@ -216,7 +217,7 @@ function App() {
             <Link to="/" className="site-title">
               <h1>Lexington Commons HOA</h1>
             </Link>
-            <ClearButton />
+            {userGroups.includes(BOARD_GROUP) && <DatabaseReset />}
             {user ? (
               <MenuState
                 userGroups={userGroups}

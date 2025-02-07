@@ -12,7 +12,6 @@ const PropertyCard = ({ property }) => {
     const newProfile = await createProfile({
       variables: {
         input: {
-          type: 'TENANT',
           ...formData
         }
       }

@@ -34,6 +34,9 @@ export const onCreateProfile = /* GraphQL */ `
         type
         owner
         address
+        city
+        state
+        zip
         profOwnerId
         profTenantId
         createdAt
@@ -80,6 +83,9 @@ export const onUpdateProfile = /* GraphQL */ `
         type
         owner
         address
+        city
+        state
+        zip
         profOwnerId
         profTenantId
         createdAt
@@ -126,6 +132,9 @@ export const onDeleteProfile = /* GraphQL */ `
         type
         owner
         address
+        city
+        state
+        zip
         profOwnerId
         profTenantId
         createdAt
@@ -146,6 +155,9 @@ export const onCreateProperty = /* GraphQL */ `
       type
       owner
       address
+      city
+      state
+      zip
       profOwner {
         id
         byTypeName
@@ -207,6 +219,9 @@ export const onUpdateProperty = /* GraphQL */ `
       type
       owner
       address
+      city
+      state
+      zip
       profOwner {
         id
         byTypeName
@@ -268,6 +283,9 @@ export const onDeleteProperty = /* GraphQL */ `
       type
       owner
       address
+      city
+      state
+      zip
       profOwner {
         id
         byTypeName

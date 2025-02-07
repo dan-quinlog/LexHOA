@@ -34,6 +34,9 @@ export const getProfile = /* GraphQL */ `
         type
         owner
         address
+        city
+        state
+        zip
         profOwnerId
         profTenantId
         createdAt
@@ -89,6 +92,9 @@ export const getProperty = /* GraphQL */ `
       type
       owner
       address
+      city
+      state
+      zip
       profOwner {
         id
         byTypeName
@@ -155,6 +161,9 @@ export const listProperties = /* GraphQL */ `
         type
         owner
         address
+        city
+        state
+        zip
         profOwnerId
         profTenantId
         createdAt
@@ -692,6 +701,9 @@ export const propertiesByType = /* GraphQL */ `
         type
         owner
         address
+        city
+        state
+        zip
         profOwnerId
         profTenantId
         createdAt
@@ -723,6 +735,9 @@ export const propertyByAddress = /* GraphQL */ `
         type
         owner
         address
+        city
+        state
+        zip
         profOwnerId
         profTenantId
         createdAt
@@ -754,6 +769,9 @@ export const propertiesByProfOwnerId = /* GraphQL */ `
         type
         owner
         address
+        city
+        state
+        zip
         profOwnerId
         profTenantId
         createdAt
@@ -785,6 +803,9 @@ export const propertiesByProfTenantId = /* GraphQL */ `
         type
         owner
         address
+        city
+        state
+        zip
         profOwnerId
         profTenantId
         createdAt

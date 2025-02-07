@@ -8,7 +8,9 @@ export const CREATE_PROFILE = gql`
   ) {
     createProfile(input: $input, condition: $condition) {
       id
-      type
+      byTypeName
+      byTypeBalance
+      byTypeCreatedAt 
       cognitoID
       name
       email
@@ -35,7 +37,9 @@ export const UPDATE_PROFILE = gql`
   ) {
     updateProfile(input: $input, condition: $condition) {
       id
-      type
+      byTypeName
+      byTypeBalance
+      byTypeCreatedAt 
       cognitoID
       name
       email
@@ -62,7 +66,9 @@ export const DELETE_PROFILE = gql`
   ) {
     deleteProfile(input: $input, condition: $condition) {
       id
-      type
+      byTypeName
+      byTypeBalance
+      byTypeCreatedAt 
       cognitoID
       name
       email
@@ -101,8 +107,11 @@ export const CREATE_PROPERTY = gql`
 `;
 
 export const UPDATE_PROPERTY = gql`
-  mutation UpdateProperty($input: UpdatePropertyInput!) {
-    updateProperty(input: $input) {
+  mutation UpdateProperty(
+    $input: UpdatePropertyInput!
+    $condition: ModelPropertyConditionInput
+  ) {
+    updateProperty(input: $input, condition: $condition) {
       id
       type
       address
@@ -110,6 +119,11 @@ export const UPDATE_PROPERTY = gql`
       profTenantId
       createdAt
       updatedAt
+      profOwner {
+        id
+        name
+        phone
+      }
       profTenant {
         id
         name
@@ -129,8 +143,8 @@ export const DELETE_PROPERTY = gql`
       id
       type
       address
-      ownerId
-      tenantId
+      profOwnerId
+      profTenantId
       createdAt
       updatedAt
     }
@@ -145,7 +159,9 @@ export const CREATE_PAYMENT = gql`
   ) {
     createPayment(input: $input, condition: $condition) {
       id
-      type
+      byTypeCreatedAt
+      byTypeCheckDate
+      byTypeInvoiceNumber
       checkDate
       checkNumber
       checkAmount
@@ -166,7 +182,9 @@ export const UPDATE_PAYMENT = gql`
   ) {
     updatePayment(input: $input, condition: $condition) {
       id
-      type
+      byTypeCreatedAt
+      byTypeCheckDate
+      byTypeInvoiceNumber
       checkDate
       checkNumber
       checkAmount
@@ -187,7 +205,9 @@ export const DELETE_PAYMENT = gql`
   ) {
     deletePayment(input: $input, condition: $condition) {
       id
-      type
+      byTypeCreatedAt
+      byTypeCheckDate
+      byTypeInvoiceNumber
       checkDate
       checkNumber
       checkAmount

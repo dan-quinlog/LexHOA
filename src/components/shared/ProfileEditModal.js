@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { useMutation } from '@apollo/client';
-import { CREATE_PROFILE, UPDATE_PROFILE } from '../../queries/mutations';
 import Modal from './Modal';
 import { US_STATES } from '../../utils/constants';
 import './ProfileEditModal.css';

@@ -6,11 +6,23 @@ type Profile @model
     { allow: groups, groups: ["BOARD"], operations: [update, delete] }
   ]) {
   id: ID!
-  type: String @default(value: "PROFILE")
+  byTypeName: String @default(value: "PROFILE")
     @index(
-      name: "byType"
-      queryField: "profilesByType"
-      sortKeyFields: ["name", "balance", "createdAt"]
+      name: "byTypeName"
+      queryField: "profilesByTypeName"
+      sortKeyFields: ["name"]
+    )
+  byTypeBalance: String @default(value: "PROFILE")
+    @index(
+      name: "byTypeBalance"
+      queryField: "profilesByTypeBalance"
+      sortKeyFields: ["balance"]
+    )
+  byTypeCreatedAt: String @default(value: "PROFILE")
+    @index(
+      name: "byTypeCreatedAt"
+      queryField: "profilesByTypeCreatedAt"
+      sortKeyFields: ["createdAt"]
     )
   owner: String
   cognitoID: String @index(name: "byCognitoID", queryField: "profileByCognitoID")
@@ -23,6 +35,7 @@ type Profile @model
   zip: String
   contactPref: ContactPrefs @default(value: "EMAIL")
   billingFreq: BillingFreq @default(value: "MONTHLY")
+  allowText: Boolean @default(value: "false")
   balance: Float @auth(rules: [
     { allow: private, operations: [create, read] },
     { allow: groups, groups: ["BOARD"], operations: [create, update, delete] }
@@ -75,11 +88,23 @@ type Payment @model
     { allow: groups, groups: ["BOARD"], operations: [create, read, update, delete] }
   ]) {
   id: ID!
-  type: String @default(value: "PAYMENT")
+  byTypeCreatedAt: String @default(value: "PAYMENT")
     @index(
-      name: "byType"
-      queryField: "paymentsByType"
-      sortKeyFields: ["createdAt", "checkDate", "invoiceNumber"]
+      name: "byTypeCreatedAt"
+      queryField: "paymentsByTypeCreatedAt"
+      sortKeyFields: ["createdAt"]
+    )
+  byTypeCheckDate: String @default(value: "PAYMENT")
+    @index(
+      name: "byTypeCheckDate"
+      queryField: "paymentsByTypeCheckDate"
+      sortKeyFields: ["checkDate"]
+    )
+  byTypeInvoiceNumber: String @default(value: "PAYMENT")
+    @index(
+      name: "byTypeInvoiceNumber"
+      queryField: "paymentsByTypeInvoiceNumber"
+      sortKeyFields: ["invoiceNumber"]
     )
   checkDate: AWSDate! @index(name: "byCheckDate", queryField: "paymentsByCheckDate")
   checkNumber: String! @index(name: "byCheckNumber", queryField: "paymentsByCheckNumber")

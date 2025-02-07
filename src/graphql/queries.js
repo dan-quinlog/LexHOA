@@ -5,7 +5,9 @@ export const getProfile = /* GraphQL */ `
   query GetProfile($id: ID!) {
     getProfile(id: $id) {
       id
-      type
+      byTypeName
+      byTypeBalance
+      byTypeCreatedAt
       owner
       cognitoID
       name
@@ -17,6 +19,7 @@ export const getProfile = /* GraphQL */ `
       zip
       contactPref
       billingFreq
+      allowText
       balance
       ownedProperties {
         nextToken
@@ -53,7 +56,9 @@ export const listProfiles = /* GraphQL */ `
     listProfiles(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -65,6 +70,7 @@ export const listProfiles = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -85,7 +91,9 @@ export const getProperty = /* GraphQL */ `
       address
       profOwner {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -97,6 +105,7 @@ export const getProperty = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -106,7 +115,9 @@ export const getProperty = /* GraphQL */ `
       profOwnerId
       profTenant {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -118,6 +129,7 @@ export const getProperty = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -158,7 +170,9 @@ export const getPayment = /* GraphQL */ `
   query GetPayment($id: ID!) {
     getPayment(id: $id) {
       id
-      type
+      byTypeCreatedAt
+      byTypeCheckDate
+      byTypeInvoiceNumber
       checkDate
       checkNumber
       checkAmount
@@ -166,7 +180,9 @@ export const getPayment = /* GraphQL */ `
       invoiceAmount
       ownerPayments {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -178,6 +194,7 @@ export const getPayment = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -201,7 +218,9 @@ export const listPayments = /* GraphQL */ `
     listPayments(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
-        type
+        byTypeCreatedAt
+        byTypeCheckDate
+        byTypeInvoiceNumber
         checkDate
         checkNumber
         checkAmount
@@ -256,18 +275,18 @@ export const listPings = /* GraphQL */ `
     }
   }
 `;
-export const profilesByType = /* GraphQL */ `
-  query ProfilesByType(
-    $type: String!
-    $nameBalanceCreatedAt: ModelProfileByTypeCompositeKeyConditionInput
+export const profilesByTypeName = /* GraphQL */ `
+  query ProfilesByTypeName(
+    $byTypeName: String!
+    $name: ModelStringKeyConditionInput
     $sortDirection: ModelSortDirection
     $filter: ModelProfileFilterInput
     $limit: Int
     $nextToken: String
   ) {
-    profilesByType(
-      type: $type
-      nameBalanceCreatedAt: $nameBalanceCreatedAt
+    profilesByTypeName(
+      byTypeName: $byTypeName
+      name: $name
       sortDirection: $sortDirection
       filter: $filter
       limit: $limit
@@ -275,7 +294,9 @@ export const profilesByType = /* GraphQL */ `
     ) {
       items {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -287,6 +308,97 @@ export const profilesByType = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const profilesByTypeBalance = /* GraphQL */ `
+  query ProfilesByTypeBalance(
+    $byTypeBalance: String!
+    $balance: ModelFloatKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelProfileFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    profilesByTypeBalance(
+      byTypeBalance: $byTypeBalance
+      balance: $balance
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const profilesByTypeCreatedAt = /* GraphQL */ `
+  query ProfilesByTypeCreatedAt(
+    $byTypeCreatedAt: String!
+    $createdAt: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelProfileFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    profilesByTypeCreatedAt(
+      byTypeCreatedAt: $byTypeCreatedAt
+      createdAt: $createdAt
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -315,7 +427,9 @@ export const profileByCognitoID = /* GraphQL */ `
     ) {
       items {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -327,6 +441,7 @@ export const profileByCognitoID = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -355,7 +470,9 @@ export const profileByName = /* GraphQL */ `
     ) {
       items {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -367,6 +484,7 @@ export const profileByName = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -395,7 +513,9 @@ export const profileByEmail = /* GraphQL */ `
     ) {
       items {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -407,6 +527,7 @@ export const profileByEmail = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -435,7 +556,9 @@ export const profileByPhone = /* GraphQL */ `
     ) {
       items {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -447,6 +570,7 @@ export const profileByPhone = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -477,7 +601,9 @@ export const profilesByBalance = /* GraphQL */ `
     ) {
       items {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -489,6 +615,7 @@ export const profilesByBalance = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -517,7 +644,9 @@ export const profilesByTenantAtId = /* GraphQL */ `
     ) {
       items {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -529,6 +658,7 @@ export const profilesByTenantAtId = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -666,18 +796,18 @@ export const propertiesByProfTenantId = /* GraphQL */ `
     }
   }
 `;
-export const paymentsByType = /* GraphQL */ `
-  query PaymentsByType(
-    $type: String!
-    $createdAtCheckDateInvoiceNumber: ModelPaymentByTypeCompositeKeyConditionInput
+export const paymentsByTypeCreatedAt = /* GraphQL */ `
+  query PaymentsByTypeCreatedAt(
+    $byTypeCreatedAt: String!
+    $createdAt: ModelStringKeyConditionInput
     $sortDirection: ModelSortDirection
     $filter: ModelPaymentFilterInput
     $limit: Int
     $nextToken: String
   ) {
-    paymentsByType(
-      type: $type
-      createdAtCheckDateInvoiceNumber: $createdAtCheckDateInvoiceNumber
+    paymentsByTypeCreatedAt(
+      byTypeCreatedAt: $byTypeCreatedAt
+      createdAt: $createdAt
       sortDirection: $sortDirection
       filter: $filter
       limit: $limit
@@ -685,7 +815,85 @@ export const paymentsByType = /* GraphQL */ `
     ) {
       items {
         id
-        type
+        byTypeCreatedAt
+        byTypeCheckDate
+        byTypeInvoiceNumber
+        checkDate
+        checkNumber
+        checkAmount
+        invoiceNumber
+        invoiceAmount
+        ownerPaymentsId
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const paymentsByTypeCheckDate = /* GraphQL */ `
+  query PaymentsByTypeCheckDate(
+    $byTypeCheckDate: String!
+    $checkDate: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelPaymentFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    paymentsByTypeCheckDate(
+      byTypeCheckDate: $byTypeCheckDate
+      checkDate: $checkDate
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        byTypeCreatedAt
+        byTypeCheckDate
+        byTypeInvoiceNumber
+        checkDate
+        checkNumber
+        checkAmount
+        invoiceNumber
+        invoiceAmount
+        ownerPaymentsId
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const paymentsByTypeInvoiceNumber = /* GraphQL */ `
+  query PaymentsByTypeInvoiceNumber(
+    $byTypeInvoiceNumber: String!
+    $invoiceNumber: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelPaymentFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    paymentsByTypeInvoiceNumber(
+      byTypeInvoiceNumber: $byTypeInvoiceNumber
+      invoiceNumber: $invoiceNumber
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        byTypeCreatedAt
+        byTypeCheckDate
+        byTypeInvoiceNumber
         checkDate
         checkNumber
         checkAmount
@@ -719,7 +927,9 @@ export const paymentsByCheckDate = /* GraphQL */ `
     ) {
       items {
         id
-        type
+        byTypeCreatedAt
+        byTypeCheckDate
+        byTypeInvoiceNumber
         checkDate
         checkNumber
         checkAmount
@@ -753,7 +963,9 @@ export const paymentsByCheckNumber = /* GraphQL */ `
     ) {
       items {
         id
-        type
+        byTypeCreatedAt
+        byTypeCheckDate
+        byTypeInvoiceNumber
         checkDate
         checkNumber
         checkAmount
@@ -787,7 +999,9 @@ export const paymentsByInvoiceNumber = /* GraphQL */ `
     ) {
       items {
         id
-        type
+        byTypeCreatedAt
+        byTypeCheckDate
+        byTypeInvoiceNumber
         checkDate
         checkNumber
         checkAmount
@@ -823,7 +1037,9 @@ export const paymentsByOwner = /* GraphQL */ `
     ) {
       items {
         id
-        type
+        byTypeCreatedAt
+        byTypeCheckDate
+        byTypeInvoiceNumber
         checkDate
         checkNumber
         checkAmount

@@ -8,7 +8,9 @@ export const createProfile = /* GraphQL */ `
   ) {
     createProfile(input: $input, condition: $condition) {
       id
-      type
+      byTypeName
+      byTypeBalance
+      byTypeCreatedAt
       owner
       cognitoID
       name
@@ -20,6 +22,7 @@ export const createProfile = /* GraphQL */ `
       zip
       contactPref
       billingFreq
+      allowText
       balance
       ownedProperties {
         nextToken
@@ -54,7 +57,9 @@ export const updateProfile = /* GraphQL */ `
   ) {
     updateProfile(input: $input, condition: $condition) {
       id
-      type
+      byTypeName
+      byTypeBalance
+      byTypeCreatedAt
       owner
       cognitoID
       name
@@ -66,6 +71,7 @@ export const updateProfile = /* GraphQL */ `
       zip
       contactPref
       billingFreq
+      allowText
       balance
       ownedProperties {
         nextToken
@@ -100,7 +106,9 @@ export const deleteProfile = /* GraphQL */ `
   ) {
     deleteProfile(input: $input, condition: $condition) {
       id
-      type
+      byTypeName
+      byTypeBalance
+      byTypeCreatedAt
       owner
       cognitoID
       name
@@ -112,6 +120,7 @@ export const deleteProfile = /* GraphQL */ `
       zip
       contactPref
       billingFreq
+      allowText
       balance
       ownedProperties {
         nextToken
@@ -151,7 +160,9 @@ export const createProperty = /* GraphQL */ `
       address
       profOwner {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -163,6 +174,7 @@ export const createProperty = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -172,7 +184,9 @@ export const createProperty = /* GraphQL */ `
       profOwnerId
       profTenant {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -184,6 +198,7 @@ export const createProperty = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -209,7 +224,9 @@ export const updateProperty = /* GraphQL */ `
       address
       profOwner {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -221,6 +238,7 @@ export const updateProperty = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -230,7 +248,9 @@ export const updateProperty = /* GraphQL */ `
       profOwnerId
       profTenant {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -242,6 +262,7 @@ export const updateProperty = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -267,7 +288,9 @@ export const deleteProperty = /* GraphQL */ `
       address
       profOwner {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -279,6 +302,7 @@ export const deleteProperty = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -288,7 +312,9 @@ export const deleteProperty = /* GraphQL */ `
       profOwnerId
       profTenant {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -300,6 +326,7 @@ export const deleteProperty = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -320,7 +347,9 @@ export const createPayment = /* GraphQL */ `
   ) {
     createPayment(input: $input, condition: $condition) {
       id
-      type
+      byTypeCreatedAt
+      byTypeCheckDate
+      byTypeInvoiceNumber
       checkDate
       checkNumber
       checkAmount
@@ -328,7 +357,9 @@ export const createPayment = /* GraphQL */ `
       invoiceAmount
       ownerPayments {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -340,6 +371,7 @@ export const createPayment = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -361,7 +393,9 @@ export const updatePayment = /* GraphQL */ `
   ) {
     updatePayment(input: $input, condition: $condition) {
       id
-      type
+      byTypeCreatedAt
+      byTypeCheckDate
+      byTypeInvoiceNumber
       checkDate
       checkNumber
       checkAmount
@@ -369,7 +403,9 @@ export const updatePayment = /* GraphQL */ `
       invoiceAmount
       ownerPayments {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -381,6 +417,7 @@ export const updatePayment = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -402,7 +439,9 @@ export const deletePayment = /* GraphQL */ `
   ) {
     deletePayment(input: $input, condition: $condition) {
       id
-      type
+      byTypeCreatedAt
+      byTypeCheckDate
+      byTypeInvoiceNumber
       checkDate
       checkNumber
       checkAmount
@@ -410,7 +449,9 @@ export const deletePayment = /* GraphQL */ `
       invoiceAmount
       ownerPayments {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -422,6 +463,7 @@ export const deletePayment = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt

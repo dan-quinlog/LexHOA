@@ -22,7 +22,7 @@ const PropertyCard = ({ property }) => {
       variables: {
         input: {
           id: property.id,
-          tenantId: newProfile.data.createProfile.id
+          profTenantId: newProfile.data.createProfile.id
         }
       }
     });
@@ -33,16 +33,15 @@ const PropertyCard = ({ property }) => {
       <div className="card-content two-column">
         <div className="left-column">
           <h3>Property Information</h3>
-          <p>Address: {property.address}</p>
           <p>Property ID: {property.id}</p>
-          <p>Type: {property.type}</p>
+          <p>Address: {property.address}</p>
         </div>
         <div className="right-column">
           <h3>Tenant Information</h3>
-          {property.tenant ? (
+          {property.profTenant ? (
             <>
-              <p>Name: {property.tenant.name}</p>
-              <p>Phone: {property.tenant.phone}</p>
+              <p>Name: {property.profTenant.name}</p>
+              <p>Phone: {property.profTenant.phone}</p>
             </>
           ) : (
             <button

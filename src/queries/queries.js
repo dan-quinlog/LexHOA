@@ -5,7 +5,9 @@ export const GET_PROFILE = gql`
   query GetProfile($id: ID!) {
     getProfile(id: $id) {
       id
-      type
+      byTypeName
+      byTypeBalance
+      byTypeCreatedAt 
       cognitoID
       name
       email
@@ -39,8 +41,8 @@ export const GET_PROFILE = gql`
         id
         type
         address
-        ownerId
-        tenantId
+        profOwnerId
+        profTenantId
         createdAt
         updatedAt
       }
@@ -57,7 +59,9 @@ export const LIST_PROFILES = gql`
     listProfiles(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt 
         cognitoID
         name
         email
@@ -96,7 +100,9 @@ export const PROFILE_BY_COGNITO_ID = gql`
     ) {
       items {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt 
         cognitoID
         name
         email
@@ -162,7 +168,9 @@ export const PROFILE_BY_NAME = gql`
     ) {
       items {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt 
         cognitoID
         name
         email
@@ -201,7 +209,9 @@ export const PROFILE_BY_EMAIL = gql`
     ) {
       items {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt 
         cognitoID
         name
         email
@@ -240,7 +250,9 @@ export const PROFILE_BY_PHONE = gql`
     ) {
       items {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt 
         cognitoID
         name
         email
@@ -261,6 +273,47 @@ export const PROFILE_BY_PHONE = gql`
     }
   }
 `;
+
+export const PROFILES_BY_TYPE_NAME = gql`
+  query ProfilesByTypeName($byTypeName: String!, $sortDirection: ModelSortDirection) {
+    profilesByTypeName(byTypeName: $byTypeName, sortDirection: $sortDirection) {
+      items {
+        id
+        name
+        email
+        phone
+        balance
+        contactPref
+        billingFreq
+      }
+    }
+  }
+`;
+
+export const PROFILES_BY_TYPE_BALANCE = gql`
+  query ProfilesByTypeBalance($byTypeBalance: String!, $sortDirection: ModelSortDirection) {
+    profilesByTypeBalance(byTypeBalance: $byTypeBalance, sortDirection: $sortDirection) {
+      items {
+        id
+        name
+        balance
+      }
+    }
+  }
+`;
+
+export const PROFILES_BY_TYPE_CREATEDAT = gql`
+  query ProfilesByTypeCreatedAt($byTypeCreatedAt: String!, $sortDirection: ModelSortDirection) {
+    profilesByTypeCreatedAt(byTypeCreatedAt: $byTypeCreatedAt, sortDirection: $sortDirection) {
+      items {
+        id
+        name
+        createdAt
+      }
+    }
+  }
+`;
+
 
 // Property Queries
 export const GET_PROPERTY = gql`
@@ -296,8 +349,8 @@ export const LIST_PROPERTIES = gql`
         id
         type
         address
-        ownerId
-        tenantId
+        profOwnerId
+        profTenantId
         createdAt
         updatedAt
       }
@@ -325,8 +378,8 @@ export const PROPERTY_BY_ADDRESS = gql`
         id
         type
         address
-        ownerId
-        tenantId
+        profOwnerId
+        profTenantId
         createdAt
         updatedAt
       }
@@ -340,7 +393,9 @@ export const GET_PAYMENT = gql`
   query GetPayment($id: ID!) {
     getPayment(id: $id) {
       id
-      type
+      byTypeCreatedAt
+      byTypeCheckDate
+      byTypeInvoiceNumber
       checkDate
       checkNumber
       checkAmount
@@ -364,7 +419,9 @@ export const LIST_PAYMENTS = gql`
     listPayments(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
-        type
+        byTypeCreatedAt
+        byTypeCheckDate
+        byTypeInvoiceNumber
         checkDate
         checkNumber
         checkAmount
@@ -399,7 +456,9 @@ export const PAYMENTS_BY_OWNER = gql`
     ) {
       items {
         id
-        type
+        byTypeCreatedAt
+        byTypeCheckDate
+        byTypeInvoiceNumber
         checkDate
         checkNumber
         checkAmount
@@ -432,7 +491,9 @@ export const PAYMENTS_BY_INVOICE_NUMBER = gql`
     ) {
       items {
         id
-        type
+        byTypeCreatedAt
+        byTypeCheckDate
+        byTypeInvoiceNumber
         checkDate
         checkNumber
         checkAmount

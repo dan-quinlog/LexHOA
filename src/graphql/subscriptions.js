@@ -5,7 +5,9 @@ export const onCreateProfile = /* GraphQL */ `
   subscription OnCreateProfile($filter: ModelSubscriptionProfileFilterInput) {
     onCreateProfile(filter: $filter) {
       id
-      type
+      byTypeName
+      byTypeBalance
+      byTypeCreatedAt
       owner
       cognitoID
       name
@@ -17,6 +19,7 @@ export const onCreateProfile = /* GraphQL */ `
       zip
       contactPref
       billingFreq
+      allowText
       balance
       ownedProperties {
         nextToken
@@ -48,7 +51,9 @@ export const onUpdateProfile = /* GraphQL */ `
   subscription OnUpdateProfile($filter: ModelSubscriptionProfileFilterInput) {
     onUpdateProfile(filter: $filter) {
       id
-      type
+      byTypeName
+      byTypeBalance
+      byTypeCreatedAt
       owner
       cognitoID
       name
@@ -60,6 +65,7 @@ export const onUpdateProfile = /* GraphQL */ `
       zip
       contactPref
       billingFreq
+      allowText
       balance
       ownedProperties {
         nextToken
@@ -91,7 +97,9 @@ export const onDeleteProfile = /* GraphQL */ `
   subscription OnDeleteProfile($filter: ModelSubscriptionProfileFilterInput) {
     onDeleteProfile(filter: $filter) {
       id
-      type
+      byTypeName
+      byTypeBalance
+      byTypeCreatedAt
       owner
       cognitoID
       name
@@ -103,6 +111,7 @@ export const onDeleteProfile = /* GraphQL */ `
       zip
       contactPref
       billingFreq
+      allowText
       balance
       ownedProperties {
         nextToken
@@ -139,7 +148,9 @@ export const onCreateProperty = /* GraphQL */ `
       address
       profOwner {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -151,6 +162,7 @@ export const onCreateProperty = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -160,7 +172,9 @@ export const onCreateProperty = /* GraphQL */ `
       profOwnerId
       profTenant {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -172,6 +186,7 @@ export const onCreateProperty = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -194,7 +209,9 @@ export const onUpdateProperty = /* GraphQL */ `
       address
       profOwner {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -206,6 +223,7 @@ export const onUpdateProperty = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -215,7 +233,9 @@ export const onUpdateProperty = /* GraphQL */ `
       profOwnerId
       profTenant {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -227,6 +247,7 @@ export const onUpdateProperty = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -249,7 +270,9 @@ export const onDeleteProperty = /* GraphQL */ `
       address
       profOwner {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -261,6 +284,7 @@ export const onDeleteProperty = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -270,7 +294,9 @@ export const onDeleteProperty = /* GraphQL */ `
       profOwnerId
       profTenant {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -282,6 +308,7 @@ export const onDeleteProperty = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -302,7 +329,9 @@ export const onCreatePayment = /* GraphQL */ `
   ) {
     onCreatePayment(filter: $filter, owner: $owner) {
       id
-      type
+      byTypeCreatedAt
+      byTypeCheckDate
+      byTypeInvoiceNumber
       checkDate
       checkNumber
       checkAmount
@@ -310,7 +339,9 @@ export const onCreatePayment = /* GraphQL */ `
       invoiceAmount
       ownerPayments {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -322,6 +353,7 @@ export const onCreatePayment = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -343,7 +375,9 @@ export const onUpdatePayment = /* GraphQL */ `
   ) {
     onUpdatePayment(filter: $filter, owner: $owner) {
       id
-      type
+      byTypeCreatedAt
+      byTypeCheckDate
+      byTypeInvoiceNumber
       checkDate
       checkNumber
       checkAmount
@@ -351,7 +385,9 @@ export const onUpdatePayment = /* GraphQL */ `
       invoiceAmount
       ownerPayments {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -363,6 +399,7 @@ export const onUpdatePayment = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt
@@ -384,7 +421,9 @@ export const onDeletePayment = /* GraphQL */ `
   ) {
     onDeletePayment(filter: $filter, owner: $owner) {
       id
-      type
+      byTypeCreatedAt
+      byTypeCheckDate
+      byTypeInvoiceNumber
       checkDate
       checkNumber
       checkAmount
@@ -392,7 +431,9 @@ export const onDeletePayment = /* GraphQL */ `
       invoiceAmount
       ownerPayments {
         id
-        type
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
         owner
         cognitoID
         name
@@ -404,6 +445,7 @@ export const onDeletePayment = /* GraphQL */ `
         zip
         contactPref
         billingFreq
+        allowText
         balance
         tenantAtId
         createdAt

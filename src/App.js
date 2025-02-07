@@ -135,8 +135,6 @@ function App() {
     const menuItems = [
       { label: 'Profile', path: '/profile' },
       { label: 'Board', path: '/board', group: BOARD_GROUP },
-      { label: 'Account', path: '/account', group: OWNERS_GROUP },
-      { label: 'Property', path: '/property', group: RESIDENTS_GROUP },
       { label: 'Amenities', path: '/amenities' },
       { label: 'Contact', path: '/contact' }
     ];

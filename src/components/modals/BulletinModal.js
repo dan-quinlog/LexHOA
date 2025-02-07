@@ -16,42 +16,40 @@ const AUDIENCE_OPTIONS = [
   { value: 'BOARD', label: 'Board' }
 ];
 
-const BulletinModal = ({ bulletin, onClose }) => {
+const BulletinModal = ({ bulletin, onClose, modalOpen }) => {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
     audience: ['PUBLIC'] // Now an array
   });
-
-  const [createBulletin] = useMutation(CREATE_BULLETIN, {
-    update(cache, { data: { createBulletin } }) {
-      try {
+    const [createBulletin] = useMutation(CREATE_BULLETIN, {
+      update(cache, { data: { createBulletin } }) {
         const existingData = cache.readQuery({
           query: BULLETINS_BY_DATE,
-          variables: { limit: 10 }
+          variables: { 
+            limit: 10,
+            type: "BULLETIN",
+            sortDirection: "DESC"
+          }
         });
 
-        if (existingData && existingData.bulletinsByDate) {
-          cache.writeQuery({
-            query: BULLETINS_BY_DATE,
-            variables: { limit: 10 },
-            data: {
-              bulletinsByDate: {
-                ...existingData.bulletinsByDate,
-                items: [createBulletin, ...existingData.bulletinsByDate.items],
-                nextToken: existingData.bulletinsByDate.nextToken
-              }
+        cache.writeQuery({
+          query: BULLETINS_BY_DATE,
+          variables: { 
+            limit: 10,
+            type: "BULLETIN",
+            sortDirection: "DESC"
+          },
+          data: {
+            bulletinsByDate: {
+              ...existingData.bulletinsByDate,
+              items: [createBulletin, ...existingData.bulletinsByDate.items]
             }
-          });
-        }
-      } catch (error) {
-        // Cache will be updated by refetchQueries
+          }
+        });
       }
-    },
-    refetchQueries: [
-      {query: BULLETINS_BY_DATE, variables: { limit: 10 }}
-    ]
-  });  const [updateBulletin] = useMutation(UPDATE_BULLETIN);
+    });
+  const [updateBulletin] = useMutation(UPDATE_BULLETIN);
   const [showNotification, setShowNotification] = useState(false);
 
   useEffect(() => {
@@ -104,7 +102,7 @@ const BulletinModal = ({ bulletin, onClose }) => {
       
       setTimeout(() => {
         setShowNotification(false);
-        onClose();
+        handleClose();
       }, 2000);
     } catch (error) {
       setShowNotification(`Error: Unable to save bulletin`);
@@ -128,9 +126,18 @@ const BulletinModal = ({ bulletin, onClose }) => {
     });
   };
 
+  const handleClose = () => {
+    setFormData({
+      title: '',
+      content: '',
+      audience: ['PUBLIC']
+    });
+    onClose();
+  };
+
   return (
     <>
-      <Modal onClose={onClose}>
+      <Modal onClose={handleClose} show={modalOpen}>
         <div className="bulletin-modal">
           <h2>{bulletin ? 'Edit Bulletin' : 'Create Bulletin'}</h2>
           <div className="form-group">
@@ -179,7 +186,7 @@ const BulletinModal = ({ bulletin, onClose }) => {
             <button onClick={handleSubmit}>
               {bulletin ? 'Save' : 'Post'}
             </button>
-            <button onClick={onClose}>Cancel</button>
+            <button onClick={handleClose}>Cancel</button>
           </div>
         </div>
       </Modal>
@@ -192,4 +199,5 @@ const BulletinModal = ({ bulletin, onClose }) => {
     </>
   );
 };
+
 export default BulletinModal;

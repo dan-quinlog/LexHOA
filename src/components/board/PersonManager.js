@@ -169,7 +169,7 @@ const PersonManager = ({ searchState, setSearchState }) => {
             header={<h3>{person.name}</h3>}
             content={
               <>
-                <div>Account ID: {person.id}</div>
+                <div>Profile ID: {person.id}</div>
                 <div>Cognito ID: {person.cognitoID}</div>
                 <div>Email: {person.email}</div>
                 <div>Phone: {person.phone}</div>

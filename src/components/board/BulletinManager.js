@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useQuery } from '@apollo/client';
-import { BULLETINS_BY_DATE } from '../../queries/queries';
+import { useQuery, useMutation } from '@apollo/client';import { BULLETINS_BY_DATE } from '../../queries/queries';
+import { DELETE_BULLETIN } from '../../queries/mutations';
 import BulletinModal from '../modals/BulletinModal';
-import DeleteConfirmModal from '../modals/DeleteConfirmModal';
+import DeleteConfirmModal from '../shared/DeleteConfirmationModal';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.bubble.css';
 import './BulletinManager.css';
@@ -15,9 +15,33 @@ const BulletinManager = () => {
   const loadingRef = useRef(null);
 
   const { loading, error, data, fetchMore } = useQuery(BULLETINS_BY_DATE, {
-    variables: { limit: 10 }
+    variables: { 
+      limit: 10,
+      type: "BULLETIN",
+      sortDirection: "DESC"
+    }
   });
 
+  const [deleteBulletin] = useMutation(DELETE_BULLETIN, {
+    update(cache, { data: { deleteBulletin } }) {
+      const existingData = cache.readQuery({
+        query: BULLETINS_BY_DATE,
+        variables: { limit: 10, type: "BULLETIN", sortDirection: "DESC" }
+      });
+
+      cache.writeQuery({
+        query: BULLETINS_BY_DATE,
+        variables: { limit: 10, type: "BULLETIN", sortDirection: "DESC" },
+        data: {
+          bulletinsByDate: {
+            ...existingData.bulletinsByDate,
+            items: existingData.bulletinsByDate.items.filter(item => item.id !== deleteBulletin.id)
+          }
+        }
+      });
+    }
+  });
+  
   useEffect(() => {
     const observer = new IntersectionObserver(
       entries => {
@@ -25,6 +49,8 @@ const BulletinManager = () => {
           fetchMore({
             variables: {
               limit: 10,
+              type: "BULLETIN",
+              sortDirection: "DESC",
               nextToken: data.bulletinsByDate.nextToken
             },
             updateQuery: (prev, { fetchMoreResult }) => {
@@ -36,8 +62,7 @@ const BulletinManager = () => {
                 }
               };
             }
-          });
-        }
+          });        }
       },
       { threshold: 1.0 }
     );
@@ -59,11 +84,31 @@ const BulletinManager = () => {
     setDeleteModalOpen(true);
   };
 
+  const handleConfirmDelete = async (id) => {
+    try {
+      await deleteBulletin({
+        variables: { input: { id } }
+      });
+      setDeleteModalOpen(false);
+      setSelectedBulletin(null);
+    } catch (error) {
+      console.error('Error deleting bulletin:', error);
+    }
+  };
+
   return (
     <div className="board-tool">
       <div className="bulletin-header">
         <h1 className="section-title">Bulletin Management</h1>
-        <button className="search-controls" onClick={() => setModalOpen(true)}>Create Bulletin</button>
+        <button 
+          className="search-controls" 
+          onClick={() => {
+            setSelectedBulletin(null)
+            setModalOpen(true)
+          }}
+        >
+          Create Bulletin
+        </button>
       </div>
       <div className="bulletin-list">
         {data?.bulletinsByDate.items.map((bulletin, index) => (
@@ -97,27 +142,25 @@ const BulletinManager = () => {
         </div>
       </div>
 
-      {modalOpen && (
-        <BulletinModal
-          bulletin={selectedBulletin}
-          onClose={() => {
-            setModalOpen(false);
-            setSelectedBulletin(null);
-          }}
-        />
-      )}
+      <BulletinModal
+        bulletin={selectedBulletin}
+        modalOpen={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setSelectedBulletin(null);
+        }}
+      />
 
-      {deleteModalOpen && (
-        <DeleteConfirmModal
-          bulletin={selectedBulletin}
-          onClose={() => {
-            setDeleteModalOpen(false);
-            setSelectedBulletin(null);
-          }}
-        />
-      )}
+      <DeleteConfirmModal
+        show={deleteModalOpen}
+        objectId={selectedBulletin?.id}
+        onConfirm={handleConfirmDelete}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setSelectedBulletin(null);
+        }}
+      />
     </div>
   );
 };
-
 export default BulletinManager;

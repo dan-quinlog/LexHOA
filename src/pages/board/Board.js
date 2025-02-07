@@ -10,7 +10,6 @@ import './Board.css';
 const TOOLS = [
   { id: 'bulletins', label: 'Bulletins' },
   { id: 'persons', label: 'Person Management' },
-  { id: 'accounts', label: 'Account Management' },
   { id: 'properties', label: 'Property Management' },
   { id: 'payments', label: 'Payment Management' }
 ];
@@ -23,12 +22,6 @@ const Board = () => {
   const [personSearchState, setPersonSearchState] = useState({
     searchType: 'email',
     searchValue: '',
-    searchResults: []
-  });
-
-  const [accountSearchState, setAccountSearchState] = useState({
-    searchType: 'accountId',
-    searchTerm: '',
     searchResults: []
   });
 

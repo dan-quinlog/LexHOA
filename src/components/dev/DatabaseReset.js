@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
-import { useMutation, useQuery, gql } from '@apollo/client';
+import { useMutation, useQuery, gql, useApolloClient } from '@apollo/client';
 import Modal from '../shared/Modal';
-import { testData } from './seedData';
+import {
+  SEED_PROFILES,
+  SEED_PROPERTIES,
+  SEED_RELATIONSHIPS,
+  SEED_BULLETINS
+} from './seedData';
 import {
   CREATE_PROFILE,
   CREATE_PROPERTY,
   CREATE_BULLETIN,
   DELETE_PROFILE,
   DELETE_PROPERTY,
-  DELETE_BULLETIN
+  DELETE_BULLETIN,
+  UPDATE_PROPERTY,
+  UPDATE_PROFILE
 } from '../../queries/mutations';
 
 const LIST_PROFILE_IDS = gql`
@@ -65,6 +72,7 @@ const LIST_PING_IDS = gql`
 const DatabaseReset = () => {
   const [showModal, setShowModal] = useState(false);
   const [status, setStatus] = useState('');
+  const client = useApolloClient();
 
   // Query hooks
   const { data: profileData } = useQuery(LIST_PROFILE_IDS);
@@ -80,58 +88,125 @@ const DatabaseReset = () => {
   const [deleteProfile] = useMutation(DELETE_PROFILE);
   const [deleteProperty] = useMutation(DELETE_PROPERTY);
   const [deleteBulletin] = useMutation(DELETE_BULLETIN);
+  const [updateProperty] = useMutation(UPDATE_PROPERTY);
+  const [updateProfile] = useMutation(UPDATE_PROFILE);
+
+  const deleteAllProperties = async () => {
+    await Promise.all(
+      propertyData?.listProperties?.items?.map(({ id }) =>
+        deleteProperty({ variables: { input: { id } } })
+      ) || []
+    );
+  };
+
+  const deleteAllProfiles = async () => {
+    await Promise.all(
+      profileData?.listProfiles?.items?.map(({ id }) =>
+        deleteProfile({ variables: { input: { id } } })
+      ) || []
+    );
+  };
+
+  const createAllProfiles = async () => {
+    const createdProfiles = await Promise.all(
+      SEED_PROFILES.map(profile =>
+        createProfile({ variables: { input: profile } })
+      )
+    );
+    return createdProfiles.map(result => result.data.createProfile);
+  };
+
+  const createAllProperties = async () => {
+    const createdProperties = await Promise.all(
+      SEED_PROPERTIES.map(property =>
+        createProperty({ variables: { input: property } })
+      )
+    );
+    return createdProperties.map(result => result.data.createProperty);
+  };
+
+  const setupRelationships = async () => {
+    await Promise.all(
+      SEED_RELATIONSHIPS.map(async relationship => {
+        // Update property with owner and tenant
+        await updateProperty({
+          variables: {
+            input: {
+              id: relationship.propertyId,
+              profOwnerId: relationship.profOwnerId,
+              profTenantId: relationship.profTenantId
+            }
+          }
+        });
+
+        // Update tenant's profile with tenantAtId
+        if (relationship.profTenantId) {
+          await updateProfile({
+            variables: {
+              input: {
+                id: relationship.profTenantId,
+                tenantAtId: relationship.propertyId
+              }
+            }
+          });
+        }
+      })
+    );
+  };
+
+  const deleteAllBulletins = async () => {
+    await Promise.all(
+      bulletinData?.listBulletins?.items?.map(({ id }) =>
+        deleteBulletin({ variables: { input: { id } } })
+      ) || []
+    );
+  };
+
+  const createAllBulletins = async () => {
+    const createdBulletins = await Promise.all(
+      SEED_BULLETINS.map(bulletin =>
+        createBulletin({ variables: { input: bulletin } })
+      )
+    );
+    return createdBulletins.map(result => result.data.createBulletin);
+  };
 
   const handleReset = async () => {
     setShowModal(true);
     try {
-      // Clear existing data
       setStatus('Clearing database...');
 
-      // Delete profiles
-      await Promise.all(
-        profileData?.listProfiles?.items?.map(({ id }) =>
-          deleteProfile({ variables: { input: { id } } })
-        ) || []
-      );
+      // Clear existing data first
+      await deleteAllProperties();
+      await deleteAllProfiles();
+      await deleteAllBulletins();
 
-      // Delete properties
-      await Promise.all(
-        propertyData?.listProperties?.items?.map(({ id }) =>
-          deleteProperty({ variables: { input: { id } } })
-        ) || []
-      );
+      // Reset cache after deletes
+      await client.resetStore();
 
-      // Delete bulletins
-      await Promise.all(
-        bulletinData?.listBulletins?.items?.map(({ id }) =>
-          deleteBulletin({ variables: { input: { id } } })
-        ) || []
-      );
+      // Create new data in order
+      setStatus('Creating profiles...');
+      await createAllProfiles();
 
-      // Load new seed data
-      setStatus('Loading new data...');
-      setStatus('Loading profiles...');
-      await Promise.all(testData.profiles.map(profile =>
-        createProfile({ variables: { input: profile } })
-      ));
+      setStatus('Creating properties...');
+      await createAllProperties();
 
-      setStatus('Loading properties...');
-      await Promise.all(testData.properties.map(property =>
-        createProperty({ variables: { input: property } })
-      ));
+      setStatus('Establishing relationships...');
+      await setupRelationships();
 
-      setStatus('Loading bulletins...');
-      await Promise.all(testData.bulletins.map(bulletin =>
-        createBulletin({ variables: { input: bulletin } })
-      ));
+      setStatus('Creating bulletins...');
+      await createAllBulletins();
 
-      setStatus('Database reset complete! This window will close automatically.');
-      setTimeout(() => setShowModal(false), 3000);
+      setStatus('Reset complete!');
     } catch (error) {
-      setStatus(`Reset failed: ${error.message}`);
-      console.error('Reset error:', error);
-      setTimeout(() => setShowModal(false), 3000);
+      setStatus('Reset failed: ' + error.message);
     }
+
+    setTimeout(() => {
+      setShowModal(false);
+      setStatus('');
+    }, 2500);
+
   };
 
   return (

@@ -2,22 +2,27 @@ import React, { useState } from 'react';
 import Modal from './Modal';
 import { US_STATES } from '../../utils/constants';
 import './ProfileEditModal.css';
-
-const ProfileEditModal = ({ 
-  show, 
-  onClose, 
-  onSubmit, 
-  initialValues = {}, 
-  isBoard = false 
+const ProfileEditModal = ({
+  show,
+  onClose,
+  onSubmit,
+  initialValues = {},
+  isBoard = false,
+  isOwner = false
 }) => {
   const [formData, setFormData] = useState({
-    name: initialValues.name || '',
-    email: initialValues.email || '',
-    phone: initialValues.phone || '',
-    address: initialValues.address || '',
-    city: initialValues.city || '',
-    state: initialValues.state || '',
-    zip: initialValues.zip || ''
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zip: '',
+    contactPref: 'EMAIL',
+    allowText: false,
+    billingFreq: '',
+    balance: 0,
+    ...initialValues
   });
 
   const handlePhoneChange = (e) => {
@@ -42,13 +47,13 @@ const ProfileEditModal = ({
     }
     onSubmit(formData);
   };
-  
+
 
   return (
     <Modal show={show} onClose={onClose}>
       <h2>
-        {initialValues?.id 
-          ? (isBoard ? 'Edit Resident' : 'Edit Profile') 
+        {initialValues?.id
+          ? (isBoard ? 'Edit Resident' : 'Edit Profile')
           : 'Create New Person'}
       </h2>
       <div className="form-container">
@@ -56,10 +61,10 @@ const ProfileEditModal = ({
           <h3>Primary Information</h3>
           <div className="form-group">
             <label>Name</label>
-            <input 
-              type="text" 
-              value={formData.name} 
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
           </div>
           <div className="form-group">
@@ -81,16 +86,16 @@ const ProfileEditModal = ({
           <div className="address-line">
             <div className="form-group">
               <label>City</label>
-              <input 
-                type="text" 
-                value={formData.city} 
-                onChange={(e) => setFormData({ ...formData, city: e.target.value })} 
+              <input
+                type="text"
+                value={formData.city}
+                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
               />
             </div>
             <div className="form-group">
               <label>State</label>
-              <select 
-                value={formData.state} 
+              <select
+                value={formData.state}
                 onChange={(e) => setFormData({ ...formData, state: e.target.value })}
               >
                 <option value="">Select State</option>
@@ -101,10 +106,10 @@ const ProfileEditModal = ({
             </div>
             <div className="form-group">
               <label>ZIP</label>
-              <input 
-                type="text" 
-                value={formData.zip} 
-                onChange={(e) => setFormData({ ...formData, zip: e.target.value })} 
+              <input
+                type="text"
+                value={formData.zip}
+                onChange={(e) => setFormData({ ...formData, zip: e.target.value })}
               />
             </div>
           </div>
@@ -113,10 +118,10 @@ const ProfileEditModal = ({
           <h3>Contact Information</h3>
           <div className="form-group">
             <label>Email</label>
-            <input 
-              type="email" 
-              value={formData.email} 
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })} 
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             />
           </div>
           <div className="form-group">
@@ -130,8 +135,8 @@ const ProfileEditModal = ({
           </div>
           <div className="form-group">
             <label>Contact Preference</label>
-            <select 
-              value={formData.contactPref} 
+            <select
+              value={formData.contactPref}
               onChange={(e) => setFormData({ ...formData, contactPref: e.target.value })}
             >
               <option value="EMAIL">Email</option>
@@ -149,7 +154,7 @@ const ProfileEditModal = ({
               Allow Text Messages
             </label>
           </div>
-          {isBoard && (
+          {isOwner && (
             <div className="form-group">
               <label>Billing Frequency</label>
               <select
@@ -164,11 +169,22 @@ const ProfileEditModal = ({
               </select>
             </div>
           )}
+          {isOwner && (
+            <div className="form-group">
+              <label>Balance</label>
+              <input
+                type="number"
+                value={formData.balance || 0}
+                onChange={(e) => setFormData({ ...formData, balance: parseFloat(e.target.value) })}
+                disabled={!isBoard}
+              />
+            </div>
+          )}
         </div>
       </div>
       <div className="modal-actions">
         <button onClick={handleSubmit}>
-          {initialValues?.id ? 'Save' : 'Create'}
+          {initialValues?.id ? 'Update' : 'Create'}
         </button>
         <button onClick={onClose}>Cancel</button>
       </div>

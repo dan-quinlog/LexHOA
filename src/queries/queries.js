@@ -155,14 +155,12 @@ export const PROFILE_BY_NAME = gql`
   query ProfileByName(
     $name: String!
     $sortDirection: ModelSortDirection
-    $filter: ModelProfileFilterInput
     $limit: Int
     $nextToken: String
   ) {
     profileByName(
-      name: $name
+      filter: { name: { contains: $name } }
       sortDirection: $sortDirection
-      filter: $filter
       limit: $limit
       nextToken: $nextToken
     ) {
@@ -170,7 +168,7 @@ export const PROFILE_BY_NAME = gql`
         id
         byTypeName
         byTypeBalance
-        byTypeCreatedAt 
+        byTypeCreatedAt
         cognitoID
         name
         email
@@ -196,14 +194,12 @@ export const PROFILE_BY_EMAIL = gql`
   query ProfileByEmail(
     $email: String!
     $sortDirection: ModelSortDirection
-    $filter: ModelProfileFilterInput
     $limit: Int
     $nextToken: String
   ) {
     profileByEmail(
-      email: $email
+      filter: { email: { contains: $email } }
       sortDirection: $sortDirection
-      filter: $filter
       limit: $limit
       nextToken: $nextToken
     ) {
@@ -211,7 +207,7 @@ export const PROFILE_BY_EMAIL = gql`
         id
         byTypeName
         byTypeBalance
-        byTypeCreatedAt 
+        byTypeCreatedAt
         cognitoID
         name
         email
@@ -314,6 +310,48 @@ export const PROFILES_BY_TYPE_CREATEDAT = gql`
   }
 `;
 
+export const SEARCH_PROFILES = gql`
+  query SearchProfiles(
+    $filter: ModelProfileFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listProfiles(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        ownedProperties {
+          items {
+            id
+            profOwnerId
+          }
+        }
+        tenantAtId
+        createdAt
+        updatedAt
+        owner
+      }
+      nextToken
+    }
+  }
+`;
+
+
 
 // Property Queries
 export const GET_PROPERTY = gql`
@@ -384,6 +422,47 @@ export const PROPERTY_BY_ADDRESS = gql`
         updatedAt
       }
       nextToken
+    }
+  }
+`;
+
+export const SEARCH_PROPERTIES = gql`
+  query SearchProperties(
+    $filter: ModelPropertyFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listProperties(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        address
+        profOwnerId
+        profTenantId
+        createdAt
+        updatedAt
+      }
+      nextToken
+    }
+  }
+`;
+
+export const FIND_RELATED_PROPERTIES = gql`
+  query FindRelatedProperties($profileId: ID!) {
+    listProperties(filter: {
+      or: [
+        { profOwnerId: { eq: $profileId } },
+        { profTenantId: { eq: $profileId } }
+      ]
+    }) {
+      items {
+        id
+        profOwnerId
+        profTenantId
+      }
     }
   }
 `;

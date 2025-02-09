@@ -18,7 +18,7 @@
 .profile-section {
   background-color: var(--background-white);
   border-radius: var(--border-radius);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: var(--spacing-large);
 }
 
@@ -30,6 +30,16 @@
   margin-bottom: var(--spacing-medium);
   width: 100%;
 }
+
+.role-tag {
+  font-size: 0.8em;
+  padding: 2px 8px;
+  margin-left: 8px;
+  border-radius: 12px;
+  background-color: #e0e0e0;
+  color: #666;
+}
+
 
 /* Mobile responsiveness for merge functionality */
 @media (max-width: 768px) {

@@ -8,11 +8,17 @@ const DeleteConfirmationModal = ({ show, objectId, onConfirm, onClose }) => {
   const handleConfirm = () => {
     if (confirmId === objectId) {
       onConfirm(objectId);
+      setConfirmId('');
     }
   };
 
+  const handleClose = () => {
+    setConfirmId('');
+    onClose();
+  };
+
   return (
-    <Modal show={show} onClose={onClose}>
+    <Modal show={show} onClose={handleClose}>
       <div className="delete-confirmation">
         <h2>Confirm Deletion</h2>
         <p>ID: {objectId}</p>
@@ -23,8 +29,8 @@ const DeleteConfirmationModal = ({ show, objectId, onConfirm, onClose }) => {
           onChange={(e) => setConfirmId(e.target.value)}
         />
         <div className="modal-actions">
-          <button 
-            className="danger" 
+          <button
+            className="danger"
             onClick={handleConfirm}
             disabled={confirmId !== objectId}
           >

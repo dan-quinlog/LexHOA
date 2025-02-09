@@ -4,12 +4,16 @@ import {
   LIST_PROPERTIES,
   PROPERTY_BY_ADDRESS
 } from '../../queries/queries';
-import { DELETE_PROPERTY } from '../../queries/mutations';
-import PropertyCard from './PropertyCard';
-import PropertyEditModal from './PropertyEditModal';
-import './shared/BoardTools.css';
+import {
+  DELETE_PROPERTY,
+  CREATE_PROPERTY,
+  UPDATE_PROPERTY,
+  UPDATE_PROFILE
+} from '../../queries/mutations';
+import PropertyEditModal from '../modals/PropertyEditModal';
 import BoardCard from './shared/BoardCard';
 import DeleteConfirmationModal from '../shared/DeleteConfirmationModal';
+import './shared/BoardTools.css';
 
 const PropertyManager = ({ searchState, setSearchState }) => {
   const [selectedProperty, setSelectedProperty] = useState(null);
@@ -21,40 +25,29 @@ const PropertyManager = ({ searchState, setSearchState }) => {
   const [searchProperties] = useLazyQuery(LIST_PROPERTIES);
   const [searchByAddress] = useLazyQuery(PROPERTY_BY_ADDRESS);
   const [deleteProperty] = useMutation(DELETE_PROPERTY);
+  const [updateProperty] = useMutation(UPDATE_PROPERTY);
+  const [createProperty] = useMutation(CREATE_PROPERTY);
+  const [updateProfile] = useMutation(UPDATE_PROFILE);
 
   const handleSearch = async () => {
     if (!searchState.searchTerm) return;
 
     try {
-      let response;
-      switch (searchState.searchType) {
-        case 'propertyId':
-          response = await searchProperties({
-            variables: { filter: { id: { contains: searchState.searchTerm } } }
-          });
-          setSearchState({
-            ...searchState,
-            searchResults: response.data?.listProperties?.items || []
-          });
-          break;
-        case 'address':
-          response = await searchByAddress({
-            variables: { address: searchState.searchTerm }
-          });
-          setSearchState({
-            ...searchState,
-            searchResults: response.data?.propertyByAddress?.items || []
-          });
-          break;
-        default:
-          response = await searchProperties({
-            variables: { filter: { id: { contains: searchState.searchTerm } } }
-          });
-          setSearchState({
-            ...searchState,
-            searchResults: response.data?.listProperties?.items || []
-          });
-      }
+      const response = await searchProperties({
+        variables: {
+          filter: {
+            [searchState.searchType === 'address' ? 'address' : 'id']: {
+              contains: searchState.searchTerm
+            }
+          },
+          limit: 10
+        }
+      });
+
+      setSearchState({
+        ...searchState,
+        searchResults: response.data?.listProperties?.items || []
+      });
     } catch (error) {
       console.error('Search error:', error);
     }
@@ -72,14 +65,65 @@ const PropertyManager = ({ searchState, setSearchState }) => {
 
   const confirmDelete = async () => {
     try {
+      // Clear tenant relationship if exists
+      if (propertyToDelete.profTenantId) {
+        await updateProfile({
+          variables: {
+            input: {
+              id: propertyToDelete.profTenantId,
+              tenantAtId: null
+            }
+          }
+        });
+      }
+
+      // Delete the property
       await deleteProperty({
-        variables: { input: { id: propertyToDelete.id } }
+        variables: { 
+          input: { id: propertyToDelete.id }
+        }
       });
+
       setShowDeleteModal(false);
       setPropertyToDelete(null);
       handleSearch();
     } catch (error) {
       console.error('Error deleting property:', error);
+    }
+  };
+
+  const handleSave = async (formData) => {
+    try {
+      const mutationInput = {
+        id: formData.id,
+        address: formData.address,
+        profOwnerId: formData.profOwnerId,
+        profTenantId: formData.profTenantId,
+        type: formData.type
+      };
+
+      await updateProperty({
+        variables: {
+          input: mutationInput
+        }
+      });
+
+      // Then update the tenant's profile if there is one
+      if (formData.profTenantId) {
+        await updateProfile({
+          variables: {
+            input: {
+              id: formData.profTenantId,
+              tenantAtId: formData.id
+            }
+          }
+        });
+      }
+
+      setShowEditModal(false);
+      handleSearch(); // Refresh results
+    } catch (error) {
+      console.error('Error saving property:', error);
     }
   };
 
@@ -127,8 +171,8 @@ const PropertyManager = ({ searchState, setSearchState }) => {
             header={<h3>Property {property.id}</h3>}
             content={
               <>
-                <div>Owner: {property.ownerId}</div>
-                <div>Tenant: {property.tenantId}</div>
+                <div>Owner: {property.profOwnerId}</div>
+                <div>Tenant: {property.profTenantId}</div>
                 <div>Address: {property.address}</div>
               </>
             }
@@ -143,24 +187,23 @@ const PropertyManager = ({ searchState, setSearchState }) => {
       </div>
       {showEditModal && (
         <PropertyEditModal
-          property={selectedProperty}
           show={showEditModal}
-          onClose={() => {
-            setShowEditModal(false);
-            handleSearch();
-          }}
+          onClose={() => setShowEditModal(false)}
+          initialValues={selectedProperty}
+          onSubmit={handleSave}
         />
       )}
 
-      {showDeleteModal && (
-        <DeleteConfirmationModal
-          id={propertyToDelete?.id}
-          onConfirm={confirmDelete}
-          onClose={() => setShowDeleteModal(false)}
-        />
-      )}
+      <DeleteConfirmationModal
+        show={showDeleteModal}
+        objectId={propertyToDelete?.id}
+        onConfirm={confirmDelete}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setPropertyToDelete(null);
+        }}
+      />
     </div>
   );
 };
-
 export default PropertyManager;

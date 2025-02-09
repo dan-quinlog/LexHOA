@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { useMutation } from '@apollo/client';
-import { UPDATE_PROFILE, DELETE_PROFILE  } from '../../queries/mutations';
 import Modal from '../shared/Modal';
 import './MergeProfilesModal.css';
 
-const MergeProfilesModal = ({ profiles, show, onClose }) => {
+const MergeProfilesModal = ({ profiles, show, onClose, onMerge }) => {
   const cognitoProfile = profiles.find(p => p.cognitoID);
   const manualProfile = profiles.find(p => !p.cognitoID);
 
@@ -20,39 +18,11 @@ const MergeProfilesModal = ({ profiles, show, onClose }) => {
     contactPref: cognitoProfile?.contactPref || 'EMAIL'
   });
 
-  const [updateProfile] = useMutation(UPDATE_PROFILE);
-  const [deleteProfile] = useMutation(DELETE_PROFILE );
-
-  const handleSelect = (field, value, profileId) => {
+  const handleSelect = (field, value) => {
     setMergedData(prev => ({
       ...prev,
       [field]: value
     }));
-  };
-
-  const handleMerge = async () => {
-    try {
-      await updateProfile({
-        variables: {
-          input: {
-            id: cognitoProfile.id,
-            ...mergedData
-          }
-        }
-      });
-
-      await deleteProfile({
-        variables: {
-          input: {
-            id: manualProfile.id
-          }
-        }
-      });
-
-      onClose();
-    } catch (error) {
-      console.error('Error merging profiles:', error);
-    }
   };
 
   return (
@@ -104,12 +74,13 @@ const MergeProfilesModal = ({ profiles, show, onClose }) => {
         </div>
 
         <div className="modal-actions">
-          <button onClick={handleMerge} className="merge-button">Merge Profiles</button>
+          <button onClick={() => onMerge(cognitoProfile, manualProfile, mergedData)} className="merge-button">
+            Merge Profiles
+          </button>
           <button onClick={onClose} className="cancel-button">Cancel</button>
         </div>
       </div>
     </Modal>
   );
 };
-
 export default MergeProfilesModal;

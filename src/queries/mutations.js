@@ -37,9 +37,6 @@ export const UPDATE_PROFILE = gql`
   ) {
     updateProfile(input: $input, condition: $condition) {
       id
-      byTypeName
-      byTypeBalance
-      byTypeCreatedAt 
       cognitoID
       name
       email
@@ -49,12 +46,19 @@ export const UPDATE_PROFILE = gql`
       state
       zip
       contactPref
+      allowText
       billingFreq
       balance
       tenantAtId
       createdAt
       updatedAt
       owner
+      ownedProperties {
+        items {
+          id
+          profOwnerId
+        }
+      }
     }
   }
 `;

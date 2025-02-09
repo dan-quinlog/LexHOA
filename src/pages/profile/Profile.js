@@ -51,7 +51,8 @@
                 onClose={() => setShowEditModal(false)}
                 onSubmit={handleProfileUpdate}
                 initialValues={profile}
-                isBoard={true}
+                isOwner={profile?.ownedProperties?.items?.length > 0}
+                isBoard={false}
               />
             </>
           )}

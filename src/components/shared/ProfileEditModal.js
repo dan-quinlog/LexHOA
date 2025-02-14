@@ -12,26 +12,32 @@ const ProfileEditModal = ({
 }) => {
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
-    phone: '',
+    email: null,
+    phone: null,
     address: '',
     city: '',
     state: '',
     zip: '',
     contactPref: 'EMAIL',
     allowText: false,
-    billingFreq: '',
+    billingFreq: 'MONTHLY',
     balance: 0,
     ...initialValues
   });
 
   const handlePhoneChange = (e) => {
     const phoneNumber = e.target.value.replace(/\D/g, '');
-    if (phoneNumber.length <= 10) {
-      setFormData({
-        ...formData,
-        phone: phoneNumber.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3')
-      });
+    if (phoneNumber.length === 0) {
+      handleContactField('phone', null);
+    } else if (phoneNumber.length <= 10) {
+      let formattedPhone = phoneNumber;
+      if (phoneNumber.length > 3) {
+        formattedPhone = phoneNumber.slice(0, 3) + '-' + phoneNumber.slice(3);
+      }
+      if (phoneNumber.length > 6) {
+        formattedPhone = formattedPhone.slice(0, 7) + '-' + formattedPhone.slice(7);
+      }
+      handleContactField('phone', formattedPhone);
     }
   };
 
@@ -42,12 +48,17 @@ const ProfileEditModal = ({
 
   const handleSubmit = () => {
     if (!formData.name) {
-      console.error('Name is required');
       return;
     }
     onSubmit(formData);
   };
 
+  const handleContactField = (field, value) => {
+    setFormData({
+      ...formData,
+      [field]: value?.trim() === '' || value === null ? null : value
+    });
+  };
 
   return (
     <Modal show={show} onClose={onClose}>
@@ -120,15 +131,15 @@ const ProfileEditModal = ({
             <label>Email</label>
             <input
               type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              value={formData.email || ''}
+              onChange={(e) => handleContactField('email', e.target.value)}
             />
           </div>
           <div className="form-group">
             <label>Phone</label>
             <input
               type="tel"
-              value={formData.phone}
+              value={formData.phone || ''}
               onChange={handlePhoneChange}
               placeholder="123-456-7890"
             />
@@ -161,7 +172,6 @@ const ProfileEditModal = ({
                 value={formData.billingFreq || ''}
                 onChange={(e) => setFormData({ ...formData, billingFreq: e.target.value })}
               >
-                <option value="">Select Frequency</option>
                 <option value="MONTHLY">Monthly</option>
                 <option value="QUARTERLY">Quarterly</option>
                 <option value="SEMI">Semi-Annual</option>

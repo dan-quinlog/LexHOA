@@ -26,7 +26,7 @@ type Profile @model
     )
   owner: String
   cognitoID: String @index(name: "byCognitoID", queryField: "profileByCognitoID")
-  name: String @index(name: "byName", queryField: "profileByName")
+  name: String! @index(name: "byName", queryField: "profileByName")
   email: String @index(name: "byEmail", queryField: "profileByEmail")
   phone: String @index(name: "byPhone", queryField: "profileByPhone")
   address: String
@@ -50,6 +50,7 @@ type Profile @model
   payments: [Payment] @hasMany(indexName: "byOwnerPayments", fields: ["id"])
   tenantAt: Property @belongsTo(fields: ["tenantAtId"])
   tenantAtId: ID @index(name: "byTenantAt")
+  createdPings: [Ping] @hasMany(indexName: "byCreator", fields: ["id"])
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
 }
@@ -144,8 +145,8 @@ type Bulletin @model
 type Ping @model
   @auth(
     rules: [
-      { allow: private, provider: userPools, operations: [create] },
-      { allow: groups, groups: ["BOARD"], operations: [create, update, delete, read] }
+      { allow: private, provider: userPools, operations: [create, read] },
+      { allow: groups, groups: ["BOARD"], operations: [create, update, delete] }
     ]
   ) {
   id: ID!
@@ -158,7 +159,8 @@ type Ping @model
   items: [String]
   instruction: String
   status: PingStatus @default(value: "PENDING")
-  createdBy: ID! @index(name: "byCreator", queryField: "pingsByCreator")
+  profCreator: Profile @belongsTo(fields: ["profCreatorId"])
+  profCreatorId: ID @index(name: "byCreator", sortKeyFields: ["createdAt"])
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
 }

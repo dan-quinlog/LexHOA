@@ -47,6 +47,10 @@ export const createProfile = /* GraphQL */ `
         __typename
       }
       tenantAtId
+      createdPings {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -99,6 +103,10 @@ export const updateProfile = /* GraphQL */ `
         __typename
       }
       tenantAtId
+      createdPings {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -151,6 +159,10 @@ export const deleteProfile = /* GraphQL */ `
         __typename
       }
       tenantAtId
+      createdPings {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -558,7 +570,30 @@ export const createPing = /* GraphQL */ `
       items
       instruction
       status
-      createdBy
+      profCreator {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      profCreatorId
       createdAt
       updatedAt
       __typename
@@ -576,7 +611,30 @@ export const updatePing = /* GraphQL */ `
       items
       instruction
       status
-      createdBy
+      profCreator {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      profCreatorId
       createdAt
       updatedAt
       __typename
@@ -594,7 +652,30 @@ export const deletePing = /* GraphQL */ `
       items
       instruction
       status
-      createdBy
+      profCreator {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      profCreatorId
       createdAt
       updatedAt
       __typename

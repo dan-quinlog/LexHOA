@@ -4,16 +4,20 @@ import Modal from '../shared/Modal';
 import {
   SEED_PROFILES,
   SEED_PROPERTIES,
+  SEED_PAYMENTS,
   SEED_RELATIONSHIPS,
   SEED_BULLETINS
 } from './seedData';
 import {
   CREATE_PROFILE,
   CREATE_PROPERTY,
+  CREATE_PAYMENT,
   CREATE_BULLETIN,
   DELETE_PROFILE,
   DELETE_PROPERTY,
+  DELETE_PAYMENT,
   DELETE_BULLETIN,
+  DELETE_PING,
   UPDATE_PROPERTY,
   UPDATE_PROFILE
 } from '../../queries/mutations';
@@ -84,10 +88,13 @@ const DatabaseReset = () => {
   // Mutation hooks
   const [createProfile] = useMutation(CREATE_PROFILE);
   const [createProperty] = useMutation(CREATE_PROPERTY);
+  const [createPayment] = useMutation(CREATE_PAYMENT);
   const [createBulletin] = useMutation(CREATE_BULLETIN);
   const [deleteProfile] = useMutation(DELETE_PROFILE);
   const [deleteProperty] = useMutation(DELETE_PROPERTY);
+  const [deletePayment] = useMutation(DELETE_PAYMENT);
   const [deleteBulletin] = useMutation(DELETE_BULLETIN);
+  const [deletePing] = useMutation(DELETE_PING);
   const [updateProperty] = useMutation(UPDATE_PROPERTY);
   const [updateProfile] = useMutation(UPDATE_PROFILE);
 
@@ -103,6 +110,22 @@ const DatabaseReset = () => {
     await Promise.all(
       profileData?.listProfiles?.items?.map(({ id }) =>
         deleteProfile({ variables: { input: { id } } })
+      ) || []
+    );
+  };
+
+  const deleteAllPayments = async () => {
+    await Promise.all(
+      paymentData?.listPayments?.items?.map(({ id }) =>
+        deletePayment({ variables: { input: { id } } })
+      ) || []
+    );
+  };
+
+  const deleteAllPings = async () => {
+    await Promise.all(
+      pingData?.listPings?.items?.map(({ id }) =>
+        deletePing({ variables: { input: { id } } })
       ) || []
     );
   };
@@ -123,6 +146,15 @@ const DatabaseReset = () => {
       )
     );
     return createdProperties.map(result => result.data.createProperty);
+  };
+
+  const createAllPayments = async () => {
+    const createdPayments = await Promise.all(
+      SEED_PAYMENTS.map(payment =>
+        createPayment({ variables: { input: payment } })
+      )
+    );
+    return createdPayments.map(result => result.data.createPayment);
   };
 
   const setupRelationships = async () => {
@@ -179,7 +211,9 @@ const DatabaseReset = () => {
       // Clear existing data first
       await deleteAllProperties();
       await deleteAllProfiles();
+      await deleteAllPayments();
       await deleteAllBulletins();
+      await deleteAllPings();
 
       // Reset cache after deletes
       await client.resetStore();
@@ -190,6 +224,9 @@ const DatabaseReset = () => {
 
       setStatus('Creating properties...');
       await createAllProperties();
+
+      setStatus('Creating payments...');
+      await createAllPayments();
 
       setStatus('Establishing relationships...');
       await setupRelationships();

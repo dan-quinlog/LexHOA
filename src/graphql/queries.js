@@ -44,6 +44,10 @@ export const getProfile = /* GraphQL */ `
         __typename
       }
       tenantAtId
+      createdPings {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -254,7 +258,30 @@ export const getPing = /* GraphQL */ `
       items
       instruction
       status
-      createdBy
+      profCreator {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      profCreatorId
       createdAt
       updatedAt
       __typename
@@ -274,7 +301,7 @@ export const listPings = /* GraphQL */ `
         items
         instruction
         status
-        createdBy
+        profCreatorId
         createdAt
         updatedAt
         __typename
@@ -1100,7 +1127,7 @@ export const pingByDate = /* GraphQL */ `
         items
         instruction
         status
-        createdBy
+        profCreatorId
         createdAt
         updatedAt
         __typename
@@ -1110,16 +1137,18 @@ export const pingByDate = /* GraphQL */ `
     }
   }
 `;
-export const pingsByCreator = /* GraphQL */ `
-  query PingsByCreator(
-    $createdBy: ID!
+export const pingsByProfCreatorIdAndCreatedAt = /* GraphQL */ `
+  query PingsByProfCreatorIdAndCreatedAt(
+    $profCreatorId: ID!
+    $createdAt: ModelStringKeyConditionInput
     $sortDirection: ModelSortDirection
     $filter: ModelPingFilterInput
     $limit: Int
     $nextToken: String
   ) {
-    pingsByCreator(
-      createdBy: $createdBy
+    pingsByProfCreatorIdAndCreatedAt(
+      profCreatorId: $profCreatorId
+      createdAt: $createdAt
       sortDirection: $sortDirection
       filter: $filter
       limit: $limit
@@ -1131,7 +1160,7 @@ export const pingsByCreator = /* GraphQL */ `
         items
         instruction
         status
-        createdBy
+        profCreatorId
         createdAt
         updatedAt
         __typename

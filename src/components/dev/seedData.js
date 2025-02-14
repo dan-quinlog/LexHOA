@@ -125,6 +125,83 @@ export const SEED_PROPERTIES = [
   }
 ];
 
+export const SEED_PAYMENTS = [
+  // James Wilson's payments ($1500 quarterly for 4 properties)
+  {
+    id: "pay-wilson-q1",
+    checkDate: "2024-01-15",
+    checkNumber: "1001",
+    checkAmount: 1500.00,
+    invoiceNumber: "INV-WILSON-Q1",
+    invoiceAmount: 1500.00,
+    ownerPaymentsId: "64c824e8-00b1-7080-e39e-f441cead3e4c"
+  },
+  {
+    id: "pay-wilson-q2",
+    checkDate: "2024-04-15",
+    checkNumber: "1002",
+    checkAmount: 1500.00,
+    invoiceNumber: "INV-WILSON-Q2",
+    invoiceAmount: 1500.00,
+    ownerPaymentsId: "64c824e8-00b1-7080-e39e-f441cead3e4c"
+  },
+  {
+    id: "pay-wilson-q3",
+    checkDate: "2024-07-15",
+    checkNumber: "1003",
+    checkAmount: 1500.00,
+    invoiceNumber: "INV-WILSON-Q3",
+    invoiceAmount: 1500.00,
+    ownerPaymentsId: "64c824e8-00b1-7080-e39e-f441cead3e4c"
+  },
+  {
+    id: "pay-wilson-q4",
+    checkDate: "2024-10-15",
+    checkNumber: "1004",
+    checkAmount: 1500.00,
+    invoiceNumber: "INV-WILSON-Q4",
+    invoiceAmount: 1500.00,
+    ownerPaymentsId: "64c824e8-00b1-7080-e39e-f441cead3e4c"
+  },
+  // Owner-no-login payments ($375 quarterly for 1 property)
+  {
+    id: "pay-owner-q1",
+    checkDate: "2024-01-15",
+    checkNumber: "2001",
+    checkAmount: 375.00,
+    invoiceNumber: "INV-OWNER-Q1",
+    invoiceAmount: 375.00,
+    ownerPaymentsId: "owner-no-login"
+  },
+  {
+    id: "pay-owner-q2",
+    checkDate: "2024-04-15",
+    checkNumber: "2002",
+    checkAmount: 375.00,
+    invoiceNumber: "INV-OWNER-Q2",
+    invoiceAmount: 375.00,
+    ownerPaymentsId: "owner-no-login"
+  },
+  {
+    id: "pay-owner-q3",
+    checkDate: "2024-07-15",
+    checkNumber: "2003",
+    checkAmount: 375.00,
+    invoiceNumber: "INV-OWNER-Q3",
+    invoiceAmount: 375.00,
+    ownerPaymentsId: "owner-no-login"
+  },
+  {
+    id: "pay-owner-q4",
+    checkDate: "2024-10-15",
+    checkNumber: "2004",
+    checkAmount: 375.00,
+    invoiceNumber: "INV-OWNER-Q4",
+    invoiceAmount: 375.00,
+    ownerPaymentsId: "owner-no-login"
+  }
+];
+
 export const SEED_RELATIONSHIPS = [
   {
     propertyId: "1234",

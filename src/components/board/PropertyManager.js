@@ -28,31 +28,54 @@ const PropertyManager = ({ searchState, setSearchState }) => {
   const [updateProperty] = useMutation(UPDATE_PROPERTY);
   const [createProperty] = useMutation(CREATE_PROPERTY);
   const [updateProfile] = useMutation(UPDATE_PROFILE);
+    const handleSearch = async () => {
+      if (!searchState.searchTerm) return;
 
-  const handleSearch = async () => {
-    if (!searchState.searchTerm) return;
+      try {
+        let response;
+        switch (searchState.searchType) {
+          case 'propertyId':
+            response = await searchProperties({
+              variables: {
+                filter: {
+                  id: { eq: searchState.searchTerm }
+                },
+                limit: 12
+              }
+            });
+            break;
 
-    try {
-      const response = await searchProperties({
-        variables: {
-          filter: {
-            [searchState.searchType === 'address' ? 'address' : 'id']: {
-              contains: searchState.searchTerm
-            }
-          },
-          limit: 10
+          case 'address':
+            response = await searchProperties({
+              variables: {
+                filter: {
+                  address: { contains: searchState.searchTerm }
+                },
+                limit: 12
+              }
+            });
+            break;
+
+          case 'ownerId':
+            response = await searchProperties({
+              variables: {
+                filter: {
+                  profOwnerId: { eq: searchState.searchTerm }
+                },
+                limit: 12
+              }
+            });
+            break;
         }
-      });
 
-      setSearchState({
-        ...searchState,
-        searchResults: response.data?.listProperties?.items || []
-      });
-    } catch (error) {
-      console.error('Search error:', error);
-    }
-  };
-
+        setSearchState({
+          ...searchState,
+          searchResults: response.data?.listProperties?.items || []
+        });
+      } catch (error) {
+        console.error('Search error:', error);
+      }
+    };
   const handleEdit = (property) => {
     setSelectedProperty(property);
     setShowEditModal(true);
@@ -141,6 +164,7 @@ const PropertyManager = ({ searchState, setSearchState }) => {
         >
           <option value="propertyId">Property ID</option>
           <option value="address">Address</option>
+          <option value="ownerId">Owner ID</option>
         </select>
         <input
           type="text"

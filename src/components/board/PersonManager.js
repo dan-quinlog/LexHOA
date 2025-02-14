@@ -127,21 +127,40 @@ const PersonManager = ({ searchState, setSearchState }) => {
     }
   };
 
+  const cleanFormData = (formData) => {
+    const fieldsToRemove = [
+      '__typename',
+      'createdAt',
+      'updatedAt',
+      'ownedProperties',
+      'cognitoID',
+      'tenantAtId'
+    ];
+
+    return Object.entries(formData).reduce((acc, [key, value]) => {
+      if (!fieldsToRemove.includes(key)) {
+        acc[key] = value === '' ? null : value;
+      }
+      return acc;
+    }, {});
+  };
+
   const handleSave = async (formData) => {
     try {
+      const cleanedData = cleanFormData(formData);
       if (selectedPerson?.id) {
         await updatePerson({
           variables: {
             input: {
               id: selectedPerson.id,
-              ...formData
+              ...cleanedData
             }
           }
         });
       } else {
         await createPerson({
           variables: {
-            input: formData
+            input: cleanedData
           }
         });
       }
@@ -225,7 +244,7 @@ const PersonManager = ({ searchState, setSearchState }) => {
   const getPersonRoleTags = (person) => {
     const isOwner = person?.ownedProperties?.items?.length > 0;
     const isResident = person?.tenantAtId;
-  
+
     if (isOwner && isResident) {
       return <span className="role-tag">Owner Resident</span>;
     }

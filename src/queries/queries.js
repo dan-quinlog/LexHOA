@@ -34,6 +34,7 @@ export const GET_PROFILE = gql`
             email
             phone
             contactPref
+            owner
           }
         }
       }
@@ -129,6 +130,7 @@ export const PROFILE_BY_COGNITO_ID = gql`
               email
               phone
               contactPref
+              owner
             }
           }
         }
@@ -142,6 +144,15 @@ export const PROFILE_BY_COGNITO_ID = gql`
           updatedAt
         }
         tenantAtId
+        createdPings {
+          items {
+            id
+            items
+            instruction
+            status
+            createdAt
+          }
+        }
         createdAt
         updatedAt
         owner
@@ -372,6 +383,7 @@ export const GET_PROPERTY = gql`
         name
         email
         phone
+        owner
       }
       profTenantId
       createdAt
@@ -519,7 +531,6 @@ export const LIST_PAYMENTS = gql`
 export const PAYMENTS_BY_OWNER = gql`
   query PaymentsByOwner(
     $ownerPaymentsId: ID!
-    $checkDate: ModelStringKeyConditionInput
     $sortDirection: ModelSortDirection
     $filter: ModelPaymentFilterInput
     $limit: Int
@@ -527,7 +538,6 @@ export const PAYMENTS_BY_OWNER = gql`
   ) {
     paymentsByOwner(
       ownerPaymentsId: $ownerPaymentsId
-      checkDate: $checkDate
       sortDirection: $sortDirection
       filter: $filter
       limit: $limit
@@ -586,7 +596,7 @@ export const PAYMENTS_BY_INVOICE_NUMBER = gql`
       nextToken
     }
   }
-  `;
+`;
 
 // Bulletin Queries
 export const GET_BULLETIN = gql`
@@ -647,6 +657,55 @@ export const BULLETINS_BY_DATE = gql`
         updatedAt
       }
       nextToken
+    }
+  }
+`;
+
+export const SEARCH_PINGS_BY_ID = gql`
+  query GetPing($id: ID!) {
+    getPing(id: $id) {
+      id
+      type
+      items
+      instruction
+      status
+      profCreatorId
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const SEARCH_PINGS_BY_CREATOR = gql`
+  query PingsByCreator($profCreatorId: ID!) {
+    pingsByCreator(profCreatorId: $profCreatorId) {
+      items {
+        id
+        type
+        items
+        instruction
+        status
+        profCreatorId
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
+export const LIST_PENDING_PINGS = gql`
+  query ListPendingPings {
+    listPings(filter: { status: { eq: PENDING } }) {
+      items {
+        id
+        type
+        items
+        instruction
+        status
+        profCreatorId
+        createdAt
+        updatedAt
+      }
     }
   }
 `;

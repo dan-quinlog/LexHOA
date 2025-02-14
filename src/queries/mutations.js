@@ -276,3 +276,57 @@ export const DELETE_BULLETIN = gql`
     }
   }
 `;
+
+export const CREATE_PING = gql`
+  mutation CreatePing(
+    $input: CreatePingInput!
+    $condition: ModelPingConditionInput
+  ) {
+    createPing(input: $input, condition: $condition) {
+      id
+      type
+      items
+      instruction
+      status
+      profCreatorId
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const UPDATE_PING = gql`
+  mutation UpdatePing(
+    $input: UpdatePingInput!
+    $condition: ModelPingConditionInput
+  ) {
+    updatePing(input: $input, condition: $condition) {
+      id
+      type
+      items
+      instruction
+      status
+      profCreatorId
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const DELETE_PING = gql`
+  mutation DeletePing(
+    $input: DeletePingInput!
+    $condition: ModelPingConditionInput
+  ) {
+    deletePing(input: $input, condition: $condition) {
+      id
+      type
+      items
+      instruction
+      status
+      profCreatorId
+      createdAt
+      updatedAt
+    }
+  }
+`;

@@ -18,7 +18,6 @@ const PaymentManager = ({ searchState, setSearchState }) => {
   const [searchPayments] = useLazyQuery(LIST_PAYMENTS);
   const [searchByOwner] = useLazyQuery(PAYMENTS_BY_OWNER);
   const [deletePayment] = useMutation(DELETE_PAYMENT);
-
   const handleSearch = async () => {
     if (!searchState.searchTerm) return;
 
@@ -33,26 +32,44 @@ const PaymentManager = ({ searchState, setSearchState }) => {
               }
             }
           });
-          setSearchState({
-            ...searchState,
-            searchResults: response.data?.listPayments?.items || []
-          });
           break;
         case 'ownerId':
           response = await searchByOwner({
-            variables: { ownerPaymentsId: searchState.searchTerm }
+            variables: {
+              ownerPaymentsId: searchState.searchTerm,
+              sortDirection: 'DESC'
+            }
           });
-          setSearchState({
-            ...searchState,
-            searchResults: response.data?.paymentsByOwner?.items || []
+          break;
+        case 'invoiceNumber':
+          response = await searchPayments({
+            variables: {
+              filter: {
+                invoiceNumber: { eq: searchState.searchTerm }
+              }
+            }
+          });
+          break;
+        case 'checkNumber':
+          response = await searchPayments({
+            variables: {
+              filter: {
+                checkNumber: { eq: searchState.searchTerm }
+              }
+            }
           });
           break;
       }
+
+      setSearchState({
+        ...searchState,
+        searchResults: response.data?.listPayments?.items ||
+          response.data?.paymentsByOwner?.items || []
+      });
     } catch (error) {
       console.error('Search error:', error);
     }
   };
-
   const handleEdit = (payment) => {
     setSelectedPayment(payment);
     setShowEditModal(true);
@@ -97,6 +114,8 @@ const PaymentManager = ({ searchState, setSearchState }) => {
         >
           <option value="paymentId">Payment ID</option>
           <option value="ownerId">Owner ID</option>
+          <option value="invoiceNumber">Invoice Number</option>
+          <option value="checkNumber">Check Number</option>
         </select>
         <input
           type="text"
@@ -149,13 +168,15 @@ const PaymentManager = ({ searchState, setSearchState }) => {
           }}
         />
       )}
-      {showDeleteModal && (
-        <DeleteConfirmationModal
-          id={paymentToDelete?.id}
-          onConfirm={confirmDelete}
-          onClose={() => setShowDeleteModal(false)}
-        />
-      )}
+      <DeleteConfirmationModal
+        show={showDeleteModal}
+        objectId={paymentToDelete?.id}
+        onConfirm={confirmDelete}
+        onClose={() => {
+          setShowDeleteModal(false)
+          setPaymentToDelete(null)
+        }}
+      />
     </div>
   );
 };

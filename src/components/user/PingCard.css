@@ -1,0 +1,9 @@
+
+.ping-card {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border: 2px solid;
+  border-radius: var(--border-radius);
+  margin: 4px 0;
+}

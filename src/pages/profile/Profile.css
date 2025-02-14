@@ -16,15 +16,21 @@
   width: 100%;
   margin-bottom: var(--spacing-medium);
 }
+  .profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 80vw;
+    margin-bottom: var(--spacing-medium);
+  }
 
-.profile-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 80vw;
-  margin-bottom: var(--spacing-medium);
-}
+  .profile-header h2 {
+    margin-right: auto;
+  }
 
+  .profile-header button {
+    margin-left: var(--spacing-medium);
+  }
 .edit-button {
   padding: var(--spacing-small) var(--spacing-medium);
   border-radius: var(--border-radius);

@@ -7,8 +7,8 @@ exports.handler = async (event) => {
     url: process.env.API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT,
     region: process.env.REGION,
     auth: {
-      type: 'API_KEY',
-      apiKey: process.env.API_LEXHOA_GRAPHQLAPIKEYOUTPUT,
+      type: 'AWS_IAM',
+      credentials: AWS.config.credentials
     },
     disableOffline: true,
   });
@@ -25,6 +25,7 @@ exports.handler = async (event) => {
 
   const variables = {
     input: {
+      id: event.request.userAttributes.sub,
       cognitoID: event.request.userAttributes.sub,
       owner: event.request.userAttributes.sub,
       name: event.request.userAttributes.name || '',

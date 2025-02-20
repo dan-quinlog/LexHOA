@@ -6,12 +6,15 @@ import ProfileCard from '../../components/user/ProfileCard';
 import PropertyCard from '../../components/user/PropertyCard';
 import PingCard from '../../components/user/PingCard';
 import ProfileEditModal from '../../components/shared/ProfileEditModal';
+import NotificationModal from '../../components/modals/NotificationModal';
 import AddPropertyRequestModal from '../../components/modals/AddPropertyRequestModal';
 import './Profile.css';
 
 const Profile = ({ cognitoId }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showPropertyRequest, setShowPropertyRequest] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
   const [updateProfile] = useMutation(UPDATE_PROFILE);
   const [createPing] = useMutation(CREATE_PING, {
     refetchQueries: [
@@ -65,7 +68,12 @@ const Profile = ({ cognitoId }) => {
       });
       setShowEditModal(false);
     } catch (error) {
-      console.error('Error updating profile:', error);
+
+
+      setNotificationMessage(
+        'You do not have permission to perform this action. Please contact a board member for assistance.'
+      );
+      setShowNotification(true);
     }
   };
 
@@ -101,6 +109,14 @@ const Profile = ({ cognitoId }) => {
             </button>
           </div>
         </div>
+        
+          {showNotification && (
+            <NotificationModal
+              show={true}
+              message={notificationMessage}
+              onClose={() => setShowNotification(false)}
+            />
+          )}
 
         {profile && (
           <>
@@ -129,33 +145,34 @@ const Profile = ({ cognitoId }) => {
                 isBoard={false}
               />
             </>
-              {profile?.ownedProperties?.items?.length > 0 && (
-                <div className="property-section">
-                  <h3>Owned Properties</h3>
-                  {profile.ownedProperties.items.map(property => (
-                    <PropertyCard 
-                      key={property.id} 
-                      property={property}
-                      currentProfileId={profile.id} 
-                    />
-                  ))}
-                </div>
-              )}
-
-              {profile?.tenantAt && (
-                <div className="property-section">
-                  <h3>Rented Property</h3>
-                  <PropertyCard 
-                    property={profile.tenantAt}
+            {profile?.ownedProperties?.items?.length > 0 && (
+              <div className="property-section">
+                <h3>Owned Properties</h3>
+                {profile.ownedProperties.items.map(property => (
+                  <PropertyCard
+                    key={property.id}
+                    property={property}
                     currentProfileId={profile.id}
                   />
-                </div>
-              )}
+                ))}
+              </div>
+            )}
+
+            {profile?.tenantAt && (
+              <div className="property-section">
+                <h3>Rented Property</h3>
+                <PropertyCard
+                  property={profile.tenantAt}
+                  currentProfileId={profile.id}
+                />
+              </div>
+            )}
 
           </>
         )}
       </div>
-    </div>
+    </div >
   );
 };
+
 export default Profile;

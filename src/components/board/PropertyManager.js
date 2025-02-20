@@ -121,6 +121,7 @@ const PropertyManager = ({ searchState, setSearchState }) => {
         id: formData.id,
         address: formData.address,
         profOwnerId: formData.profOwnerId,
+        owner: formData.profOwnerId,
         profTenantId: formData.profTenantId,
         type: formData.type
       };

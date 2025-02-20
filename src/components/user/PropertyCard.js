@@ -11,6 +11,7 @@ const PropertyCard = ({ property, currentProfileId }) => {
   const [updateProfile] = useMutation(UPDATE_PROFILE);
 
   const isTenantCurrentUser = property.profTenant?.owner === currentProfileId;
+  const isOwner = property.profOwnerId === currentProfileId;
 
   const handleCreateTenant = async (formData) => {
     const newProfile = await createProfile({
@@ -57,31 +58,40 @@ const PropertyCard = ({ property, currentProfileId }) => {
           <p>Address: {property.address}</p>
         </div>
         <div className="right-column">
-          <h3>Tenant Information</h3>
-          {property.profTenant ? (
-            <>
-              <p>Name: {property.profTenant.name}</p>
-              <p>Phone: {property.profTenant.phone}</p>
-              {isTenantCurrentUser && (
-                <button
-                  className="edit-tenant-button"
-                  onClick={() => setShowEditTenantModal(true)}
-                >
-                  Edit Profile
-                </button>
-              )}
-            </>
+          {isOwner ? (
+            property.profTenant ? (
+              <>
+                <h4>Tenant Contact</h4>
+                <p>Name: {property.profTenant.name}</p>
+                <p>Phone: {property.profTenant.phone}</p>
+                <p>Email: {property.profTenant.email}</p>
+                {property.profTenant.owner === currentProfileId && (
+                  <button
+                    className="edit-tenant-button"
+                    onClick={() => setShowEditTenantModal(true)}
+                  >
+                    Update Tenant
+                  </button>
+                )}
+              </>
+            ) : (
+              <button
+                className="add-tenant-button"
+                onClick={() => setShowCreateTenantModal(true)}
+              >
+                Add Tenant
+              </button>
+            )
           ) : (
-            <button
-              className="add-tenant-button"
-              onClick={() => setShowCreateTenantModal(true)}
-            >
-              Add Tenant
-            </button>
+            <>
+              <h4>Owner Contact</h4>
+              <p>Name: {property.profOwner.name}</p>
+              <p>Phone: {property.profOwner.phone}</p>
+              <p>Email: {property.profOwner.email}</p>
+            </>
           )}
         </div>
       </div>
-
       {showCreateTenantModal && (
         <ProfileEditModal
           show={showCreateTenantModal}

@@ -118,6 +118,7 @@ export const UPDATE_PROPERTY = gql`
     updateProperty(input: $input, condition: $condition) {
       id
       type
+      owner
       address
       profOwnerId
       profTenantId

@@ -139,6 +139,12 @@ export const PROFILE_BY_COGNITO_ID = gql`
           type
           address
           profOwnerId
+          profOwner {
+            id
+            name
+            phone
+            email
+            }
           profTenantId
           createdAt
           updatedAt

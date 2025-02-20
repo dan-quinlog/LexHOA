@@ -22,7 +22,7 @@
       "function": {
         "GenerateProfileOnSignUp": {
           "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
-          "s3Key": "amplify-builds/GenerateProfileOnSignUp-562b484933715662726f-build.zip"
+          "s3Key": "amplify-builds/GenerateProfileOnSignUp-4c6d5871337339735739-build.zip"
         }
       }
     }

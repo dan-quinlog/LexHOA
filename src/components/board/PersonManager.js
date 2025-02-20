@@ -49,10 +49,11 @@ const PersonManager = ({ searchState, setSearchState }) => {
       const updatePromises = relatedProperties.data.listProperties.items.map(property => {
         const updates = {
           id: property.id,
-          _version: property._version // Important for versioning
+          _version: property._version
         };
         if (property.profOwnerId === personToDelete.id) {
           updates.profOwnerId = null;
+          updates.owner = null;
         }
         if (property.profTenantId === personToDelete.id) {
           updates.profTenantId = null;
@@ -95,6 +96,7 @@ const PersonManager = ({ searchState, setSearchState }) => {
         const updates = { id: property.id };
         if (property.profOwnerId === manualProfile.id) {
           updates.profOwnerId = cognitoProfile.id;
+          updates.owner = cognitoProfile.id;
         }
         if (property.profTenantId === manualProfile.id) {
           updates.profTenantId = cognitoProfile.id;

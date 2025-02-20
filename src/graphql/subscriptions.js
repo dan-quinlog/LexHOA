@@ -490,6 +490,48 @@ export const onDeletePayment = /* GraphQL */ `
     }
   }
 `;
+export const onCreateBulletin = /* GraphQL */ `
+  subscription OnCreateBulletin($filter: ModelSubscriptionBulletinFilterInput) {
+    onCreateBulletin(filter: $filter) {
+      id
+      title
+      content
+      type
+      audience
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateBulletin = /* GraphQL */ `
+  subscription OnUpdateBulletin($filter: ModelSubscriptionBulletinFilterInput) {
+    onUpdateBulletin(filter: $filter) {
+      id
+      title
+      content
+      type
+      audience
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteBulletin = /* GraphQL */ `
+  subscription OnDeleteBulletin($filter: ModelSubscriptionBulletinFilterInput) {
+    onDeleteBulletin(filter: $filter) {
+      id
+      title
+      content
+      type
+      audience
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
 export const onCreatePing = /* GraphQL */ `
   subscription OnCreatePing($filter: ModelSubscriptionPingFilterInput) {
     onCreatePing(filter: $filter) {
@@ -598,48 +640,6 @@ export const onDeletePing = /* GraphQL */ `
         __typename
       }
       profCreatorId
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const onCreateBulletin = /* GraphQL */ `
-  subscription OnCreateBulletin($filter: ModelSubscriptionBulletinFilterInput) {
-    onCreateBulletin(filter: $filter) {
-      id
-      title
-      content
-      type
-      audience
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const onUpdateBulletin = /* GraphQL */ `
-  subscription OnUpdateBulletin($filter: ModelSubscriptionBulletinFilterInput) {
-    onUpdateBulletin(filter: $filter) {
-      id
-      title
-      content
-      type
-      audience
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const onDeleteBulletin = /* GraphQL */ `
-  subscription OnDeleteBulletin($filter: ModelSubscriptionBulletinFilterInput) {
-    onDeleteBulletin(filter: $filter) {
-      id
-      title
-      content
-      type
-      audience
       createdAt
       updatedAt
       __typename

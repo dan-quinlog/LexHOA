@@ -89,228 +89,6 @@ export const listProfiles = /* GraphQL */ `
     }
   }
 `;
-export const getProperty = /* GraphQL */ `
-  query GetProperty($id: ID!) {
-    getProperty(id: $id) {
-      id
-      type
-      owner
-      address
-      city
-      state
-      zip
-      profOwner {
-        id
-        byTypeName
-        byTypeBalance
-        byTypeCreatedAt
-        owner
-        cognitoID
-        name
-        email
-        phone
-        address
-        city
-        state
-        zip
-        contactPref
-        billingFreq
-        allowText
-        balance
-        tenantAtId
-        createdAt
-        updatedAt
-        __typename
-      }
-      profOwnerId
-      profTenant {
-        id
-        byTypeName
-        byTypeBalance
-        byTypeCreatedAt
-        owner
-        cognitoID
-        name
-        email
-        phone
-        address
-        city
-        state
-        zip
-        contactPref
-        billingFreq
-        allowText
-        balance
-        tenantAtId
-        createdAt
-        updatedAt
-        __typename
-      }
-      profTenantId
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const listProperties = /* GraphQL */ `
-  query ListProperties(
-    $filter: ModelPropertyFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    listProperties(filter: $filter, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        type
-        owner
-        address
-        city
-        state
-        zip
-        profOwnerId
-        profTenantId
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const getPayment = /* GraphQL */ `
-  query GetPayment($id: ID!) {
-    getPayment(id: $id) {
-      id
-      byTypeCreatedAt
-      byTypeCheckDate
-      byTypeInvoiceNumber
-      checkDate
-      checkNumber
-      checkAmount
-      invoiceNumber
-      invoiceAmount
-      ownerPayments {
-        id
-        byTypeName
-        byTypeBalance
-        byTypeCreatedAt
-        owner
-        cognitoID
-        name
-        email
-        phone
-        address
-        city
-        state
-        zip
-        contactPref
-        billingFreq
-        allowText
-        balance
-        tenantAtId
-        createdAt
-        updatedAt
-        __typename
-      }
-      ownerPaymentsId
-      createdAt
-      updatedAt
-      owner
-      __typename
-    }
-  }
-`;
-export const listPayments = /* GraphQL */ `
-  query ListPayments(
-    $filter: ModelPaymentFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    listPayments(filter: $filter, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        byTypeCreatedAt
-        byTypeCheckDate
-        byTypeInvoiceNumber
-        checkDate
-        checkNumber
-        checkAmount
-        invoiceNumber
-        invoiceAmount
-        ownerPaymentsId
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const getPing = /* GraphQL */ `
-  query GetPing($id: ID!) {
-    getPing(id: $id) {
-      id
-      type
-      items
-      instruction
-      status
-      profCreator {
-        id
-        byTypeName
-        byTypeBalance
-        byTypeCreatedAt
-        owner
-        cognitoID
-        name
-        email
-        phone
-        address
-        city
-        state
-        zip
-        contactPref
-        billingFreq
-        allowText
-        balance
-        tenantAtId
-        createdAt
-        updatedAt
-        __typename
-      }
-      profCreatorId
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const listPings = /* GraphQL */ `
-  query ListPings(
-    $filter: ModelPingFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    listPings(filter: $filter, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        type
-        items
-        instruction
-        status
-        profCreatorId
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
 export const profilesByTypeName = /* GraphQL */ `
   query ProfilesByTypeName(
     $byTypeName: String!
@@ -706,6 +484,96 @@ export const profilesByTenantAtId = /* GraphQL */ `
     }
   }
 `;
+export const getProperty = /* GraphQL */ `
+  query GetProperty($id: ID!) {
+    getProperty(id: $id) {
+      id
+      type
+      owner
+      address
+      city
+      state
+      zip
+      profOwner {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      profOwnerId
+      profTenant {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      profTenantId
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listProperties = /* GraphQL */ `
+  query ListProperties(
+    $filter: ModelPropertyFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listProperties(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        type
+        owner
+        address
+        city
+        state
+        zip
+        profOwnerId
+        profTenantId
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
 export const propertiesByType = /* GraphQL */ `
   query PropertiesByType(
     $type: String!
@@ -837,6 +705,77 @@ export const propertiesByProfTenantId = /* GraphQL */ `
         profTenantId
         createdAt
         updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getPayment = /* GraphQL */ `
+  query GetPayment($id: ID!) {
+    getPayment(id: $id) {
+      id
+      byTypeCreatedAt
+      byTypeCheckDate
+      byTypeInvoiceNumber
+      checkDate
+      checkNumber
+      checkAmount
+      invoiceNumber
+      invoiceAmount
+      ownerPayments {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      ownerPaymentsId
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const listPayments = /* GraphQL */ `
+  query ListPayments(
+    $filter: ModelPaymentFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listPayments(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        byTypeCreatedAt
+        byTypeCheckDate
+        byTypeInvoiceNumber
+        checkDate
+        checkNumber
+        checkAmount
+        invoiceNumber
+        invoiceAmount
+        ownerPaymentsId
+        createdAt
+        updatedAt
+        owner
         __typename
       }
       nextToken
@@ -1104,72 +1043,6 @@ export const paymentsByOwner = /* GraphQL */ `
     }
   }
 `;
-export const pingByDate = /* GraphQL */ `
-  query PingByDate(
-    $type: String!
-    $createdAt: ModelStringKeyConditionInput
-    $sortDirection: ModelSortDirection
-    $filter: ModelPingFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    pingByDate(
-      type: $type
-      createdAt: $createdAt
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        type
-        items
-        instruction
-        status
-        profCreatorId
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const pingsByProfCreatorIdAndCreatedAt = /* GraphQL */ `
-  query PingsByProfCreatorIdAndCreatedAt(
-    $profCreatorId: ID!
-    $createdAt: ModelStringKeyConditionInput
-    $sortDirection: ModelSortDirection
-    $filter: ModelPingFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    pingsByProfCreatorIdAndCreatedAt(
-      profCreatorId: $profCreatorId
-      createdAt: $createdAt
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        type
-        items
-        instruction
-        status
-        profCreatorId
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
 export const getBulletin = /* GraphQL */ `
   query GetBulletin($id: ID!) {
     getBulletin(id: $id) {
@@ -1229,6 +1102,133 @@ export const bulletinsByDate = /* GraphQL */ `
         content
         type
         audience
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getPing = /* GraphQL */ `
+  query GetPing($id: ID!) {
+    getPing(id: $id) {
+      id
+      type
+      items
+      instruction
+      status
+      profCreator {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      profCreatorId
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listPings = /* GraphQL */ `
+  query ListPings(
+    $filter: ModelPingFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listPings(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        type
+        items
+        instruction
+        status
+        profCreatorId
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const pingByDate = /* GraphQL */ `
+  query PingByDate(
+    $type: String!
+    $createdAt: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelPingFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    pingByDate(
+      type: $type
+      createdAt: $createdAt
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        type
+        items
+        instruction
+        status
+        profCreatorId
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const pingsByProfCreatorIdAndCreatedAt = /* GraphQL */ `
+  query PingsByProfCreatorIdAndCreatedAt(
+    $profCreatorId: ID!
+    $createdAt: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelPingFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    pingsByProfCreatorIdAndCreatedAt(
+      profCreatorId: $profCreatorId
+      createdAt: $createdAt
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        type
+        items
+        instruction
+        status
+        profCreatorId
         createdAt
         updatedAt
         __typename

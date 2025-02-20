@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Modal from './Modal';
 import { US_STATES } from '../../utils/constants';
 import './ProfileEditModal.css';
+
 const ProfileEditModal = ({
   show,
   onClose,
@@ -11,18 +12,17 @@ const ProfileEditModal = ({
   isOwner = false
 }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: null,
-    phone: null,
-    address: '',
-    city: '',
-    state: '',
-    zip: '',
-    contactPref: 'EMAIL',
-    allowText: false,
-    billingFreq: 'MONTHLY',
-    balance: 0,
-    ...initialValues
+    name: initialValues?.name || '',
+    email: initialValues?.email || '',
+    phone: initialValues?.phone || '',
+    address: initialValues?.address || '',
+    city: initialValues?.city || '',
+    state: initialValues?.state || '',
+    zip: initialValues?.zip || '',
+    contactPref: initialValues?.contactPref || 'EMAIL',
+    allowText: initialValues?.allowText || false,
+    billingFreq: initialValues?.billingFreq || 'MONTHLY',
+    balance: initialValues?.balance || 0.00
   });
 
   const handlePhoneChange = (e) => {
@@ -50,7 +50,21 @@ const ProfileEditModal = ({
     if (!formData.name) {
       return;
     }
-    onSubmit(formData);
+
+    // Filter out empty string values and convert them to null
+    const mutationData = Object.entries(formData).reduce((acc, [key, value]) => {
+      // Skip balance field if not a board member
+      if (!isBoard && key === 'balance') {
+        return acc;
+      }
+      if (value === '') {
+        return acc;
+      }
+      acc[key] = value;
+      return acc;
+    }, {});
+
+    onSubmit(mutationData);
   };
 
   const handleContactField = (field, value) => {
@@ -184,8 +198,12 @@ const ProfileEditModal = ({
               <label>Balance</label>
               <input
                 type="number"
-                value={formData.balance || 0}
-                onChange={(e) => setFormData({ ...formData, balance: parseFloat(e.target.value) })}
+                step="0.01"
+                value={Number(formData.balance).toFixed(2)}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  balance: Number(parseFloat(e.target.value).toFixed(2))
+                })}
                 disabled={!isBoard}
               />
             </div>

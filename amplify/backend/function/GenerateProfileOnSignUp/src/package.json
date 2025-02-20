@@ -8,6 +8,9 @@
     "@types/aws-lambda": "^8.10.92"
   },
   "dependencies": {
-    "aws-sdk": "^2.1692.0"
+    "aws-sdk": "^2.1692.0",
+    "aws-appsync": "^4.1.9",
+    "graphql-tag": "^2.12.6",
+    "isomorphic-fetch": "^3.0.0"
   }
 }

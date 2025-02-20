@@ -3,7 +3,8 @@ type Profile @model
   @auth(rules: [
     { allow: private, operations: [create, read] },
     { allow: owner, operations: [update] },
-    { allow: groups, groups: ["BOARD"], operations: [update, delete] }
+    { allow: groups, groups: ["BOARD"], operations: [update, delete] },
+    { allow: private, provider: iam, operations: [create] }
   ]) {
   id: ID!
   byTypeName: String @default(value: "PROFILE")
@@ -79,7 +80,7 @@ type Property @model
   profTenantId: ID @index(name: "byTenant")
   @auth(rules: [
     { allow: private, operations: [read] },
-    { allow: groups, groups: ["OWNERS"], operations: [read, create, update] },
+    { allow: owner, operations: [update] },
     { allow: groups, groups: ["BOARD"], operations: [create, read, update, delete] }
   ])
   createdAt: AWSDateTime

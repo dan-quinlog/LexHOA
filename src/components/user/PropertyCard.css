@@ -16,3 +16,9 @@
 .add-tenant-button:hover {
   background-color: var(--primary-color-dark);
 }
+
+@media (max-width: 768px) {
+  .property-card .two-column {
+    grid-template-columns: 1fr;
+  }
+}

@@ -153,7 +153,7 @@ const PropertyManager = ({ searchState, setSearchState }) => {
 
   return (
     <div className="board-tool">
-      <h1 className="section-title">Property Search</h1>
+      <h2 className="section-title">Property Search</h2>
       <div className="search-controls">
         <select
           value={searchState.searchType}

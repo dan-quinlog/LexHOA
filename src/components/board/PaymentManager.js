@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { LIST_PAYMENTS, PAYMENTS_BY_OWNER } from '../../queries/queries';
 import { DELETE_PAYMENT } from '../../queries/mutations';
-import PaymentCard from './PaymentCard';
 import PaymentEditModal from './PaymentEditModal';
 import BoardCard from './shared/BoardCard';
 import DeleteConfirmationModal from '../shared/DeleteConfirmationModal';
-import './PaymentManager.css';
 import './shared/BoardTools.css';
 
 const PaymentManager = ({ searchState, setSearchState }) => {
@@ -103,7 +101,7 @@ const PaymentManager = ({ searchState, setSearchState }) => {
 
   return (
     <div className="board-tool">
-      <h1 className="section-title">Payment Search</h1>
+      <h2 className="section-title">Payment Search</h2>
       <div className="search-controls">
         <select
           value={searchState.searchType}
@@ -111,6 +109,7 @@ const PaymentManager = ({ searchState, setSearchState }) => {
             ...searchState,
             searchType: e.target.value
           })}
+          className="search-type"
         >
           <option value="paymentId">Payment ID</option>
           <option value="ownerId">Owner ID</option>
@@ -119,16 +118,18 @@ const PaymentManager = ({ searchState, setSearchState }) => {
         </select>
         <input
           type="text"
-          className="search-input"
+          placeholder="Search..."
           value={searchState.searchTerm}
           onChange={(e) => setSearchState({
             ...searchState,
             searchTerm: e.target.value
           })}
           onKeyPress={(e) => {
-            if (e.key === 'Enter') handleSearch()
+            if (e.key === 'Enter') {
+              handleSearch();
+            }
           }}
-          placeholder="Search payments..."
+          className="search-input"
         />
         <button onClick={handleSearch}>Search</button>
         <button onClick={() => {
@@ -158,16 +159,18 @@ const PaymentManager = ({ searchState, setSearchState }) => {
           />
         ))}
       </div>
-      {showEditModal && (
-        <PaymentEditModal
-          payment={selectedPayment}
-          show={showEditModal}
-          onClose={() => {
-            setShowEditModal(false);
-            handleSearch();
-          }}
-        />
-      )}
+      {
+        showEditModal && (
+          <PaymentEditModal
+            payment={selectedPayment}
+            show={showEditModal}
+            onClose={() => {
+              setShowEditModal(false);
+              handleSearch();
+            }}
+          />
+        )
+      }
       <DeleteConfirmationModal
         show={showDeleteModal}
         objectId={paymentToDelete?.id}
@@ -177,7 +180,7 @@ const PaymentManager = ({ searchState, setSearchState }) => {
           setPaymentToDelete(null)
         }}
       />
-    </div>
+    </div >
   );
 };
 

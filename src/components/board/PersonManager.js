@@ -7,7 +7,6 @@ import ProfileEditModal from '../shared/ProfileEditModal';
 import DeleteConfirmationModal from '../shared/DeleteConfirmationModal';
 import MergeProfilesModal from '../modals/MergeProfilesModal';
 import NotificationModal from '../modals/NotificationModal';
-import './PersonManager.css';
 import './shared/BoardTools.css';
 
 const PersonManager = ({ searchState, setSearchState }) => {
@@ -266,7 +265,11 @@ const PersonManager = ({ searchState, setSearchState }) => {
         <div className="search-controls">
           <select
             value={searchState.searchType}
-            onChange={(e) => setSearchState({ ...searchState, searchType: e.target.value })}
+            onChange={(e) => setSearchState({
+              ...searchState,
+              searchType: e.target.value
+            })}
+            className="search-type"
           >
             <option value="id">ID</option>
             <option value="name">Name</option>
@@ -275,9 +278,19 @@ const PersonManager = ({ searchState, setSearchState }) => {
             <option value="cognitoID">Cognito ID</option>
           </select>
           <input
-            className="search-input"
+            type="text"
+            placeholder="Search..."
             value={searchState.searchTerm}
-            onChange={(e) => setSearchState({ ...searchState, searchTerm: e.target.value })}
+            onChange={(e) => setSearchState({
+              ...searchState,
+              searchTerm: e.target.value
+            })}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleSearch();
+              }
+            }}
+            className="search-input"
           />
           <button onClick={handleSearch}>Search</button>
           <button onClick={() => {
@@ -361,14 +374,15 @@ const PersonManager = ({ searchState, setSearchState }) => {
             }}
           />
         )}
-      </div>
+      </div >
 
       {showNotification && (
         <NotificationModal
           message={notificationMessage}
           onClose={() => setShowNotification(false)}
         />
-      )}
+      )
+      }
     </>
   );
 };

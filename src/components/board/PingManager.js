@@ -73,16 +73,29 @@ const PingManager = ({ searchState, setSearchState }) => {
             <div className="search-controls">
                 <select
                     value={searchState.searchType}
-                    onChange={(e) => setSearchState({ ...searchState, searchType: e.target.value })}
+                    onChange={(e) => setSearchState({
+                        ...searchState,
+                        searchType: e.target.value
+                    })}
+                    className="search-type"
                 >
                     <option value="id">Ping ID</option>
                     <option value="creator">Creator ID</option>
                 </select>
                 <input
-                    className="search-input"
+                    type="text"
+                    placeholder="Search..."
                     value={searchState.searchTerm}
-                    onChange={(e) => setSearchState({ ...searchState, searchTerm: e.target.value })}
-                    placeholder="Search term..."
+                    onChange={(e) => setSearchState({
+                        ...searchState,
+                        searchTerm: e.target.value
+                    })}
+                    onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                            handleSearch();
+                        }
+                    }}
+                    className="search-input"
                 />
                 <button onClick={handleSearch}>Search</button>
                 <button onClick={handlePendingPings}>View Pending</button>

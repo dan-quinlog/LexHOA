@@ -164,8 +164,8 @@ const ProfileEditModal = ({
               value={formData.contactPref}
               onChange={(e) => setFormData({ ...formData, contactPref: e.target.value })}
             >
-              <option value="CALL">Email</option>
-              <option value="PHONE">Phone</option>
+              <option value="EMAIL">Email</option>
+              <option value="CALL">Phone</option>
               <option value="TEXT">Text</option>
               <option value="PHYSICAL">Traditional Mail</option>
             </select>

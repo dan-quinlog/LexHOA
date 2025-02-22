@@ -99,7 +99,7 @@ const BulletinManager = () => {
   return (
     <div className="board-tool">
       <div className="bulletin-header">
-        <h1 className="section-title">Bulletin Management</h1>
+        <h2 className="section-title">Bulletin Management</h2>
         <button 
           className="search-controls" 
           onClick={() => {

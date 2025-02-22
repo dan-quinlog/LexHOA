@@ -109,14 +109,14 @@ const Profile = ({ cognitoId }) => {
             </button>
           </div>
         </div>
-        
-          {showNotification && (
-            <NotificationModal
-              show={true}
-              message={notificationMessage}
-              onClose={() => setShowNotification(false)}
-            />
-          )}
+
+        {showNotification && (
+          <NotificationModal
+            show={true}
+            message={notificationMessage}
+            onClose={() => setShowNotification(false)}
+          />
+        )}
 
         {profile && (
           <>
@@ -134,8 +134,8 @@ const Profile = ({ cognitoId }) => {
               </div>
             )}
 
-            <>
-              <ProfileCard profile={profile} />
+            <ProfileCard profile={profile} />
+            {showEditModal && (
               <ProfileEditModal
                 show={showEditModal}
                 onClose={() => setShowEditModal(false)}
@@ -144,7 +144,7 @@ const Profile = ({ cognitoId }) => {
                 isOwner={profile?.ownedProperties?.items?.length > 0}
                 isBoard={false}
               />
-            </>
+            )}
             {profile?.ownedProperties?.items?.length > 0 && (
               <div className="property-section">
                 <h3>Owned Properties</h3>
@@ -157,8 +157,7 @@ const Profile = ({ cognitoId }) => {
                 ))}
               </div>
             )}
-
-            {profile?.tenantAt && (
+            {profile.tenantAt && profile.tenantAt.profOwnerId !== profile.id && (
               <div className="property-section">
                 <h3>Rented Property</h3>
                 <PropertyCard
@@ -167,7 +166,6 @@ const Profile = ({ cognitoId }) => {
                 />
               </div>
             )}
-
           </>
         )}
       </div>

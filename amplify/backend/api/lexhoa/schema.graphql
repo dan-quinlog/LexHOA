@@ -77,10 +77,15 @@ type Property @model
   profOwner: Profile @belongsTo(fields: ["profOwnerId"])
   profOwnerId: ID @index(name: "byOwner")
   profTenant: Profile @hasOne(fields: ["profTenantId"])
+  @auth(rules: [
+    { allow: private, operations: [read] },
+    { allow: owner, operations: [create, update] },
+    { allow: groups, groups: ["BOARD"], operations: [create, read, update, delete] }
+  ])
   profTenantId: ID @index(name: "byTenant")
   @auth(rules: [
     { allow: private, operations: [read] },
-    { allow: owner, operations: [update] },
+    { allow: owner, operations: [create, update] },
     { allow: groups, groups: ["BOARD"], operations: [create, read, update, delete] }
   ])
   createdAt: AWSDateTime

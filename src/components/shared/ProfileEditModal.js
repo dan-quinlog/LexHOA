@@ -215,7 +215,7 @@ const ProfileEditModal = ({
         <button onClick={handleSubmit}>
           {initialValues?.id ? 'Update' : 'Create'}
         </button>
-        <button onClick={onClose}>Cancel</button>
+        <button type="button" onClick={onClose}>Cancel</button>
       </div>
     </Modal>
   );

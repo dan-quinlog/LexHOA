@@ -160,12 +160,13 @@ const DatabaseReset = () => {
   const setupRelationships = async () => {
     await Promise.all(
       SEED_RELATIONSHIPS.map(async relationship => {
-        // Update property with owner and tenant
+        // Update property with owner, owner field, and tenant
         await updateProperty({
           variables: {
             input: {
               id: relationship.propertyId,
               profOwnerId: relationship.profOwnerId,
+              owner: relationship.profOwnerId,
               profTenantId: relationship.profTenantId
             }
           }
@@ -185,7 +186,6 @@ const DatabaseReset = () => {
       })
     );
   };
-
   const deleteAllBulletins = async () => {
     await Promise.all(
       bulletinData?.listBulletins?.items?.map(({ id }) =>

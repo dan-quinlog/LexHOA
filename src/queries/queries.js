@@ -120,6 +120,9 @@ export const PROFILE_BY_COGNITO_ID = gql`
             id
             type
             address
+            city
+            state
+            zip
             profOwnerId
             profTenantId
             createdAt
@@ -138,6 +141,9 @@ export const PROFILE_BY_COGNITO_ID = gql`
           id
           type
           address
+          city
+          state
+          zip
           profOwnerId
           profOwner {
             id

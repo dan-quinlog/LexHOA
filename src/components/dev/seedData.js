@@ -75,9 +75,9 @@ export const SEED_PROFILES = [
     allowText: false
   },
   {
-    id: "14e8b428-f041-70d4-81ad-f3a9bc46f4a5",
-    cognitoID: "14e8b428-f041-70d4-81ad-f3a9bc46f4a5",
-    owner: "14e8b428-f041-70d4-81ad-f3a9bc46f4a5",
+    id: "14f8c418-0011-70f8-3b1c-12c02b6fb820",
+    cognitoID: "14f8c418-0011-70f8-3b1c-12c02b6fb820",
+    owner: "14f8c418-0011-70f8-3b1c-12c02b6fb820",
     name: "David Johnson",
     email: "djohnson@email.com",
     phone: "8435557890",
@@ -206,25 +206,30 @@ export const SEED_RELATIONSHIPS = [
   {
     propertyId: "1234",
     profOwnerId: "64c824e8-00b1-7080-e39e-f441cead3e4c",
+    owner: "64c824e8-00b1-7080-e39e-f441cead3e4c",
     profTenantId: "64c824e8-00b1-7080-e39e-f441cead3e4c"
   },
   {
     propertyId: "2345",
     profOwnerId: "64c824e8-00b1-7080-e39e-f441cead3e4c",
+    owner: "64c824e8-00b1-7080-e39e-f441cead3e4c",
     profTenantId: "74b8d498-1071-70e1-dce4-d02b3a04e42b"
   },
   {
     propertyId: "3456",
     profOwnerId: "64c824e8-00b1-7080-e39e-f441cead3e4c",
+    owner: "64c824e8-00b1-7080-e39e-f441cead3e4c",
     profTenantId: "tenant-no-login"
   },
   {
     propertyId: "7582",
-    profOwnerId: "64c824e8-00b1-7080-e39e-f441cead3e4c"
+    profOwnerId: "64c824e8-00b1-7080-e39e-f441cead3e4c",
+    owner: "64c824e8-00b1-7080-e39e-f441cead3e4c"
   },
   {
     propertyId: "5678",
-    profOwnerId: "owner-no-login"
+    profOwnerId: "owner-no-login",
+    owner: "owner-no-login"
   }
 ];
 

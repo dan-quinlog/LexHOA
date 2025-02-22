@@ -56,6 +56,7 @@ const PropertyCard = ({ property, currentProfileId }) => {
           <h3>Property Information</h3>
           <p>Property ID: {property.id}</p>
           <p>Address: {property.address}</p>
+          <p>{property.city}, {property.state} {property.zip}</p>
         </div>
         <div className="right-column">
           {isOwner ? (

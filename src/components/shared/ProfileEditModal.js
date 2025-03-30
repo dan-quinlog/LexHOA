@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { US_STATES } from '../../utils/constants';
+import { updateCognitoUserAttributes, verifyNewEmail } from '../../utils/cognitoUtils';
 import './ProfileEditModal.css';
 
 const ProfileEditModal = ({
@@ -24,6 +25,19 @@ const ProfileEditModal = ({
     billingFreq: initialValues?.billingFreq || 'MONTHLY',
     balance: initialValues?.balance || 0.00
   });
+  const [emailChanged, setEmailChanged] = useState(false);
+  const [showVerification, setShowVerification] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (initialValues) {
+      // Your existing code to set formData
+      // ...
+      setEmailChanged(false);
+    }
+  }, [initialValues]);
 
   const handlePhoneChange = (e) => {
     const phoneNumber = e.target.value.replace(/\D/g, '');
@@ -45,34 +59,144 @@ const ProfileEditModal = ({
     const newAddress = line1 + (line2 ? `|${line2}` : '');
     setFormData(prev => ({ ...prev, address: newAddress }));
   };
+    const handleSubmit = async () => {
+      if (!formData.name) {
+        return;
+      }
 
-  const handleSubmit = () => {
-    if (!formData.name) {
-      return;
+      setLoading(true);
+      setError('');
+
+      try {
+        // Filter out empty string values and convert them to null
+        const mutationData = Object.entries(formData).reduce((acc, [key, value]) => {
+          // Skip balance field if not a board member
+          if (!isBoard && key === 'balance') {
+            return acc;
+          }
+          if (value === '') {
+            return acc;
+          }
+          acc[key] = value;
+          return acc;
+        }, {});
+
+        // If this is a user updating their own profile (not a board member)
+        // and they have changed their email
+        if (!isBoard && initialValues.cognitoID && emailChanged) {
+          // Update Cognito with new email - this will trigger verification
+          await updateCognitoUserAttributes({
+            email: formData.email
+          });
+        
+          // Also update name if changed
+          if (formData.name !== initialValues.name) {
+            await updateCognitoUserAttributes({
+              name: formData.name
+            });
+          }
+        
+          // Don't update the database email yet - wait for verification
+          const tempMutationData = { ...mutationData };
+          delete tempMutationData.email; // Remove email from database update
+        
+          // Submit other changes to database
+          onSubmit(tempMutationData, emailChanged ? formData.email : null);
+        } else {
+          // For board members or non-email changes
+          // If it's a user updating their own name (not a board member)
+          if (!isBoard && initialValues.cognitoID && formData.name !== initialValues.name) {
+            // Update name in Cognito
+            await updateCognitoUserAttributes({
+              name: formData.name
+            });
+          }
+        
+          // If it's a board member updating a Cognito user's email, show warning
+          if (isBoard && initialValues.cognitoID && emailChanged) {
+            alert("Note: Changing a user's email in the database will not update their login email. The user must update their own email through their profile page.");
+          }
+        
+          // Submit all changes to database
+          onSubmit(mutationData);
+        }
+      
+        onClose();
+      } catch (error) {
+        console.error("Error updating profile:", error);
+        setError(error.message || "An error occurred while updating the profile");
+      } finally {
+        setLoading(false);
+      }
+    };
+  const handleVerificationSubmit = async () => {
+    setLoading(true);
+    setError('');
+    
+    try {
+      // Verify the new email
+      await verifyNewEmail(verificationCode);
+      
+      // Now update the email in the database after verification
+      await onSubmit({ id: initialValues.id, email: formData.email });
+      
+      setShowVerification(false);
+      onClose();
+    } catch (error) {
+      console.error("Error verifying email:", error);
+      setError(error.message || "Failed to verify email");
+    } finally {
+      setLoading(false);
     }
-
-    // Filter out empty string values and convert them to null
-    const mutationData = Object.entries(formData).reduce((acc, [key, value]) => {
-      // Skip balance field if not a board member
-      if (!isBoard && key === 'balance') {
-        return acc;
-      }
-      if (value === '') {
-        return acc;
-      }
-      acc[key] = value;
-      return acc;
-    }, {});
-
-    onSubmit(mutationData);
   };
 
   const handleContactField = (field, value) => {
+    // Track if email is being changed
+    if (field === 'email' && value !== initialValues.email) {
+      setEmailChanged(true);
+    } else if (field === 'email' && value === initialValues.email) {
+      setEmailChanged(false);
+    }
+
     setFormData({
       ...formData,
       [field]: value?.trim() === '' || value === null ? null : value
     });
   };
+
+  const handleVerificationClose = () => {
+    setShowVerification(false);
+    // Don't close the entire modal
+  };
+
+  if (show && showVerification) {
+    return (
+      <Modal show={show} onClose={handleVerificationClose}>
+        <h2>Verify Your New Email</h2>
+        <p>A verification code has been sent to {formData.email}. Please enter it below to complete your email update.</p>
+        
+        {error && <div className="error-message">{error}</div>}
+        
+        <div className="form-group">
+          <label>Verification Code</label>
+          <input
+            type="text"
+            value={verificationCode}
+            onChange={(e) => setVerificationCode(e.target.value)}
+            placeholder="Enter verification code"
+            required
+          />
+        </div>
+        
+        <div className="modal-actions">
+          <button onClick={handleVerificationSubmit} disabled={loading}>
+            {loading ? 'Verifying...' : 'Verify Email'}
+          </button>
+          <button type="button" onClick={handleVerificationClose} disabled={loading}>Cancel</button>
+        </div>
+      </Modal>
+    );
+  }
 
   return (
     <Modal show={show} onClose={onClose}>
@@ -148,6 +272,11 @@ const ProfileEditModal = ({
               value={formData.email || ''}
               onChange={(e) => handleContactField('email', e.target.value)}
             />
+            {emailChanged && !isBoard && initialValues.cognitoID && (
+              <p className="email-note">
+                Changing your email will require verification of the new address.
+              </p>
+            )}
           </div>
           <div className="form-group">
             <label>Phone</label>
@@ -212,10 +341,10 @@ const ProfileEditModal = ({
         </div>
       </div>
       <div className="modal-actions">
-        <button onClick={handleSubmit}>
-          {initialValues?.id ? 'Update' : 'Create'}
+        <button onClick={handleSubmit} disabled={loading}>
+          {loading ? 'Processing...' : (initialValues?.id ? 'Update' : 'Create')}
         </button>
-        <button type="button" onClick={onClose}>Cancel</button>
+        <button type="button" onClick={onClose} disabled={loading}>Cancel</button>
       </div>
     </Modal>
   );

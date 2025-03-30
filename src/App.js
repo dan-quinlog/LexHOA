@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Amplify } from 'aws-amplify';
 import { getCurrentUser, signOut, signInWithRedirect, fetchAuthSession } from '@aws-amplify/auth';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
@@ -16,7 +16,7 @@ import amplifyConfig from './services/amplify-config';
 import { createAuthLink } from 'aws-appsync-auth-link';
 import { createSubscriptionHandshakeLink } from 'aws-appsync-subscription-link';
 import { ApolloLink } from '@apollo/client';
-import { BULLETINS_BY_DATE } from './queries/queries';
+import { BULLETINS_BY_DATE, PROFILE_BY_COGNITO_ID } from './queries/queries';
 import ReactQuill from 'react-quill';
 import MenuState from './components/menu/MenuState';
 import DatabaseReset from './components/dev/DatabaseReset'
@@ -33,14 +33,6 @@ Amplify.configure({
 const url = amplifyConfig.aws_appsync_graphqlEndpoint;
 const region = amplifyConfig.aws_appsync_region;
 const BOARD_GROUP = process.env.REACT_APP_BOARD_GROUP_NAME;
-const OWNERS_GROUP = process.env.REACT_APP_OWNERS_GROUP_NAME;
-const RESIDENTS_GROUP = process.env.REACT_APP_RESIDENTS_GROUP_NAME;
-console.log({
-  BOARD_GROUP: process.env.REACT_APP_BOARD_GROUP_NAME,
-  OWNERS_GROUP: process.env.REACT_APP_OWNERS_GROUP_NAME,
-  RESIDENTS_GROUP: process.env.REACT_APP_RESIDENTS_GROUP_NAME
-});
-
 
 function App() {
   const [user, setUser] = useState(null);
@@ -50,7 +42,7 @@ function App() {
 
   const auth = {
     type: user ? amplifyConfig.aws_appsync_authenticationType : 'API_KEY',
-    apiKey: 'da2-a72v2rhxifbdvfaluuqhxiheaq',
+    apiKey: process.env.REACT_APP_APPSYNC_API_KEY,
     jwtToken: async () => {
       if (user) {
         const session = await fetchAuthSession();
@@ -82,7 +74,7 @@ function App() {
     uri: url,
     cache: new InMemoryCache(),
     headers: {
-      'x-api-key': amplifyConfig.aws_appsync_apiKey
+      'x-api-key': process.env.REACT_APP_APPSYNC_API_KEY
     }
   });
 
@@ -127,6 +119,7 @@ function App() {
       console.error('Error signing out: ', error);
     }
   }
+  
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -149,25 +142,62 @@ function App() {
   };
 
   const HomePage = () => {
-    const filter = user
-      ? {
-        or: [
-          { audience: { contains: "PUBLIC" } },
-          ...userGroups.map(group => ({ audience: { contains: group } }))
-        ]
-      }
-      : {
-        or: [{ audience: { contains: "PUBLIC" } }]
-      };
+    // Determine user roles based on profile data and groups
+    const { loading: profileLoading, error: profileError, data: profileData } = useQuery(PROFILE_BY_COGNITO_ID, {
+      variables: { cognitoID: user?.username },
+      skip: !user,
+      client: authenticatedClient
+    });
 
-    const { loading, error, data } = useQuery(BULLETINS_BY_DATE, {
+    // Get profile data
+    const profile = profileData?.profileByCognitoID?.items[0];
+    
+    // Determine user roles based on profile data
+    const isTenant = profile?.tenantAt !== null && profile?.tenantAt !== undefined;
+    const isOwner = profile?.ownedProperties?.items?.length > 0;
+    const isBoard = userGroups.includes(BOARD_GROUP);
+
+    // Fetch all bulletins with a high limit
+    const { loading: bulletinsLoading, error: bulletinsError, data: bulletinsData } = useQuery(BULLETINS_BY_DATE, {
       variables: {
-        limit: user ? 10 : 3,
+        limit: 50, // High limit to ensure we get all relevant bulletins
         type: "BULLETIN",
-        filter
+        sortDirection: "DESC"
       },
       client: user ? authenticatedClient : publicClient
     });
+
+    // Filter bulletins client-side based on user roles
+    const filteredBulletins = useMemo(() => {
+      const allBulletins = bulletinsData?.bulletinsByDate?.items || [];
+      
+      // For unauthenticated users, show only PUBLIC bulletins
+      if (!user) {
+        return allBulletins
+          .filter(bulletin => bulletin.audience && bulletin.audience.includes("PUBLIC"))
+          .slice(0, 3); // Limit to 3 for public users
+      }
+      
+      // For board members, show all bulletins
+      if (isBoard) {
+        return allBulletins.slice(0, 10); // Limit to 10 for board members
+      }
+      
+      // For other authenticated users, filter based on roles
+      return allBulletins
+        .filter(bulletin => {
+          if (!bulletin.audience) return false;
+          
+          if (bulletin.audience.includes("PUBLIC")) return true;
+          if (isTenant && bulletin.audience.includes("RESIDENTS")) return true;
+          if (isOwner && bulletin.audience.includes("OWNERS")) return true;
+          
+          return false;
+        })
+        .slice(0, 10); // Limit to 10 for authenticated users
+    }, [bulletinsData, user, isBoard, isTenant, isOwner]);
+
+    const isLoading = bulletinsLoading || (user && !isBoard && profileLoading);
 
     return (
       <main className="content">
@@ -182,24 +212,39 @@ function App() {
           </div>
           <div className="bulletins">
             <h2>Recent Bulletins</h2>
-            {loading && <p>Loading bulletins...</p>}
-            {error && <p>Error loading bulletins. Please try again later.</p>}
-            {!loading && !error && data?.bulletinsByDate && (
+            {isLoading && <p>Loading bulletins...</p>}
+            {(bulletinsError || (user && !isBoard && profileError)) && (
+              <div>
+                <p>Error loading bulletins. Please try again later.</p>
+                {bulletinsError && <p>Bulletin error: {bulletinsError.message}</p>}
+                {profileError && <p>Profile error: {profileError.message}</p>}
+              </div>
+            )}
+            {!isLoading && !bulletinsError && !(user && !isBoard && profileError) && (
               <ul className="bulletin-list">
-                {data.bulletinsByDate.items.map(bulletin => (
-                  <li key={bulletin.id} className="bulletin-card">
-                    <h3>{bulletin.title}</h3>
-                    <ReactQuill
-                      value={bulletin.content}
-                      readOnly={true}
-                      theme="bubble"
-                      modules={{ toolbar: false }}
-                    />
-                    <p className="bulletin-date">
-                      {new Date(bulletin.createdAt).toLocaleDateString()}
-                    </p>
-                  </li>
-                ))}
+                {filteredBulletins.length > 0 ? (
+                  filteredBulletins.map(bulletin => (
+                    <li key={bulletin.id} className="bulletin-card">
+                      <h3>{bulletin.title}</h3>
+                      <ReactQuill
+                        value={bulletin.content}
+                        readOnly={true}
+                        theme="bubble"
+                        modules={{ toolbar: false }}
+                      />
+                      <p className="bulletin-date">
+                        {new Date(bulletin.createdAt).toLocaleDateString()}
+                      </p>
+                      {user && (
+                        <p className="bulletin-audience" style={{ fontSize: '0.8em', color: '#666' }}>
+                          Audience: {bulletin.audience.join(', ')}
+                        </p>
+                      )}
+                    </li>
+                  ))
+                ) : (
+                  <p>No bulletins to display</p>
+                )}
               </ul>
             )}
           </div>
@@ -207,6 +252,7 @@ function App() {
       </main>
     );
   };
+
   return (
     <ApolloProvider client={user ? authenticatedClient : publicClient}>
       <BrowserRouter>
@@ -258,4 +304,5 @@ function App() {
     </ApolloProvider>
   );
 }
+
 export default App;

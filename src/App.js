@@ -42,7 +42,7 @@ function App() {
 
   const auth = {
     type: user ? amplifyConfig.aws_appsync_authenticationType : 'API_KEY',
-    apiKey: process.env.REACT_APP_APPSYNC_API_KEY,
+    apiKey: process.env.REACT_APP_API_KEY,
     jwtToken: async () => {
       if (user) {
         const session = await fetchAuthSession();
@@ -74,7 +74,7 @@ function App() {
     uri: url,
     cache: new InMemoryCache(),
     headers: {
-      'x-api-key': process.env.REACT_APP_APPSYNC_API_KEY
+      'x-api-key': process.env.REACT_APP_API_KEY
     }
   });
 

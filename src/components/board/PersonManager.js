@@ -9,7 +9,13 @@ import MergeProfilesModal from '../modals/MergeProfilesModal';
 import NotificationModal from '../modals/NotificationModal';
 import './shared/BoardTools.css';
 
-const PersonManager = ({ searchState, setSearchState }) => {
+// Get group names from environment variables
+const PRESIDENT_GROUP = process.env.REACT_APP_PRESIDENT_GROUP_NAME;
+const SECRETARY_GROUP = process.env.REACT_APP_SECRETARY_GROUP_NAME;
+const TREASURER_GROUP = process.env.REACT_APP_TREASURER_GROUP_NAME;
+const BOARD_GROUP = process.env.REACT_APP_BOARD_GROUP_NAME;
+
+const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
   const client = useApolloClient();
   const [selectedPerson, setSelectedPerson] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -18,6 +24,24 @@ const PersonManager = ({ searchState, setSearchState }) => {
   const [showMergeModal, setShowMergeModal] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
+
+  // Permission checks
+  const isPresident = userGroups && userGroups.includes(PRESIDENT_GROUP);
+  const isSecretary = userGroups && userGroups.includes(SECRETARY_GROUP);
+  const isTreasurer = userGroups && userGroups.includes(TREASURER_GROUP);
+  const isBoard = userGroups && userGroups.includes(BOARD_GROUP);
+  
+  // Only President and Secretary can delete profiles
+  const hasDeletePermission = isPresident || isSecretary;
+  
+  // Only President and Treasurer can edit balance
+  const hasBalanceEditPermission = isPresident || isTreasurer;
+  
+  // All board members can edit basic profile info
+  const hasEditPermission = isBoard;
+  
+  // Only President can create new profiles (or Secretary for special cases)
+  const hasCreatePermission = isPresident || isSecretary;
 
   const [searchProfiles] = useLazyQuery(SEARCH_PROFILES);
   const [searchById] = useLazyQuery(GET_PROFILE);
@@ -32,6 +56,13 @@ const PersonManager = ({ searchState, setSearchState }) => {
   const [deletePerson] = useMutation(DELETE_PROFILE);
 
   const handleDelete = (person) => {
+    // Only President can delete profiles directly
+    if (!isPresident) {
+      setNotificationMessage("Only the President can delete profiles directly");
+      setShowNotification(true);
+      return;
+    }
+    
     setPersonToDelete(person);
     setShowDeleteModal(true);
   };
@@ -224,6 +255,13 @@ const PersonManager = ({ searchState, setSearchState }) => {
   };
 
   const handleProfileSelect = (profile) => {
+    // Allow profile selection for merge if user has delete permission
+    if (!hasDeletePermission) {
+      setNotificationMessage("You don't have permission to merge profiles");
+      setShowNotification(true);
+      return;
+    }
+    
     if (selectedProfiles.find(p => p.id === profile.id)) {
       setSelectedProfiles(selectedProfiles.filter(p => p.id !== profile.id));
     } else {
@@ -293,10 +331,13 @@ const PersonManager = ({ searchState, setSearchState }) => {
             className="search-input"
           />
           <button onClick={handleSearch}>Search</button>
-          <button onClick={() => {
-            setSelectedPerson(null);
-            setShowEditModal(true);
-          }}>Create New</button>
+          {/* Only show Create New button to users with create permission */}
+          {hasCreatePermission && (
+            <button onClick={() => {
+              setSelectedPerson(null);
+              setShowEditModal(true);
+            }}>Create New</button>
+          )}
         </div>
 
         {errors.search && <div className="error-message">{errors.search}</div>}
@@ -329,30 +370,43 @@ const PersonManager = ({ searchState, setSearchState }) => {
               status={person.status}
               actions={
                 <>
-                  <button onClick={() => {
-                    setSelectedPerson(person)
-                    setShowEditModal(true)
-                  }}>Edit</button>
-                  <button onClick={() => handleDelete(person)}>Delete</button>
-                  <button onClick={() => handleProfileSelect(person)}>
-                    {selectedProfiles.find(p => p.id === person.id) ? 'Unselect' : 'Select for Merge'}
-                  </button>
+                  {/* All BOARD members can edit profiles */}
+                  {hasEditPermission && (
+                    <button onClick={() => {
+                      setSelectedPerson(person)
+                      setShowEditModal(true)
+                    }}>Edit</button>
+                  )}
+                  
+                  {/* Only PRESIDENT can delete profiles directly */}
+                  {isPresident && (
+                    <button onClick={() => handleDelete(person)}>Delete</button>
+                  )}
+                  
+                  {/* PRESIDENT and SECRETARY can merge profiles */}
+                  {(isPresident || isSecretary) && (
+                    <button onClick={() => handleProfileSelect(person)}>
+                      {selectedProfiles.find(p => p.id === person.id) ? 'Unselect' : 'Select for Merge'}
+                    </button>
+                  )}
                 </>
               }
             />
           ))}
         </div>
-        {showEditModal && (
+        {showEditModal && hasEditPermission && (
           <ProfileEditModal
             show={showEditModal}
             onClose={() => setShowEditModal(false)}
             initialValues={selectedPerson}
             isOwner={selectedPerson?.ownedProperties?.items?.length > 0}
             isBoard={true}
+            hasBalanceEditPermission={hasBalanceEditPermission}
+            userGroups={userGroups}
             onSubmit={handleSave}
           />
         )}
-        {showMergeModal && (
+        {showMergeModal && (isPresident || isSecretary) && (
           <MergeProfilesModal
             profiles={selectedProfiles}
             show={showMergeModal}
@@ -363,7 +417,7 @@ const PersonManager = ({ searchState, setSearchState }) => {
             onMerge={handleMergeProfiles}
           />
         )}
-        {showDeleteModal && (
+        {showDeleteModal && isPresident && (
           <DeleteConfirmationModal
             show={showDeleteModal}
             objectId={personToDelete?.id}

@@ -1,9 +1,9 @@
-
 type Profile @model
   @auth(rules: [
     { allow: private, operations: [create, read] },
     { allow: owner, operations: [update] },
-    { allow: groups, groups: ["BOARD"], operations: [update, delete] },
+    { allow: groups, groups: ["PRESIDENT", "SECRETARY"], operations: [create, update, delete] },
+    { allow: groups, groups: ["BOARD"], operations: [create, update] },
     { allow: private, provider: iam, operations: [create] }
   ]) {
   id: ID!
@@ -39,7 +39,9 @@ type Profile @model
   allowText: Boolean @default(value: "false")
   balance: Float @auth(rules: [
     { allow: private, operations: [create, read] },
-    { allow: groups, groups: ["BOARD"], operations: [create, update, delete] }
+    { allow: owner, operations: [read] },
+    { allow: groups, groups: ["BOARD"], operations: [create, read] },
+    { allow: groups, groups: ["TREASURER", "PRESIDENT", "SECRETARY"], operations: [create, read, update] }
   ])
   @default(value:"0.00")
   @index(
@@ -59,7 +61,8 @@ type Profile @model
 type Property @model
   @auth(rules: [
     { allow: private, operations: [read] },
-    { allow: groups, groups: ["BOARD"], operations: [create, update, delete] },
+    { allow: groups, groups: ["BOARD"], operations: [read, update] },
+    { allow: groups, groups: ["PRESIDENT"], operations: [create, read, update, delete] },
   ])
 {
   id: ID!
@@ -76,17 +79,21 @@ type Property @model
   zip: String @default (value: "29169")
   profOwner: Profile @belongsTo(fields: ["profOwnerId"])
   profOwnerId: ID @index(name: "byOwner")
+  @auth(rules: [
+    { allow: private, operations: [read] },
+    { allow: groups, groups: ["BOARD", "PRESIDENT"], operations: [create, read, update] }
+  ])
   profTenant: Profile @hasOne(fields: ["profTenantId"])
   @auth(rules: [
     { allow: private, operations: [read] },
-    { allow: owner, operations: [create, update] },
-    { allow: groups, groups: ["BOARD"], operations: [create, read, update, delete] }
+    { allow: owner, operations: [create, read, update] },
+    { allow: groups, groups: ["BOARD", "PRESIDENT"], operations: [create, read, update, delete] }
   ])
   profTenantId: ID @index(name: "byTenant")
   @auth(rules: [
     { allow: private, operations: [read] },
-    { allow: owner, operations: [create, update] },
-    { allow: groups, groups: ["BOARD"], operations: [create, read, update, delete] }
+    { allow: owner, operations: [create, read, update] },
+    { allow: groups, groups: ["BOARD", "PRESIDENT"], operations: [create, read, update, delete] }
   ])
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
@@ -95,7 +102,8 @@ type Property @model
 type Payment @model
   @auth(rules: [
     { allow: owner, operations: [read] },
-    { allow: groups, groups: ["BOARD"], operations: [create, read, update, delete] }
+    { allow: groups, groups: ["BOARD"], operations: [read] },
+    { allow: groups, groups: ["TREASURER", "PRESIDENT"], operations: [create, read, update] }
   ]) {
   id: ID!
   byTypeCreatedAt: String @default(value: "PAYMENT")
@@ -132,7 +140,8 @@ type Bulletin @model
     rules: [
       { allow: public, provider: apiKey, operations: [read] },
       { allow: private, provider: userPools, operations: [read] },
-      { allow: groups, groups: ["BOARD"], operations: [create, update, delete, read] }
+      { allow: groups, groups: ["BOARD"], operations: [read] },
+      { allow: groups, groups: ["MEDIA", "PRESIDENT"], operations: [create, read, update, delete] }
     ]
   ) {
   id: ID!
@@ -152,7 +161,7 @@ type Ping @model
   @auth(
     rules: [
       { allow: private, provider: userPools, operations: [create, read] },
-      { allow: groups, groups: ["BOARD"], operations: [create, update, delete] }
+      { allow: groups, groups: ["BOARD", "PRESIDENT"], operations: [create, read, update, delete] }
     ]
   ) {
   id: ID!

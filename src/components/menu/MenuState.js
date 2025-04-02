@@ -2,8 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const BOARD_GROUP = process.env.REACT_APP_BOARD_GROUP_NAME;
-const OWNERS_GROUP = process.env.REACT_APP_OWNERS_GROUP_NAME;
-const RESIDENTS_GROUP = process.env.REACT_APP_RESIDENTS_GROUP_NAME;
 
 const MenuState = ({ userGroups, onSignOut, renderMenuItems }) => {
   const [isOpen, setIsOpen] = useState(false);

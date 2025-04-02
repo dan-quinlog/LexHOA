@@ -1,350 +1,182 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Modal from './Modal';
-import { US_STATES } from '../../utils/constants';
-import { updateCognitoUserAttributes, verifyNewEmail } from '../../utils/cognitoUtils';
 import './ProfileEditModal.css';
 
-const ProfileEditModal = ({
-  show,
-  onClose,
-  onSubmit,
-  initialValues = {},
+const ProfileEditModal = ({ 
+  show, 
+  onClose, 
+  onSubmit, 
+  initialValues = {}, 
+  isOwner = false, 
   isBoard = false,
-  isOwner = false
+  hasBalanceEditPermission = false, // New prop for balance edit permission
+  userGroups = []
 }) => {
   const [formData, setFormData] = useState({
-    name: initialValues?.name || '',
-    email: initialValues?.email || '',
-    phone: initialValues?.phone || '',
-    address: initialValues?.address || '',
-    city: initialValues?.city || '',
-    state: initialValues?.state || '',
-    zip: initialValues?.zip || '',
-    contactPref: initialValues?.contactPref || 'EMAIL',
-    allowText: initialValues?.allowText || false,
-    billingFreq: initialValues?.billingFreq || 'MONTHLY',
-    balance: initialValues?.balance || 0.00
+    id: '',
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zip: '',
+    contactPref: 'EMAIL',
+    billingFreq: 'MONTHLY',
+    allowText: false,
+    balance: 0,
+    ...initialValues
   });
-  const [emailChanged, setEmailChanged] = useState(false);
-  const [showVerification, setShowVerification] = useState(false);
-  const [verificationCode, setVerificationCode] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (initialValues) {
-      // Your existing code to set formData
-      // ...
-      setEmailChanged(false);
-    }
-  }, [initialValues]);
+  const [errors, setErrors] = useState({});
 
-  const handlePhoneChange = (e) => {
-    const phoneNumber = e.target.value.replace(/\D/g, '');
-    if (phoneNumber.length === 0) {
-      handleContactField('phone', null);
-    } else if (phoneNumber.length <= 10) {
-      let formattedPhone = phoneNumber;
-      if (phoneNumber.length > 3) {
-        formattedPhone = phoneNumber.slice(0, 3) + '-' + phoneNumber.slice(3);
-      }
-      if (phoneNumber.length > 6) {
-        formattedPhone = formattedPhone.slice(0, 7) + '-' + formattedPhone.slice(7);
-      }
-      handleContactField('phone', formattedPhone);
-    }
-  };
-
-  const handleAddressChange = (line1, line2) => {
-    const newAddress = line1 + (line2 ? `|${line2}` : '');
-    setFormData(prev => ({ ...prev, address: newAddress }));
-  };
-    const handleSubmit = async () => {
-      if (!formData.name) {
-        return;
-      }
-
-      setLoading(true);
-      setError('');
-
-      try {
-        // Filter out empty string values and convert them to null
-        const mutationData = Object.entries(formData).reduce((acc, [key, value]) => {
-          // Skip balance field if not a board member
-          if (!isBoard && key === 'balance') {
-            return acc;
-          }
-          if (value === '') {
-            return acc;
-          }
-          acc[key] = value;
-          return acc;
-        }, {});
-
-        // If this is a user updating their own profile (not a board member)
-        // and they have changed their email
-        if (!isBoard && initialValues.cognitoID && emailChanged) {
-          // Update Cognito with new email - this will trigger verification
-          await updateCognitoUserAttributes({
-            email: formData.email
-          });
-        
-          // Also update name if changed
-          if (formData.name !== initialValues.name) {
-            await updateCognitoUserAttributes({
-              name: formData.name
-            });
-          }
-        
-          // Don't update the database email yet - wait for verification
-          const tempMutationData = { ...mutationData };
-          delete tempMutationData.email; // Remove email from database update
-        
-          // Submit other changes to database
-          onSubmit(tempMutationData, emailChanged ? formData.email : null);
-        } else {
-          // For board members or non-email changes
-          // If it's a user updating their own name (not a board member)
-          if (!isBoard && initialValues.cognitoID && formData.name !== initialValues.name) {
-            // Update name in Cognito
-            await updateCognitoUserAttributes({
-              name: formData.name
-            });
-          }
-        
-          // If it's a board member updating a Cognito user's email, show warning
-          if (isBoard && initialValues.cognitoID && emailChanged) {
-            alert("Note: Changing a user's email in the database will not update their login email. The user must update their own email through their profile page.");
-          }
-        
-          // Submit all changes to database
-          onSubmit(mutationData);
-        }
-      
-        onClose();
-      } catch (error) {
-        console.error("Error updating profile:", error);
-        setError(error.message || "An error occurred while updating the profile");
-      } finally {
-        setLoading(false);
-      }
-    };
-  const handleVerificationSubmit = async () => {
-    setLoading(true);
-    setError('');
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.name) newErrors.name = 'Name is required';
+    if (!formData.email) newErrors.email = 'Email is required';
     
-    try {
-      // Verify the new email
-      await verifyNewEmail(verificationCode);
-      
-      // Now update the email in the database after verification
-      await onSubmit({ id: initialValues.id, email: formData.email });
-      
-      setShowVerification(false);
-      onClose();
-    } catch (error) {
-      console.error("Error verifying email:", error);
-      setError(error.message || "Failed to verify email");
-    } finally {
-      setLoading(false);
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = () => {
+    if (validateForm()) {
+      onSubmit(formData);
     }
   };
-
-  const handleContactField = (field, value) => {
-    // Track if email is being changed
-    if (field === 'email' && value !== initialValues.email) {
-      setEmailChanged(true);
-    } else if (field === 'email' && value === initialValues.email) {
-      setEmailChanged(false);
-    }
-
-    setFormData({
-      ...formData,
-      [field]: value?.trim() === '' || value === null ? null : value
-    });
-  };
-
-  const handleVerificationClose = () => {
-    setShowVerification(false);
-    // Don't close the entire modal
-  };
-
-  if (show && showVerification) {
-    return (
-      <Modal show={show} onClose={handleVerificationClose}>
-        <h2>Verify Your New Email</h2>
-        <p>A verification code has been sent to {formData.email}. Please enter it below to complete your email update.</p>
-        
-        {error && <div className="error-message">{error}</div>}
-        
-        <div className="form-group">
-          <label>Verification Code</label>
-          <input
-            type="text"
-            value={verificationCode}
-            onChange={(e) => setVerificationCode(e.target.value)}
-            placeholder="Enter verification code"
-            required
-          />
-        </div>
-        
-        <div className="modal-actions">
-          <button onClick={handleVerificationSubmit} disabled={loading}>
-            {loading ? 'Verifying...' : 'Verify Email'}
-          </button>
-          <button type="button" onClick={handleVerificationClose} disabled={loading}>Cancel</button>
-        </div>
-      </Modal>
-    );
-  }
 
   return (
     <Modal show={show} onClose={onClose}>
-      <h2>
-        {initialValues?.id
-          ? (isBoard ? 'Edit Resident' : 'Edit Profile')
-          : 'Create New Person'}
-      </h2>
+      <h2>{initialValues?.id ? 'Edit' : 'Create New'} Profile</h2>
       <div className="form-container">
         <div className="form-section">
-          <h3>Primary Information</h3>
           <div className="form-group">
-            <label>Name</label>
+            <label>Name*</label>
             <input
               type="text"
-              value={formData.name}
+              value={formData.name || ''}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className={errors.name ? 'error' : ''}
             />
+            {errors.name && <div className="error-message">{errors.name}</div>}
           </div>
+
           <div className="form-group">
-            <label>Address Line 1</label>
-            <input
-              type="text"
-              value={formData.address.split('|')[0]}
-              onChange={(e) => handleAddressChange(e.target.value, formData.address.split('|')[1])}
-            />
-          </div>
-          <div className="form-group">
-            <label>Address Line 2</label>
-            <input
-              type="text"
-              value={formData.address.split('|')[1] || ''}
-              onChange={(e) => handleAddressChange(formData.address.split('|')[0], e.target.value)}
-            />
-          </div>
-          <div className="address-line">
-            <div className="form-group">
-              <label>City</label>
-              <input
-                type="text"
-                value={formData.city}
-                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-              />
-            </div>
-            <div className="form-group">
-              <label>State</label>
-              <select
-                value={formData.state}
-                onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-              >
-                <option value="">Select State</option>
-                {US_STATES.map(state => (
-                  <option key={state.value} value={state.value}>{state.label}</option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <label>ZIP</label>
-              <input
-                type="text"
-                value={formData.zip}
-                onChange={(e) => setFormData({ ...formData, zip: e.target.value })}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="form-section">
-          <h3>Contact Information</h3>
-          <div className="form-group">
-            <label>Email</label>
+            <label>Email*</label>
             <input
               type="email"
               value={formData.email || ''}
-              onChange={(e) => handleContactField('email', e.target.value)}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              className={errors.email ? 'error' : ''}
             />
-            {emailChanged && !isBoard && initialValues.cognitoID && (
-              <p className="email-note">
-                Changing your email will require verification of the new address.
-              </p>
-            )}
+            {errors.email && <div className="error-message">{errors.email}</div>}
           </div>
+
           <div className="form-group">
             <label>Phone</label>
             <input
               type="tel"
               value={formData.phone || ''}
-              onChange={handlePhoneChange}
-              placeholder="123-456-7890"
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             />
           </div>
+
+          <div className="form-group">
+            <label>Address</label>
+            <input
+              type="text"
+              value={formData.address || ''}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>City</label>
+            <input
+              type="text"
+              value={formData.city || ''}
+              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>State</label>
+            <input
+              type="text"
+              value={formData.state || ''}
+              onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>ZIP</label>
+            <input
+              type="text"
+              value={formData.zip || ''}
+              onChange={(e) => setFormData({ ...formData, zip: e.target.value })}
+            />
+          </div>
+        </div>
+
+        <div className="form-section">
           <div className="form-group">
             <label>Contact Preference</label>
             <select
-              value={formData.contactPref}
+              value={formData.contactPref || 'EMAIL'}
               onChange={(e) => setFormData({ ...formData, contactPref: e.target.value })}
             >
               <option value="EMAIL">Email</option>
-              <option value="CALL">Phone</option>
+              <option value="CALL">Call</option>
               <option value="TEXT">Text</option>
-              <option value="PHYSICAL">Traditional Mail</option>
+              <option value="PHYSICAL">Physical Mail</option>
             </select>
           </div>
-          <div className="form-group checkbox">
+
+          <div className="form-group">
+            <label>Billing Frequency</label>
+            <select
+              value={formData.billingFreq || 'MONTHLY'}
+              onChange={(e) => setFormData({ ...formData, billingFreq: e.target.value })}
+            >
+              <option value="MONTHLY">Monthly</option>
+              <option value="QUARTERLY">Quarterly</option>
+              <option value="SEMI">Semi-Annual</option>
+              <option value="ANNUAL">Annual</option>
+            </select>
+          </div>
+
+          <div className="form-group checkbox-group">
             <label>
               <input
                 type="checkbox"
-                checked={formData.allowText}
+                checked={formData.allowText || false}
                 onChange={(e) => setFormData({ ...formData, allowText: e.target.checked })}
               />
               Allow Text Messages
             </label>
           </div>
-          {isOwner && (
-            <div className="form-group">
-              <label>Billing Frequency</label>
-              <select
-                value={formData.billingFreq || ''}
-                onChange={(e) => setFormData({ ...formData, billingFreq: e.target.value })}
-              >
-                <option value="MONTHLY">Monthly</option>
-                <option value="QUARTERLY">Quarterly</option>
-                <option value="SEMI">Semi-Annual</option>
-                <option value="ANNUAL">Annual</option>
-              </select>
-            </div>
-          )}
-          {isOwner && (
-            <div className="form-group">
-              <label>Balance</label>
-              <input
-                type="number"
-                step="0.01"
-                value={Number(formData.balance).toFixed(2)}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  balance: Number(parseFloat(e.target.value).toFixed(2))
-                })}
-                disabled={!isBoard}
-              />
-            </div>
-          )}
+
+          <div className="form-group">
+            <label>Balance</label>
+            <input
+              type="number"
+              value={formData.balance || 0}
+              onChange={(e) => setFormData({ ...formData, balance: parseFloat(e.target.value) })}
+              // Only allow balance editing for users with permission
+              readOnly={!hasBalanceEditPermission}
+              className={!hasBalanceEditPermission ? "read-only-field" : ""}
+            />
+            {!hasBalanceEditPermission && (
+              <small className="field-note">Balance can only be edited by the President or Treasurer</small>
+            )}
+          </div>
         </div>
       </div>
       <div className="modal-actions">
-        <button onClick={handleSubmit} disabled={loading}>
-          {loading ? 'Processing...' : (initialValues?.id ? 'Update' : 'Create')}
+        <button onClick={handleSubmit}>
+          {initialValues?.id ? 'Save' : 'Create'}
         </button>
-        <button type="button" onClick={onClose} disabled={loading}>Cancel</button>
+        <button onClick={onClose}>Cancel</button>
       </div>
     </Modal>
   );

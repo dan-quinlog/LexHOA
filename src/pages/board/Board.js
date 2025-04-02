@@ -16,7 +16,7 @@ const TOOLS = [
   { id: 'payments', label: 'Payment Management' }
 ];
 
-const Board = () => {
+const Board = ({ userGroups = [] }) => {
   const [selectedTool, setSelectedTool] = useState('bulletins');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -53,26 +53,30 @@ const Board = () => {
   const renderTool = () => {
     switch (selectedTool) {
       case 'bulletins':
-        return <BulletinManager />;
+        return <BulletinManager userGroups={userGroups} />;
       case 'persons':
         return <PersonManager
           searchState={personSearchState}
           setSearchState={setPersonSearchState}
+          userGroups={userGroups}
         />;
       case 'properties':
         return <PropertyManager
           searchState={propertySearchState}
           setSearchState={setPropertySearchState}
+          userGroups={userGroups}
         />;
       case 'payments':
         return <PaymentManager
           searchState={paymentSearchState}
           setSearchState={setPaymentSearchState}
+          userGroups={userGroups}
         />;
       case 'pings':
         return <PingManager
           searchState={pingSearchState}
           setSearchState={setPingSearchState}
+          userGroups={userGroups}
         />;
       default:
         return null;
@@ -108,4 +112,3 @@ const Board = () => {
   );
 };
 export default Board;
-

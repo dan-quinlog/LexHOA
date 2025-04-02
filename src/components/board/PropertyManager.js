@@ -15,12 +15,22 @@ import BoardCard from './shared/BoardCard';
 import DeleteConfirmationModal from '../shared/DeleteConfirmationModal';
 import './shared/BoardTools.css';
 
-const PropertyManager = ({ searchState, setSearchState }) => {
+// Get group names from environment variables
+const PRESIDENT_GROUP = process.env.REACT_APP_PRESIDENT_GROUP_NAME;
+const BOARD_GROUP = process.env.REACT_APP_BOARD_GROUP_NAME;
+
+const PropertyManager = ({ searchState, setSearchState, userGroups = [] }) => {
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [properties, setProperties] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [propertyToDelete, setPropertyToDelete] = useState(null);
+
+  // Check if user has admin permissions (PRESIDENT only)
+  const hasAdminPermission = userGroups && userGroups.includes(PRESIDENT_GROUP);
+  
+  // All board members can edit properties
+  const hasEditPermission = userGroups && userGroups.includes(BOARD_GROUP);
 
   const [searchProperties] = useLazyQuery(LIST_PROPERTIES);
   const [searchByAddress] = useLazyQuery(PROPERTY_BY_ADDRESS);
@@ -183,10 +193,13 @@ const PropertyManager = ({ searchState, setSearchState }) => {
           className="search-input"
         />
         <button onClick={handleSearch}>Search</button>
-        <button onClick={() => {
-          setSelectedProperty(null);
-          setShowEditModal(true);
-        }}>Create New</button>
+        {/* Only show Create New button to users with admin permission (PRESIDENT) */}
+        {hasAdminPermission && (
+          <button onClick={() => {
+            setSelectedProperty(null);
+            setShowEditModal(true);
+          }}>Create New</button>
+        )}
       </div>
 
       <div className="results-grid">
@@ -203,31 +216,42 @@ const PropertyManager = ({ searchState, setSearchState }) => {
             }
             actions={
               <>
-                <button onClick={() => handleEdit(property)}>Edit</button>
-                <button onClick={() => handleDelete(property)}>Delete</button>
+                {/* All BOARD members can edit properties */}
+                {hasEditPermission && (
+                  <button onClick={() => handleEdit(property)}>Edit</button>
+                )}
+                {/* Only PRESIDENT can delete properties */}
+                {hasAdminPermission && (
+                  <button onClick={() => handleDelete(property)}>Delete</button>
+                )}
               </>
             }
           />
         ))}
       </div>
-      {showEditModal && (
+      {/* All BOARD members can access the edit modal */}
+      {showEditModal && hasEditPermission && (
         <PropertyEditModal
           show={showEditModal}
           onClose={() => setShowEditModal(false)}
           initialValues={selectedProperty}
           onSubmit={handleSave}
+          userGroups={userGroups}
         />
       )}
 
-      <DeleteConfirmationModal
-        show={showDeleteModal}
-        objectId={propertyToDelete?.id}
-        onConfirm={confirmDelete}
-        onClose={() => {
-          setShowDeleteModal(false);
-          setPropertyToDelete(null);
-        }}
-      />
+      {/* Only PRESIDENT can access the delete confirmation modal */}
+      {hasAdminPermission && (
+        <DeleteConfirmationModal
+          show={showDeleteModal}
+          objectId={propertyToDelete?.id}
+          onConfirm={confirmDelete}
+          onClose={() => {
+            setShowDeleteModal(false);
+            setPropertyToDelete(null);
+          }}
+        />
+      )}
     </div>
   );
 };

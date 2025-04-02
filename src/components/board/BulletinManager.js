@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useQuery, useMutation } from '@apollo/client';import { BULLETINS_BY_DATE } from '../../queries/queries';
+import { useQuery, useMutation } from '@apollo/client';
+import { BULLETINS_BY_DATE } from '../../queries/queries';
 import { DELETE_BULLETIN } from '../../queries/mutations';
 import BulletinModal from '../modals/BulletinModal';
 import DeleteConfirmModal from '../shared/DeleteConfirmationModal';
@@ -8,11 +9,19 @@ import 'react-quill/dist/quill.bubble.css';
 import './BulletinManager.css';
 import './shared/BoardTools.css';
 
-const BulletinManager = () => {
+// Get group names from environment variables
+const MEDIA_GROUP = process.env.REACT_APP_MEDIA_GROUP_NAME;
+const PRESIDENT_GROUP = process.env.REACT_APP_PRESIDENT_GROUP_NAME;
+
+const BulletinManager = ({ userGroups = [] }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedBulletin, setSelectedBulletin] = useState(null);
   const loadingRef = useRef(null);
+  
+  // Check if user has edit permissions (MEDIA or PRESIDENT)
+  const hasEditPermission = userGroups && 
+    (userGroups.includes(MEDIA_GROUP) || userGroups.includes(PRESIDENT_GROUP));
 
   const { loading, error, data, fetchMore } = useQuery(BULLETINS_BY_DATE, {
     variables: { 
@@ -100,15 +109,18 @@ const BulletinManager = () => {
     <div className="board-tool">
       <div className="bulletin-header">
         <h2 className="section-title">Bulletin Management</h2>
-        <button 
-          className="search-controls" 
-          onClick={() => {
-            setSelectedBulletin(null)
-            setModalOpen(true)
-          }}
-        >
-          Create Bulletin
-        </button>
+        {/* Only show Create button to users with edit permission */}
+        {hasEditPermission && (
+          <button 
+            className="search-controls" 
+            onClick={() => {
+              setSelectedBulletin(null)
+              setModalOpen(true)
+            }}
+          >
+            Create Bulletin
+          </button>
+        )}
       </div>
       <div className="bulletin-list">
         {data?.bulletinsByDate.items.map((bulletin, index) => (
@@ -117,10 +129,13 @@ const BulletinManager = () => {
             className="bulletin-item"
           >
             <div className="bulletin-header">
-              <div className="bulletin-actions">
-                <button onClick={() => handleEdit(bulletin)}>Edit</button>
-                <button onClick={() => handleDelete(bulletin)}>Delete</button>
-              </div>
+              {/* Only show Edit/Delete buttons to users with edit permission */}
+              {hasEditPermission && (
+                <div className="bulletin-actions">
+                  <button onClick={() => handleEdit(bulletin)}>Edit</button>
+                  <button onClick={() => handleDelete(bulletin)}>Delete</button>
+                </div>
+              )}
               <div className="bulletin-metadata">
                 <span className="bulletin-date">{new Date(bulletin.createdAt).toLocaleString()}</span>
                 <span className="bulletin-audience">{bulletin.audience}</span>
@@ -142,24 +157,29 @@ const BulletinManager = () => {
         </div>
       </div>
 
-      <BulletinModal
-        bulletin={selectedBulletin}
-        modalOpen={modalOpen}
-        onClose={() => {
-          setModalOpen(false);
-          setSelectedBulletin(null);
-        }}
-      />
+      {/* Only render modal if user has edit permission */}
+      {hasEditPermission && (
+        <>
+          <BulletinModal
+            bulletin={selectedBulletin}
+            modalOpen={modalOpen}
+            onClose={() => {
+              setModalOpen(false);
+              setSelectedBulletin(null);
+            }}
+          />
 
-      <DeleteConfirmModal
-        show={deleteModalOpen}
-        objectId={selectedBulletin?.id}
-        onConfirm={handleConfirmDelete}
-        onClose={() => {
-          setDeleteModalOpen(false);
-          setSelectedBulletin(null);
-        }}
-      />
+          <DeleteConfirmModal
+            show={deleteModalOpen}
+            objectId={selectedBulletin?.id}
+            onConfirm={handleConfirmDelete}
+            onClose={() => {
+              setDeleteModalOpen(false);
+              setSelectedBulletin(null);
+            }}
+          />
+        </>
+      )}
     </div>
   );
 };

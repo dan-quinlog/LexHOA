@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import Modal from '../shared/Modal';
 import './PropertyEditModal.css';
 
-const PropertyEditModal = ({ show, onClose, onSubmit, initialValues = {} }) => {
+// Get group name from environment variable
+const PRESIDENT_GROUP = process.env.REACT_APP_PRESIDENT_GROUP_NAME;
+
+const PropertyEditModal = ({ show, onClose, onSubmit, initialValues = {}, userGroups = [] }) => {
   const [formData, setFormData] = useState({
     id: '',
     address: '',
@@ -10,6 +13,9 @@ const PropertyEditModal = ({ show, onClose, onSubmit, initialValues = {} }) => {
     profTenantId: '',
     ...initialValues
   });
+
+  // Check if user has admin permissions (PRESIDENT only)
+  const hasAdminPermission = userGroups && userGroups.includes(PRESIDENT_GROUP);
 
   const handleSubmit = () => {
     if (!formData.address) {
@@ -56,8 +62,14 @@ const PropertyEditModal = ({ show, onClose, onSubmit, initialValues = {} }) => {
             <input
               type="text"
               value={formData.address}
+              // Only allow PRESIDENT to edit the address
+              readOnly={!hasAdminPermission}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              className={!hasAdminPermission ? "read-only-field" : ""}
             />
+            {!hasAdminPermission && initialValues?.id && (
+              <small className="field-note">Address can only be edited by the President</small>
+            )}
           </div>
         </div>
       </div>

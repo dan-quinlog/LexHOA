@@ -119,3 +119,16 @@
     flex: 1;
   }
 }
+
+.read-only-field {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  border: 1px solid #ddd;
+}
+
+.field-note {
+  color: #666;
+  font-style: italic;
+  margin-top: 4px;
+  display: block;
+}

@@ -7,15 +7,24 @@ import BoardCard from './shared/BoardCard';
 import DeleteConfirmationModal from '../shared/DeleteConfirmationModal';
 import './shared/BoardTools.css';
 
-const PaymentManager = ({ searchState, setSearchState }) => {
+// Get group names from environment variables
+const TREASURER_GROUP = process.env.REACT_APP_TREASURER_GROUP_NAME;
+const PRESIDENT_GROUP = process.env.REACT_APP_PRESIDENT_GROUP_NAME;
+
+const PaymentManager = ({ searchState, setSearchState, userGroups = [] }) => {
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [paymentToDelete, setPaymentToDelete] = useState(null);
 
+  // Check if user has edit permissions (TREASURER or PRESIDENT)
+  const hasEditPermission = userGroups && 
+    (userGroups.includes(TREASURER_GROUP) || userGroups.includes(PRESIDENT_GROUP));
+
   const [searchPayments] = useLazyQuery(LIST_PAYMENTS);
   const [searchByOwner] = useLazyQuery(PAYMENTS_BY_OWNER);
   const [deletePayment] = useMutation(DELETE_PAYMENT);
+
   const handleSearch = async () => {
     if (!searchState.searchTerm) return;
 
@@ -68,6 +77,7 @@ const PaymentManager = ({ searchState, setSearchState }) => {
       console.error('Search error:', error);
     }
   };
+
   const handleEdit = (payment) => {
     setSelectedPayment(payment);
     setShowEditModal(true);
@@ -132,10 +142,13 @@ const PaymentManager = ({ searchState, setSearchState }) => {
           className="search-input"
         />
         <button onClick={handleSearch}>Search</button>
-        <button onClick={() => {
-          setSelectedPayment(null)
-          setShowEditModal(true)
-        }}>Create New</button>
+        {/* Only show Create New button to users with edit permission */}
+        {hasEditPermission && (
+          <button onClick={() => {
+            setSelectedPayment(null)
+            setShowEditModal(true)
+          }}>Create New</button>
+        )}
       </div>
       <div className="results-grid">
         {searchState.searchResults.map(payment => (
@@ -151,16 +164,18 @@ const PaymentManager = ({ searchState, setSearchState }) => {
               </>
             }
             actions={
-              <>
-                <button onClick={() => handleEdit(payment)}>Edit</button>
-                <button onClick={() => handleDelete(payment)}>Delete</button>
-              </>
+              hasEditPermission ? (
+                <>
+                  <button onClick={() => handleEdit(payment)}>Edit</button>
+                  <button onClick={() => handleDelete(payment)}>Delete</button>
+                </>
+              ) : null
             }
           />
         ))}
       </div>
       {
-        showEditModal && (
+        showEditModal && hasEditPermission && (
           <PaymentEditModal
             payment={selectedPayment}
             show={showEditModal}
@@ -171,18 +186,19 @@ const PaymentManager = ({ searchState, setSearchState }) => {
           />
         )
       }
-      <DeleteConfirmationModal
-        show={showDeleteModal}
-        objectId={paymentToDelete?.id}
-        onConfirm={confirmDelete}
-        onClose={() => {
-          setShowDeleteModal(false)
-          setPaymentToDelete(null)
-        }}
-      />
-    </div >
+      {hasEditPermission && (
+        <DeleteConfirmationModal
+          show={showDeleteModal}
+          objectId={paymentToDelete?.id}
+          onConfirm={confirmDelete}
+          onClose={() => {
+            setShowDeleteModal(false)
+            setPaymentToDelete(null)
+          }}
+        />
+      )}
+    </div>
   );
 };
 
 export default PaymentManager;
-

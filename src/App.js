@@ -280,7 +280,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/profile" element={<Profile cognitoId={user?.username} />} />
             <Route path="/amenities" element={<Amenities />} />
-            <Route path="/board" element={<Board />} />
+            <Route path="/board" element={<Board userGroups={userGroups} />} />
             <Route path="/contact" element={<Contact />} />
           </Routes>
           <footer className="bottom-bar">

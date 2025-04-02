@@ -2,8 +2,11 @@
 // this is an auto generated file. This will be overwritten
 
 export const onCreateProfile = /* GraphQL */ `
-  subscription OnCreateProfile($filter: ModelSubscriptionProfileFilterInput) {
-    onCreateProfile(filter: $filter) {
+  subscription OnCreateProfile(
+    $filter: ModelSubscriptionProfileFilterInput
+    $owner: String
+  ) {
+    onCreateProfile(filter: $filter, owner: $owner) {
       id
       byTypeName
       byTypeBalance
@@ -55,8 +58,11 @@ export const onCreateProfile = /* GraphQL */ `
   }
 `;
 export const onUpdateProfile = /* GraphQL */ `
-  subscription OnUpdateProfile($filter: ModelSubscriptionProfileFilterInput) {
-    onUpdateProfile(filter: $filter) {
+  subscription OnUpdateProfile(
+    $filter: ModelSubscriptionProfileFilterInput
+    $owner: String
+  ) {
+    onUpdateProfile(filter: $filter, owner: $owner) {
       id
       byTypeName
       byTypeBalance
@@ -108,8 +114,11 @@ export const onUpdateProfile = /* GraphQL */ `
   }
 `;
 export const onDeleteProfile = /* GraphQL */ `
-  subscription OnDeleteProfile($filter: ModelSubscriptionProfileFilterInput) {
-    onDeleteProfile(filter: $filter) {
+  subscription OnDeleteProfile(
+    $filter: ModelSubscriptionProfileFilterInput
+    $owner: String
+  ) {
+    onDeleteProfile(filter: $filter, owner: $owner) {
       id
       byTypeName
       byTypeBalance
@@ -161,8 +170,11 @@ export const onDeleteProfile = /* GraphQL */ `
   }
 `;
 export const onCreateProperty = /* GraphQL */ `
-  subscription OnCreateProperty($filter: ModelSubscriptionPropertyFilterInput) {
-    onCreateProperty(filter: $filter) {
+  subscription OnCreateProperty(
+    $filter: ModelSubscriptionPropertyFilterInput
+    $owner: String
+  ) {
+    onCreateProperty(filter: $filter, owner: $owner) {
       id
       type
       owner
@@ -225,8 +237,11 @@ export const onCreateProperty = /* GraphQL */ `
   }
 `;
 export const onUpdateProperty = /* GraphQL */ `
-  subscription OnUpdateProperty($filter: ModelSubscriptionPropertyFilterInput) {
-    onUpdateProperty(filter: $filter) {
+  subscription OnUpdateProperty(
+    $filter: ModelSubscriptionPropertyFilterInput
+    $owner: String
+  ) {
+    onUpdateProperty(filter: $filter, owner: $owner) {
       id
       type
       owner
@@ -289,8 +304,11 @@ export const onUpdateProperty = /* GraphQL */ `
   }
 `;
 export const onDeleteProperty = /* GraphQL */ `
-  subscription OnDeleteProperty($filter: ModelSubscriptionPropertyFilterInput) {
-    onDeleteProperty(filter: $filter) {
+  subscription OnDeleteProperty(
+    $filter: ModelSubscriptionPropertyFilterInput
+    $owner: String
+  ) {
+    onDeleteProperty(filter: $filter, owner: $owner) {
       id
       type
       owner

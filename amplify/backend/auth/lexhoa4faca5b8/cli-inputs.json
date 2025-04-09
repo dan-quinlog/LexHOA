@@ -1,6 +1,8 @@
 {
   "version": "1",
   "cognitoConfig": {
+    "identityPoolName": "lexhoa4faca5b8_identitypool_22e6f35c",
+    "allowUnauthenticatedIdentities": false,
     "resourceNameTruncated": "lexhoa4faca5b8",
     "userPoolName": "lexhoa4faca5b8_userpool_4faca5b8",
     "autoVerifiedAttributes": [
@@ -12,7 +14,7 @@
     ],
     "smsAuthenticationMessage": "Your authentication code is {####}",
     "smsVerificationMessage": "Your verification code is {####}",
-    "emailVerificationSubject": "Your verification code",
+    "emailVerificationSubject": "Lexington HOA Verification",
     "emailVerificationMessage": "Your verification code is {####}",
     "defaultPasswordPolicy": false,
     "passwordPolicyMinLength": 8,
@@ -34,7 +36,7 @@
     "userpoolClientSetAttributes": false,
     "sharedId": "4faca5b8",
     "resourceName": "lexhoa4faca5b8",
-    "authSelections": "userPoolOnly",
+    "authSelections": "identityPoolAndUserPool",
     "useDefault": "manual",
     "usernameAttributes": [
       "email"
@@ -42,8 +44,10 @@
     "triggers": {},
     "userPoolGroupList": [
       "BOARD",
-      "OWNERS",
-      "RESIDENTS"
+      "PRESIDENT",
+      "SECRETARY",
+      "MEDIA",
+      "TREASURER"
     ],
     "serviceName": "Cognito",
     "usernameCaseSensitive": false,
@@ -68,11 +72,11 @@
     "hostedUIDomainName": "lexhoa49625c75-49625c75",
     "authProvidersUserPool": [],
     "hostedUIProviderMeta": "[]",
-    "oAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\"],\"AllowedOAuthScopes\":[\"phone\",\"email\",\"openid\",\"profile\",\"aws.cognito.signin.user.admin\"],\"CallbackURLs\":[\"http://localhost:3000/\"],\"LogoutURLs\":[\"http://localhost:3000/\"]}",
-    "authProviders": [],
     "parentStack": {
       "Ref": "AWS::StackId"
     },
-    "permissions": []
+    "permissions": [],
+    "oAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\"],\"AllowedOAuthScopes\":[\"phone\",\"email\",\"openid\",\"profile\",\"aws.cognito.signin.user.admin\"],\"CallbackURLs\":[\"http://localhost:3000/\",\"http://localhost:3000/\"],\"LogoutURLs\":[\"http://localhost:3000/\"]}",
+    "authProviders": []
   }
 }

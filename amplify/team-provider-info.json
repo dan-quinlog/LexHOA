@@ -9,7 +9,8 @@
       "UnauthRoleName": "amplify-lexhoa-dev-49387-unauthRole",
       "StackName": "amplify-lexhoa-dev-49387",
       "StackId": "arn:aws:cloudformation:us-east-1:324037289979:stack/amplify-lexhoa-dev-49387/448ff890-e1de-11ef-8c55-0affe405cde1",
-      "AmplifyAppId": "dcq8knwxivreq"
+      "AmplifyAppId": "dcq8knwxivreq",
+      "APIGatewayAuthURL": "https://s3.amazonaws.com/amplify-lexhoa-dev-49387-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json"
     },
     "categories": {
       "auth": {
@@ -17,12 +18,37 @@
         "userPoolGroups": {}
       },
       "api": {
-        "lexhoa": {}
+        "lexhoa": {},
+        "cognitoGroupManagement": {}
       },
       "function": {
         "GenerateProfileOnSignUp": {
           "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
           "s3Key": "amplify-builds/GenerateProfileOnSignUp-4c6d5871337339735739-build.zip"
+        },
+        "addUserToGroup": {
+          "presidentGroupName": "PRESIDENT",
+          "secretaryGroupName": "SECRETARY",
+          "treasurerGroupName": "TREASURER",
+          "boardGroupName": "BOARD",
+          "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
+          "s3Key": "amplify-builds/addUserToGroup-45537a73703661317854-build.zip"
+        },
+        "removeUserFromGroup": {
+          "presidentGroupName": "PRESIDENT",
+          "secretaryGroupName": "SECRETARY",
+          "treasurerGroupName": "TREASURER",
+          "boardGroupName": "BOARD",
+          "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
+          "s3Key": "amplify-builds/removeUserFromGroup-6f765274567a77774449-build.zip"
+        },
+        "getUserGroups": {
+          "secretaryGroupName": "SECRETARY",
+          "treasurerGroupName": "TREASURER",
+          "boardGroupName": "BOARD",
+          "presidentGroupName": "PRESIDENT",
+          "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
+          "s3Key": "amplify-builds/getUserGroups-792b61747a4263736756-build.zip"
         }
       }
     }

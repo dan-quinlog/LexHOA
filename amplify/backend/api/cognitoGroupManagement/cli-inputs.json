@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "paths": {
+    "/cognitoGroups": {
+      "name": "/cognitoGroups",
+      "lambdaFunction": "getUserGroups",
+      "permissions": {
+        "setting": "private",
+        "auth": [
+          "read",
+          "update"
+        ]
+      }
+    },
+    "/addUserToGroup": {
+      "name": "/addUserToGroup",
+      "lambdaFunction": "addUserToGroup",
+      "permissions": {
+        "setting": "private",
+        "auth": [
+          "read",
+          "update"
+        ]
+      }
+    },
+    "/removeUserFromGroup": {
+      "name": "/removeUserFromGroup",
+      "lambdaFunction": "removeUserFromGroup",
+      "permissions": {
+        "setting": "private",
+        "auth": [
+          "read",
+          "update"
+        ]
+      }
+    }
+  }
+}

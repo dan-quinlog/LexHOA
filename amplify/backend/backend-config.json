@@ -1,5 +1,35 @@
 {
   "api": {
+    "cognitoGroupManagement": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "getUserGroups"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "addUserToGroup"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "removeUserFromGroup"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway"
+    },
     "lexhoa": {
       "dependsOn": [
         {
@@ -71,7 +101,8 @@
           "attributes": [
             "UserPoolId",
             "AppClientIDWeb",
-            "AppClientID"
+            "AppClientID",
+            "IdentityPoolId"
           ],
           "category": "auth",
           "resourceName": "lexhoa4faca5b8"
@@ -97,6 +128,48 @@
       ],
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
+    },
+    "addUserToGroup": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "lexhoa4faca5b8"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "getUserGroups": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "lexhoa4faca5b8"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "removeUserFromGroup": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "lexhoa4faca5b8"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
     }
   },
   "parameters": {
@@ -113,6 +186,150 @@
         {
           "category": "function",
           "resourceName": "GenerateProfileOnSignUp"
+        }
+      ]
+    },
+    "AMPLIFY_function_addUserToGroup_boardGroupName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "addUserToGroup"
+        }
+      ]
+    },
+    "AMPLIFY_function_addUserToGroup_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "addUserToGroup"
+        }
+      ]
+    },
+    "AMPLIFY_function_addUserToGroup_presidentGroupName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "addUserToGroup"
+        }
+      ]
+    },
+    "AMPLIFY_function_addUserToGroup_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "addUserToGroup"
+        }
+      ]
+    },
+    "AMPLIFY_function_addUserToGroup_secretaryGroupName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "addUserToGroup"
+        }
+      ]
+    },
+    "AMPLIFY_function_addUserToGroup_treasurerGroupName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "addUserToGroup"
+        }
+      ]
+    },
+    "AMPLIFY_function_getUserGroups_boardGroupName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getUserGroups"
+        }
+      ]
+    },
+    "AMPLIFY_function_getUserGroups_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getUserGroups"
+        }
+      ]
+    },
+    "AMPLIFY_function_getUserGroups_presidentGroupName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getUserGroups"
+        }
+      ]
+    },
+    "AMPLIFY_function_getUserGroups_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getUserGroups"
+        }
+      ]
+    },
+    "AMPLIFY_function_getUserGroups_secretaryGroupName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getUserGroups"
+        }
+      ]
+    },
+    "AMPLIFY_function_getUserGroups_treasurerGroupName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getUserGroups"
+        }
+      ]
+    },
+    "AMPLIFY_function_removeUserFromGroup_boardGroupName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "removeUserFromGroup"
+        }
+      ]
+    },
+    "AMPLIFY_function_removeUserFromGroup_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "removeUserFromGroup"
+        }
+      ]
+    },
+    "AMPLIFY_function_removeUserFromGroup_presidentGroupName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "removeUserFromGroup"
+        }
+      ]
+    },
+    "AMPLIFY_function_removeUserFromGroup_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "removeUserFromGroup"
+        }
+      ]
+    },
+    "AMPLIFY_function_removeUserFromGroup_secretaryGroupName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "removeUserFromGroup"
+        }
+      ]
+    },
+    "AMPLIFY_function_removeUserFromGroup_treasurerGroupName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "removeUserFromGroup"
         }
       ]
     }

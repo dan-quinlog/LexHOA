@@ -18,6 +18,10 @@ const amplifyConfig = {
     redirectSignIn: process.env.REACT_APP_REDIRECT_SIGN_IN,
     redirectSignOut: process.env.REACT_APP_REDIRECT_SIGN_OUT,
     responseType: 'code'
+  }, API: {
+    REST: {
+      cognitoGroupManagement: process.env.REACT_APP_API_ENDPOINT
+    }
   }
 };
 

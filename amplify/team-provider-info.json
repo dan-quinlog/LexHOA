@@ -9,7 +9,8 @@
       "UnauthRoleName": "amplify-lexhoa-dev-49387-unauthRole",
       "StackName": "amplify-lexhoa-dev-49387",
       "StackId": "arn:aws:cloudformation:us-east-1:324037289979:stack/amplify-lexhoa-dev-49387/448ff890-e1de-11ef-8c55-0affe405cde1",
-      "AmplifyAppId": "dcq8knwxivreq"
+      "AmplifyAppId": "dcq8knwxivreq",
+      "APIGatewayAuthURL": "https://s3.amazonaws.com/amplify-lexhoa-dev-49387-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json"
     },
     "categories": {
       "auth": {

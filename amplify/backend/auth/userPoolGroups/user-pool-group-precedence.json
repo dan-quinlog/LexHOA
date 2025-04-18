@@ -10,5 +10,21 @@
   {
     "groupName": "RESIDENTS",
     "precedence": 3
+  },
+  {
+    "groupName": "PRESIDENT",
+    "precedence": 4
+  },
+  {
+    "groupName": "SECRETARY",
+    "precedence": 5
+  },
+  {
+    "groupName": "TREASURER",
+    "precedence": 6
+  },
+  {
+    "groupName": "MEDIA",
+    "precedence": 7
   }
 ]

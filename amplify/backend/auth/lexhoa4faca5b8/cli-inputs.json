@@ -44,10 +44,12 @@
     "triggers": {},
     "userPoolGroupList": [
       "BOARD",
+      "OWNERS",
+      "RESIDENTS",
       "PRESIDENT",
       "SECRETARY",
-      "MEDIA",
-      "TREASURER"
+      "TREASURER",
+      "MEDIA"
     ],
     "serviceName": "Cognito",
     "usernameCaseSensitive": false,
@@ -75,8 +77,6 @@
     "parentStack": {
       "Ref": "AWS::StackId"
     },
-    "permissions": [],
-    "oAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\"],\"AllowedOAuthScopes\":[\"phone\",\"email\",\"openid\",\"profile\",\"aws.cognito.signin.user.admin\"],\"CallbackURLs\":[\"http://localhost:3000/\",\"http://localhost:3000/\"],\"LogoutURLs\":[\"http://localhost:3000/\"]}",
-    "authProviders": []
+    "permissions": []
   }
 }

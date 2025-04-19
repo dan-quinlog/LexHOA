@@ -41,7 +41,7 @@ type Profile @model
     { allow: private, operations: [create, read] },
     { allow: owner, operations: [read] },
     { allow: groups, groups: ["BOARD"], operations: [create, read] },
-    { allow: groups, groups: ["TREASURER", "PRESIDENT", "SECRETARY"], operations: [create, read, update] }
+    { allow: groups, groups: ["TREASURER", "PRESIDENT", "SECRETARY"], operations: [create, read, update, delete] }
   ])
   @default(value:"0.00")
   @index(
@@ -81,7 +81,7 @@ type Property @model
   profOwnerId: ID @index(name: "byOwner")
   @auth(rules: [
     { allow: private, operations: [read] },
-    { allow: groups, groups: ["BOARD", "PRESIDENT"], operations: [create, read, update] }
+    { allow: groups, groups: ["BOARD", "PRESIDENT"], operations: [create, read, update, delete] }
   ])
   profTenant: Profile @hasOne(fields: ["profTenantId"])
   @auth(rules: [
@@ -103,7 +103,7 @@ type Payment @model
   @auth(rules: [
     { allow: owner, operations: [read] },
     { allow: groups, groups: ["BOARD"], operations: [read] },
-    { allow: groups, groups: ["TREASURER", "PRESIDENT"], operations: [create, read, update] }
+    { allow: groups, groups: ["TREASURER", "PRESIDENT"], operations: [create, read, update, delete] }
   ]) {
   id: ID!
   byTypeCreatedAt: String @default(value: "PAYMENT")

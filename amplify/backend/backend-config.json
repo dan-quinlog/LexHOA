@@ -8,7 +8,7 @@
             "Arn"
           ],
           "category": "function",
-          "resourceName": "getUserGroups"
+          "resourceName": "getCognitoGroups"
         },
         {
           "attributes": [
@@ -25,6 +25,14 @@
           ],
           "category": "function",
           "resourceName": "removeUserFromGroup"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "listUsersInGroup"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -143,7 +151,21 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
-    "getUserGroups": {
+    "getCognitoGroups": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "lexhoa4faca5b8"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "listUsersInGroup": {
       "build": true,
       "dependsOn": [
         {
@@ -189,14 +211,6 @@
         }
       ]
     },
-    "AMPLIFY_function_addUserToGroup_boardGroupName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "addUserToGroup"
-        }
-      ]
-    },
     "AMPLIFY_function_addUserToGroup_deploymentBucketName": {
       "usedBy": [
         {
@@ -205,7 +219,7 @@
         }
       ]
     },
-    "AMPLIFY_function_addUserToGroup_presidentGroupName": {
+    "AMPLIFY_function_addUserToGroup_region": {
       "usedBy": [
         {
           "category": "function",
@@ -221,7 +235,7 @@
         }
       ]
     },
-    "AMPLIFY_function_addUserToGroup_secretaryGroupName": {
+    "AMPLIFY_function_addUserToGroup_userPoolId": {
       "usedBy": [
         {
           "category": "function",
@@ -229,67 +243,67 @@
         }
       ]
     },
-    "AMPLIFY_function_addUserToGroup_treasurerGroupName": {
+    "AMPLIFY_function_getCognitoGroups_deploymentBucketName": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "addUserToGroup"
+          "resourceName": "getCognitoGroups"
         }
       ]
     },
-    "AMPLIFY_function_getUserGroups_boardGroupName": {
+    "AMPLIFY_function_getCognitoGroups_region": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "getUserGroups"
+          "resourceName": "getCognitoGroups"
         }
       ]
     },
-    "AMPLIFY_function_getUserGroups_deploymentBucketName": {
+    "AMPLIFY_function_getCognitoGroups_s3Key": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "getUserGroups"
+          "resourceName": "getCognitoGroups"
         }
       ]
     },
-    "AMPLIFY_function_getUserGroups_presidentGroupName": {
+    "AMPLIFY_function_getCognitoGroups_userPoolId": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "getUserGroups"
+          "resourceName": "getCognitoGroups"
         }
       ]
     },
-    "AMPLIFY_function_getUserGroups_s3Key": {
+    "AMPLIFY_function_listUsersInGroup_deploymentBucketName": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "getUserGroups"
+          "resourceName": "listUsersInGroup"
         }
       ]
     },
-    "AMPLIFY_function_getUserGroups_secretaryGroupName": {
+    "AMPLIFY_function_listUsersInGroup_region": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "getUserGroups"
+          "resourceName": "listUsersInGroup"
         }
       ]
     },
-    "AMPLIFY_function_getUserGroups_treasurerGroupName": {
+    "AMPLIFY_function_listUsersInGroup_s3Key": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "getUserGroups"
+          "resourceName": "listUsersInGroup"
         }
       ]
     },
-    "AMPLIFY_function_removeUserFromGroup_boardGroupName": {
+    "AMPLIFY_function_listUsersInGroup_userPoolId": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "removeUserFromGroup"
+          "resourceName": "listUsersInGroup"
         }
       ]
     },
@@ -301,7 +315,7 @@
         }
       ]
     },
-    "AMPLIFY_function_removeUserFromGroup_presidentGroupName": {
+    "AMPLIFY_function_removeUserFromGroup_region": {
       "usedBy": [
         {
           "category": "function",
@@ -317,15 +331,7 @@
         }
       ]
     },
-    "AMPLIFY_function_removeUserFromGroup_secretaryGroupName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "removeUserFromGroup"
-        }
-      ]
-    },
-    "AMPLIFY_function_removeUserFromGroup_treasurerGroupName": {
+    "AMPLIFY_function_removeUserFromGroup_userPoolId": {
       "usedBy": [
         {
           "category": "function",

@@ -16,21 +16,15 @@
     "s3Key": {
       "Type": "String"
     },
-    "presidentGroupName": {
-      "Type": "String"
-    },
-    "secretaryGroupName": {
-      "Type": "String"
-    },
-    "treasurerGroupName": {
-      "Type": "String"
-    },
-    "boardGroupName": {
+    "userPoolId": {
       "Type": "String"
     },
     "authlexhoa4faca5b8UserPoolId": {
       "Type": "String",
       "Default": "authlexhoa4faca5b8UserPoolId"
+    },
+    "region": {
+      "Type": "String"
     }
   },
   "Conditions": {
@@ -89,17 +83,8 @@
             "AUTH_LEXHOA4FACA5B8_USERPOOLID": {
               "Ref": "authlexhoa4faca5b8UserPoolId"
             },
-            "PRESIDENT_GROUP_NAME": {
-              "Ref": "presidentGroupName"
-            },
-            "SECRETARY_GROUP_NAME": {
-              "Ref": "secretaryGroupName"
-            },
-            "TREASURER_GROUP_NAME": {
-              "Ref": "treasurerGroupName"
-            },
-            "BOARD_GROUP_NAME": {
-              "Ref": "boardGroupName"
+            "USER_POOL_ID": {
+              "Ref": "userPoolId"
             }
           }
         },
@@ -120,12 +105,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "lexhoaLambdaRolee03a5514",
+            "lexhoaLambdaRole2860ac9e",
             {
               "Fn::Join": [
                 "",
                 [
-                  "lexhoaLambdaRolee03a5514",
+                  "lexhoaLambdaRole2860ac9e",
                   "-",
                   {
                     "Ref": "env"
@@ -214,6 +199,51 @@
             {
               "Effect": "Allow",
               "Action": [
+                "cognito-idp:ConfirmSignUp",
+                "cognito-idp:AdminCreateUser",
+                "cognito-idp:CreateUserImportJob",
+                "cognito-idp:AdminSetUserSettings",
+                "cognito-idp:AdminLinkProviderForUser",
+                "cognito-idp:CreateIdentityProvider",
+                "cognito-idp:AdminConfirmSignUp",
+                "cognito-idp:AdminDisableUser",
+                "cognito-idp:AdminRemoveUserFromGroup",
+                "cognito-idp:SetUserMFAPreference",
+                "cognito-idp:SetUICustomization",
+                "cognito-idp:SignUp",
+                "cognito-idp:VerifyUserAttribute",
+                "cognito-idp:SetRiskConfiguration",
+                "cognito-idp:StartUserImportJob",
+                "cognito-idp:AdminSetUserPassword",
+                "cognito-idp:AssociateSoftwareToken",
+                "cognito-idp:CreateResourceServer",
+                "cognito-idp:RespondToAuthChallenge",
+                "cognito-idp:CreateUserPoolClient",
+                "cognito-idp:AdminUserGlobalSignOut",
+                "cognito-idp:GlobalSignOut",
+                "cognito-idp:AddCustomAttributes",
+                "cognito-idp:CreateGroup",
+                "cognito-idp:CreateUserPool",
+                "cognito-idp:AdminForgetDevice",
+                "cognito-idp:AdminAddUserToGroup",
+                "cognito-idp:AdminRespondToAuthChallenge",
+                "cognito-idp:ForgetDevice",
+                "cognito-idp:CreateUserPoolDomain",
+                "cognito-idp:AdminEnableUser",
+                "cognito-idp:AdminUpdateDeviceStatus",
+                "cognito-idp:StopUserImportJob",
+                "cognito-idp:InitiateAuth",
+                "cognito-idp:AdminInitiateAuth",
+                "cognito-idp:AdminSetUserMFAPreference",
+                "cognito-idp:ConfirmForgotPassword",
+                "cognito-idp:SetUserSettings",
+                "cognito-idp:VerifySoftwareToken",
+                "cognito-idp:AdminDisableProviderForUser",
+                "cognito-idp:SetUserPoolMfaConfig",
+                "cognito-idp:ChangePassword",
+                "cognito-idp:ConfirmDevice",
+                "cognito-idp:AdminResetUserPassword",
+                "cognito-idp:ResendConfirmationCode",
                 "cognito-identity:Describe*",
                 "cognito-identity:Get*",
                 "cognito-identity:List*",

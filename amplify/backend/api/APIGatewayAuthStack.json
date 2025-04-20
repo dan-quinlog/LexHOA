@@ -64,6 +64,66 @@
                           }
                         ]
                       },
+                      "/POST/cognitoGroups/*"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "cognitoGroupManagement"
+                      },
+                      "/",
+                      {
+                        "Fn::If": [
+                          "ShouldNotCreateEnvResources",
+                          "Prod",
+                          {
+                            "Ref": "env"
+                          }
+                        ]
+                      },
+                      "/POST/cognitoGroups"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "cognitoGroupManagement"
+                      },
+                      "/",
+                      {
+                        "Fn::If": [
+                          "ShouldNotCreateEnvResources",
+                          "Prod",
+                          {
+                            "Ref": "env"
+                          }
+                        ]
+                      },
                       "/GET/cognitoGroups/*"
                     ]
                   ]
@@ -124,7 +184,7 @@
                           }
                         ]
                       },
-                      "/PUT/cognitoGroups/*"
+                      "/POST/addUserToGroup/*"
                     ]
                   ]
                 },
@@ -154,67 +214,7 @@
                           }
                         ]
                       },
-                      "/PUT/cognitoGroups"
-                    ]
-                  ]
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:execute-api:",
-                      {
-                        "Ref": "AWS::Region"
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId"
-                      },
-                      ":",
-                      {
-                        "Ref": "cognitoGroupManagement"
-                      },
-                      "/",
-                      {
-                        "Fn::If": [
-                          "ShouldNotCreateEnvResources",
-                          "Prod",
-                          {
-                            "Ref": "env"
-                          }
-                        ]
-                      },
-                      "/PATCH/cognitoGroups/*"
-                    ]
-                  ]
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:execute-api:",
-                      {
-                        "Ref": "AWS::Region"
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId"
-                      },
-                      ":",
-                      {
-                        "Ref": "cognitoGroupManagement"
-                      },
-                      "/",
-                      {
-                        "Fn::If": [
-                          "ShouldNotCreateEnvResources",
-                          "Prod",
-                          {
-                            "Ref": "env"
-                          }
-                        ]
-                      },
-                      "/PATCH/cognitoGroups"
+                      "/POST/addUserToGroup"
                     ]
                   ]
                 },
@@ -304,7 +304,7 @@
                           }
                         ]
                       },
-                      "/PUT/addUserToGroup/*"
+                      "/POST/removeUserFromGroup/*"
                     ]
                   ]
                 },
@@ -334,67 +334,7 @@
                           }
                         ]
                       },
-                      "/PUT/addUserToGroup"
-                    ]
-                  ]
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:execute-api:",
-                      {
-                        "Ref": "AWS::Region"
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId"
-                      },
-                      ":",
-                      {
-                        "Ref": "cognitoGroupManagement"
-                      },
-                      "/",
-                      {
-                        "Fn::If": [
-                          "ShouldNotCreateEnvResources",
-                          "Prod",
-                          {
-                            "Ref": "env"
-                          }
-                        ]
-                      },
-                      "/PATCH/addUserToGroup/*"
-                    ]
-                  ]
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:execute-api:",
-                      {
-                        "Ref": "AWS::Region"
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId"
-                      },
-                      ":",
-                      {
-                        "Ref": "cognitoGroupManagement"
-                      },
-                      "/",
-                      {
-                        "Fn::If": [
-                          "ShouldNotCreateEnvResources",
-                          "Prod",
-                          {
-                            "Ref": "env"
-                          }
-                        ]
-                      },
-                      "/PATCH/addUserToGroup"
+                      "/POST/removeUserFromGroup"
                     ]
                   ]
                 },
@@ -484,7 +424,7 @@
                           }
                         ]
                       },
-                      "/PUT/removeUserFromGroup/*"
+                      "/POST/listUsersInGroup/*"
                     ]
                   ]
                 },
@@ -514,7 +454,7 @@
                           }
                         ]
                       },
-                      "/PUT/removeUserFromGroup"
+                      "/POST/listUsersInGroup"
                     ]
                   ]
                 },
@@ -544,7 +484,7 @@
                           }
                         ]
                       },
-                      "/PATCH/removeUserFromGroup/*"
+                      "/GET/listUsersInGroup/*"
                     ]
                   ]
                 },
@@ -574,7 +514,7 @@
                           }
                         ]
                       },
-                      "/PATCH/removeUserFromGroup"
+                      "/GET/listUsersInGroup"
                     ]
                   ]
                 }

@@ -3,12 +3,12 @@
   "paths": {
     "/cognitoGroups": {
       "name": "/cognitoGroups",
-      "lambdaFunction": "getUserGroups",
+      "lambdaFunction": "getCognitoGroups",
       "permissions": {
         "setting": "private",
         "auth": [
-          "read",
-          "update"
+          "create",
+          "read"
         ]
       }
     },
@@ -18,8 +18,8 @@
       "permissions": {
         "setting": "private",
         "auth": [
-          "read",
-          "update"
+          "create",
+          "read"
         ]
       }
     },
@@ -29,8 +29,19 @@
       "permissions": {
         "setting": "private",
         "auth": [
-          "read",
-          "update"
+          "create",
+          "read"
+        ]
+      }
+    },
+    "/listUsersInGroup": {
+      "name": "/listUsersInGroup",
+      "lambdaFunction": "listUsersInGroup",
+      "permissions": {
+        "setting": "private",
+        "auth": [
+          "create",
+          "read"
         ]
       }
     }

@@ -9,37 +9,29 @@ exports.handler = async (event) => {
     });
     
     try {
-        // Parse request body
-        const requestBody = event.body ? JSON.parse(event.body) : {};
-        const { userId, groupName } = requestBody;
+        // Extract user ID from the request
+        const userId = event.body ? JSON.parse(event.body).userId : null;
         
-        if (!userId || !groupName) {
+        if (!userId) {
             return {
                 statusCode: 400,
                 headers: {
                     "Access-Control-Allow-Origin": "*",
                     "Access-Control-Allow-Headers": "*"
                 },
-                body: JSON.stringify({ error: 'userId and groupName are required' })
+                body: JSON.stringify({ error: 'userId is required' })
             };
         }
         
-        // Remove user from group
-        const removeFromGroupParams = {
-            GroupName: groupName,
+        // Get user's groups from Cognito
+        const params = {
             UserPoolId: process.env.USER_POOL_ID,
             Username: userId
         };
         
-        await cognitoIdentityServiceProvider.adminRemoveUserFromGroup(removeFromGroupParams).promise();
+        const userGroups = await cognitoIdentityServiceProvider.adminListGroupsForUser(params).promise();
         
-        // Get updated list of user's groups
-        const listGroupsParams = {
-            UserPoolId: process.env.USER_POOL_ID,
-            Username: userId
-        };
-        
-        const userGroups = await cognitoIdentityServiceProvider.adminListGroupsForUser(listGroupsParams).promise();
+        // Extract group names
         const groups = userGroups.Groups.map(group => group.GroupName);
         
         return {
@@ -48,10 +40,7 @@ exports.handler = async (event) => {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Headers": "*"
             },
-            body: JSON.stringify({ 
-                message: `User ${userId} successfully removed from group ${groupName}`,
-                groups
-            })
+            body: JSON.stringify({ groups })
         };
     } catch (error) {
         console.error('Error:', error);
@@ -63,7 +52,7 @@ exports.handler = async (event) => {
                 "Access-Control-Allow-Headers": "*"
             },
             body: JSON.stringify({ 
-                error: error.message || 'An error occurred while removing user from group' 
+                error: error.message || 'An error occurred while retrieving user groups' 
             })
         };
     }

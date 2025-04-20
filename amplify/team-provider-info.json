@@ -27,28 +27,28 @@
           "s3Key": "amplify-builds/GenerateProfileOnSignUp-4c6d5871337339735739-build.zip"
         },
         "addUserToGroup": {
-          "presidentGroupName": "PRESIDENT",
-          "secretaryGroupName": "SECRETARY",
-          "treasurerGroupName": "TREASURER",
-          "boardGroupName": "BOARD",
           "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
-          "s3Key": "amplify-builds/addUserToGroup-45537a73703661317854-build.zip"
+          "s3Key": "amplify-builds/addUserToGroup-48577459515862476566-build.zip",
+          "userPoolId": "us-east-1_bQMOu81V8",
+          "region": "us-east-1"
         },
         "removeUserFromGroup": {
-          "presidentGroupName": "PRESIDENT",
-          "secretaryGroupName": "SECRETARY",
-          "treasurerGroupName": "TREASURER",
-          "boardGroupName": "BOARD",
           "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
-          "s3Key": "amplify-builds/removeUserFromGroup-6f765274567a77774449-build.zip"
+          "s3Key": "amplify-builds/removeUserFromGroup-32315332434a7659416e-build.zip",
+          "userPoolId": "us-east-1_bQMOu81V8",
+          "region": "us-east-1"
         },
-        "getUserGroups": {
-          "secretaryGroupName": "SECRETARY",
-          "treasurerGroupName": "TREASURER",
-          "boardGroupName": "BOARD",
-          "presidentGroupName": "PRESIDENT",
+        "getCognitoGroups": {
+          "userPoolId": "us-east-1_bQMOu81V8",
+          "region": "us-east-1",
           "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
-          "s3Key": "amplify-builds/getUserGroups-792b61747a4263736756-build.zip"
+          "s3Key": "amplify-builds/getCognitoGroups-4959346c735a6e4a706d-build.zip"
+        },
+        "listUsersInGroup": {
+          "userPoolId": "us-east-1_bQMOu81V8",
+          "region": "us-east-1",
+          "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
+          "s3Key": "amplify-builds/listUsersInGroup-6a616b41453547447142-build.zip"
         }
       }
     }

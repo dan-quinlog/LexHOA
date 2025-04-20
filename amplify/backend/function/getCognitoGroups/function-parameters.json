@@ -2,9 +2,7 @@
   "permissions": {
     "auth": {
       "lexhoa4faca5b8": [
-        "create",
-        "read",
-        "update"
+        "read"
       ]
     }
   },

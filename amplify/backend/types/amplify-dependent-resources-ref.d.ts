@@ -18,7 +18,6 @@ export type AmplifyDependentResourcesAttributes = {
       "HostedUIDomain": "string",
       "IdentityPoolId": "string",
       "IdentityPoolName": "string",
-      "OAuthMetadata": "string",
       "UserPoolArn": "string",
       "UserPoolId": "string",
       "UserPoolName": "string"
@@ -26,7 +25,9 @@ export type AmplifyDependentResourcesAttributes = {
     "userPoolGroups": {
       "BOARDGroupRole": "string",
       "MEDIAGroupRole": "string",
+      "OWNERSGroupRole": "string",
       "PRESIDENTGroupRole": "string",
+      "RESIDENTSGroupRole": "string",
       "SECRETARYGroupRole": "string",
       "TREASURERGroupRole": "string"
     }
@@ -46,7 +47,14 @@ export type AmplifyDependentResourcesAttributes = {
       "Name": "string",
       "Region": "string"
     },
-    "getUserGroups": {
+    "getCognitoGroups": {
+      "Arn": "string",
+      "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
+      "Name": "string",
+      "Region": "string"
+    },
+    "listUsersInGroup": {
       "Arn": "string",
       "LambdaExecutionRole": "string",
       "LambdaExecutionRoleArn": "string",

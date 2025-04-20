@@ -16,20 +16,14 @@
     "s3Key": {
       "Type": "String"
     },
+    "userPoolId": {
+      "Type": "String"
+    },
     "authlexhoa4faca5b8UserPoolId": {
       "Type": "String",
       "Default": "authlexhoa4faca5b8UserPoolId"
     },
-    "secretaryGroupName": {
-      "Type": "String"
-    },
-    "treasurerGroupName": {
-      "Type": "String"
-    },
-    "boardGroupName": {
-      "Type": "String"
-    },
-    "presidentGroupName": {
+    "region": {
       "Type": "String"
     }
   },
@@ -63,12 +57,12 @@
         "FunctionName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "getUserGroups",
+            "listUsersInGroup",
             {
               "Fn::Join": [
                 "",
                 [
-                  "getUserGroups",
+                  "listUsersInGroup",
                   "-",
                   {
                     "Ref": "env"
@@ -89,17 +83,8 @@
             "AUTH_LEXHOA4FACA5B8_USERPOOLID": {
               "Ref": "authlexhoa4faca5b8UserPoolId"
             },
-            "SECRETARY_GROUP_NAME": {
-              "Ref": "secretaryGroupName"
-            },
-            "TREASURER_GROUP_NAME": {
-              "Ref": "treasurerGroupName"
-            },
-            "BOARD_GROUP_NAME": {
-              "Ref": "boardGroupName"
-            },
-            "PRESIDENT_GROUP_NAME": {
-              "Ref": "presidentGroupName"
+            "USER_POOL_ID": {
+              "Ref": "userPoolId"
             }
           }
         },
@@ -120,12 +105,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "lexhoaLambdaRoledc1c12c4",
+            "lexhoaLambdaRole1a748453",
             {
               "Fn::Join": [
                 "",
                 [
-                  "lexhoaLambdaRoledc1c12c4",
+                  "lexhoaLambdaRole1a748453",
                   "-",
                   {
                     "Ref": "env"
@@ -227,19 +212,7 @@
                 "cognito-sync:List*",
                 "iam:ListOpenIdConnectProviders",
                 "iam:ListRoles",
-                "sns:ListPlatformApplications",
-                "cognito-idp:ForgotPassword",
-                "cognito-idp:UpdateAuthEventFeedback",
-                "cognito-idp:UpdateResourceServer",
-                "cognito-idp:UpdateUserPoolClient",
-                "cognito-idp:AdminUpdateUserAttributes",
-                "cognito-idp:UpdateUserAttributes",
-                "cognito-idp:UpdateUserPoolDomain",
-                "cognito-idp:UpdateIdentityProvider",
-                "cognito-idp:UpdateGroup",
-                "cognito-idp:AdminUpdateAuthEventFeedback",
-                "cognito-idp:UpdateDeviceStatus",
-                "cognito-idp:UpdateUserPool"
+                "sns:ListPlatformApplications"
               ],
               "Resource": [
                 {

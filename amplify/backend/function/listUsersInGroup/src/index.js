@@ -9,38 +9,45 @@ exports.handler = async (event) => {
     });
     
     try {
-        // Parse request body
-        const requestBody = event.body ? JSON.parse(event.body) : {};
-        const { userId, groupName } = requestBody;
+        // Extract group name from the request
+        const groupName = event.body ? JSON.parse(event.body).groupName : null;
         
-        if (!userId || !groupName) {
+        if (!groupName) {
             return {
                 statusCode: 400,
                 headers: {
                     "Access-Control-Allow-Origin": "*",
                     "Access-Control-Allow-Headers": "*"
                 },
-                body: JSON.stringify({ error: 'userId and groupName are required' })
+                body: JSON.stringify({ error: 'groupName is required' })
             };
         }
         
-        // Remove user from group
-        const removeFromGroupParams = {
+        // List users in the group
+        const params = {
             GroupName: groupName,
             UserPoolId: process.env.USER_POOL_ID,
-            Username: userId
+            Limit: 60 // Adjust as needed
         };
         
-        await cognitoIdentityServiceProvider.adminRemoveUserFromGroup(removeFromGroupParams).promise();
+        const result = await cognitoIdentityServiceProvider.listUsersInGroup(params).promise();
         
-        // Get updated list of user's groups
-        const listGroupsParams = {
-            UserPoolId: process.env.USER_POOL_ID,
-            Username: userId
-        };
-        
-        const userGroups = await cognitoIdentityServiceProvider.adminListGroupsForUser(listGroupsParams).promise();
-        const groups = userGroups.Groups.map(group => group.GroupName);
+        // Extract user information
+        const users = result.Users.map(user => {
+            const attributes = {};
+            user.Attributes.forEach(attr => {
+                attributes[attr.Name] = attr.Value;
+            });
+            
+            return {
+                username: user.Username,
+                enabled: user.Enabled,
+                status: user.UserStatus,
+                created: user.UserCreateDate,
+                modified: user.UserLastModifiedDate,
+                attributes
+            };
+        });
         
         return {
             statusCode: 200,
@@ -48,10 +55,7 @@ exports.handler = async (event) => {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Headers": "*"
             },
-            body: JSON.stringify({ 
-                message: `User ${userId} successfully removed from group ${groupName}`,
-                groups
-            })
+            body: JSON.stringify({ users })
         };
     } catch (error) {
         console.error('Error:', error);
@@ -63,7 +67,7 @@ exports.handler = async (event) => {
                 "Access-Control-Allow-Headers": "*"
             },
             body: JSON.stringify({ 
-                error: error.message || 'An error occurred while removing user from group' 
+                error: error.message || 'An error occurred while listing users in group' 
             })
         };
     }

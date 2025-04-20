@@ -4,19 +4,27 @@
     "precedence": 1
   },
   {
-    "groupName": "PRESIDENT",
+    "groupName": "OWNERS",
     "precedence": 2
   },
   {
-    "groupName": "SECRETARY",
+    "groupName": "RESIDENTS",
     "precedence": 3
   },
   {
-    "groupName": "MEDIA",
+    "groupName": "PRESIDENT",
     "precedence": 4
   },
   {
-    "groupName": "TREASURER",
+    "groupName": "SECRETARY",
     "precedence": 5
+  },
+  {
+    "groupName": "TREASURER",
+    "precedence": 6
+  },
+  {
+    "groupName": "MEDIA",
+    "precedence": 7
   }
 ]

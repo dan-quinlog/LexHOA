@@ -2,6 +2,7 @@
   "permissions": {
     "auth": {
       "lexhoa4faca5b8": [
+        "create",
         "read",
         "update"
       ]
@@ -10,20 +11,12 @@
   "lambdaLayers": [],
   "environmentVariableList": [
     {
-      "cloudFormationParameterName": "presidentGroupName",
-      "environmentVariableName": "PRESIDENT_GROUP_NAME"
+      "cloudFormationParameterName": "userPoolId",
+      "environmentVariableName": "USER_POOL_ID"
     },
     {
-      "cloudFormationParameterName": "secretaryGroupName",
-      "environmentVariableName": "SECRETARY_GROUP_NAME"
-    },
-    {
-      "cloudFormationParameterName": "treasurerGroupName",
-      "environmentVariableName": "TREASURER_GROUP_NAME"
-    },
-    {
-      "cloudFormationParameterName": "boardGroupName",
-      "environmentVariableName": "BOARD_GROUP_NAME"
+      "cloudFormationParameterName": "region",
+      "environmentVariableName": "REGION"
     }
   ]
 }

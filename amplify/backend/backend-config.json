@@ -1,43 +1,5 @@
 {
   "api": {
-    "cognitoGroupManagement": {
-      "dependsOn": [
-        {
-          "attributes": [
-            "Name",
-            "Arn"
-          ],
-          "category": "function",
-          "resourceName": "getCognitoGroups"
-        },
-        {
-          "attributes": [
-            "Name",
-            "Arn"
-          ],
-          "category": "function",
-          "resourceName": "addUserToGroup"
-        },
-        {
-          "attributes": [
-            "Name",
-            "Arn"
-          ],
-          "category": "function",
-          "resourceName": "removeUserFromGroup"
-        },
-        {
-          "attributes": [
-            "Name",
-            "Arn"
-          ],
-          "category": "function",
-          "resourceName": "listUsersInGroup"
-        }
-      ],
-      "providerPlugin": "awscloudformation",
-      "service": "API Gateway"
-    },
     "lexhoa": {
       "dependsOn": [
         {
@@ -165,6 +127,34 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "getCognitoUser": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "lexhoa4faca5b8"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "listGroupsForUser": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "lexhoa4faca5b8"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "listUsersInGroup": {
       "build": true,
       "dependsOn": [
@@ -272,6 +262,70 @@
         {
           "category": "function",
           "resourceName": "getCognitoGroups"
+        }
+      ]
+    },
+    "AMPLIFY_function_getCognitoUser_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getCognitoUser"
+        }
+      ]
+    },
+    "AMPLIFY_function_getCognitoUser_region": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getCognitoUser"
+        }
+      ]
+    },
+    "AMPLIFY_function_getCognitoUser_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getCognitoUser"
+        }
+      ]
+    },
+    "AMPLIFY_function_getCognitoUser_userPoolId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getCognitoUser"
+        }
+      ]
+    },
+    "AMPLIFY_function_listGroupsForUser_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "listGroupsForUser"
+        }
+      ]
+    },
+    "AMPLIFY_function_listGroupsForUser_region": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "listGroupsForUser"
+        }
+      ]
+    },
+    "AMPLIFY_function_listGroupsForUser_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "listGroupsForUser"
+        }
+      ]
+    },
+    "AMPLIFY_function_listGroupsForUser_userPoolId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "listGroupsForUser"
         }
       ]
     },

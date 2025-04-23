@@ -18,8 +18,7 @@
         "userPoolGroups": {}
       },
       "api": {
-        "lexhoa": {},
-        "cognitoGroupManagement": {}
+        "lexhoa": {}
       },
       "function": {
         "GenerateProfileOnSignUp": {
@@ -49,6 +48,18 @@
           "region": "us-east-1",
           "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
           "s3Key": "amplify-builds/listUsersInGroup-6a616b41453547447142-build.zip"
+        },
+        "listGroupsForUser": {
+          "userPoolId": "us-east-1_bQMOu81V8",
+          "region": "us-east-1",
+          "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
+          "s3Key": "amplify-builds/listGroupsForUser-7754554e494849427151-build.zip"
+        },
+        "getCognitoUser": {
+          "userPoolId": "us-east-1_bQMOu81V8",
+          "region": "us-east-1",
+          "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
+          "s3Key": "amplify-builds/getCognitoUser-58466f724b5a37594667-build.zip"
         }
       }
     }

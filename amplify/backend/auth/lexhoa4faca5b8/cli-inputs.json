@@ -1,8 +1,6 @@
 {
   "version": "1",
   "cognitoConfig": {
-    "identityPoolName": "lexhoa4faca5b8_identitypool_22e6f35c",
-    "allowUnauthenticatedIdentities": false,
     "resourceNameTruncated": "lexhoa4faca5b8",
     "userPoolName": "lexhoa4faca5b8_userpool_4faca5b8",
     "autoVerifiedAttributes": [
@@ -14,7 +12,7 @@
     ],
     "smsAuthenticationMessage": "Your authentication code is {####}",
     "smsVerificationMessage": "Your verification code is {####}",
-    "emailVerificationSubject": "Lexington HOA Verification",
+    "emailVerificationSubject": "Your verification code",
     "emailVerificationMessage": "Your verification code is {####}",
     "defaultPasswordPolicy": false,
     "passwordPolicyMinLength": 8,
@@ -36,7 +34,7 @@
     "userpoolClientSetAttributes": false,
     "sharedId": "4faca5b8",
     "resourceName": "lexhoa4faca5b8",
-    "authSelections": "identityPoolAndUserPool",
+    "authSelections": "userPoolOnly",
     "useDefault": "manual",
     "usernameAttributes": [
       "email"
@@ -77,6 +75,8 @@
     "parentStack": {
       "Ref": "AWS::StackId"
     },
-    "permissions": []
+    "permissions": [],
+    "oAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\"],\"AllowedOAuthScopes\":[\"phone\",\"email\",\"openid\",\"profile\",\"aws.cognito.signin.user.admin\"],\"CallbackURLs\":[\"http://localhost:3000/\"],\"LogoutURLs\":[\"http://localhost:3000/\"]}",
+    "authProviders": []
   }
 }

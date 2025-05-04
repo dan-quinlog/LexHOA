@@ -4,15 +4,11 @@ import BoardCard from './shared/BoardCard';
 import DeleteConfirmationModal from '../shared/DeleteConfirmationModal';
 import NotificationModal from '../modals/NotificationModal';
 import './shared/BoardTools.css';
-import {
-  ADD_USER_TO_GROUP,
-  REMOVE_USER_FROM_GROUP
-} from '../../queries/userMutations';
-import { LIST_USERS_IN_GROUP } from '../../queries/userQueries';
 
-import {
-  LIST_USERS_IN_GROUP,
-  GET_USER_BY_EMAIL,
+// Import the queries and mutations we'll need to create
+import { 
+  LIST_USERS_IN_GROUP, 
+  GET_USER_BY_EMAIL, 
   GET_USER_BY_NAME,
   GET_USER_BY_ID,
   LIST_GROUPS_FOR_USER
@@ -60,7 +56,7 @@ const BoardRoleManager = ({ userGroups = [] }) => {
   const [getUserByName] = useLazyQuery(GET_USER_BY_NAME);
   const [getUserById] = useLazyQuery(GET_USER_BY_ID);
   const [listGroupsForUser] = useLazyQuery(LIST_GROUPS_FOR_USER);
-
+  
   const [addUserToGroup] = useMutation(ADD_USER_TO_GROUP);
   const [removeUserFromGroup] = useMutation(REMOVE_USER_FROM_GROUP);
 
@@ -88,7 +84,7 @@ const BoardRoleManager = ({ userGroups = [] }) => {
         const response = await listUsersInGroup({
           variables: { groupName }
         });
-
+        
         setSearchState(prev => ({
           ...prev,
           searchResults: response.data?.listUsersInGroup?.users || []
@@ -102,12 +98,12 @@ const BoardRoleManager = ({ userGroups = [] }) => {
         }
 
         let response;
-
+        
         if (searchState.searchType === 'Search by Email') {
           response = await getUserByEmail({
             variables: { email: searchState.searchTerm }
           });
-
+          
           setSearchState(prev => ({
             ...prev,
             searchResults: response.data?.getUserByEmail?.user ? [response.data.getUserByEmail.user] : []
@@ -116,7 +112,7 @@ const BoardRoleManager = ({ userGroups = [] }) => {
           response = await getUserByName({
             variables: { name: searchState.searchTerm }
           });
-
+          
           setSearchState(prev => ({
             ...prev,
             searchResults: response.data?.getUserByName?.users || []
@@ -125,7 +121,7 @@ const BoardRoleManager = ({ userGroups = [] }) => {
           response = await getUserById({
             variables: { id: searchState.searchTerm }
           });
-
+          
           setSearchState(prev => ({
             ...prev,
             searchResults: response.data?.getUserById?.user ? [response.data.getUserById.user] : []
@@ -145,7 +141,7 @@ const BoardRoleManager = ({ userGroups = [] }) => {
       const response = await listGroupsForUser({
         variables: { username }
       });
-
+      
       setUserGroupsData(response.data?.listGroupsForUser?.groups || []);
       setSelectedUser(username);
     } catch (error) {
@@ -166,7 +162,7 @@ const BoardRoleManager = ({ userGroups = [] }) => {
       await addUserToGroup({
         variables: { username, groupName }
       });
-
+      
       // Refresh user's groups
       await fetchUserGroups(username);
       setNotificationMessage(`User successfully added to ${groupName} group`);
@@ -194,7 +190,7 @@ const BoardRoleManager = ({ userGroups = [] }) => {
       await removeUserFromGroup({
         variables: { username, groupName }
       });
-
+      
       // Refresh user's groups
       await fetchUserGroups(username);
       setNotificationMessage(`User successfully removed from ${groupName} group`);
@@ -269,7 +265,7 @@ const BoardRoleManager = ({ userGroups = [] }) => {
                   <div>Cognito ID: {user.username}</div>
                   <div>Email: {getUserAttribute(user, 'email')}</div>
                   <div>Phone: {getUserAttribute(user, 'phone_number')}</div>
-
+                  
                   {selectedUser === user.username && (
                     <div className="user-groups">
                       <h4>Group Membership:</h4>
@@ -281,7 +277,7 @@ const BoardRoleManager = ({ userGroups = [] }) => {
                             <li key={group.groupName} className="group-item">
                               {group.groupName}
                               {hasRoleManagementPermission && (
-                                <button
+                                <button 
                                   className="remove-button"
                                   onClick={() => confirmRemoveFromGroup(user.username, group.groupName)}
                                 >
@@ -292,7 +288,7 @@ const BoardRoleManager = ({ userGroups = [] }) => {
                           ))}
                         </ul>
                       )}
-
+                      
                       {hasRoleManagementPermission && (
                         <div className="add-to-group">
                           <h4>Add to Group:</h4>

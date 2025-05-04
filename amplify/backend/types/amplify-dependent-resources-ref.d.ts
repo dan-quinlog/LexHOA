@@ -11,66 +11,14 @@ export type AmplifyDependentResourcesAttributes = {
       "AppClientID": "string",
       "AppClientIDWeb": "string",
       "HostedUIDomain": "string",
-      "IdentityPoolId": "string",
-      "IdentityPoolName": "string",
+      "OAuthMetadata": "string",
       "UserPoolArn": "string",
       "UserPoolId": "string",
       "UserPoolName": "string"
-    },
-    "userPoolGroups": {
-      "BOARDGroupRole": "string",
-      "MEDIAGroupRole": "string",
-      "OWNERSGroupRole": "string",
-      "PRESIDENTGroupRole": "string",
-      "RESIDENTSGroupRole": "string",
-      "SECRETARYGroupRole": "string",
-      "TREASURERGroupRole": "string"
     }
   },
   "function": {
     "GenerateProfileOnSignUp": {
-      "Arn": "string",
-      "LambdaExecutionRole": "string",
-      "LambdaExecutionRoleArn": "string",
-      "Name": "string",
-      "Region": "string"
-    },
-    "addUserToGroup": {
-      "Arn": "string",
-      "LambdaExecutionRole": "string",
-      "LambdaExecutionRoleArn": "string",
-      "Name": "string",
-      "Region": "string"
-    },
-    "getCognitoGroups": {
-      "Arn": "string",
-      "LambdaExecutionRole": "string",
-      "LambdaExecutionRoleArn": "string",
-      "Name": "string",
-      "Region": "string"
-    },
-    "getCognitoUser": {
-      "Arn": "string",
-      "LambdaExecutionRole": "string",
-      "LambdaExecutionRoleArn": "string",
-      "Name": "string",
-      "Region": "string"
-    },
-    "listGroupsForUser": {
-      "Arn": "string",
-      "LambdaExecutionRole": "string",
-      "LambdaExecutionRoleArn": "string",
-      "Name": "string",
-      "Region": "string"
-    },
-    "listUsersInGroup": {
-      "Arn": "string",
-      "LambdaExecutionRole": "string",
-      "LambdaExecutionRoleArn": "string",
-      "Name": "string",
-      "Region": "string"
-    },
-    "removeUserFromGroup": {
       "Arn": "string",
       "LambdaExecutionRole": "string",
       "LambdaExecutionRoleArn": "string",

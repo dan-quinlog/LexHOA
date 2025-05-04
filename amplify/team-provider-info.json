@@ -9,57 +9,17 @@
       "UnauthRoleName": "amplify-lexhoa-dev-49387-unauthRole",
       "StackName": "amplify-lexhoa-dev-49387",
       "StackId": "arn:aws:cloudformation:us-east-1:324037289979:stack/amplify-lexhoa-dev-49387/448ff890-e1de-11ef-8c55-0affe405cde1",
-      "AmplifyAppId": "dcq8knwxivreq",
-      "APIGatewayAuthURL": "https://s3.amazonaws.com/amplify-lexhoa-dev-49387-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json"
+      "AmplifyAppId": "dcq8knwxivreq"
     },
     "categories": {
       "auth": {
         "lexhoa4faca5b8": {},
         "userPoolGroups": {}
       },
-      "api": {
-        "lexhoa": {}
-      },
       "function": {
         "GenerateProfileOnSignUp": {
           "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
           "s3Key": "amplify-builds/GenerateProfileOnSignUp-4c6d5871337339735739-build.zip"
-        },
-        "addUserToGroup": {
-          "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
-          "s3Key": "amplify-builds/addUserToGroup-48577459515862476566-build.zip",
-          "userPoolId": "us-east-1_bQMOu81V8",
-          "region": "us-east-1"
-        },
-        "removeUserFromGroup": {
-          "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
-          "s3Key": "amplify-builds/removeUserFromGroup-32315332434a7659416e-build.zip",
-          "userPoolId": "us-east-1_bQMOu81V8",
-          "region": "us-east-1"
-        },
-        "getCognitoGroups": {
-          "userPoolId": "us-east-1_bQMOu81V8",
-          "region": "us-east-1",
-          "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
-          "s3Key": "amplify-builds/getCognitoGroups-4959346c735a6e4a706d-build.zip"
-        },
-        "listUsersInGroup": {
-          "userPoolId": "us-east-1_bQMOu81V8",
-          "region": "us-east-1",
-          "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
-          "s3Key": "amplify-builds/listUsersInGroup-6a616b41453547447142-build.zip"
-        },
-        "listGroupsForUser": {
-          "userPoolId": "us-east-1_bQMOu81V8",
-          "region": "us-east-1",
-          "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
-          "s3Key": "amplify-builds/listGroupsForUser-7754554e494849427151-build.zip"
-        },
-        "getCognitoUser": {
-          "userPoolId": "us-east-1_bQMOu81V8",
-          "region": "us-east-1",
-          "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
-          "s3Key": "amplify-builds/getCognitoUser-58466f724b5a37594667-build.zip"
         }
       }
     }

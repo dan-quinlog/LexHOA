@@ -1,237 +1,330 @@
 import React, { useState } from 'react';
-import { useLazyQuery, useMutation } from '@apollo/client';
+import { useLazyQuery, useMutation, useApolloClient } from '@apollo/client';
+import { SEARCH_PROFILES, GET_PROFILE, PROFILE_BY_COGNITO_ID, FIND_RELATED_PROPERTIES } from '../../queries/queries';
+import { CREATE_PROFILE, UPDATE_PROFILE, DELETE_PROFILE, UPDATE_PROPERTY } from '../../queries/mutations';
 import BoardCard from './shared/BoardCard';
+import ProfileEditModal from '../shared/ProfileEditModal';
 import DeleteConfirmationModal from '../shared/DeleteConfirmationModal';
+import MergeProfilesModal from '../modals/MergeProfilesModal';
 import NotificationModal from '../modals/NotificationModal';
 import './shared/BoardTools.css';
 
-// Import the queries and mutations we'll need to create
-import { 
-  LIST_USERS_IN_GROUP, 
-  GET_USER_BY_EMAIL, 
-  GET_USER_BY_NAME,
-  GET_USER_BY_ID,
-  LIST_GROUPS_FOR_USER
-} from '../../queries/userQueries';
-
-import {
-  ADD_USER_TO_GROUP,
-  REMOVE_USER_FROM_GROUP
-} from '../../queries/userMutations';
-
 // Get group names from environment variables
-const PRESIDENT_GROUP = process.env.REACT_APP_PRESIDENT_GROUP_NAME || 'PRESIDENT';
-const SECRETARY_GROUP = process.env.REACT_APP_SECRETARY_GROUP_NAME || 'SECRETARY';
-const TREASURER_GROUP = process.env.REACT_APP_TREASURER_GROUP_NAME || 'TREASURER';
-const BOARD_GROUP = process.env.REACT_APP_BOARD_GROUP_NAME || 'BOARD';
-const MEDIA_GROUP = process.env.REACT_APP_MEDIA_GROUP_NAME || 'MEDIA';
+const PRESIDENT_GROUP = process.env.REACT_APP_PRESIDENT_GROUP_NAME;
+const SECRETARY_GROUP = process.env.REACT_APP_SECRETARY_GROUP_NAME;
+const TREASURER_GROUP = process.env.REACT_APP_TREASURER_GROUP_NAME;
+const BOARD_GROUP = process.env.REACT_APP_BOARD_GROUP_NAME;
 
-const BoardRoleManager = ({ userGroups = [] }) => {
-  const [searchState, setSearchState] = useState({
-    searchType: 'List BOARD',
-    searchTerm: '',
-    searchResults: []
-  });
-  const [loading, setLoading] = useState(false);
+const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
+  const client = useApolloClient();
+  const [selectedPerson, setSelectedPerson] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedProfiles, setSelectedProfiles] = useState([]);
   const [errors, setErrors] = useState({});
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [userGroupsData, setUserGroupsData] = useState([]);
+  const [showMergeModal, setShowMergeModal] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [confirmAction, setConfirmAction] = useState(null);
 
   // Permission checks
   const isPresident = userGroups && userGroups.includes(PRESIDENT_GROUP);
   const isSecretary = userGroups && userGroups.includes(SECRETARY_GROUP);
   const isTreasurer = userGroups && userGroups.includes(TREASURER_GROUP);
   const isBoard = userGroups && userGroups.includes(BOARD_GROUP);
-
-  // Only President and Secretary can manage roles
-  const hasRoleManagementPermission = isPresident || isSecretary;
-
-  // Define GraphQL operations using Apollo hooks
-  const [listUsersInGroup] = useLazyQuery(LIST_USERS_IN_GROUP);
-  const [getUserByEmail] = useLazyQuery(GET_USER_BY_EMAIL);
-  const [getUserByName] = useLazyQuery(GET_USER_BY_NAME);
-  const [getUserById] = useLazyQuery(GET_USER_BY_ID);
-  const [listGroupsForUser] = useLazyQuery(LIST_GROUPS_FOR_USER);
   
-  const [addUserToGroup] = useMutation(ADD_USER_TO_GROUP);
-  const [removeUserFromGroup] = useMutation(REMOVE_USER_FROM_GROUP);
+  // Only President and Secretary can delete profiles
+  const hasDeletePermission = isPresident || isSecretary;
+  
+  // Only President and Treasurer can edit balance
+  const hasBalanceEditPermission = isPresident || isTreasurer;
+  
+  // All board members can edit basic profile info
+  const hasEditPermission = isBoard;
+  
+  // Only President can create new profiles (or Secretary for special cases)
+  const hasCreatePermission = isPresident || isSecretary;
 
-  const searchOptions = [
-    'List BOARD',
-    'List PRESIDENT',
-    'List SECRETARY',
-    'List TREASURER',
-    'List MEDIA',
-    'Search by Email',
-    'Search by Name',
-    'Search by Cognito ID'
-  ];
+  const [searchProfiles] = useLazyQuery(SEARCH_PROFILES);
+  const [searchById] = useLazyQuery(GET_PROFILE);
+  const [searchByCognito] = useLazyQuery(PROFILE_BY_COGNITO_ID);
+  const [updateProperty] = useMutation(UPDATE_PROPERTY);
+
+  // Add mutations
+  const [createPerson] = useMutation(CREATE_PROFILE);
+  const [updatePerson] = useMutation(UPDATE_PROFILE);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [personToDelete, setPersonToDelete] = useState(null);
+  const [deletePerson] = useMutation(DELETE_PROFILE);
+
+  const handleDelete = (person) => {
+    // Only President can delete profiles directly
+    if (!isPresident) {
+      setNotificationMessage("Only the President can delete profiles directly");
+      setShowNotification(true);
+      return;
+    }
+    
+    setPersonToDelete(person);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      // First find all related properties
+      const relatedProperties = await client.query({
+        query: FIND_RELATED_PROPERTIES,
+        variables: { profileId: personToDelete.id }
+      });
+
+      // Update each property to remove references
+      const updatePromises = relatedProperties.data.listProperties.items.map(property => {
+        const updates = {
+          id: property.id,
+          _version: property._version
+        };
+
+        if (property.profOwnerId === personToDelete.id) {
+          updates.profOwnerId = null;
+          updates.owner = null;
+        }
+
+        if (property.profTenantId === personToDelete.id) {
+          updates.profTenantId = null;
+        }
+
+        return updateProperty({
+          variables: {
+            input: {
+              id: property.id,
+              ...updates
+            }
+          }
+        });
+      });
+
+      await Promise.all(updatePromises);
+
+      // Now safe to delete the profile
+      await deletePerson({
+        variables: { input: { id: personToDelete.id } }
+      });
+
+      setShowDeleteModal(false);
+      setPersonToDelete(null);
+      handleSearch();
+    } catch (error) {
+      console.error('Error deleting person:', error);
+    }
+  };
+
+  const handleMergeProfiles = async (cognitoProfile, manualProfile, mergedData) => {
+    try {
+      // Find related properties
+      const relatedProperties = await client.query({
+        query: FIND_RELATED_PROPERTIES,
+        variables: { profileId: manualProfile.id }
+      });
+
+      // Update properties to point to cognito profile
+      const updatePromises = relatedProperties.data.listProperties.items.map(property => {
+        const updates = { id: property.id };
+        
+        if (property.profOwnerId === manualProfile.id) {
+          updates.profOwnerId = cognitoProfile.id;
+          updates.owner = cognitoProfile.id;
+        }
+        
+        if (property.profTenantId === manualProfile.id) {
+          updates.profTenantId = cognitoProfile.id;
+        }
+        
+        return updateProperty({ variables: { input: updates } });
+      });
+
+      await Promise.all(updatePromises);
+
+      // Update cognito profile with merged data
+      await updatePerson({
+        variables: {
+          input: {
+            id: cognitoProfile.id,
+            ...mergedData
+          }
+        }
+      });
+
+      // Delete manual profile
+      await deletePerson({
+        variables: { input: { id: manualProfile.id } }
+      });
+
+      setShowMergeModal(false);
+      setSelectedProfiles([]);
+      handleSearch();
+    } catch (error) {
+      console.error('Error merging profiles:', error);
+    }
+  };
+
+  const cleanFormData = (formData) => {
+    const fieldsToRemove = [
+      '__typename',
+      'createdAt',
+      'updatedAt',
+      'ownedProperties',
+      'cognitoID',
+      'tenantAtId'
+    ];
+
+    return Object.entries(formData).reduce((acc, [key, value]) => {
+      if (!fieldsToRemove.includes(key)) {
+        acc[key] = value === '' ? null : value;
+      }
+      return acc;
+    }, {});
+  };
+
+  const handleSave = async (formData) => {
+    try {
+      const cleanedData = cleanFormData(formData);
+      
+      if (selectedPerson?.id) {
+        await updatePerson({
+          variables: {
+            input: {
+              id: selectedPerson.id,
+              ...cleanedData
+            }
+          }
+        });
+      } else {
+        await createPerson({
+          variables: {
+            input: cleanedData
+          }
+        });
+      }
+      
+      setShowEditModal(false);
+      handleSearch(); // Refresh the results
+    } catch (error) {
+      console.error('Error saving person:', error);
+    }
+  };
 
   const handleSearch = async () => {
-    setLoading(true);
-    setErrors({});
-    setSelectedUser(null);
-    setUserGroupsData([]);
+    if (!searchState.searchTerm) {
+      setErrors({ search: 'Search value is required' });
+      return;
+    }
 
     try {
-      if (searchState.searchType.startsWith('List ')) {
-        // Extract group name from the search type
-        const groupName = searchState.searchType.replace('List ', '');
-        const response = await listUsersInGroup({
-          variables: { groupName }
-        });
-        
-        setSearchState(prev => ({
-          ...prev,
-          searchResults: response.data?.listUsersInGroup?.users || []
-        }));
-      } else {
-        // Handle individual user search
-        if (!searchState.searchTerm) {
-          setErrors({ search: 'Search value is required' });
-          setLoading(false);
-          return;
-        }
-
-        let response;
-        
-        if (searchState.searchType === 'Search by Email') {
-          response = await getUserByEmail({
-            variables: { email: searchState.searchTerm }
-          });
-          
-          setSearchState(prev => ({
-            ...prev,
-            searchResults: response.data?.getUserByEmail?.user ? [response.data.getUserByEmail.user] : []
-          }));
-        } else if (searchState.searchType === 'Search by Name') {
-          response = await getUserByName({
-            variables: { name: searchState.searchTerm }
-          });
-          
-          setSearchState(prev => ({
-            ...prev,
-            searchResults: response.data?.getUserByName?.users || []
-          }));
-        } else if (searchState.searchType === 'Search by Cognito ID') {
-          response = await getUserById({
+      let response;
+      
+      switch (searchState.searchType) {
+        case 'id':
+          response = await searchById({
             variables: { id: searchState.searchTerm }
           });
-          
           setSearchState(prev => ({
             ...prev,
-            searchResults: response.data?.getUserById?.user ? [response.data.getUserById.user] : []
+            searchResults: response.data?.getProfile ? [response.data.getProfile] : []
           }));
-        }
+          break;
+        case 'cognitoID':
+          response = await searchByCognito({
+            variables: { cognitoID: searchState.searchTerm }
+          });
+          setSearchState(prev => ({
+            ...prev,
+            searchResults: response.data?.profileByCognitoID?.items || []
+          }));
+          break;
+        case 'email':
+        case 'name':
+        case 'phone':
+          response = await searchProfiles({
+            variables: {
+              filter: {
+                [searchState.searchType]: { contains: searchState.searchTerm }
+              },
+              limit: 10
+            }
+          });
+          setSearchState(prev => ({
+            ...prev,
+            searchResults: response.data?.listProfiles?.items || []
+          }));
+          break;
       }
     } catch (error) {
       console.error('Search error:', error);
-      setErrors({ search: 'Error performing search: ' + (error.message || 'Unknown error') });
-    } finally {
-      setLoading(false);
+      setErrors({ search: 'Error performing search' });
     }
   };
 
-  const fetchUserGroups = async (username) => {
-    try {
-      const response = await listGroupsForUser({
-        variables: { username }
-      });
-      
-      setUserGroupsData(response.data?.listGroupsForUser?.groups || []);
-      setSelectedUser(username);
-    } catch (error) {
-      console.error('Error fetching user groups:', error);
-      setNotificationMessage('Error fetching user groups: ' + (error.message || 'Unknown error'));
-      setShowNotification(true);
-    }
-  };
-
-  const handleAddToGroup = async (username, groupName) => {
-    if (!hasRoleManagementPermission) {
-      setNotificationMessage("You don't have permission to manage user roles");
+  const handleProfileSelect = (profile) => {
+    // Allow profile selection for merge if user has delete permission
+    if (!hasDeletePermission) {
+      setNotificationMessage("You don't have permission to merge profiles");
       setShowNotification(true);
       return;
     }
-
-    try {
-      await addUserToGroup({
-        variables: { username, groupName }
-      });
-      
-      // Refresh user's groups
-      await fetchUserGroups(username);
-      setNotificationMessage(`User successfully added to ${groupName} group`);
-      setShowNotification(true);
-    } catch (error) {
-      console.error('Error adding user to group:', error);
-      setNotificationMessage('Error adding user to group: ' + (error.message || 'Unknown error'));
-      setShowNotification(true);
+    
+    if (selectedProfiles.find(p => p.id === profile.id)) {
+      setSelectedProfiles(selectedProfiles.filter(p => p.id !== profile.id));
+    } else {
+      const newSelectedProfiles = [...selectedProfiles, profile];
+      if (newSelectedProfiles.length === 2) {
+        const cognitoProfiles = newSelectedProfiles.filter(p => p.cognitoID);
+        if (cognitoProfiles.length === 2) {
+          setNotificationMessage("Select a profile without a Cognito ID to merge");
+          setShowNotification(true);
+          return;
+        }
+        setShowMergeModal(true);
+      }
+      setSelectedProfiles(newSelectedProfiles);
     }
   };
 
-  const confirmRemoveFromGroup = (username, groupName) => {
-    if (!hasRoleManagementPermission) {
-      setNotificationMessage("You don't have permission to manage user roles");
-      setShowNotification(true);
-      return;
+  const getPersonRoleTags = (person) => {
+    const isOwner = person?.ownedProperties?.items?.length > 0;
+    const isResident = person?.tenantAtId;
+    
+    if (isOwner && isResident) {
+      return <span className="role-tag">Owner Resident</span>;
     }
-
-    setConfirmAction(() => () => handleRemoveFromGroup(username, groupName));
-    setShowConfirmModal(true);
-  };
-
-  const handleRemoveFromGroup = async (username, groupName) => {
-    try {
-      await removeUserFromGroup({
-        variables: { username, groupName }
-      });
-      
-      // Refresh user's groups
-      await fetchUserGroups(username);
-      setNotificationMessage(`User successfully removed from ${groupName} group`);
-      setShowNotification(true);
-    } catch (error) {
-      console.error('Error removing user from group:', error);
-      setNotificationMessage('Error removing user from group: ' + (error.message || 'Unknown error'));
-      setShowNotification(true);
-    }
-  };
-
-  const getUserAttribute = (user, attributeName) => {
-    if (!user || !user.attributes) return 'N/A';
-    return user.attributes[attributeName] || 'N/A';
-  };
-
-  const isUserInGroup = (groupName) => {
-    return userGroupsData.some(group => group.groupName === groupName);
+    
+    return (
+      <>
+        {isOwner && <span className="role-tag">Owner</span>}
+        {isResident && <span className="role-tag">Resident</span>}
+      </>
+    );
   };
 
   return (
     <>
       <div className="board-tool">
-        <h2 className="section-title">User Role Management</h2>
+        <h2 className="section-title">Person Management</h2>
         <div className="search-controls">
           <select
             value={searchState.searchType}
             onChange={(e) => setSearchState({
               ...searchState,
-              searchType: e.target.value,
-              searchTerm: e.target.value.startsWith('List ') ? '' : searchState.searchTerm
+              searchType: e.target.value
             })}
             className="search-type"
           >
-            {searchOptions.map(option => (
-              <option key={option} value={option}>{option}</option>
-            ))}
+            <option value="id">ID</option>
+            <option value="name">Name</option>
+            <option value="email">Email</option>
+            <option value="phone">Phone</option>
+            <option value="cognitoID">Cognito ID</option>
           </select>
           <input
             type="text"
-            placeholder={searchState.searchType.startsWith('List ') ? 'Not required for group listing' : 'Enter search term'}
+            placeholder="Search..."
             value={searchState.searchTerm}
             onChange={(e) => setSearchState({
               ...searchState,
@@ -243,97 +336,63 @@ const BoardRoleManager = ({ userGroups = [] }) => {
               }
             }}
             className="search-input"
-            disabled={searchState.searchType.startsWith('List ')}
           />
-          <button onClick={handleSearch} disabled={loading}>
-            {loading ? 'Searching...' : 'Search'}
-          </button>
+          <button onClick={handleSearch}>Search</button>
+          {/* Only show Create New button to users with create permission */}
+          {hasCreatePermission && (
+            <button onClick={() => {
+              setSelectedPerson(null);
+              setShowEditModal(true);
+            }}>Create New</button>
+          )}
         </div>
         {errors.search && <div className="error-message">{errors.search}</div>}
 
+        {/* Selected Profiles Section */}
+        {selectedProfiles.length > 0 && (
+          <div className="selected-profiles">
+            {/* Existing selected profiles UI */}
+          </div>
+        )}
+
         <div className="results-grid">
-          {searchState.searchResults.map(user => (
+          {searchState.searchResults.map(person => (
             <BoardCard
-              key={user.username}
+              key={person.id}
               header={
                 <div className="person-header">
-                  <h3>{getUserAttribute(user, 'name') || user.username}</h3>
+                  <h3>{person.name}</h3>
+                  {getPersonRoleTags(person)}
                 </div>
               }
               content={
                 <>
-                  <div>Cognito ID: {user.username}</div>
-                  <div>Email: {getUserAttribute(user, 'email')}</div>
-                  <div>Phone: {getUserAttribute(user, 'phone_number')}</div>
-                  
-                  {selectedUser === user.username && (
-                    <div className="user-groups">
-                      <h4>Group Membership:</h4>
-                      {userGroupsData.length === 0 ? (
-                        <p>Not a member of any groups</p>
-                      ) : (
-                        <ul className="group-list">
-                          {userGroupsData.map(group => (
-                            <li key={group.groupName} className="group-item">
-                              {group.groupName}
-                              {hasRoleManagementPermission && (
-                                <button 
-                                  className="remove-button"
-                                  onClick={() => confirmRemoveFromGroup(user.username, group.groupName)}
-                                >
-                                  Remove
-                                </button>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                      
-                      {hasRoleManagementPermission && (
-                        <div className="add-to-group">
-                          <h4>Add to Group:</h4>
-                          <div className="group-actions">
-                            {!isUserInGroup(BOARD_GROUP) && (
-                              <button onClick={() => handleAddToGroup(user.username, BOARD_GROUP)}>
-                                Add to BOARD
-                              </button>
-                            )}
-                            {!isUserInGroup(PRESIDENT_GROUP) && (
-                              <button onClick={() => handleAddToGroup(user.username, PRESIDENT_GROUP)}>
-                                Add to PRESIDENT
-                              </button>
-                            )}
-                            {!isUserInGroup(SECRETARY_GROUP) && (
-                              <button onClick={() => handleAddToGroup(user.username, SECRETARY_GROUP)}>
-                                Add to SECRETARY
-                              </button>
-                            )}
-                            {!isUserInGroup(TREASURER_GROUP) && (
-                              <button onClick={() => handleAddToGroup(user.username, TREASURER_GROUP)}>
-                                Add to TREASURER
-                              </button>
-                            )}
-                            {!isUserInGroup(MEDIA_GROUP) && (
-                              <button onClick={() => handleAddToGroup(user.username, MEDIA_GROUP)}>
-                                Add to MEDIA
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  <div>Profile ID: {person.id}</div>
+                  <div>Cognito ID: {person.cognitoID}</div>
+                  <div>Email: {person.email}</div>
+                  <div>Phone: {person.phone}</div>
                 </>
               }
+              status={person.status}
               actions={
                 <>
-                  {selectedUser !== user.username ? (
-                    <button onClick={() => fetchUserGroups(user.username)}>
-                      View Groups
-                    </button>
-                  ) : (
-                    <button onClick={() => setSelectedUser(null)}>
-                      Hide Groups
+                  {/* All BOARD members can edit profiles */}
+                  {hasEditPermission && (
+                    <button onClick={() => {
+                      setSelectedPerson(person)
+                      setShowEditModal(true)
+                    }}>Edit</button>
+                  )}
+                  
+                  {/* Only PRESIDENT can delete profiles directly */}
+                  {isPresident && (
+                    <button onClick={() => handleDelete(person)}>Delete</button>
+                  )}
+                  
+                  {/* PRESIDENT and SECRETARY can merge profiles */}
+                  {(isPresident || isSecretary) && (
+                    <button onClick={() => handleProfileSelect(person)}>
+                      {selectedProfiles.find(p => p.id === person.id) ? 'Unselect' : 'Select for Merge'}
                     </button>
                   )}
                 </>
@@ -341,19 +400,44 @@ const BoardRoleManager = ({ userGroups = [] }) => {
             />
           ))}
         </div>
-      </div>
 
-      {showConfirmModal && (
-        <DeleteConfirmationModal
-          show={showConfirmModal}
-          objectId="this user from the group"
-          onConfirm={() => {
-            confirmAction();
-            setShowConfirmModal(false);
-          }}
-          onClose={() => setShowConfirmModal(false)}
-        />
-      )}
+        {showEditModal && hasEditPermission && (
+          <ProfileEditModal
+            show={showEditModal}
+            onClose={() => setShowEditModal(false)}
+            initialValues={selectedPerson}
+            isOwner={selectedPerson?.ownedProperties?.items?.length > 0}
+            isBoard={true}
+            hasBalanceEditPermission={hasBalanceEditPermission}
+            userGroups={userGroups}
+            onSubmit={handleSave}
+          />
+        )}
+
+        {showMergeModal && (isPresident || isSecretary) && (
+          <MergeProfilesModal
+            profiles={selectedProfiles}
+            show={showMergeModal}
+            onClose={() => {
+              setShowMergeModal(false);
+              setSelectedProfiles([]);
+            }}
+            onMerge={handleMergeProfiles}
+          />
+        )}
+
+        {showDeleteModal && isPresident && (
+          <DeleteConfirmationModal
+            show={showDeleteModal}
+            objectId={personToDelete?.id}
+            onConfirm={confirmDelete}
+            onClose={() => {
+              setShowDeleteModal(false)
+              setPersonToDelete(null)
+            }}
+          />
+        )}
+      </div>
 
       {showNotification && (
         <NotificationModal
@@ -365,4 +449,4 @@ const BoardRoleManager = ({ userGroups = [] }) => {
   );
 };
 
-export default BoardRoleManager;
+export default PersonManager;

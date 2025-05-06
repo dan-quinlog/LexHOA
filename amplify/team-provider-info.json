@@ -20,7 +20,22 @@
         "GenerateProfileOnSignUp": {
           "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
           "s3Key": "amplify-builds/GenerateProfileOnSignUp-4c6d5871337339735739-build.zip"
+        },
+        "listUsersInGroupResolver": {
+          "userPoolId": "us-east-1_bQMOu81V8",
+          "region": "us-east-1",
+          "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
+          "s3Key": "amplify-builds/listUsersInGroupResolver-46396c57664876485533-build.zip"
+        },
+        "addUserToGroupResolver": {
+          "userPoolId": "us-east-1_bQMOu81V8",
+          "region": "us-east-1",
+          "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
+          "s3Key": "amplify-builds/addUserToGroupResolver-2b685845304e387a2b6b-build.zip"
         }
+      },
+      "api": {
+        "lexhoa": {}
       }
     }
   }

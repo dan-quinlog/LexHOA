@@ -212,3 +212,55 @@ input ModelAudienceInput {
   ne: Audience
   contains: Audience
 }
+
+# Define your types for Cognito user management
+type CognitoUser {
+  username: String
+  email: String
+  enabled: Boolean
+  userStatus: String
+  userCreateDate: String
+  userLastModifiedDate: String
+}
+
+type UserAttributes {
+  name: String
+  email: String
+  phone_number: String
+  # Add other attributes as needed
+}
+
+type UserGroup {
+  groupName: String!
+}
+
+type UserListResult {
+  users: [CognitoUser]
+}
+
+type UserResult {
+  user: CognitoUser
+}
+
+type GroupListResult {
+  groups: [UserGroup]
+}
+
+type MutationResult {
+  success: Boolean!
+  message: String
+}
+
+# Define your custom queries and mutations
+type Query {
+  listUsersInGroup(groupName: String!): [CognitoUser] @function(name: "listUsersInGroupResolver-${env}")
+}
+
+type Mutation {
+  addUserToGroup(userId: String!, groupName: String!): AddUserToGroupResult @function(name: "addUserToGroupResolver-${env}")
+}
+
+type AddUserToGroupResult {
+  message: String
+  groups: [String]
+}

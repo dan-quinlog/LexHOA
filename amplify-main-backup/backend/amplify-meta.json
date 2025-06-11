@@ -1,0 +1,108 @@
+{
+  "providers": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-lexhoacommunityapp-main-4dd2b-authRole",
+      "UnauthRoleArn": "arn:aws:iam::324037289979:role/amplify-lexhoacommunityapp-main-4dd2b-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::324037289979:role/amplify-lexhoacommunityapp-main-4dd2b-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-lexhoacommunityapp-main-4dd2b-deployment",
+      "UnauthRoleName": "amplify-lexhoacommunityapp-main-4dd2b-unauthRole",
+      "StackName": "amplify-lexhoacommunityapp-main-4dd2b",
+      "StackId": "arn:aws:cloudformation:us-east-1:324037289979:stack/amplify-lexhoacommunityapp-main-4dd2b/419bcdb0-46da-11f0-9285-12ef115b7161",
+      "AmplifyAppId": "dcq8knwxivreq"
+    }
+  },
+  "api": {
+    "lexhoa": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "lexhoa4faca5b8"
+        }
+      ],
+      "output": {
+        "authConfig": {
+          "additionalAuthenticationProviders": [
+            {
+              "apiKeyConfig": {
+                "apiKeyExpirationDate": "2025-03-05T03:31:30.015Z",
+                "apiKeyExpirationDays": 30,
+                "description": "test key"
+              },
+              "authenticationType": "API_KEY"
+            },
+            {
+              "authenticationType": "AWS_IAM"
+            }
+          ],
+          "defaultAuthentication": {
+            "authenticationType": "AMAZON_COGNITO_USER_POOLS",
+            "userPoolConfig": {
+              "userPoolId": "authlexhoa4faca5b8"
+            }
+          }
+        },
+        "GraphQLAPIIdOutput": "tlcqv3ucnra3nav2h2yd2uqjcu",
+        "GraphQLAPIEndpointOutput": "https://feki7v2d75hvjdxl2t7wsqdqmu.appsync-api.us-east-1.amazonaws.com/graphql",
+        "GraphQLAPIKeyOutput": "da2-nvbt5dj4ybadtatqgxy2cokszy"
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "AppSync",
+      "lastPushTimeStamp": "2025-06-11T18:39:23.420Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-lexhoacommunityapp-main-4dd2b-deployment/amplify-cfn-templates/api/cloudformation-template.json",
+        "logicalId": "apilexhoa"
+      }
+    }
+  },
+  "auth": {
+    "lexhoa4faca5b8": {
+      "customAuth": false,
+      "dependsOn": [],
+      "frontendAuthConfig": {
+        "mfaConfiguration": "OPTIONAL",
+        "mfaTypes": [
+          "TOTP"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyMinLength": 8,
+          "passwordPolicyCharacters": []
+        },
+        "signupAttributes": [
+          "EMAIL",
+          "NAME"
+        ],
+        "socialProviders": [],
+        "usernameAttributes": [
+          "EMAIL"
+        ],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "Cognito"
+    }
+  },
+  "function": {
+    "GenerateProfileOnSignUp": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "lexhoa"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    }
+  }
+}

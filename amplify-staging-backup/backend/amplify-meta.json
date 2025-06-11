@@ -51,7 +51,7 @@
       },
       "providerPlugin": "awscloudformation",
       "service": "AppSync",
-      "lastPushTimeStamp": "2025-06-11T16:57:35.998Z",
+      "lastPushTimeStamp": "2025-06-11T18:38:37.463Z",
       "providerMetadata": {
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-lexhoa-staging-ee07d-deployment/amplify-cfn-templates/api/cloudformation-template.json",
         "logicalId": "apilexhoa"
@@ -95,7 +95,7 @@
         "OAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\"],\"AllowedOAuthScopes\":[\"phone\",\"email\",\"openid\",\"profile\",\"aws.cognito.signin.user.admin\"],\"CallbackURLs\":[\"http://localhost:3000/\"],\"LogoutURLs\":[\"http://localhost:3000/\"]}",
         "UserPoolName": "lexhoa4faca5b8_userpool_4faca5b8"
       },
-      "lastPushTimeStamp": "2025-06-11T16:57:36.000Z",
+      "lastPushTimeStamp": "2025-06-11T18:38:37.465Z",
       "providerMetadata": {
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-lexhoa-staging-ee07d-deployment/amplify-cfn-templates/auth/lexhoa4faca5b8-cloudformation-template.json",
         "logicalId": "authlexhoa4faca5b8"
@@ -126,7 +126,7 @@
         "Name": "GenerateProfileOnSignUp-staging",
         "LambdaExecutionRole": "lexhoaLambdaRole98b6da82-staging"
       },
-      "lastPushTimeStamp": "2025-06-11T16:57:36.026Z",
+      "lastPushTimeStamp": "2025-06-11T18:38:37.489Z",
       "providerMetadata": {
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-lexhoa-staging-ee07d-deployment/amplify-cfn-templates/function/GenerateProfileOnSignUp-cloudformation-template.json",
         "logicalId": "functionGenerateProfileOnSignUp"

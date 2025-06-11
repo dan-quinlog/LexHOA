@@ -1,4 +1,25 @@
 {
+  "main": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-lexhoacommunityapp-main-4dd2b-authRole",
+      "UnauthRoleArn": "arn:aws:iam::324037289979:role/amplify-lexhoacommunityapp-main-4dd2b-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::324037289979:role/amplify-lexhoacommunityapp-main-4dd2b-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-lexhoacommunityapp-main-4dd2b-deployment",
+      "UnauthRoleName": "amplify-lexhoacommunityapp-main-4dd2b-unauthRole",
+      "StackName": "amplify-lexhoacommunityapp-main-4dd2b",
+      "StackId": "arn:aws:cloudformation:us-east-1:324037289979:stack/amplify-lexhoacommunityapp-main-4dd2b/419bcdb0-46da-11f0-9285-12ef115b7161",
+      "AmplifyAppId": "dcq8knwxivreq"
+    },
+    "categories": {
+      "auth": {
+        "lexhoa4faca5b8": {}
+      },
+      "function": {
+        "GenerateProfileOnSignUp": {}
+      }
+    }
+  },
   "staging": {
     "awscloudformation": {
       "AuthRoleName": "amplify-lexhoa-staging-ee07d-authRole",
@@ -12,9 +33,6 @@
       "AmplifyAppId": "dcq8knwxivreq"
     },
     "categories": {
-      "auth": {
-        "lexhoa4faca5b8": {}
-      },
       "function": {
         "GenerateProfileOnSignUp": {
           "deploymentBucketName": "amplify-lexhoa-staging-ee07d-deployment",
@@ -25,6 +43,11 @@
       },
       "api": {
         "lexhoa": {}
+      },
+      "auth": {
+        "lexhoaauth": {},
+        "userPoolGroups": {},
+        "lexhoa4faca5b8": {}
       }
     }
   },

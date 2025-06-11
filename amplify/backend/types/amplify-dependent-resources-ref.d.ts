@@ -25,13 +25,6 @@ export type AmplifyDependentResourcesAttributes = {
       "Name": "string",
       "Region": "string"
     },
-    "addUserToGroupResolver": {
-      "Arn": "string",
-      "LambdaExecutionRole": "string",
-      "LambdaExecutionRoleArn": "string",
-      "Name": "string",
-      "Region": "string"
-    },
     "listUsersInGroupResolver": {
       "Arn": "string",
       "LambdaExecutionRole": "string",

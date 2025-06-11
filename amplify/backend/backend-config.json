@@ -98,31 +98,9 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
-    "addUserToGroupResolver": {
-      "build": true,
-      "dependsOn": [
-        {
-          "attributes": [
-            "UserPoolId"
-          ],
-          "category": "auth",
-          "resourceName": "lexhoa4faca5b8"
-        }
-      ],
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda"
-    },
     "listUsersInGroupResolver": {
       "build": true,
-      "dependsOn": [
-        {
-          "attributes": [
-            "UserPoolId"
-          ],
-          "category": "auth",
-          "resourceName": "lexhoa4faca5b8"
-        }
-      ],
+      "dependsOn": [],
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     }
@@ -144,47 +122,7 @@
         }
       ]
     },
-    "AMPLIFY_function_addUserToGroupResolver_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "addUserToGroupResolver"
-        }
-      ]
-    },
-    "AMPLIFY_function_addUserToGroupResolver_region": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "addUserToGroupResolver"
-        }
-      ]
-    },
-    "AMPLIFY_function_addUserToGroupResolver_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "addUserToGroupResolver"
-        }
-      ]
-    },
-    "AMPLIFY_function_addUserToGroupResolver_userPoolId": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "addUserToGroupResolver"
-        }
-      ]
-    },
     "AMPLIFY_function_listUsersInGroupResolver_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "listUsersInGroupResolver"
-        }
-      ]
-    },
-    "AMPLIFY_function_listUsersInGroupResolver_region": {
       "usedBy": [
         {
           "category": "function",

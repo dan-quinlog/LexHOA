@@ -1,15 +1,6 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
-export const addUserToGroup = /* GraphQL */ `
-  mutation AddUserToGroup($userId: String!, $groupName: String!) {
-    addUserToGroup(userId: $userId, groupName: $groupName) {
-      message
-      groups
-      __typename
-    }
-  }
-`;
 export const createProfile = /* GraphQL */ `
   mutation CreateProfile(
     $input: CreateProfileInput!

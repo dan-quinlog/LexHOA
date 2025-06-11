@@ -253,14 +253,5 @@ type MutationResult {
 
 # Define your custom queries and mutations
 type Query {
-  listUsersInGroup(groupName: String!): [CognitoUser] @function(name: "listUsersInGroupResolver-${env}")
-}
-
-type Mutation {
-  addUserToGroup(userId: String!, groupName: String!): AddUserToGroupResult @function(name: "addUserToGroupResolver-${env}")
-}
-
-type AddUserToGroupResult {
-  message: String
-  groups: [String]
+  listUsersInGroup(groupName: String!): [CognitoUser]
 }

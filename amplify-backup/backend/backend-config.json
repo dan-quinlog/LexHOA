@@ -1,0 +1,105 @@
+{
+  "api": {
+    "lexhoa": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "lexhoa4faca5b8"
+        }
+      ],
+      "output": {
+        "authConfig": {
+          "additionalAuthenticationProviders": [
+            {
+              "apiKeyConfig": {
+                "apiKeyExpirationDate": "2025-03-05T03:31:30.015Z",
+                "apiKeyExpirationDays": 30,
+                "description": "test key"
+              },
+              "authenticationType": "API_KEY"
+            },
+            {
+              "authenticationType": "AWS_IAM"
+            }
+          ],
+          "defaultAuthentication": {
+            "authenticationType": "AMAZON_COGNITO_USER_POOLS",
+            "userPoolConfig": {
+              "userPoolId": "authlexhoa4faca5b8"
+            }
+          }
+        }
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "AppSync"
+    }
+  },
+  "auth": {
+    "lexhoa4faca5b8": {
+      "customAuth": false,
+      "dependsOn": [],
+      "frontendAuthConfig": {
+        "mfaConfiguration": "OPTIONAL",
+        "mfaTypes": [
+          "TOTP"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyCharacters": [],
+          "passwordPolicyMinLength": 8
+        },
+        "signupAttributes": [
+          "EMAIL",
+          "NAME"
+        ],
+        "socialProviders": [],
+        "usernameAttributes": [
+          "EMAIL"
+        ],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "Cognito"
+    }
+  },
+  "function": {
+    "GenerateProfileOnSignUp": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "lexhoa"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    }
+  },
+  "parameters": {
+    "AMPLIFY_function_GenerateProfileOnSignUp_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "GenerateProfileOnSignUp"
+        }
+      ]
+    },
+    "AMPLIFY_function_GenerateProfileOnSignUp_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "GenerateProfileOnSignUp"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "serviceConfiguration": {
+    "apiName": "lexhoa",
+    "serviceName": "AppSync",
+    "defaultAuthType": {
+      "mode": "AMAZON_COGNITO_USER_POOLS",
+      "cognitoUserPoolId": "authlexhoa4faca5b8"
+    },
+    "additionalAuthTypes": [
+      {
+        "mode": "API_KEY",
+        "expirationTime": 30,
+        "apiKeyExpirationDate": "2025-03-05T03:31:30.015Z",
+        "keyDescription": "test key"
+      },
+      {
+        "mode": "AWS_IAM"
+      }
+    ]
+  }
+}

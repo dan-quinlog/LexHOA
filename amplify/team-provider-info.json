@@ -63,14 +63,14 @@
   },
   "main": {
     "awscloudformation": {
-      "AuthRoleName": "amplify-lexhoa-main-51144-authRole",
-      "UnauthRoleArn": "arn:aws:iam::324037289979:role/amplify-lexhoa-main-51144-unauthRole",
-      "AuthRoleArn": "arn:aws:iam::324037289979:role/amplify-lexhoa-main-51144-authRole",
+      "AuthRoleName": "amplify-lexhoa-main-8f42d-authRole",
+      "UnauthRoleArn": "arn:aws:iam::324037289979:role/amplify-lexhoa-main-8f42d-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::324037289979:role/amplify-lexhoa-main-8f42d-authRole",
       "Region": "us-east-1",
-      "DeploymentBucketName": "amplify-lexhoa-main-51144-deployment",
-      "UnauthRoleName": "amplify-lexhoa-main-51144-unauthRole",
-      "StackName": "amplify-lexhoa-main-51144",
-      "StackId": "arn:aws:cloudformation:us-east-1:324037289979:stack/amplify-lexhoa-main-51144/f87acef0-4702-11f0-9e17-126fc2b9dba7",
+      "DeploymentBucketName": "amplify-lexhoa-main-8f42d-deployment",
+      "UnauthRoleName": "amplify-lexhoa-main-8f42d-unauthRole",
+      "StackName": "amplify-lexhoa-main-8f42d",
+      "StackId": "arn:aws:cloudformation:us-east-1:324037289979:stack/amplify-lexhoa-main-8f42d/03c87800-470a-11f0-88b0-0affde745fe7",
       "AmplifyAppId": "dcq8knwxivreq"
     },
     "categories": {
@@ -79,7 +79,7 @@
       },
       "function": {
         "GenerateProfileOnSignUp": {
-          "deploymentBucketName": "amplify-lexhoa-main-51144-deployment",
+          "deploymentBucketName": "amplify-lexhoa-main-8f42d-deployment",
           "s3Key": "amplify-builds/GenerateProfileOnSignUp-4c6d5871337339735739-build.zip"
         },
         "lexhoa": {},

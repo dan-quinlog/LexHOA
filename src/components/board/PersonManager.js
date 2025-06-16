@@ -246,8 +246,7 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
             variables: {
               filter: {
                 [searchState.searchType]: { contains: searchState.searchTerm }
-              },
-              limit: 10
+              }
             }
           });
           setSearchState(prev => ({

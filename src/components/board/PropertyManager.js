@@ -28,7 +28,7 @@ const PropertyManager = ({ searchState, setSearchState, userGroups = [] }) => {
 
   // Check if user has admin permissions (PRESIDENT only)
   const hasAdminPermission = userGroups && userGroups.includes(PRESIDENT_GROUP);
-  
+
   // All board members can edit properties
   const hasEditPermission = userGroups && userGroups.includes(BOARD_GROUP);
 
@@ -38,54 +38,51 @@ const PropertyManager = ({ searchState, setSearchState, userGroups = [] }) => {
   const [updateProperty] = useMutation(UPDATE_PROPERTY);
   const [createProperty] = useMutation(CREATE_PROPERTY);
   const [updateProfile] = useMutation(UPDATE_PROFILE);
-    const handleSearch = async () => {
-      if (!searchState.searchTerm) return;
+  const handleSearch = async () => {
+    if (!searchState.searchTerm) return;
 
-      try {
-        let response;
-        switch (searchState.searchType) {
-          case 'propertyId':
-            response = await searchProperties({
-              variables: {
-                filter: {
-                  id: { eq: searchState.searchTerm }
-                },
-                limit: 12
+    try {
+      let response;
+      switch (searchState.searchType) {
+        case 'propertyId':
+          response = await searchProperties({
+            variables: {
+              filter: {
+                id: { contains: searchState.searchTerm }
               }
-            });
-            break;
+            }
+          });
+          break;
 
-          case 'address':
-            response = await searchProperties({
-              variables: {
-                filter: {
-                  address: { contains: searchState.searchTerm }
-                },
-                limit: 12
+        case 'address':
+          response = await searchProperties({
+            variables: {
+              filter: {
+                address: { contains: searchState.searchTerm }
               }
-            });
-            break;
+            }
+          });
+          break;
 
-          case 'ownerId':
-            response = await searchProperties({
-              variables: {
-                filter: {
-                  profOwnerId: { eq: searchState.searchTerm }
-                },
-                limit: 12
+        case 'ownerId':
+          response = await searchProperties({
+            variables: {
+              filter: {
+                profOwnerId: { eq: searchState.searchTerm }
               }
-            });
-            break;
-        }
-
-        setSearchState({
-          ...searchState,
-          searchResults: response.data?.listProperties?.items || []
-        });
-      } catch (error) {
-        console.error('Search error:', error);
+            }
+          });
+          break;
       }
-    };
+
+      setSearchState({
+        ...searchState,
+        searchResults: response.data?.listProperties?.items || []
+      });
+    } catch (error) {
+      console.error('Search error:', error);
+    }
+  };
   const handleEdit = (property) => {
     setSelectedProperty(property);
     setShowEditModal(true);
@@ -112,7 +109,7 @@ const PropertyManager = ({ searchState, setSearchState, userGroups = [] }) => {
 
       // Delete the property
       await deleteProperty({
-        variables: { 
+        variables: {
           input: { id: propertyToDelete.id }
         }
       });
@@ -136,11 +133,22 @@ const PropertyManager = ({ searchState, setSearchState, userGroups = [] }) => {
         type: formData.type
       };
 
-      await updateProperty({
-        variables: {
-          input: mutationInput
-        }
-      });
+      // Check if we're creating a new property or updating an existing one
+      if (selectedProperty) {
+        // This is an update operation
+        await updateProperty({
+          variables: {
+            input: mutationInput
+          }
+        });
+      } else {
+        // This is a create operation
+        await createProperty({
+          variables: {
+            input: mutationInput
+          }
+        });
+      }
 
       // Then update the tenant's profile if there is one
       if (formData.profTenantId) {

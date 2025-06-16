@@ -19,6 +19,11 @@
         "GenerateProfileOnSignUp": {
           "deploymentBucketName": "amplify-lexhoa-staging-224ba-deployment",
           "s3Key": "amplify-builds/GenerateProfileOnSignUp-4c6d5871337339735739-build.zip"
+        },
+        "listUsersInGroupResolver": {
+          "userPoolId": "placeholder",
+          "deploymentBucketName": "amplify-lexhoa-staging-224ba-deployment",
+          "s3Key": "amplify-builds/listUsersInGroupResolver-6a647130587246766a39-build.zip"
         }
       }
     }

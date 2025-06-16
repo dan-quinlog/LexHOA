@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "{\"createdOn\":\"Windows\",\"createdBy\":\"Amplify\",\"createdWith\":\"12.13.1\",\"stackType\":\"function-Lambda\",\"metadata\":{\"whyContinueWithGen1\":\"I am a current Gen 1 user\"}}",
+  "Description": "{\"createdOn\":\"Windows\",\"createdBy\":\"Amplify\",\"createdWith\":\"13.0.0\",\"stackType\":\"function-Lambda\",\"metadata\":{\"whyContinueWithGen1\":\"\"}}",
   "Parameters": {
     "CloudWatchRule": {
       "Type": "String",
@@ -16,17 +16,8 @@
     "s3Key": {
       "Type": "String"
     },
-    "apilexhoaGraphQLAPIIdOutput": {
-      "Type": "String",
-      "Default": "apilexhoaGraphQLAPIIdOutput"
-    },
-    "apilexhoaGraphQLAPIEndpointOutput": {
-      "Type": "String",
-      "Default": "apilexhoaGraphQLAPIEndpointOutput"
-    },
-    "apilexhoaGraphQLAPIKeyOutput": {
-      "Type": "String",
-      "Default": "apilexhoaGraphQLAPIKeyOutput"
+    "userPoolId": {
+      "Type": "String"
     }
   },
   "Conditions": {
@@ -59,12 +50,12 @@
         "FunctionName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "GenerateProfileOnSignUp",
+            "listUsersInGroupResolver",
             {
               "Fn::Join": [
                 "",
                 [
-                  "GenerateProfileOnSignUp",
+                  "listUsersInGroupResolver",
                   "-",
                   {
                     "Ref": "env"
@@ -82,14 +73,8 @@
             "REGION": {
               "Ref": "AWS::Region"
             },
-            "API_LEXHOA_GRAPHQLAPIIDOUTPUT": {
-              "Ref": "apilexhoaGraphQLAPIIdOutput"
-            },
-            "API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT": {
-              "Ref": "apilexhoaGraphQLAPIEndpointOutput"
-            },
-            "API_LEXHOA_GRAPHQLAPIKEYOUTPUT": {
-              "Ref": "apilexhoaGraphQLAPIKeyOutput"
+            "USER_POOL_ID": {
+              "Ref": "userPoolId"
             }
           }
         },
@@ -99,7 +84,7 @@
             "Arn"
           ]
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": "nodejs22.x",
         "Layers": [],
         "Timeout": 25
       }
@@ -110,12 +95,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "lexhoaLambdaRole98b6da82",
+            "lexhoaLambdaRole021b8399",
             {
               "Fn::Join": [
                 "",
                 [
-                  "lexhoaLambdaRole98b6da82",
+                  "lexhoaLambdaRole021b8399",
                   "-",
                   {
                     "Ref": "env"
@@ -181,53 +166,6 @@
                   }
                 ]
               }
-            }
-          ]
-        }
-      }
-    },
-    "AmplifyResourcesPolicy": {
-      "DependsOn": [
-        "LambdaExecutionRole"
-      ],
-      "Type": "AWS::IAM::Policy",
-      "Properties": {
-        "PolicyName": "amplify-lambda-execution-policy",
-        "Roles": [
-          {
-            "Ref": "LambdaExecutionRole"
-          }
-        ],
-        "PolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Action": [
-                "appsync:GraphQL"
-              ],
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:appsync:",
-                      {
-                        "Ref": "AWS::Region"
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId"
-                      },
-                      ":apis/",
-                      {
-                        "Ref": "apilexhoaGraphQLAPIIdOutput"
-                      },
-                      "/types/Mutation/*"
-                    ]
-                  ]
-                }
-              ]
             }
           ]
         }

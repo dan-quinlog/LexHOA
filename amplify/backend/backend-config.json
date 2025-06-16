@@ -82,6 +82,12 @@
       ],
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
+    },
+    "listUsersInGroupResolver": {
+      "build": true,
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
     }
   },
   "parameters": {
@@ -98,6 +104,30 @@
         {
           "category": "function",
           "resourceName": "GenerateProfileOnSignUp"
+        }
+      ]
+    },
+    "AMPLIFY_function_listUsersInGroupResolver_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "listUsersInGroupResolver"
+        }
+      ]
+    },
+    "AMPLIFY_function_listUsersInGroupResolver_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "listUsersInGroupResolver"
+        }
+      ]
+    },
+    "AMPLIFY_function_listUsersInGroupResolver_userPoolId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "listUsersInGroupResolver"
         }
       ]
     }

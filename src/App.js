@@ -22,13 +22,25 @@ import MenuState from './components/menu/MenuState';
 import DatabaseReset from './components/dev/DatabaseReset'
 import 'react-quill/dist/quill.bubble.css';
 
+// Configure Amplify
 Amplify.configure({
   ...amplifyConfig,
   Auth: {
     region: 'us-east-1',
     mandatorySignIn: false
+  },
+  // Add REST API configuration directly here
+  API: {
+    REST: {
+      cognitoGroupManagement: {
+        endpoint: 'https://7vxyhwwje0.execute-api.us-east-1.amazonaws.com/dev',
+        region: 'us-east-1'
+      }
+    }
   }
 });
+
+
 
 const url = amplifyConfig.aws_appsync_graphqlEndpoint;
 const region = amplifyConfig.aws_appsync_region;
@@ -119,7 +131,7 @@ function App() {
       console.error('Error signing out: ', error);
     }
   }
-  
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -151,7 +163,7 @@ function App() {
 
     // Get profile data
     const profile = profileData?.profileByCognitoID?.items[0];
-    
+
     // Determine user roles based on profile data
     const isTenant = profile?.tenantAt !== null && profile?.tenantAt !== undefined;
     const isOwner = profile?.ownedProperties?.items?.length > 0;
@@ -170,28 +182,28 @@ function App() {
     // Filter bulletins client-side based on user roles
     const filteredBulletins = useMemo(() => {
       const allBulletins = bulletinsData?.bulletinsByDate?.items || [];
-      
+
       // For unauthenticated users, show only PUBLIC bulletins
       if (!user) {
         return allBulletins
           .filter(bulletin => bulletin.audience && bulletin.audience.includes("PUBLIC"))
           .slice(0, 3); // Limit to 3 for public users
       }
-      
+
       // For board members, show all bulletins
       if (isBoard) {
         return allBulletins.slice(0, 10); // Limit to 10 for board members
       }
-      
+
       // For other authenticated users, filter based on roles
       return allBulletins
         .filter(bulletin => {
           if (!bulletin.audience) return false;
-          
+
           if (bulletin.audience.includes("PUBLIC")) return true;
           if (isTenant && bulletin.audience.includes("RESIDENTS")) return true;
           if (isOwner && bulletin.audience.includes("OWNERS")) return true;
-          
+
           return false;
         })
         .slice(0, 10); // Limit to 10 for authenticated users

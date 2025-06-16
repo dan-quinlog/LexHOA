@@ -4,8 +4,7 @@ import PersonManager from '../../components/board/PersonManager';
 import PropertyManager from '../../components/board/PropertyManager';
 import PaymentManager from '../../components/board/PaymentManager';
 import PingManager from '../../components/board/PingManager';
-import { useQuery } from '@apollo/client';
-import { LIST_PROFILES } from '../../queries/queries';
+import BoardRoleManager from '../../components/board/BoardRoleManager';
 import './Board.css';
 
 const TOOLS = [
@@ -13,7 +12,8 @@ const TOOLS = [
   { id: 'pings', label: 'Ping Management' },
   { id: 'persons', label: 'Person Management' },
   { id: 'properties', label: 'Property Management' },
-  { id: 'payments', label: 'Payment Management' }
+  { id: 'payments', label: 'Payment Management' },
+  { id: 'roles', label: 'Board Role Manager' }
 ];
 
 const Board = ({ userGroups = [] }) => {
@@ -78,6 +78,8 @@ const Board = ({ userGroups = [] }) => {
           setSearchState={setPingSearchState}
           userGroups={userGroups}
         />;
+      case 'roles':
+        return <BoardRoleManager userGroups={userGroups} />;
       default:
         return null;
     }

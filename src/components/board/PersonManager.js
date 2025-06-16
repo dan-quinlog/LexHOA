@@ -81,13 +81,16 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
           id: property.id,
           _version: property._version
         };
+
         if (property.profOwnerId === personToDelete.id) {
           updates.profOwnerId = null;
           updates.owner = null;
         }
+
         if (property.profTenantId === personToDelete.id) {
           updates.profTenantId = null;
         }
+
         return updateProperty({
           variables: {
             input: {
@@ -124,13 +127,16 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
       // Update properties to point to cognito profile
       const updatePromises = relatedProperties.data.listProperties.items.map(property => {
         const updates = { id: property.id };
+        
         if (property.profOwnerId === manualProfile.id) {
           updates.profOwnerId = cognitoProfile.id;
           updates.owner = cognitoProfile.id;
         }
+        
         if (property.profTenantId === manualProfile.id) {
           updates.profTenantId = cognitoProfile.id;
         }
+        
         return updateProperty({ variables: { input: updates } });
       });
 
@@ -180,6 +186,7 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
   const handleSave = async (formData) => {
     try {
       const cleanedData = cleanFormData(formData);
+      
       if (selectedPerson?.id) {
         await updatePerson({
           variables: {
@@ -196,6 +203,7 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
           }
         });
       }
+      
       setShowEditModal(false);
       handleSearch(); // Refresh the results
     } catch (error) {
@@ -211,6 +219,7 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
 
     try {
       let response;
+      
       switch (searchState.searchType) {
         case 'id':
           response = await searchById({
@@ -221,7 +230,6 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
             searchResults: response.data?.getProfile ? [response.data.getProfile] : []
           }));
           break;
-
         case 'cognitoID':
           response = await searchByCognito({
             variables: { cognitoID: searchState.searchTerm }
@@ -238,8 +246,7 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
             variables: {
               filter: {
                 [searchState.searchType]: { contains: searchState.searchTerm }
-              },
-              limit: 10
+              }
             }
           });
           setSearchState(prev => ({
@@ -266,7 +273,6 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
       setSelectedProfiles(selectedProfiles.filter(p => p.id !== profile.id));
     } else {
       const newSelectedProfiles = [...selectedProfiles, profile];
-
       if (newSelectedProfiles.length === 2) {
         const cognitoProfiles = newSelectedProfiles.filter(p => p.cognitoID);
         if (cognitoProfiles.length === 2) {
@@ -283,11 +289,11 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
   const getPersonRoleTags = (person) => {
     const isOwner = person?.ownedProperties?.items?.length > 0;
     const isResident = person?.tenantAtId;
-
+    
     if (isOwner && isResident) {
       return <span className="role-tag">Owner Resident</span>;
     }
-
+    
     return (
       <>
         {isOwner && <span className="role-tag">Owner</span>}
@@ -339,7 +345,6 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
             }}>Create New</button>
           )}
         </div>
-
         {errors.search && <div className="error-message">{errors.search}</div>}
 
         {/* Selected Profiles Section */}
@@ -394,6 +399,7 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
             />
           ))}
         </div>
+
         {showEditModal && hasEditPermission && (
           <ProfileEditModal
             show={showEditModal}
@@ -406,6 +412,7 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
             onSubmit={handleSave}
           />
         )}
+
         {showMergeModal && (isPresident || isSecretary) && (
           <MergeProfilesModal
             profiles={selectedProfiles}
@@ -417,6 +424,7 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
             onMerge={handleMergeProfiles}
           />
         )}
+
         {showDeleteModal && isPresident && (
           <DeleteConfirmationModal
             show={showDeleteModal}
@@ -428,15 +436,14 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
             }}
           />
         )}
-      </div >
+      </div>
 
       {showNotification && (
         <NotificationModal
           message={notificationMessage}
           onClose={() => setShowNotification(false)}
         />
-      )
-      }
+      )}
     </>
   );
 };

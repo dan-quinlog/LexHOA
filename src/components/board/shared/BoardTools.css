@@ -108,3 +108,57 @@
   background-color: var(--danger-color);
   color: var(--background-white);
 }
+/* Add these styles to your existing BoardTools.css file */
+
+.user-groups {
+  margin-top: 15px;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+.group-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+}
+
+.group-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 10px;
+  margin-bottom: 5px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.remove-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  padding: 2px 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.add-to-group {
+  margin-top: 15px;
+}
+
+.group-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.group-actions button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}

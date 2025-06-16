@@ -48,9 +48,8 @@ const PropertyManager = ({ searchState, setSearchState, userGroups = [] }) => {
           response = await searchProperties({
             variables: {
               filter: {
-                id: { eq: searchState.searchTerm }
-              },
-              limit: 12
+                id: { contains: searchState.searchTerm }
+              }
             }
           });
           break;
@@ -60,8 +59,7 @@ const PropertyManager = ({ searchState, setSearchState, userGroups = [] }) => {
             variables: {
               filter: {
                 address: { contains: searchState.searchTerm }
-              },
-              limit: 12
+              }
             }
           });
           break;
@@ -71,8 +69,7 @@ const PropertyManager = ({ searchState, setSearchState, userGroups = [] }) => {
             variables: {
               filter: {
                 profOwnerId: { eq: searchState.searchTerm }
-              },
-              limit: 12
+              }
             }
           });
           break;

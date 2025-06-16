@@ -1,6 +1,19 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
+export const listUsersInGroup = /* GraphQL */ `
+  query ListUsersInGroup($groupName: String!) {
+    listUsersInGroup(groupName: $groupName) {
+      username
+      email
+      enabled
+      userStatus
+      userCreateDate
+      userLastModifiedDate
+      __typename
+    }
+  }
+`;
 export const getProfile = /* GraphQL */ `
   query GetProfile($id: ID!) {
     getProfile(id: $id) {

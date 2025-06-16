@@ -40,7 +40,15 @@
       "email"
     ],
     "triggers": {},
-    "userPoolGroupList": [],
+    "userPoolGroupList": [
+      "BOARD",
+      "OWNERS",
+      "RESIDENTS",
+      "PRESIDENT",
+      "SECRETARY",
+      "TREASURER",
+      "MEDIA"
+    ],
     "serviceName": "Cognito",
     "usernameCaseSensitive": false,
     "useEnabledMfas": true,

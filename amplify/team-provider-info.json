@@ -1,4 +1,28 @@
 {
+  "staging": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-lexhoa-staging-224ba-authRole",
+      "UnauthRoleArn": "arn:aws:iam::324037289979:role/amplify-lexhoa-staging-224ba-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::324037289979:role/amplify-lexhoa-staging-224ba-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-lexhoa-staging-224ba-deployment",
+      "UnauthRoleName": "amplify-lexhoa-staging-224ba-unauthRole",
+      "StackName": "amplify-lexhoa-staging-224ba",
+      "StackId": "arn:aws:cloudformation:us-east-1:324037289979:stack/amplify-lexhoa-staging-224ba/803c39b0-4a13-11f0-bac5-0affe598bc87",
+      "AmplifyAppId": "dcq8knwxivreq"
+    },
+    "categories": {
+      "auth": {
+        "lexhoa4faca5b8": {}
+      },
+      "function": {
+        "GenerateProfileOnSignUp": {
+          "deploymentBucketName": "amplify-lexhoa-staging-224ba-deployment",
+          "s3Key": "amplify-builds/GenerateProfileOnSignUp-4c6d5871337339735739-build.zip"
+        }
+      }
+    }
+  },
   "dev": {
     "awscloudformation": {
       "AuthRoleName": "amplify-lexhoa-dev-49387-authRole",
@@ -14,8 +38,7 @@
     },
     "categories": {
       "auth": {
-        "lexhoa4faca5b8": {},
-        "userPoolGroups": {}
+        "lexhoa4faca5b8": {}
       },
       "api": {
         "lexhoa": {}
@@ -27,35 +50,6 @@
         },
         "lexhoa": {},
         "lexhoa4faca5b8": {}
-      }
-    }
-  },
-  "staging": {
-    "awscloudformation": {
-      "AuthRoleName": "amplify-lexhoa-staging-ee07d-authRole",
-      "UnauthRoleArn": "arn:aws:iam::324037289979:role/amplify-lexhoa-staging-ee07d-unauthRole",
-      "AuthRoleArn": "arn:aws:iam::324037289979:role/amplify-lexhoa-staging-ee07d-authRole",
-      "Region": "us-east-1",
-      "DeploymentBucketName": "amplify-lexhoa-staging-ee07d-deployment",
-      "UnauthRoleName": "amplify-lexhoa-staging-ee07d-unauthRole",
-      "StackName": "amplify-lexhoa-staging-ee07d",
-      "StackId": "arn:aws:cloudformation:us-east-1:324037289979:stack/amplify-lexhoa-staging-ee07d/cf20f210-200a-11f0-a077-0affc0d5459b",
-      "AmplifyAppId": "dcq8knwxivreq"
-    },
-    "categories": {
-      "auth": {
-        "lexhoa4faca5b8": {}
-      },
-      "function": {
-        "GenerateProfileOnSignUp": {
-          "deploymentBucketName": "amplify-lexhoa-staging-ee07d-deployment",
-          "s3Key": "amplify-builds/GenerateProfileOnSignUp-4c6d5871337339735739-build.zip"
-        },
-        "lexhoa": {},
-        "lexhoa4faca5b8": {}
-      },
-      "api": {
-        "lexhoa": {}
       }
     }
   }

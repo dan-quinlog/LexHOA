@@ -273,7 +273,6 @@ function App() {
             <Link to="/" className="site-title">
               <h1>Lexington Commons HOA</h1>
             </Link>
-            {userGroups.includes(BOARD_GROUP) && <DatabaseReset />}
             {user ? (
               <MenuState
                 userGroups={userGroups}

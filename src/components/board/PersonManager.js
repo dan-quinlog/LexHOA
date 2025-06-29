@@ -316,10 +316,10 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
             })}
             className="search-type"
           >
-            <option value="id">Profile ID</option>
             <option value="name">Name</option>
             <option value="email">Email</option>
             <option value="phone">Phone</option>
+            <option value="id">Profile ID</option>
             <option value="cognitoID">Cognito ID</option>
           </select>
           <input

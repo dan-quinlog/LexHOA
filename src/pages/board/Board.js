@@ -22,7 +22,7 @@ const Board = ({ userGroups = [] }) => {
 
   // New state management
   const [personSearchState, setPersonSearchState] = useState({
-    searchType: 'email',
+    searchType: 'name',
     searchValue: '',
     searchResults: []
   });
@@ -34,7 +34,7 @@ const Board = ({ userGroups = [] }) => {
   });
 
   const [paymentSearchState, setPaymentSearchState] = useState({
-    searchType: 'paymentId',
+    searchType: 'ownerId',
     searchTerm: '',
     searchResults: []
   });

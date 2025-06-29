@@ -32,20 +32,38 @@ const PaymentManager = ({ searchState, setSearchState, userGroups = [] }) => {
     try {
       let response;
       switch (searchState.searchType) {
-        case 'paymentId':
-          response = await searchPayments({
-            variables: {
-              filter: {
-                id: { eq: searchState.searchTerm }
-              }
-            }
-          });
-          break;
         case 'ownerId':
           response = await searchByOwner({
             variables: {
               ownerPaymentsId: searchState.searchTerm,
               sortDirection: 'DESC'
+            }
+          });
+          break;
+        case 'checkNumber':
+          response = await searchPayments({
+            variables: {
+              filter: {
+                checkNumber: { eq: searchState.searchTerm }
+              }
+            }
+          });
+          break;
+        case 'checkAmount':
+          const checkAmount = parseFloat(searchState.searchTerm);
+          if (isNaN(checkAmount) || checkAmount < 0) {
+            setSearchState(prev => ({
+              ...prev,
+              searchResults: []
+            }));
+            console.error('Invalid check amount - must be a positive number');
+            return;
+          }
+          response = await searchPayments({
+            variables: {
+              filter: {
+                checkAmount: { eq: checkAmount }
+              }
             }
           });
           break;
@@ -58,11 +76,29 @@ const PaymentManager = ({ searchState, setSearchState, userGroups = [] }) => {
             }
           });
           break;
-        case 'checkNumber':
+        case 'invoiceAmount':
+          const invoiceAmount = parseFloat(searchState.searchTerm);
+          if (isNaN(invoiceAmount) || invoiceAmount < 0) {
+            setSearchState(prev => ({
+              ...prev,
+              searchResults: []
+            }));
+            console.error('Invalid invoice amount - must be a positive number');
+            return;
+          }
           response = await searchPayments({
             variables: {
               filter: {
-                checkNumber: { eq: searchState.searchTerm }
+                invoiceAmount: { eq: invoiceAmount }
+              }
+            }
+          });
+          break;
+        case 'paymentId':
+          response = await searchPayments({
+            variables: {
+              filter: {
+                id: { eq: searchState.searchTerm }
               }
             }
           });
@@ -122,14 +158,25 @@ const PaymentManager = ({ searchState, setSearchState, userGroups = [] }) => {
           })}
           className="search-type"
         >
-          <option value="paymentId">Payment ID</option>
           <option value="ownerId">Owner ID</option>
-          <option value="invoiceNumber">Invoice Number</option>
           <option value="checkNumber">Check Number</option>
+          <option value="checkAmount">Check Amount</option>
+          <option value="invoiceNumber">Invoice ID</option>
+          <option value="invoiceAmount">Invoice Amount</option>
+          <option value="paymentId">Payment ID</option>
         </select>
         <input
-          type="text"
-          placeholder="Search..."
+          type={searchState.searchType === 'checkAmount' || searchState.searchType === 'invoiceAmount' ? 'number' : 'text'}
+          placeholder={
+            searchState.searchType === 'checkAmount' ? 'Enter check amount...' :
+            searchState.searchType === 'invoiceAmount' ? 'Enter invoice amount...' :
+            searchState.searchType === 'ownerId' ? 'Enter owner ID...' :
+            searchState.searchType === 'checkNumber' ? 'Enter check number...' :
+            searchState.searchType === 'invoiceNumber' ? 'Enter invoice ID...' :
+            searchState.searchType === 'paymentId' ? 'Enter payment ID...' :
+            'Search...'
+          }
+          step={searchState.searchType === 'checkAmount' || searchState.searchType === 'invoiceAmount' ? '0.01' : undefined}
           value={searchState.searchTerm}
           onChange={(e) => setSearchState({
             ...searchState,

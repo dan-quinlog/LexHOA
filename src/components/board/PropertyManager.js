@@ -13,6 +13,7 @@ import {
 import PropertyEditModal from '../modals/PropertyEditModal';
 import BoardCard from './shared/BoardCard';
 import DeleteConfirmationModal from '../shared/DeleteConfirmationModal';
+import { copyWithFeedback } from '../../utils/clipboardUtils';
 import './shared/BoardTools.css';
 
 // Get group names from environment variables
@@ -217,8 +218,30 @@ const PropertyManager = ({ searchState, setSearchState, userGroups = [] }) => {
             header={<h3>Property {property.id}</h3>}
             content={
               <>
-                <div>Owner: {property.profOwnerId}</div>
-                <div>Tenant: {property.profTenantId}</div>
+                <div>
+                  Owner: {property.profOwner?.name || property.profOwnerId || 'None'}
+                  {property.profOwnerId && (
+                    <button 
+                      className="copy-btn" 
+                      onClick={() => copyWithFeedback(property.profOwnerId)}
+                      title="Copy Owner ID"
+                    >
+                      📋
+                    </button>
+                  )}
+                </div>
+                <div>
+                  Tenant: {property.profTenant?.name || property.profTenantId || 'None'}
+                  {property.profTenantId && (
+                    <button 
+                      className="copy-btn" 
+                      onClick={() => copyWithFeedback(property.profTenantId)}
+                      title="Copy Tenant ID"
+                    >
+                      📋
+                    </button>
+                  )}
+                </div>
                 <div>Address: {property.address}</div>
               </>
             }

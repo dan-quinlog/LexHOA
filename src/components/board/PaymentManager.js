@@ -5,6 +5,7 @@ import { DELETE_PAYMENT } from '../../queries/mutations';
 import PaymentEditModal from './PaymentEditModal';
 import BoardCard from './shared/BoardCard';
 import DeleteConfirmationModal from '../shared/DeleteConfirmationModal';
+import { copyWithFeedback } from '../../utils/clipboardUtils';
 import './shared/BoardTools.css';
 
 // Get group names from environment variables
@@ -157,9 +158,20 @@ const PaymentManager = ({ searchState, setSearchState, userGroups = [] }) => {
             header={<h3>Payment {payment.id}</h3>}
             content={
               <>
-                <div>Account: {payment.ownerPaymentsId}</div>
-                <div>Invoice ID: {payment.invoiceNumber}</div>
-                <div>Amount: ${payment.invoiceAmount.toFixed(2)}</div>
+                <div>
+                  Owner: {payment.ownerPayments?.name || payment.ownerPaymentsId || 'Unknown'}
+                  {payment.ownerPaymentsId && (
+                    <button 
+                      className="copy-btn" 
+                      onClick={() => copyWithFeedback(payment.ownerPaymentsId)}
+                      title="Copy Owner ID"
+                    >
+                      📋
+                    </button>
+                  )}
+                </div>
+                <div>Check ID: {payment.checkNumber || 'N/A'}</div>
+                <div>Check Amount: ${payment.checkAmount ? payment.checkAmount.toFixed(2) : '0.00'}</div>
                 <div>Check Date: {payment.checkDate}</div>
               </>
             }

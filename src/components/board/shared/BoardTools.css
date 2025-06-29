@@ -162,3 +162,25 @@
   font-size: 0.8rem;
   cursor: pointer;
 }
+
+/* Copy Button Styles */
+.copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9em;
+  margin-left: 8px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+  opacity: 0.7;
+}
+
+.copy-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  opacity: 1;
+}
+
+.copy-btn:active {
+  background-color: rgba(0, 0, 0, 0.2);
+}

@@ -371,10 +371,10 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
                     Profile ID: {person.id}
                     <button 
                       className="copy-btn" 
-                      onClick={() => copyWithFeedback(person.id)}
+                      onClick={(e) => copyWithFeedback(person.id, e)}
                       title="Copy Profile ID"
                     >
-                      📋
+                      Copy
                     </button>
                   </div>
                   <div>
@@ -382,10 +382,10 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
                     {person.cognitoID && (
                       <button 
                         className="copy-btn" 
-                        onClick={() => copyWithFeedback(person.cognitoID)}
+                        onClick={(e) => copyWithFeedback(person.cognitoID, e)}
                         title="Copy Cognito ID"
                       >
-                        📋
+                        Copy
                       </button>
                     )}
                   </div>

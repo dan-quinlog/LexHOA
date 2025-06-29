@@ -163,10 +163,10 @@ const PaymentManager = ({ searchState, setSearchState, userGroups = [] }) => {
                   {payment.ownerPaymentsId && (
                     <button 
                       className="copy-btn" 
-                      onClick={() => copyWithFeedback(payment.ownerPaymentsId)}
+                      onClick={(e) => copyWithFeedback(payment.ownerPaymentsId, e)}
                       title="Copy Owner ID"
                     >
-                      📋
+                      Copy
                     </button>
                   )}
                 </div>

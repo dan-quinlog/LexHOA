@@ -223,10 +223,10 @@ const PropertyManager = ({ searchState, setSearchState, userGroups = [] }) => {
                   {property.profOwnerId && (
                     <button 
                       className="copy-btn" 
-                      onClick={() => copyWithFeedback(property.profOwnerId)}
+                      onClick={(e) => copyWithFeedback(property.profOwnerId, e)}
                       title="Copy Owner ID"
                     >
-                      📋
+                      Copy
                     </button>
                   )}
                 </div>
@@ -235,10 +235,10 @@ const PropertyManager = ({ searchState, setSearchState, userGroups = [] }) => {
                   {property.profTenantId && (
                     <button 
                       className="copy-btn" 
-                      onClick={() => copyWithFeedback(property.profTenantId)}
+                      onClick={(e) => copyWithFeedback(property.profTenantId, e)}
                       title="Copy Tenant ID"
                     >
-                      📋
+                      Copy
                     </button>
                   )}
                 </div>

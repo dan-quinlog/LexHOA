@@ -34,19 +34,31 @@ export const copyToClipboard = async (text) => {
 /**
  * Copy text to clipboard and show success feedback
  * @param {string} text - Text to copy
+ * @param {Event} event - Click event to prevent default behavior
  * @param {string} successMessage - Optional success message
  */
-export const copyWithFeedback = async (text, successMessage = 'Copied to clipboard!') => {
+export const copyWithFeedback = async (text, event, successMessage = 'Copied to clipboard!') => {
+  // Prevent default behavior and stop propagation
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  
   const success = await copyToClipboard(text);
   if (success) {
-    // Simple feedback - could be enhanced with toast notifications
-    const originalText = document.activeElement?.textContent;
-    if (document.activeElement) {
-      document.activeElement.textContent = 'Copied!';
+    // Show feedback by temporarily changing button style instead of text
+    const button = event?.target;
+    if (button) {
+      const originalTitle = button.title;
+      const originalStyle = button.style.cssText;
+      
+      button.title = 'Copied!';
+      button.style.backgroundColor = '#28a745';
+      button.style.color = 'white';
+      
       setTimeout(() => {
-        if (document.activeElement && originalText) {
-          document.activeElement.textContent = originalText;
-        }
+        button.title = originalTitle;
+        button.style.cssText = originalStyle;
       }, 1000);
     }
   }

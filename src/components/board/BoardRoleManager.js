@@ -6,11 +6,12 @@ import './shared/BoardTools.css';
 
 // Import the existing queries and mutations
 import { LIST_USERS_IN_GROUP } from '../../queries/userQueries';
-import { ADD_USER_TO_GROUP } from '../../queries/userMutations';
+import { MANAGE_COGNITO_GROUPS } from '../../queries/userMutations';
 
-const UserManagement = ({ userGroups = [] }) => {
+const BoardRoleManager = ({ userGroups = [] }) => {
+  const [actionType, setActionType] = useState('LIST');
   const [selectedGroup, setSelectedGroup] = useState('BOARD');
-  const [userId, setUserId] = useState('');
+  const [cognitoId, setCognitoId] = useState('');
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
 
@@ -18,21 +19,24 @@ const UserManagement = ({ userGroups = [] }) => {
   const [listUsersInGroup, { loading: queryLoading, data }] = useLazyQuery(LIST_USERS_IN_GROUP, {
     fetchPolicy: 'network-only'
   });
-  
-  const [addUserToGroup, { loading: mutationLoading }] = useMutation(ADD_USER_TO_GROUP, {
+
+  const [manageCognitoGroups, { loading: mutationLoading }] = useMutation(MANAGE_COGNITO_GROUPS, {
     onCompleted: (data) => {
-      setNotificationMessage(data.addUserToGroup.message);
+      setNotificationMessage(data.manageCognitoGroups.message || 'Operation completed successfully');
       setShowNotification(true);
-      setUserId('');
-      fetchUsers(); // Refresh the user list
+      setCognitoId('');
+      if (actionType !== 'LIST') {
+        fetchUsers();
+      }
     },
     onError: (error) => {
-      setNotificationMessage(`Failed to add user to group: ${error.message}`);
+      setNotificationMessage(`Failed to ${actionType.toLowerCase()} user: ${error.message}`);
       setShowNotification(true);
     }
   });
 
-  const groups = ['BOARD', 'OWNERS', 'RESIDENTS'];
+  const groups = ['BOARD', 'MEDIA', 'TREASURER', 'SECRETARY', 'PRESIDENT'];
+  const actions = ['LIST', 'ADD', 'REMOVE'];
   const loading = queryLoading || mutationLoading;
   const users = data?.listUsersInGroup || [];
 
@@ -45,37 +49,52 @@ const UserManagement = ({ userGroups = [] }) => {
   const handleGroupChange = (e) => {
     const newGroup = e.target.value;
     setSelectedGroup(newGroup);
-    listUsersInGroup({
-      variables: { groupName: newGroup }
-    });
   };
   
-  const handleAddUserToGroup = () => {
-    if (!userId) {
-      setNotificationMessage('Please enter a user ID');
+  const handleActionTypeChange = (e) => {
+    setActionType(e.target.value);
+    setCognitoId('');
+  };
+
+  const handleRun = () => {
+    if (actionType === 'LIST') {
+      fetchUsers();
+      return;
+    }
+
+    if (!cognitoId) {
+      setNotificationMessage('Please enter a Cognito ID');
       setShowNotification(true);
       return;
     }
-    
-    addUserToGroup({
-      variables: { 
-        userId: userId,
-        groupName: selectedGroup
+
+    manageCognitoGroups({
+      variables: {
+        action: actionType.toLowerCase(),
+        groupName: selectedGroup,
+        cognitoId: cognitoId
       }
     });
   };
 
-  // Initial fetch on component mount
-  React.useEffect(() => {
-    fetchUsers();
-  }, []);
+  // Component mount - no auto-fetch
   
   return (
     <>
       <div className="board-tool">
-        <h2 className="section-title">User Group Management</h2>
+        <h2 className="section-title">Board Role Manager</h2>
         
         <div className="search-controls">
+          <select
+            value={actionType}
+            onChange={handleActionTypeChange}
+            className="search-type"
+          >
+            {actions.map(action => (
+              <option key={action} value={action}>{action}</option>
+            ))}
+          </select>
+          
           <select
             value={selectedGroup}
             onChange={handleGroupChange}
@@ -86,53 +105,57 @@ const UserManagement = ({ userGroups = [] }) => {
             ))}
           </select>
           
-          <input
-            type="text"
-            placeholder="Enter user ID to add to group"
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter') {
-                handleAddUserToGroup();
-              }
-            }}
-            className="search-input"
-          />
+          {(actionType === 'ADD' || actionType === 'REMOVE') && (
+            <input
+              type="text"
+              placeholder="Enter Cognito ID"
+              value={cognitoId}
+              onChange={(e) => setCognitoId(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleRun();
+                }
+              }}
+              className="search-input"
+            />
+          )}
           
           <button 
-            onClick={handleAddUserToGroup} 
-            disabled={loading || !userId}
+            onClick={handleRun} 
+            disabled={loading || (actionType !== 'LIST' && !cognitoId)}
           >
-            {loading ? 'Adding...' : `Add to ${selectedGroup}`}
+            {loading ? 'Processing...' : 'Run'}
           </button>
         </div>
 
-        <div className="results-grid">
-          {loading ? (
-            <div>Loading users...</div>
-          ) : users.length > 0 ? (
-            users.map(user => (
-              <BoardCard
-                key={user.username}
-                header={
-                  <div className="person-header">
-                    <h3>{user.email || user.username}</h3>
-                  </div>
-                }
-                content={
-                  <>
-                    <div>Cognito ID: {user.username}</div>
-                    <div>Email: {user.email}</div>
-                    <div>Status: {user.userStatus}</div>
-                    <div>Enabled: {user.enabled ? 'Yes' : 'No'}</div>
-                  </>
-                }
-              />
-            ))
-          ) : (
-            <div>No users found in this group</div>
-          )}
-        </div>
+        {actionType === 'LIST' && (
+          <div className="results-grid">
+            {loading ? (
+              <div>Loading users...</div>
+            ) : users.length > 0 ? (
+              users.map(user => (
+                <BoardCard
+                  key={user.username}
+                  header={
+                    <div className="person-header">
+                      <h3>{user.email || user.username}</h3>
+                    </div>
+                  }
+                  content={
+                    <>
+                      <div>Cognito ID: {user.username}</div>
+                      <div>Email: {user.email}</div>
+                      <div>Status: {user.userStatus}</div>
+                      <div>Enabled: {user.enabled ? 'Yes' : 'No'}</div>
+                    </>
+                  }
+                />
+              ))
+            ) : (
+              <div>No users found in this group</div>
+            )}
+          </div>
+        )}
       </div>
 
       {showNotification && (
@@ -145,4 +168,4 @@ const UserManagement = ({ userGroups = [] }) => {
   );
 };
 
-export default UserManagement;
+export default BoardRoleManager;

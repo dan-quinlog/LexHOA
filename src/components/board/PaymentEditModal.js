@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useMutation } from '@apollo/client';
-import { CREATE_PAYMENT, UPDATE_PAYMENT } from '../../queries/mutations';
+import { useMutation, useQuery } from '@apollo/client';
+import { CREATE_PAYMENT, UPDATE_PAYMENT, UPDATE_PROFILE } from '../../queries/mutations';
+import { GET_PROFILE } from '../../queries/queries';
 import Modal from '../shared/Modal';
 import './PaymentEditModal.css';
 
@@ -14,9 +15,18 @@ const PaymentEditModal = ({ payment, onClose, show }) => {
     ownerPaymentsId: payment?.ownerPaymentsId || '',
     notes: payment?.notes || ''
   });
+  
+  const [applyPayment, setApplyPayment] = useState(false);
 
   const [updatePayment] = useMutation(UPDATE_PAYMENT);
   const [createPayment] = useMutation(CREATE_PAYMENT);
+  const [updateProfile] = useMutation(UPDATE_PROFILE);
+  
+  // Get profile data when ownerPaymentsId is set (for applying payment)
+  const { data: profileData } = useQuery(GET_PROFILE, {
+    variables: { id: formData.ownerPaymentsId },
+    skip: !formData.ownerPaymentsId || !applyPayment
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,16 +44,39 @@ const PaymentEditModal = ({ payment, onClose, show }) => {
         return acc;
     }, {});
 
-    if (payment?.id) {
-        await updatePayment({
-            variables: { input: { id: payment.id, ...input } }
-        });
-    } else {
-        await createPayment({
-            variables: { input }
-        });
+    try {
+      if (payment?.id) {
+          await updatePayment({
+              variables: { input: { id: payment.id, ...input } }
+          });
+      } else {
+          await createPayment({
+              variables: { input }
+          });
+          
+          // Apply payment to profile balance if checkbox is checked
+          if (applyPayment && formData.ownerPaymentsId && formData.checkAmount) {
+              const currentProfile = profileData?.getProfile;
+              if (currentProfile) {
+                  const currentBalance = parseFloat(currentProfile.balance || 0);
+                  const paymentAmount = parseFloat(formData.checkAmount);
+                  const newBalance = currentBalance - paymentAmount;
+                  
+                  await updateProfile({
+                      variables: {
+                          input: {
+                              id: formData.ownerPaymentsId,
+                              balance: newBalance
+                          }
+                      }
+                  });
+              }
+          }
+      }
+      onClose();
+    } catch (error) {
+        console.error('Error processing payment:', error);
     }
-    onClose();
   };
 
   const handleChange = (e) => {
@@ -57,7 +90,7 @@ const PaymentEditModal = ({ payment, onClose, show }) => {
   return (
     <Modal show={show} onClose={onClose}>
       <div className="payment-edit-modal">
-        <h2>Edit Payment</h2>
+        <h2>{payment?.id ? 'Edit Payment' : 'Create Payment'}</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-container">
             <div className="form-section">
@@ -93,9 +126,22 @@ const PaymentEditModal = ({ payment, onClose, show }) => {
               </div>
 
               <div className="form-group">
-                <label>Account*</label>
+                <label>Owner ID*</label>
                 <input type="text" value={formData.ownerPaymentsId} onChange={(e) => setFormData({...formData, ownerPaymentsId: e.target.value})} />
               </div>
+              
+              {!payment?.id && (
+                <div className="form-group apply-payment-section">
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={applyPayment}
+                      onChange={(e) => setApplyPayment(e.target.checked)}
+                    />
+                    Apply Payment (reduce profile balance by check amount)
+                  </label>
+                </div>
+              )}
             </div>
           </div>
           <div className="modal-actions">

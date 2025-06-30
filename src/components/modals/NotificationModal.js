@@ -5,7 +5,7 @@ const NotificationModal = ({ message, onClose }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
-    }, 2000); // 1 second show + 1 second fade
+    }, 3000); // 2 second show + 1 second fade
 
     return () => clearTimeout(timer);
   }, [onClose]);

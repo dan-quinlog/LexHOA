@@ -18,3 +18,24 @@
 .save-button:hover {
   background-color: var(--hover-color);
 }
+
+.apply-payment-section {
+  margin-top: var(--spacing-medium);
+  padding: var(--spacing-small);
+  background-color: var(--background-light);
+  border-radius: var(--border-radius-small);
+  border: 1px solid var(--border-color);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  font-weight: normal;
+  cursor: pointer;
+  gap: var(--spacing-small);
+}
+
+.checkbox-label input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}

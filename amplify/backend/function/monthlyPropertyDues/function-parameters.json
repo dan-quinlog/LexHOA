@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "api": {
+      "lexhoa": [
+        "Query",
+        "Mutation"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "duesAmount",
+      "environmentVariableName": "DUES_AMOUNT"
+    }
+  ]
+}

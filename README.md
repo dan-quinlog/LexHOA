@@ -1,70 +1,217 @@
-# Getting Started with Create React App
+# Lexington Commons HOA Management System
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A comprehensive payment and profile management system designed specifically for Homeowners Association (HOA) administration at Lexington Commons.
 
-## Available Scripts
+## 🏠 Purpose
 
-In the project directory, you can run:
+This application provides HOA board members and administrators with tools to:
 
-### `npm start`
+- **Profile Management**: Create, edit, and manage homeowner and tenant profiles
+- **Payment Tracking**: Record and track HOA dues, fees, and other payments
+- **Property Management**: Maintain property records with owner/tenant relationships  
+- **Board Tools**: Administrative functions with role-based permissions
+- **Communication**: Bulletin board and ping messaging system
+- **Authentication**: Secure access control via AWS Cognito
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 🛠 Technical Architecture
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Frontend
+- **Framework**: React 18 with Create React App
+- **UI**: Custom CSS with responsive design
+- **State Management**: Apollo Client for GraphQL state management
+- **Authentication**: AWS Amplify Auth (Cognito)
+- **Routing**: React Router for SPA navigation
 
-### `npm test`
+### Backend
+- **API**: AWS AppSync (GraphQL)
+- **Database**: Amazon DynamoDB
+- **Authentication**: AWS Cognito User Pools
+- **File Storage**: Amazon S3
+- **Serverless Functions**: AWS Lambda
+- **Infrastructure**: AWS Amplify for full-stack deployment
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Key Features
+- **GraphQL API**: Efficient data fetching with relationships
+- **Real-time Updates**: Subscriptions for live data updates
+- **Role-based Access Control**: President, Secretary, Treasurer, Board member permissions
+- **Responsive Design**: Works on desktop, tablet, and mobile devices
+- **Offline Support**: Progressive Web App capabilities
 
-### `npm run build`
+## 🚀 Getting Started
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Prerequisites
+- Node.js 16+ and npm
+- AWS Account (for backend services)
+- Amplify CLI configured
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Installation
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. **Clone the repository**
+   ```bash
+   git clone [repository-url]
+   cd LexHOA
+   ```
 
-### `npm run eject`
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+3. **Configure AWS Amplify**
+   ```bash
+   amplify configure
+   amplify init
+   ```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+4. **Deploy backend resources**
+   ```bash
+   amplify push
+   ```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+5. **Start development server**
+   ```bash
+   npm start
+   ```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+The app will open at [http://localhost:3000](http://localhost:3000)
 
-## Learn More
+## 📁 Project Structure
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```
+src/
+├── components/          # Reusable UI components
+│   ├── board/          # Board management tools
+│   ├── modals/         # Modal dialogs
+│   ├── shared/         # Shared components
+│   └── dev/            # Development utilities
+├── pages/              # Main application pages
+│   ├── dashboard/      # Dashboard components
+│   ├── profile/        # Profile management
+│   └── payments/       # Payment tracking
+├── queries/            # GraphQL queries and mutations
+├── utils/              # Utility functions
+├── services/           # API service layers
+└── styles/             # Global styles and themes
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 🔐 User Roles & Permissions
 
-### Code Splitting
+### President
+- Full administrative access
+- Create/edit/delete all profiles and properties
+- Manage board member roles
+- Access all financial data
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Secretary  
+- Profile management (create/edit/merge)
+- Property management
+- Board communications
+- Limited financial access
 
-### Analyzing the Bundle Size
+### Treasurer
+- Payment management (create/edit/delete)
+- Financial reporting
+- Profile balance management
+- Property financial data
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Board Member
+- View and edit basic profile information
+- Access property information
+- View payment history
+- Board communications
 
-### Making a Progressive Web App
+## 🏗 Available Scripts
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### Development
+- **`npm start`** - Start development server
+- **`npm test`** - Run test suite in watch mode
+- **`npm run build`** - Create production build
 
-### Advanced Configuration
+### AWS Amplify
+- **`amplify status`** - Check backend resource status
+- **`amplify push`** - Deploy backend changes
+- **`amplify pull`** - Pull latest backend configuration
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## 🗄 Database Schema
 
-### Deployment
+### Core Entities
+- **Profile**: Homeowner/tenant information, contact details, balance
+- **Property**: Physical property data with owner/tenant relationships
+- **Payment**: Payment records with owner associations
+- **Bulletin**: Board announcements and communications
+- **Ping**: Internal messaging system
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### Relationships
+- **Profile** ↔ **Property**: Owner and tenant relationships
+- **Profile** ↔ **Payment**: Payment ownership
+- **Property** → **Profile**: Owner and tenant references
 
-### `npm run build` fails to minify
+## 🔧 Configuration
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Environment Variables
+Create a `.env` file with the following variables:
+```
+REACT_APP_PRESIDENT_GROUP_NAME=president
+REACT_APP_SECRETARY_GROUP_NAME=secretary  
+REACT_APP_TREASURER_GROUP_NAME=treasurer
+REACT_APP_BOARD_GROUP_NAME=board
+```
+
+### AWS Services Configuration
+- **Cognito**: User authentication and authorization
+- **AppSync**: GraphQL API endpoint
+- **DynamoDB**: Data storage with global secondary indexes
+- **S3**: File storage for documents and images
+
+## 📱 Progressive Web App
+
+The application includes PWA capabilities:
+- **Offline functionality**: Basic operations work without internet
+- **Install prompt**: Can be installed on mobile devices
+- **App-like experience**: Fullscreen mode on mobile
+- **Custom app icon**: Lexington Commons HOA logo
+
+## 🔍 Testing
+
+The application includes comprehensive testing:
+- **Unit tests**: Component and utility function testing
+- **Integration tests**: User workflow testing
+- **E2E tests**: Full application testing
+
+Run tests with:
+```bash
+npm test                    # Interactive watch mode
+npm test -- --watchAll=false   # Run all tests once
+```
+
+## 🚀 Deployment
+
+### Production Build
+```bash
+npm run build
+```
+
+### Amplify Hosting
+The application is configured for automatic deployment via AWS Amplify:
+1. Connect repository to Amplify Console
+2. Configure build settings
+3. Deploy automatically on git push
+
+## 🤝 Contributing
+
+1. Create feature branch from `main`
+2. Make changes following existing code style
+3. Update tests as needed
+4. Submit pull request for review
+
+## 📄 License
+
+Private software for Lexington Commons HOA use only.
+
+## 📞 Support
+
+For technical support or feature requests, contact the development team.
+
+---
+
+**Built with ❤️ for the Lexington Commons Community**

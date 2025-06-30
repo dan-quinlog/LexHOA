@@ -7,6 +7,7 @@ import ProfileEditModal from '../shared/ProfileEditModal';
 import DeleteConfirmationModal from '../shared/DeleteConfirmationModal';
 import MergeProfilesModal from '../modals/MergeProfilesModal';
 import NotificationModal from '../modals/NotificationModal';
+import { copyWithFeedback } from '../../utils/clipboardUtils';
 import './shared/BoardTools.css';
 
 // Get group names from environment variables
@@ -315,10 +316,10 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
             })}
             className="search-type"
           >
-            <option value="id">ID</option>
             <option value="name">Name</option>
             <option value="email">Email</option>
             <option value="phone">Phone</option>
+            <option value="id">Profile ID</option>
             <option value="cognitoID">Cognito ID</option>
           </select>
           <input
@@ -366,8 +367,28 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
               }
               content={
                 <>
-                  <div>Profile ID: {person.id}</div>
-                  <div>Cognito ID: {person.cognitoID}</div>
+                  <div>
+                    Profile ID: {person.id}
+                    <button 
+                      className="copy-btn" 
+                      onClick={(e) => copyWithFeedback(person.id, e)}
+                      title="Copy Profile ID"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                  <div>
+                    Cognito ID: {person.cognitoID || 'None'}
+                    {person.cognitoID && (
+                      <button 
+                        className="copy-btn" 
+                        onClick={(e) => copyWithFeedback(person.cognitoID, e)}
+                        title="Copy Cognito ID"
+                      >
+                        Copy
+                      </button>
+                    )}
+                  </div>
                   <div>Email: {person.email}</div>
                   <div>Phone: {person.phone}</div>
                 </>

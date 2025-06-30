@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "auth": {
+      "lexhoa4faca5b8": [
+        "create",
+        "update"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "authLexhoaUserpoolid",
+      "environmentVariableName": "AUTH_LEXHOA_USERPOOLID"
+    }
+  ]
+}

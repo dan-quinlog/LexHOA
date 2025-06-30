@@ -5,6 +5,7 @@ import { DELETE_PAYMENT } from '../../queries/mutations';
 import PaymentEditModal from './PaymentEditModal';
 import BoardCard from './shared/BoardCard';
 import DeleteConfirmationModal from '../shared/DeleteConfirmationModal';
+import { copyWithFeedback } from '../../utils/clipboardUtils';
 import './shared/BoardTools.css';
 
 // Get group names from environment variables
@@ -31,20 +32,38 @@ const PaymentManager = ({ searchState, setSearchState, userGroups = [] }) => {
     try {
       let response;
       switch (searchState.searchType) {
-        case 'paymentId':
-          response = await searchPayments({
-            variables: {
-              filter: {
-                id: { eq: searchState.searchTerm }
-              }
-            }
-          });
-          break;
         case 'ownerId':
           response = await searchByOwner({
             variables: {
               ownerPaymentsId: searchState.searchTerm,
               sortDirection: 'DESC'
+            }
+          });
+          break;
+        case 'checkNumber':
+          response = await searchPayments({
+            variables: {
+              filter: {
+                checkNumber: { eq: searchState.searchTerm }
+              }
+            }
+          });
+          break;
+        case 'checkAmount':
+          const checkAmount = parseFloat(searchState.searchTerm);
+          if (isNaN(checkAmount) || checkAmount < 0) {
+            setSearchState(prev => ({
+              ...prev,
+              searchResults: []
+            }));
+            console.error('Invalid check amount - must be a positive number');
+            return;
+          }
+          response = await searchPayments({
+            variables: {
+              filter: {
+                checkAmount: { eq: checkAmount }
+              }
             }
           });
           break;
@@ -57,11 +76,29 @@ const PaymentManager = ({ searchState, setSearchState, userGroups = [] }) => {
             }
           });
           break;
-        case 'checkNumber':
+        case 'invoiceAmount':
+          const invoiceAmount = parseFloat(searchState.searchTerm);
+          if (isNaN(invoiceAmount) || invoiceAmount < 0) {
+            setSearchState(prev => ({
+              ...prev,
+              searchResults: []
+            }));
+            console.error('Invalid invoice amount - must be a positive number');
+            return;
+          }
           response = await searchPayments({
             variables: {
               filter: {
-                checkNumber: { eq: searchState.searchTerm }
+                invoiceAmount: { eq: invoiceAmount }
+              }
+            }
+          });
+          break;
+        case 'paymentId':
+          response = await searchPayments({
+            variables: {
+              filter: {
+                id: { eq: searchState.searchTerm }
               }
             }
           });
@@ -121,14 +158,25 @@ const PaymentManager = ({ searchState, setSearchState, userGroups = [] }) => {
           })}
           className="search-type"
         >
-          <option value="paymentId">Payment ID</option>
           <option value="ownerId">Owner ID</option>
-          <option value="invoiceNumber">Invoice Number</option>
           <option value="checkNumber">Check Number</option>
+          <option value="checkAmount">Check Amount</option>
+          <option value="invoiceNumber">Invoice ID</option>
+          <option value="invoiceAmount">Invoice Amount</option>
+          <option value="paymentId">Payment ID</option>
         </select>
         <input
-          type="text"
-          placeholder="Search..."
+          type={searchState.searchType === 'checkAmount' || searchState.searchType === 'invoiceAmount' ? 'number' : 'text'}
+          placeholder={
+            searchState.searchType === 'checkAmount' ? 'Enter check amount...' :
+            searchState.searchType === 'invoiceAmount' ? 'Enter invoice amount...' :
+            searchState.searchType === 'ownerId' ? 'Enter owner ID...' :
+            searchState.searchType === 'checkNumber' ? 'Enter check number...' :
+            searchState.searchType === 'invoiceNumber' ? 'Enter invoice ID...' :
+            searchState.searchType === 'paymentId' ? 'Enter payment ID...' :
+            'Search...'
+          }
+          step={searchState.searchType === 'checkAmount' || searchState.searchType === 'invoiceAmount' ? '0.01' : undefined}
           value={searchState.searchTerm}
           onChange={(e) => setSearchState({
             ...searchState,
@@ -157,9 +205,20 @@ const PaymentManager = ({ searchState, setSearchState, userGroups = [] }) => {
             header={<h3>Payment {payment.id}</h3>}
             content={
               <>
-                <div>Account: {payment.ownerPaymentsId}</div>
-                <div>Invoice ID: {payment.invoiceNumber}</div>
-                <div>Amount: ${payment.invoiceAmount.toFixed(2)}</div>
+                <div>
+                  Owner: {payment.ownerPayments?.name || payment.ownerPaymentsId || 'Unknown'}
+                  {payment.ownerPaymentsId && (
+                    <button 
+                      className="copy-btn" 
+                      onClick={(e) => copyWithFeedback(payment.ownerPaymentsId, e)}
+                      title="Copy Owner ID"
+                    >
+                      Copy
+                    </button>
+                  )}
+                </div>
+                <div>Check ID: {payment.checkNumber || 'N/A'}</div>
+                <div>Check Amount: ${payment.checkAmount ? payment.checkAmount.toFixed(2) : '0.00'}</div>
                 <div>Check Date: {payment.checkDate}</div>
               </>
             }

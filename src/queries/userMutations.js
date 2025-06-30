@@ -8,3 +8,21 @@ export const ADD_USER_TO_GROUP = gql`
     }
   }
 `;
+
+export const MANAGE_COGNITO_GROUPS = gql`
+  mutation ManageCognitoGroups($action: String!, $groupName: String!, $cognitoId: String!) {
+    manageCognitoGroups(action: $action, groupName: $groupName, cognitoId: $cognitoId) {
+      success
+      message
+    }
+  }
+`;
+
+export const PROCESS_MONTHLY_PROPERTY_DUES = gql`
+  mutation ProcessMonthlyPropertyDues {
+    processMonthlyPropertyDues {
+      success
+      message
+    }
+  }
+`;

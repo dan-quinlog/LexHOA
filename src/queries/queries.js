@@ -413,6 +413,14 @@ export const LIST_PROPERTIES = gql`
         address
         profOwnerId
         profTenantId
+        profOwner {
+          id
+          name
+        }
+        profTenant {
+          id
+          name
+        }
         createdAt
         updatedAt
       }
@@ -530,6 +538,10 @@ export const LIST_PAYMENTS = gql`
         checkAmount
         invoiceNumber
         invoiceAmount
+        ownerPayments {
+          id
+          name
+        }
         ownerPaymentsId
         createdAt
         updatedAt
@@ -565,6 +577,10 @@ export const PAYMENTS_BY_OWNER = gql`
         checkAmount
         invoiceNumber
         invoiceAmount
+        ownerPayments {
+          id
+          name
+        }
         ownerPaymentsId
         createdAt
         updatedAt

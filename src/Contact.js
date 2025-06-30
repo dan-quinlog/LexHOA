@@ -10,7 +10,7 @@ function Contact() {
         <div className="contact-info">
           <h2>Get in Touch</h2>
           <p>Phone: (555) 123-4567</p>
-          <p>Email: info@lexingtoncommonshoa.com</p>
+          <p>Email: info@lexingtoncommons-weco.com</p>
           <h3>Response Times</h3>
           <p>We aim to respond as board members are available. There is no paid staff, so please allow time for a volunteer to address your inquiry.</p>
         </div>

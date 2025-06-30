@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLazyQuery, useMutation } from '@apollo/client';
 import BoardCard from './shared/BoardCard';
 import NotificationModal from '../modals/NotificationModal';
+import { copyWithFeedback } from '../../utils/clipboardUtils';
 import './shared/BoardTools.css';
 
 // Import the existing queries and mutations
@@ -50,7 +51,7 @@ const BoardRoleManager = ({ userGroups = [] }) => {
     const newGroup = e.target.value;
     setSelectedGroup(newGroup);
   };
-  
+
   const handleActionTypeChange = (e) => {
     setActionType(e.target.value);
     setCognitoId('');
@@ -78,12 +79,12 @@ const BoardRoleManager = ({ userGroups = [] }) => {
   };
 
   // Component mount - no auto-fetch
-  
+
   return (
     <>
       <div className="board-tool">
         <h2 className="section-title">Board Role Manager</h2>
-        
+
         <div className="search-controls">
           <select
             value={actionType}
@@ -94,7 +95,7 @@ const BoardRoleManager = ({ userGroups = [] }) => {
               <option key={action} value={action}>{action}</option>
             ))}
           </select>
-          
+
           <select
             value={selectedGroup}
             onChange={handleGroupChange}
@@ -104,7 +105,7 @@ const BoardRoleManager = ({ userGroups = [] }) => {
               <option key={group} value={group}>{group}</option>
             ))}
           </select>
-          
+
           {(actionType === 'ADD' || actionType === 'REMOVE') && (
             <input
               type="text"
@@ -119,9 +120,9 @@ const BoardRoleManager = ({ userGroups = [] }) => {
               className="search-input"
             />
           )}
-          
-          <button 
-            onClick={handleRun} 
+
+          <button
+            onClick={handleRun}
             disabled={loading || (actionType !== 'LIST' && !cognitoId)}
           >
             {loading ? 'Processing...' : 'Run'}
@@ -143,7 +144,15 @@ const BoardRoleManager = ({ userGroups = [] }) => {
                   }
                   content={
                     <>
-                      <div>Cognito ID: {user.username}</div>
+                      <div>Cognito ID: {user.username}
+                        <button
+                          className="copy-btn"
+                          onClick={(e) => copyWithFeedback(person.id, e)}
+                          title="Copy Profile ID"
+                        >
+                          Copy
+                        </button>
+                      </div>
                       <div>Email: {user.email}</div>
                       <div>Status: {user.userStatus}</div>
                       <div>Enabled: {user.enabled ? 'Yes' : 'No'}</div>

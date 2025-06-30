@@ -255,3 +255,10 @@ type MutationResult {
 type Query {
   listUsersInGroup(groupName: String!): [CognitoUser]
 }
+
+type Mutation {
+  manageCognitoGroups(action: String!, groupName: String!, cognitoId: String!): MutationResult
+    @function(name: "manageCognitoGroups-${env}")
+  processMonthlyPropertyDues: MutationResult
+    @function(name: "monthlyPropertyDues-${env}")
+}

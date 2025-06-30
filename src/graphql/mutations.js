@@ -1,6 +1,32 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
+export const manageCognitoGroups = /* GraphQL */ `
+  mutation ManageCognitoGroups(
+    $action: String!
+    $groupName: String!
+    $cognitoId: String!
+  ) {
+    manageCognitoGroups(
+      action: $action
+      groupName: $groupName
+      cognitoId: $cognitoId
+    ) {
+      success
+      message
+      __typename
+    }
+  }
+`;
+export const processMonthlyPropertyDues = /* GraphQL */ `
+  mutation ProcessMonthlyPropertyDues {
+    processMonthlyPropertyDues {
+      success
+      message
+      __typename
+    }
+  }
+`;
 export const createProfile = /* GraphQL */ `
   mutation CreateProfile(
     $input: CreateProfileInput!

@@ -25,6 +25,16 @@
           "userPoolId": "us-east-1_bQMOu81V8",
           "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
           "s3Key": "amplify-builds/listUsersInGroupResolver-666f7a2b702b7a34626a-build.zip"
+        },
+        "manageCognitoGroups": {
+          "authLexhoaUserpoolid": "us-east-1_bQMOu81V8",
+          "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
+          "s3Key": "amplify-builds/manageCognitoGroups-5950684d77674e686e51-build.zip"
+        },
+        "monthlyPropertyDues": {
+          "duesAmount": "50",
+          "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
+          "s3Key": "amplify-builds/monthlyPropertyDues-396166787a734a59544b-build.zip"
         }
       },
       "api": {

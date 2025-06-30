@@ -103,6 +103,36 @@
       "dependsOn": [],
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
+    },
+    "manageCognitoGroups": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "lexhoa4faca5b8"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "monthlyPropertyDues": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "lexhoa"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
     }
   },
   "parameters": {
@@ -143,6 +173,54 @@
         {
           "category": "function",
           "resourceName": "listUsersInGroupResolver"
+        }
+      ]
+    },
+    "AMPLIFY_function_manageCognitoGroups_authLexhoaUserpoolid": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "manageCognitoGroups"
+        }
+      ]
+    },
+    "AMPLIFY_function_manageCognitoGroups_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "manageCognitoGroups"
+        }
+      ]
+    },
+    "AMPLIFY_function_manageCognitoGroups_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "manageCognitoGroups"
+        }
+      ]
+    },
+    "AMPLIFY_function_monthlyPropertyDues_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "monthlyPropertyDues"
+        }
+      ]
+    },
+    "AMPLIFY_function_monthlyPropertyDues_duesAmount": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "monthlyPropertyDues"
+        }
+      ]
+    },
+    "AMPLIFY_function_monthlyPropertyDues_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "monthlyPropertyDues"
         }
       ]
     }

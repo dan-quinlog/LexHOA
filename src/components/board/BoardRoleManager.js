@@ -145,13 +145,13 @@ const BoardRoleManager = ({ userGroups = [] }) => {
                   content={
                     <>
                       <div>Cognito ID: {user.username}
-                        <button
-                          className="copy-btn"
-                          onClick={(e) => copyWithFeedback(person.id, e)}
-                          title="Copy Profile ID"
-                        >
-                          Copy
-                        </button>
+                      <button
+                      className="copy-btn"
+                      onClick={(e) => copyWithFeedback(user.username, e)}
+                      title="Copy Cognito ID"
+                      >
+                      Copy
+                      </button>
                       </div>
                       <div>Email: {user.email}</div>
                       <div>Status: {user.userStatus}</div>

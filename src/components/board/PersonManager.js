@@ -172,18 +172,10 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
       'createdAt',
       'updatedAt',
       'ownedProperties',
-      'createdPings',
-      'payments',
       'cognitoID',
-      'tenantAtId',
-      'tenantAt',
-      'byTypeName',
-      'byTypeBalance',
-      'byTypeCreatedAt',
-      'owner'
+      'tenantAtId'
     ];
-    
-    // Create a clean object with only valid fields
+
     return Object.entries(formData).reduce((acc, [key, value]) => {
       if (!fieldsToRemove.includes(key)) {
         acc[key] = value === '' ? null : value;
@@ -197,20 +189,11 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
       const cleanedData = cleanFormData(formData);
       
       if (selectedPerson?.id) {
-        // For updates, only include fields that have actually changed
-        const changedFields = {};
-        Object.keys(cleanedData).forEach(key => {
-          // Only include fields that have changed or are required (like id)
-          if (key === 'id' || cleanedData[key] !== selectedPerson[key]) {
-            changedFields[key] = cleanedData[key];
-          }
-        });
-        
         await updatePerson({
           variables: {
             input: {
               id: selectedPerson.id,
-              ...changedFields
+              ...cleanedData
             }
           }
         });

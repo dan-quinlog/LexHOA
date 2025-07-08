@@ -25,12 +25,7 @@ type Profile @model
       queryField: "profilesByTypeCreatedAt"
       sortKeyFields: ["createdAt"]
     )
-  owner: String 
-    @auth(rules: [
-      { allow: private, operations: [read] },
-      { allow: owner, operations: [read] },
-      { allow: groups, groups: ["PRESIDENT", "SECRETARY"], operations: [create, read, update, delete] }
-    ])
+  owner: String
   cognitoID: String @index(name: "byCognitoID", queryField: "profileByCognitoID")
   name: String! @index(name: "byName", queryField: "profileByName")
   email: String @index(name: "byEmail", queryField: "profileByEmail")

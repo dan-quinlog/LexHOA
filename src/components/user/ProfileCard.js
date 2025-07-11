@@ -15,7 +15,7 @@ const ProfileCard = ({ profile }) => {
       </div>
 
       <div className="field-group">
-        <div className="field-label">Address</div>
+        <div className="field-label">Mailing Address</div>
         <div className="field-value">
           {address1}
           {address2 && <div>{address2}</div>}

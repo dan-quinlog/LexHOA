@@ -13,7 +13,6 @@ const ProfileEditModal = ({
   userGroups = []
 }) => {
   const [formData, setFormData] = useState({
-    id: '',
     name: '',
     email: '',
     phone: '',

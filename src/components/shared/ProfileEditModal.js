@@ -105,7 +105,64 @@ const ProfileEditModal = ({
           </div>
 
           <div className="form-group">
-            <label>Address</label>
+            <label>Contact Preference</label>
+            <select
+              value={formData.contactPref || 'EMAIL'}
+              onChange={(e) => setFormData({ ...formData, contactPref: e.target.value })}
+            >
+              <option value="EMAIL">Email</option>
+              <option value="CALL">Call</option>
+              <option value="TEXT">Text</option>
+              <option value="PHYSICAL">Physical Mail</option>
+            </select>
+          </div>
+
+          <div className="form-group checkbox-group">
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.allowText || false}
+                onChange={(e) => setFormData({ ...formData, allowText: e.target.checked })}
+              />
+              Allow Text Messages
+            </label>
+          </div>
+
+          {isBoard && (
+            <div className="form-group">
+              <label>Balance</label>
+              <input
+                type="number"
+                value={formData.balance || 0}
+                onChange={(e) => setFormData({ ...formData, balance: parseFloat(e.target.value) })}
+                readOnly={!hasBalanceEditPermission}
+                className={!hasBalanceEditPermission ? "read-only-field" : ""}
+              />
+              {!hasBalanceEditPermission && (
+                <small className="field-note">Balance can only be edited by the President or Treasurer</small>
+              )}
+            </div>
+          )}
+
+          {isOwner && (
+            <div className="form-group">
+              <label>Billing Frequency</label>
+              <select
+                value={formData.billingFreq || 'MONTHLY'}
+                onChange={(e) => setFormData({ ...formData, billingFreq: e.target.value })}
+              >
+                <option value="MONTHLY">Monthly</option>
+                <option value="QUARTERLY">Quarterly</option>
+                <option value="SEMI">Semi-Annual</option>
+                <option value="ANNUAL">Annual</option>
+              </select>
+            </div>
+          )}
+        </div>
+
+        <div className="form-section">
+          <div className="form-group">
+            <label>Mailing Address</label>
             <input
               type="text"
               value={formData.address || ''}
@@ -138,60 +195,6 @@ const ProfileEditModal = ({
               value={formData.zip || ''}
               onChange={(e) => setFormData({ ...formData, zip: e.target.value })}
             />
-          </div>
-        </div>
-
-        <div className="form-section">
-          <div className="form-group">
-            <label>Contact Preference</label>
-            <select
-              value={formData.contactPref || 'EMAIL'}
-              onChange={(e) => setFormData({ ...formData, contactPref: e.target.value })}
-            >
-              <option value="EMAIL">Email</option>
-              <option value="CALL">Call</option>
-              <option value="TEXT">Text</option>
-              <option value="PHYSICAL">Physical Mail</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label>Billing Frequency</label>
-            <select
-              value={formData.billingFreq || 'MONTHLY'}
-              onChange={(e) => setFormData({ ...formData, billingFreq: e.target.value })}
-            >
-              <option value="MONTHLY">Monthly</option>
-              <option value="QUARTERLY">Quarterly</option>
-              <option value="SEMI">Semi-Annual</option>
-              <option value="ANNUAL">Annual</option>
-            </select>
-          </div>
-
-          <div className="form-group checkbox-group">
-            <label>
-              <input
-                type="checkbox"
-                checked={formData.allowText || false}
-                onChange={(e) => setFormData({ ...formData, allowText: e.target.checked })}
-              />
-              Allow Text Messages
-            </label>
-          </div>
-
-          <div className="form-group">
-            <label>Balance</label>
-            <input
-              type="number"
-              value={formData.balance || 0}
-              onChange={(e) => setFormData({ ...formData, balance: parseFloat(e.target.value) })}
-              // Only allow balance editing for users with permission
-              readOnly={!hasBalanceEditPermission}
-              className={!hasBalanceEditPermission ? "read-only-field" : ""}
-            />
-            {!hasBalanceEditPermission && (
-              <small className="field-note">Balance can only be edited by the President or Treasurer</small>
-            )}
           </div>
         </div>
       </div>

@@ -17,11 +17,25 @@ const PropertyEditModal = ({ show, onClose, onSubmit, initialValues = {}, userGr
   // Check if user has admin permissions (PRESIDENT only)
   const hasAdminPermission = userGroups && userGroups.includes(PRESIDENT_GROUP);
 
+  const cleanFormData = (data) => {
+    const cleaned = {};
+    Object.entries(data).forEach(([key, value]) => {
+      // Convert empty strings to null for ID fields to avoid DynamoDB errors
+      if ((key === 'profOwnerId' || key === 'profTenantId') && value === '') {
+        cleaned[key] = null;
+      } else if (value !== '') {
+        cleaned[key] = value;
+      }
+    });
+    return cleaned;
+  };
+
   const handleSubmit = () => {
     if (!formData.address) {
       return;
     }
-    onSubmit(formData);
+    const cleanedData = cleanFormData(formData);
+    onSubmit(cleanedData);
   };
 
   return (
@@ -45,6 +59,7 @@ const PropertyEditModal = ({ show, onClose, onSubmit, initialValues = {}, userGr
               type="text"
               value={formData.profOwnerId}
               onChange={(e) => setFormData({ ...formData, profOwnerId: e.target.value })}
+              placeholder="Leave blank if property has no owner"
             />
           </div>
 
@@ -54,6 +69,7 @@ const PropertyEditModal = ({ show, onClose, onSubmit, initialValues = {}, userGr
               type="text"
               value={formData.profTenantId}
               onChange={(e) => setFormData({ ...formData, profTenantId: e.target.value })}
+              placeholder="Leave blank if property is vacant"
             />
           </div>
 

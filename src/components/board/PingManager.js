@@ -130,7 +130,7 @@ const PingManager = ({ searchState, setSearchState }) => {
                                             {item}
                                             <button 
                                                 className="copy-btn" 
-                                                onClick={(e) => copyWithFeedback(item, e)}
+                                                onClick={(e) => copyWithFeedback(item.split(':').pop(), e)}
                                                 title="Copy ID"
                                             >
                                                 Copy

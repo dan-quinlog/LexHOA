@@ -167,21 +167,19 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
   };
 
   const cleanFormData = (formData) => {
-    const fieldsToRemove = [
-      '__typename',
-      'createdAt',
-      'updatedAt',
-      'ownedProperties',
-      'cognitoID',
-      'tenantAtId'
-    ];
-
-    return Object.entries(formData).reduce((acc, [key, value]) => {
-      if (!fieldsToRemove.includes(key)) {
-        acc[key] = value === '' ? null : value;
+    // Only include fields that are valid for UpdateProfileInput
+    const allowedFields = ['name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'contactPref', 'allowText', 'billingFreq', 'balance', 'tenantAtId'];
+    const updateData = {};
+    
+    allowedFields.forEach(field => {
+      if (formData.hasOwnProperty(field)) {
+        const value = formData[field];
+        // Convert empty strings to null, but keep the field
+        updateData[field] = value === '' ? null : value;
       }
-      return acc;
-    }, {});
+    });
+    
+    return updateData;
   };
 
   const handleSave = async (formData) => {

@@ -3,6 +3,7 @@ import { useLazyQuery, useMutation } from '@apollo/client';
 import { SEARCH_PINGS_BY_ID, SEARCH_PINGS_BY_CREATOR, LIST_PENDING_PINGS } from '../../queries/queries';
 import { UPDATE_PING } from '../../queries/mutations';
 import BoardCard from './shared/BoardCard';
+import { copyWithFeedback } from '../../utils/clipboardUtils';
 import './shared/BoardTools.css';
 
 const PingManager = ({ searchState, setSearchState }) => {
@@ -109,11 +110,32 @@ const PingManager = ({ searchState, setSearchState }) => {
                         content={
                             <>
                                 <div>Type: {ping.type}</div>
+                                <div>
+                                    Requestor: {ping.profCreator?.name || ping.profCreatorId || 'None'}
+                                    {ping.profCreatorId && (
+                                        <button 
+                                            className="copy-btn" 
+                                            onClick={(e) => copyWithFeedback(ping.profCreatorId, e)}
+                                            title="Copy Creator ID"
+                                        >
+                                            Copy
+                                        </button>
+                                    )}
+                                </div>
                                 <div>Request Details: {ping.instruction}</div>
-                                <div>Related IDs:</div>
+                                <div>Related ID:</div>
                                 <ul>
                                     {ping.items.map((item, index) => (
-                                        <li key={index}>{item}</li>
+                                        <li key={index}>
+                                            {item}
+                                            <button 
+                                                className="copy-btn" 
+                                                onClick={(e) => copyWithFeedback(item.split(':').pop(), e)}
+                                                title="Copy ID"
+                                            >
+                                                Copy
+                                            </button>
+                                        </li>
                                     ))}
                                 </ul>
                                 <div>Created: {new Date(ping.createdAt).toLocaleDateString()}</div>

@@ -13,7 +13,6 @@ const ProfileEditModal = ({
   userGroups = []
 }) => {
   const [formData, setFormData] = useState({
-    id: '',
     name: '',
     email: '',
     phone: '',
@@ -27,6 +26,28 @@ const ProfileEditModal = ({
     balance: 0,
     ...initialValues
   });
+
+  const formatPhoneNumber = (value) => {
+    // Remove all non-digit characters
+    const numbers = value.replace(/\D/g, '');
+    
+    // Limit to 10 digits
+    const limited = numbers.slice(0, 10);
+    
+    // Format as XXX-XXX-XXXX
+    if (limited.length >= 6) {
+      return `${limited.slice(0, 3)}-${limited.slice(3, 6)}-${limited.slice(6)}`;
+    } else if (limited.length >= 3) {
+      return `${limited.slice(0, 3)}-${limited.slice(3)}`;
+    } else {
+      return limited;
+    }
+  };
+
+  const handlePhoneChange = (e) => {
+    const formatted = formatPhoneNumber(e.target.value);
+    setFormData({ ...formData, phone: formatted });
+  };
 
   const [errors, setErrors] = useState({});
 
@@ -77,12 +98,71 @@ const ProfileEditModal = ({
             <input
               type="tel"
               value={formData.phone || ''}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              onChange={handlePhoneChange}
+              placeholder="000-000-0000"
+              maxLength="12"
             />
           </div>
 
           <div className="form-group">
-            <label>Address</label>
+            <label>Contact Preference</label>
+            <select
+              value={formData.contactPref || 'EMAIL'}
+              onChange={(e) => setFormData({ ...formData, contactPref: e.target.value })}
+            >
+              <option value="EMAIL">Email</option>
+              <option value="CALL">Call</option>
+              <option value="TEXT">Text</option>
+              <option value="PHYSICAL">Physical Mail</option>
+            </select>
+          </div>
+
+          <div className="form-group checkbox-group">
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.allowText || false}
+                onChange={(e) => setFormData({ ...formData, allowText: e.target.checked })}
+              />
+              Allow Text Messages
+            </label>
+          </div>
+
+          {isBoard && (
+            <div className="form-group">
+              <label>Balance</label>
+              <input
+                type="number"
+                value={formData.balance || 0}
+                onChange={(e) => setFormData({ ...formData, balance: parseFloat(e.target.value) })}
+                readOnly={!hasBalanceEditPermission}
+                className={!hasBalanceEditPermission ? "read-only-field" : ""}
+              />
+              {!hasBalanceEditPermission && (
+                <small className="field-note">Balance can only be edited by the President or Treasurer</small>
+              )}
+            </div>
+          )}
+
+          {isOwner && (
+            <div className="form-group">
+              <label>Billing Frequency</label>
+              <select
+                value={formData.billingFreq || 'MONTHLY'}
+                onChange={(e) => setFormData({ ...formData, billingFreq: e.target.value })}
+              >
+                <option value="MONTHLY">Monthly</option>
+                <option value="QUARTERLY">Quarterly</option>
+                <option value="SEMI">Semi-Annual</option>
+                <option value="ANNUAL">Annual</option>
+              </select>
+            </div>
+          )}
+        </div>
+
+        <div className="form-section">
+          <div className="form-group">
+            <label>Mailing Address</label>
             <input
               type="text"
               value={formData.address || ''}
@@ -115,60 +195,6 @@ const ProfileEditModal = ({
               value={formData.zip || ''}
               onChange={(e) => setFormData({ ...formData, zip: e.target.value })}
             />
-          </div>
-        </div>
-
-        <div className="form-section">
-          <div className="form-group">
-            <label>Contact Preference</label>
-            <select
-              value={formData.contactPref || 'EMAIL'}
-              onChange={(e) => setFormData({ ...formData, contactPref: e.target.value })}
-            >
-              <option value="EMAIL">Email</option>
-              <option value="CALL">Call</option>
-              <option value="TEXT">Text</option>
-              <option value="PHYSICAL">Physical Mail</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label>Billing Frequency</label>
-            <select
-              value={formData.billingFreq || 'MONTHLY'}
-              onChange={(e) => setFormData({ ...formData, billingFreq: e.target.value })}
-            >
-              <option value="MONTHLY">Monthly</option>
-              <option value="QUARTERLY">Quarterly</option>
-              <option value="SEMI">Semi-Annual</option>
-              <option value="ANNUAL">Annual</option>
-            </select>
-          </div>
-
-          <div className="form-group checkbox-group">
-            <label>
-              <input
-                type="checkbox"
-                checked={formData.allowText || false}
-                onChange={(e) => setFormData({ ...formData, allowText: e.target.checked })}
-              />
-              Allow Text Messages
-            </label>
-          </div>
-
-          <div className="form-group">
-            <label>Balance</label>
-            <input
-              type="number"
-              value={formData.balance || 0}
-              onChange={(e) => setFormData({ ...formData, balance: parseFloat(e.target.value) })}
-              // Only allow balance editing for users with permission
-              readOnly={!hasBalanceEditPermission}
-              className={!hasBalanceEditPermission ? "read-only-field" : ""}
-            />
-            {!hasBalanceEditPermission && (
-              <small className="field-note">Balance can only be edited by the President or Treasurer</small>
-            )}
           </div>
         </div>
       </div>

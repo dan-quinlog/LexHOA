@@ -26,10 +26,15 @@ type Profile @model
       sortKeyFields: ["createdAt"]
     )
   owner: String
+    @auth(rules: [
+      { allow: private, operations: [create, read] },
+      { allow: owner, operations: [read] },
+      { allow: groups, groups: ["PRESIDENT", "SECRETARY"], operations: [create, read, update, delete] }
+    ])
   cognitoID: String @index(name: "byCognitoID", queryField: "profileByCognitoID")
   name: String! @index(name: "byName", queryField: "profileByName")
   email: String @index(name: "byEmail", queryField: "profileByEmail")
-  phone: String @index(name: "byPhone", queryField: "profileByPhone")
+  phone: String
   address: String
   city: String
   state: String

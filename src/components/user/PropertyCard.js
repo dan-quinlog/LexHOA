@@ -87,8 +87,21 @@ const PropertyCard = ({ property, currentProfileId }) => {
             <>
               <h4>Owner Contact</h4>
               <p>Name: {property.profOwner.name}</p>
-              <p>Phone: {property.profOwner.phone}</p>
-              <p>Email: {property.profOwner.email}</p>
+              {property.profOwner.contactPref === 'CALL' && property.profOwner.phone && (
+                <p>Phone: {property.profOwner.phone}</p>
+              )}
+              {property.profOwner.contactPref === 'TEXT' && property.profOwner.phone && (
+                <p>Phone: {property.profOwner.phone}</p>
+              )}
+              {property.profOwner.contactPref === 'EMAIL' && property.profOwner.email && (
+                <p>Email: {property.profOwner.email}</p>
+              )}
+              {property.profOwner.contactPref === 'PHYSICAL' && property.profOwner.address && (
+                <div>
+                  <p>Mailing Address: {property.profOwner.address}</p>
+                  <p>{property.profOwner.city}, {property.profOwner.state} {property.profOwner.zip}</p>
+                </div>
+              )}
             </>
           )}
         </div>

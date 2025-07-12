@@ -150,6 +150,11 @@ export const PROFILE_BY_COGNITO_ID = gql`
             name
             phone
             email
+            address
+            city
+            state
+            zip
+            contactPref
             }
           profTenantId
           createdAt
@@ -698,6 +703,10 @@ export const SEARCH_PINGS_BY_ID = gql`
       instruction
       status
       profCreatorId
+      profCreator {
+        id
+        name
+      }
       createdAt
       updatedAt
     }
@@ -714,6 +723,10 @@ export const SEARCH_PINGS_BY_CREATOR = gql`
         instruction
         status
         profCreatorId
+        profCreator {
+          id
+          name
+        }
         createdAt
         updatedAt
       }
@@ -731,6 +744,10 @@ export const LIST_PENDING_PINGS = gql`
         instruction
         status
         profCreatorId
+        profCreator {
+          id
+          name
+        }
         createdAt
         updatedAt
       }

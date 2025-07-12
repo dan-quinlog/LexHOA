@@ -58,12 +58,27 @@ const Profile = ({ cognitoId }) => {
 
   const handleProfileUpdate = async (formData, newEmailToVerify) => {
     const cleanedData = cleanFormData(formData);
+    
+    // Only include fields that have changed and are allowed for UpdateProfileInput
+    const allowedFields = ['name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'contactPref', 'allowText', 'billingFreq'];
+    const updateData = {};
+    
+    allowedFields.forEach(field => {
+      const newValue = cleanedData[field];
+      const currentValue = profile?.[field];
+      
+      // Only include field if it has changed and is not null/empty
+      if (newValue !== currentValue && newValue !== null && newValue !== '') {
+        updateData[field] = newValue;
+      }
+    });
+    
     try {
       await updateProfile({
         variables: {
           input: {
             id: profile?.id,
-            ...cleanedData
+            ...updateData
           }
         },
         refetchQueries: [

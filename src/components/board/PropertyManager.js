@@ -74,6 +74,16 @@ const PropertyManager = ({ searchState, setSearchState, userGroups = [] }) => {
             }
           });
           break;
+
+        case 'tenantId':
+          response = await searchProperties({
+            variables: {
+              filter: {
+                profTenantId: { eq: searchState.searchTerm }
+              }
+            }
+          });
+          break;
       }
 
       setSearchState({
@@ -134,6 +144,24 @@ const PropertyManager = ({ searchState, setSearchState, userGroups = [] }) => {
         type: formData.type
       };
 
+      // Handle tenant relationship changes for updates
+      if (selectedProperty) {
+        const oldTenantId = selectedProperty.profTenantId;
+        const newTenantId = formData.profTenantId;
+
+        // If tenant changed, clear old tenant's tenantAtId
+        if (oldTenantId && oldTenantId !== newTenantId) {
+          await updateProfile({
+            variables: {
+              input: {
+                id: oldTenantId,
+                tenantAtId: null
+              }
+            }
+          });
+        }
+      }
+
       // Check if we're creating a new property or updating an existing one
       if (selectedProperty) {
         // This is an update operation
@@ -151,7 +179,7 @@ const PropertyManager = ({ searchState, setSearchState, userGroups = [] }) => {
         });
       }
 
-      // Then update the tenant's profile if there is one
+      // Set new tenant's tenantAtId if there is one
       if (formData.profTenantId) {
         await updateProfile({
           variables: {
@@ -185,6 +213,7 @@ const PropertyManager = ({ searchState, setSearchState, userGroups = [] }) => {
           <option value="propertyId">Property ID</option>
           <option value="address">Address</option>
           <option value="ownerId">Owner ID</option>
+          <option value="tenantId">Tenant ID</option>
         </select>
         <input
           type="text"

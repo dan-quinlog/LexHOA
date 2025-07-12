@@ -366,49 +366,6 @@ export const profileByEmail = /* GraphQL */ `
     }
   }
 `;
-export const profileByPhone = /* GraphQL */ `
-  query ProfileByPhone(
-    $phone: String!
-    $sortDirection: ModelSortDirection
-    $filter: ModelProfileFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    profileByPhone(
-      phone: $phone
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        byTypeName
-        byTypeBalance
-        byTypeCreatedAt
-        owner
-        cognitoID
-        name
-        email
-        phone
-        address
-        city
-        state
-        zip
-        contactPref
-        billingFreq
-        allowText
-        balance
-        tenantAtId
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
 export const profilesByBalance = /* GraphQL */ `
   query ProfilesByBalance(
     $balance: Float!

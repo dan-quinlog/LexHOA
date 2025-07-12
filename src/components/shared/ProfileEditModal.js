@@ -27,6 +27,28 @@ const ProfileEditModal = ({
     ...initialValues
   });
 
+  const formatPhoneNumber = (value) => {
+    // Remove all non-digit characters
+    const numbers = value.replace(/\D/g, '');
+    
+    // Limit to 10 digits
+    const limited = numbers.slice(0, 10);
+    
+    // Format as XXX-XXX-XXXX
+    if (limited.length >= 6) {
+      return `${limited.slice(0, 3)}-${limited.slice(3, 6)}-${limited.slice(6)}`;
+    } else if (limited.length >= 3) {
+      return `${limited.slice(0, 3)}-${limited.slice(3)}`;
+    } else {
+      return limited;
+    }
+  };
+
+  const handlePhoneChange = (e) => {
+    const formatted = formatPhoneNumber(e.target.value);
+    setFormData({ ...formData, phone: formatted });
+  };
+
   const [errors, setErrors] = useState({});
 
   const validateForm = () => {
@@ -76,7 +98,9 @@ const ProfileEditModal = ({
             <input
               type="tel"
               value={formData.phone || ''}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              onChange={handlePhoneChange}
+              placeholder="000-000-0000"
+              maxLength="12"
             />
           </div>
 

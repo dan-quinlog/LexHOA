@@ -102,12 +102,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "lexhoaLambdaRolef17fb671",
+            "lexhoaLambdaRole64d686bf",
             {
               "Fn::Join": [
                 "",
                 [
-                  "lexhoaLambdaRolef17fb671",
+                  "lexhoaLambdaRole64d686bf",
                   "-",
                   {
                     "Ref": "env"
@@ -252,7 +252,11 @@
                 "cognito-idp:UpdateGroup",
                 "cognito-idp:AdminUpdateAuthEventFeedback",
                 "cognito-idp:UpdateDeviceStatus",
-                "cognito-idp:UpdateUserPool"
+                "cognito-idp:UpdateUserPool",
+                "cognito-idp:AdminGetUser",
+                "cognito-idp:AdminListGroupsForUser",
+                "cognito-idp:GetGroup",
+                "cognito-idp:ListUsersInGroup"
               ],
               "Resource": [
                 {

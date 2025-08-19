@@ -116,12 +116,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "lexhoaLambdaRolebe0eacce",
+            "lexhoaLambdaRole17f18875",
             {
               "Fn::Join": [
                 "",
                 [
-                  "lexhoaLambdaRolebe0eacce",
+                  "lexhoaLambdaRole17f18875",
                   "-",
                   {
                     "Ref": "env"

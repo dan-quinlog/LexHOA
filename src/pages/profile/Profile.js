@@ -10,7 +10,7 @@ import ProfileEditModal from '../../components/shared/ProfileEditModal';
 import NotificationModal from '../../components/modals/NotificationModal';
 import AddPropertyRequestModal from '../../components/modals/AddPropertyRequestModal';
 import { getCurrentUser, fetchUserAttributes } from '@aws-amplify/auth';
-import { verifyNewEmail } from '../../utils/cognitoUtils';
+import { verifyNewEmail, updateCognitoUserAttributes, requestEmailVerificationCode } from '../../utils/cognitoUtils';
 import './Profile.css';
 
 const Profile = ({ cognitoId }) => {
@@ -74,6 +74,31 @@ const Profile = ({ cognitoId }) => {
     });
     
     try {
+      // Update Cognito user attributes for name and email changes
+      const cognitoUpdates = {};
+      
+      if (updateData.name) {
+        cognitoUpdates.name = updateData.name;
+      }
+      
+      if (updateData.email && updateData.email !== profile?.email) {
+        // For email changes, update Cognito (this automatically sends verification code)
+        cognitoUpdates.email = updateData.email;
+        await updateCognitoUserAttributes(cognitoUpdates);
+        // Note: updateCognitoUserAttributes automatically sends verification code, no need to call requestEmailVerificationCode
+        
+        // Store the new email before removing it from profile update
+        setNewEmail(updateData.email);
+        setPendingEmailVerification(true);
+        
+        // Remove email from profile update since it needs verification first
+        delete updateData.email;
+      } else if (cognitoUpdates.name) {
+        // Update just the name if no email change
+        await updateCognitoUserAttributes(cognitoUpdates);
+      }
+
+      // Update profile in database (without email if it needs verification)
       await updateProfile({
         variables: {
           input: {
@@ -89,13 +114,15 @@ const Profile = ({ cognitoId }) => {
         ]
       });
 
-      if (newEmailToVerify) {
-        setNewEmail(newEmailToVerify);
-        setPendingEmailVerification(true);
-      }
-
       setShowEditModal(false);
+      
+      if (!updateData.email) {
+        // Show success message only if not waiting for email verification
+        setNotificationMessage('Profile updated successfully!');
+        setShowNotification(true);
+      }
     } catch (error) {
+      console.error('Error updating profile:', error);
       setNotificationMessage(
         'You do not have permission to perform this action. Please contact a board member for assistance.'
       );
@@ -144,7 +171,11 @@ const Profile = ({ cognitoId }) => {
   const handleVerificationSubmit = async () => {
     try {
       setVerificationError('');
+      console.log('Attempting verification with code:', verificationCode);
+      console.log('New email:', newEmail);
+      
       await verifyNewEmail(verificationCode);
+      console.log('Email verification successful');
 
       if (profile) {
         await updateProfile({
@@ -161,6 +192,7 @@ const Profile = ({ cognitoId }) => {
             }
           ]
         });
+        console.log('Profile updated with new email');
       }
 
       setPendingEmailVerification(false);
@@ -168,6 +200,7 @@ const Profile = ({ cognitoId }) => {
       setShowNotification(true);
     } catch (error) {
       console.error('Error verifying email:', error);
+      console.error('Full error object:', error);
       setVerificationError(error.message || 'Failed to verify email');
     }
   };

@@ -1,0 +1,184 @@
+# Development Best Practices - LexHOA
+
+## Context
+
+Development guidelines for LexHOA Homeowners Association Management System.
+
+<conditional-block context-check="core-principles">
+IF this Core Principles section already read in current context:
+  SKIP: Re-reading this section
+  NOTE: "Using Core Principles already in context"
+ELSE:
+  READ: The following principles
+
+## Core Principles
+
+### Keep It Simple
+- Implement code in the fewest lines possible
+- Avoid over-engineering solutions
+- Choose straightforward approaches over clever ones
+
+### Optimize for Readability
+- Prioritize code clarity over micro-optimizations
+- Write self-documenting code with clear variable names
+- Add comments for "why" not "what"
+
+### DRY (Don't Repeat Yourself)
+- Extract repeated business logic to utility functions
+- Extract repeated UI markup to shared components
+- Create reusable hooks for common operations
+
+### File Structure
+- Keep files focused on a single responsibility
+- Group related functionality together
+- Use consistent naming conventions
+- Follow established project structure:
+  - `src/components/` - UI components organized by feature
+  - `src/pages/` - Page-level components
+  - `src/queries/` - GraphQL queries and mutations
+  - `src/utils/` - Utility functions and constants
+  - `src/services/` - API service layers
+  - `src/styles/` - Global styles and CSS variables
+
+## Mobile-First Development
+
+### Design Principles
+- Design for mobile screens first, then enhance for larger screens
+- Touch-friendly interface elements (minimum 44px touch targets)
+- Thumb-friendly navigation patterns
+- Fast loading times on slower mobile connections
+- Responsive design using CSS media queries
+
+### Performance Standards
+- First Contentful Paint (FCP) < 1.8s
+- Largest Contentful Paint (LCP) < 2.5s
+- Cumulative Layout Shift (CLS) < 0.1
+- Keep bundle size optimized
+
+### Responsive Breakpoints
+Use CSS variables and media queries for responsive design:
+- Mobile: < 768px (default styling)
+- Tablet: 768px - 1024px
+- Desktop: > 1024px
+
+## React Best Practices
+
+### Component Design
+- Single responsibility principle per component
+- Prefer functional components with hooks
+- Implement proper error boundaries
+- Use React.memo for expensive components that re-render frequently
+
+### State Management
+- Use React's built-in state (useState) for component-specific data
+- Use Apollo Client cache for GraphQL data
+- Use Context API sparingly for deeply nested prop sharing
+- Avoid prop drilling beyond 2-3 levels
+
+### Performance Optimization
+- Use React.memo for expensive components
+- Implement proper key props in lists
+- Lazy load routes and heavy components when appropriate
+- Optimize images with proper formats and sizing
+
+## AWS & GraphQL Patterns
+
+### GraphQL Best Practices
+- Define all queries/mutations in `src/queries/queries.js`
+- Use Apollo Client hooks (`useQuery`, `useMutation`)
+- Handle loading, error, and data states consistently
+- Leverage Apollo cache for performance
+
+### AWS Amplify Patterns
+- Use Amplify Auth for authentication flows
+- Use Amplify API for REST endpoints when needed
+- Follow AWS best practices for DynamoDB data modeling
+- Utilize Cognito groups for role-based access control
+
+### Role-Based Access Control
+LexHOA uses four user roles with specific permissions:
+- **President**: Full administrative access
+- **Secretary**: Profile and property management
+- **Treasurer**: Payment and financial management
+- **Board Member**: View and basic edit permissions
+
+Always check user permissions before allowing actions.
+
+## Testing Guidelines
+
+### Testing Approach
+- Write unit tests for utility functions
+- Test components with React Testing Library
+- Run tests before committing: `npm test -- --watchAll=false`
+- Ensure all tests pass before merging to dev
+
+### What to Test
+- Critical business logic
+- User authentication flows
+- Form validation
+- Error handling
+- API interactions
+
+</conditional-block>
+
+<conditional-block context-check="dependencies" task-condition="choosing-external-library">
+IF current task involves choosing an external library:
+  IF Dependencies section already read in current context:
+    SKIP: Re-reading this section
+    NOTE: "Using Dependencies guidelines already in context"
+  ELSE:
+    READ: The following guidelines
+ELSE:
+  SKIP: Dependencies section not relevant to current task
+
+## Dependencies
+
+### Choose Libraries Wisely
+When adding third-party dependencies:
+- **IMPORTANT**: Check if LexHOA already uses a library for this purpose
+- Prefer libraries that are actively maintained
+- Check the library's GitHub repository for:
+  - Recent commits (within last 6 months)
+  - Active issue resolution
+  - Number of stars/downloads
+  - Clear documentation
+- Consider bundle size impact on mobile performance
+- Ensure compatibility with React 18 and AWS Amplify
+
+### Existing LexHOA Dependencies
+The project already uses:
+- **Apollo Client** for GraphQL
+- **AWS Amplify** for backend services
+- **React Router** for navigation
+- **React Quill** for rich text editing
+
+Before adding new dependencies, check if existing tools can accomplish the task.
+</conditional-block>
+
+## LexHOA-Specific Conventions
+
+### Authentication Flow
+- Use AWS Amplify Auth for sign-in/sign-out
+- Store user session with `fetchAuthSession()`
+- Check user groups for role-based permissions
+- Handle session expiration gracefully
+
+### Data Management
+- Use GraphQL for primary data operations
+- Use REST API (Lambda) for complex operations
+- Follow DynamoDB best practices (GSI usage, key design)
+- Implement proper error handling for all API calls
+
+### UI/UX Standards
+- Use CSS variables from `src/styles/variables.css`
+- Maintain consistent spacing, colors, and typography
+- Provide loading states for all async operations
+- Show user-friendly error messages
+- Implement confirmation dialogs for destructive actions
+
+### Security Best Practices
+- Never expose AWS credentials in frontend code
+- Validate all user inputs
+- Use Cognito groups for authorization checks
+- Sanitize data before display
+- Follow AWS security best practices

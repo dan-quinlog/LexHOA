@@ -1,9 +1,9 @@
 
 import React from 'react';
 import './Amenities.css';
-import clubHouseImage from './images/club-house.jpg';
-import poolImage from './images/pool.jpg';
-import playgroundImage from './images/playground.jpg';
+import clubHouseImage from '../../images/club-house.jpg';
+import poolImage from '../../images/pool.jpg';
+import playgroundImage from '../../images/playground.jpg';
 
 function Amenities() {
   const amenities = [

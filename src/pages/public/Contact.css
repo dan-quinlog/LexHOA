@@ -1,0 +1,36 @@
+
+.contact {
+  padding-top: 80px;
+  padding-bottom: 20px;
+  padding-left: 11%;
+  padding-right: 11%;
+}
+
+.contact-content {
+  display: flex;
+  flex-direction: column;
+  flex-direction: column-reverse;
+}
+
+.contact-info, .contact-text {
+  margin-bottom: 20px;
+}
+
+@media (min-width: 768px) {
+  .contact {
+    padding-top: 115px;
+  }
+
+  .contact-content {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .contact-info {
+    width: 30%;
+  }
+
+  .contact-text {
+    width: 60%;
+  }
+}

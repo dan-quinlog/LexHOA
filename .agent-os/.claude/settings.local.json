@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(/C:\\outterspacebar\\.agent-os\\standards/**)",
+      "Read(/C:\\outterspacebar\\.agent-os\\standards/**)",
+      "Read(/C:\\outterspacebar\\.agent-os\\standards\\code-style/**)",
+      "Read(/C:\\outterspacebar\\.agent-os\\standards\\code-style/**)",
+      "Read(/C:\\outterspacebar\\.agent-os\\commands/**)",
+      "Read(/C:\\outterspacebar\\.agent-os\\instructions/**)",
+      "Read(/C:\\outterspacebar\\.agent-os\\instructions/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

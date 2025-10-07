@@ -209,5 +209,12 @@
         }
       ]
     }
+  },
+  "storage": {
+    "hoaDocuments": {
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "S3"
+    }
   }
 }

@@ -73,6 +73,9 @@
           "deploymentBucketName": "amplify-lexhoa-dev-49387-deployment",
           "s3Key": "amplify-builds/monthlyPropertyDues-396166787a734a59544b-build.zip"
         }
+      },
+      "storage": {
+        "hoaDocuments": {}
       }
     }
   },

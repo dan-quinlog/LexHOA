@@ -5,10 +5,12 @@ import PropertyManager from '../../components/board/PropertyManager';
 import PaymentManager from '../../components/board/PaymentManager';
 import PingManager from '../../components/board/PingManager';
 import BoardRoleManager from '../../components/board/BoardRoleManager';
+import DocumentManager from '../../components/board/DocumentManager';
 import './Board.css';
 
 const TOOLS = [
   { id: 'bulletins', label: 'Bulletins' },
+  { id: 'documents', label: 'Documents' },
   { id: 'pings', label: 'Ping Management' },
   { id: 'persons', label: 'Person Management' },
   { id: 'properties', label: 'Property Management' },
@@ -16,7 +18,7 @@ const TOOLS = [
   { id: 'roles', label: 'Board Role Manager' }
 ];
 
-const Board = ({ userGroups = [] }) => {
+const Board = ({ userGroups = [], user }) => {
   const [selectedTool, setSelectedTool] = useState('bulletins');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -54,6 +56,8 @@ const Board = ({ userGroups = [] }) => {
     switch (selectedTool) {
       case 'bulletins':
         return <BulletinManager userGroups={userGroups} />;
+      case 'documents':
+        return <DocumentManager user={user} />;
       case 'persons':
         return <PersonManager
           searchState={personSearchState}

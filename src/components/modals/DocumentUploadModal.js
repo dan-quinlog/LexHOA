@@ -101,7 +101,7 @@ const DocumentUploadModal = ({ document, user, onClose, onSuccess }) => {
           key: s3Key,
           data: file,
           options: {
-            accessLevel: 'guest',
+            accessLevel: 'public',
             contentType: file.type,
             onProgress: ({ transferredBytes, totalBytes }) => {
               if (totalBytes) {

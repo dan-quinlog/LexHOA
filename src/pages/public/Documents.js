@@ -78,7 +78,7 @@ const Documents = ({ user, userGroups = [] }) => {
       const result = await getUrl({
         key: document.s3Key,
         options: {
-          accessLevel: 'guest', // All documents are guest-readable
+          accessLevel: 'public', // All documents are publicly accessible
           expiresIn: 900 // 15 minutes
         }
       });

@@ -59,6 +59,7 @@ type Profile @model
   tenantAt: Property @belongsTo(fields: ["tenantAtId"])
   tenantAtId: ID @index(name: "byTenantAt")
   createdPings: [Ping] @hasMany(indexName: "byCreator", fields: ["id"])
+  uploadedDocuments: [Document] @hasMany(indexName: "byUploader", fields: ["id"])
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
 }
@@ -289,7 +290,7 @@ type Document @model
   s3Key: String!
   s3Url: String
   uploadedBy: Profile @belongsTo(fields: ["uploadedById"])
-  uploadedById: ID
+  uploadedById: ID @index(name: "byUploader", sortKeyFields: ["createdAt"])
   displayOrder: Int @default(value: "0")
   year: Int
   isArchived: Boolean @default(value: "false")

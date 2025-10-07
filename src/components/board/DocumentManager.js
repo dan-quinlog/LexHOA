@@ -42,7 +42,7 @@ const DocumentManager = ({ user }) => {
       await remove({
         key: document.s3Key,
         options: {
-          accessLevel: 'guest'
+          accessLevel: 'public'
         }
       });
 

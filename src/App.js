@@ -23,8 +23,12 @@ import MenuState from './components/menu/MenuState';
 import DatabaseReset from './components/dev/DatabaseReset'
 import 'react-quill/dist/quill.bubble.css';
 
+// Import amplify configuration
+import awsconfig from './amplifyconfiguration.json';
+
 // Configure Amplify
 Amplify.configure({
+  ...awsconfig,
   ...amplifyConfig,
   Auth: {
     region: 'us-east-1',

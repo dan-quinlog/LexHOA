@@ -160,7 +160,8 @@ const DocumentUploadModal = ({ document, user, onClose, onSuccess }) => {
   };
 
   return (
-    <Modal title={document ? 'Edit Document' : 'Upload Document'} onClose={onClose}>
+    <Modal show={true} onClose={onClose}>
+      <h2 style={{ marginTop: 0 }}>{document ? 'Edit Document' : 'Upload Document'}</h2>
       <form onSubmit={handleSubmit} className="document-upload-form">
         <div className="form-group">
           <label>Title *</label>

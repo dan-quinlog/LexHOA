@@ -132,8 +132,10 @@ const DocumentManager = ({ user }) => {
         <button
           className="action-button"
           onClick={() => {
+            console.log('Upload Document button clicked');
             setEditingDocument(null);
             setShowUploadModal(true);
+            console.log('showUploadModal set to true');
           }}
           style={{ backgroundColor: 'var(--primary-color)', color: 'white' }}
         >
@@ -222,16 +224,19 @@ const DocumentManager = ({ user }) => {
           document={editingDocument}
           user={user}
           onClose={() => {
+            console.log('Modal closing');
             setShowUploadModal(false);
             setEditingDocument(null);
           }}
           onSuccess={() => {
+            console.log('Upload success');
             setShowUploadModal(false);
             setEditingDocument(null);
             refetch();
           }}
         />
       )}
+      {console.log('showUploadModal state:', showUploadModal)}
     </div>
   );
 };

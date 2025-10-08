@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useMutation } from '@apollo/client';
 import { CREATE_DOCUMENT, UPDATE_DOCUMENT } from '../../queries/documentMutations';
 import { uploadData } from 'aws-amplify/storage';
+import { Amplify } from 'aws-amplify';
 import Modal from '../shared/Modal';
 import './DocumentUploadModal.css';
 
@@ -97,6 +98,14 @@ const DocumentUploadModal = ({ document, user, onClose, onSuccess }) => {
         const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
         s3Key = `documents/${timestamp}_${sanitizedFileName}`;
 
+        console.log('Attempting upload with:', {
+          key: s3Key,
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type,
+          user: user
+        });
+
         const result = await uploadData({
           key: s3Key,
           data: file,
@@ -110,6 +119,8 @@ const DocumentUploadModal = ({ document, user, onClose, onSuccess }) => {
             }
           }
         }).result;
+
+        console.log('Upload result:', result);
 
         fileName = file.name;
         fileSize = file.size;

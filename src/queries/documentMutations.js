@@ -15,10 +15,6 @@ export const CREATE_DOCUMENT = gql`
       s3Key
       s3Url
       uploadedById
-      uploadedBy {
-        id
-        name
-      }
       displayOrder
       year
       isArchived
@@ -43,10 +39,6 @@ export const UPDATE_DOCUMENT = gql`
       s3Key
       s3Url
       uploadedById
-      uploadedBy {
-        id
-        name
-      }
       displayOrder
       year
       isArchived

@@ -20,10 +20,6 @@ export const LIST_DOCUMENTS = gql`
         s3Key
         s3Url
         uploadedById
-        uploadedBy {
-          id
-          name
-        }
         displayOrder
         year
         isArchived
@@ -65,10 +61,6 @@ export const DOCUMENTS_BY_CATEGORY = gql`
         s3Key
         s3Url
         uploadedById
-        uploadedBy {
-          id
-          name
-        }
         displayOrder
         year
         isArchived
@@ -95,11 +87,6 @@ export const GET_DOCUMENT = gql`
       s3Key
       s3Url
       uploadedById
-      uploadedBy {
-        id
-        name
-        email
-      }
       displayOrder
       year
       isArchived
@@ -139,10 +126,6 @@ export const DOCUMENTS_BY_DATE = gql`
         s3Key
         s3Url
         uploadedById
-        uploadedBy {
-          id
-          name
-        }
         displayOrder
         year
         isArchived

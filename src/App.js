@@ -26,17 +26,13 @@ import 'react-quill/dist/quill.bubble.css';
 // Import amplify configuration
 import awsconfig from './amplifyconfiguration.json';
 
-// Configure Amplify
+// Configure Amplify with merged configuration (single call to avoid overwriting)
 Amplify.configure({
   ...awsconfig,
-  ...amplifyConfig,
-  Auth: {
-    region: 'us-east-1',
-    mandatorySignIn: false
-  },
-  // Add REST API configuration directly here
   API: {
+    ...(awsconfig.API ?? {}),
     REST: {
+      ...(awsconfig.API?.REST ?? {}),
       cognitoGroupManagement: {
         endpoint: 'https://7vxyhwwje0.execute-api.us-east-1.amazonaws.com/dev',
         region: 'us-east-1'

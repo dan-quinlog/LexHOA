@@ -83,6 +83,13 @@ const DocumentUploadModal = ({ document, user, onClose, onSuccess }) => {
       return;
     }
 
+    // Debug: Check Amplify configuration and user
+    const config = Amplify.getConfig();
+    console.log('Amplify Storage Config:', config.Storage);
+    console.log('User object:', user);
+    console.log('User username:', user?.username);
+    console.log('User profile ID:', user?.profile?.id);
+
     setUploading(true);
     setProgress(0);
 

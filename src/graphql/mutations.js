@@ -77,6 +77,10 @@ export const createProfile = /* GraphQL */ `
         nextToken
         __typename
       }
+      uploadedDocuments {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -133,6 +137,10 @@ export const updateProfile = /* GraphQL */ `
         nextToken
         __typename
       }
+      uploadedDocuments {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -186,6 +194,10 @@ export const deleteProfile = /* GraphQL */ `
       }
       tenantAtId
       createdPings {
+        nextToken
+        __typename
+      }
+      uploadedDocuments {
         nextToken
         __typename
       }
@@ -704,6 +716,165 @@ export const deletePing = /* GraphQL */ `
       profCreatorId
       createdAt
       updatedAt
+      __typename
+    }
+  }
+`;
+export const createDocument = /* GraphQL */ `
+  mutation CreateDocument(
+    $input: CreateDocumentInput!
+    $condition: ModelDocumentConditionInput
+  ) {
+    createDocument(input: $input, condition: $condition) {
+      id
+      title
+      description
+      category
+      accessLevel
+      fileName
+      fileSize
+      fileType
+      s3Key
+      s3Url
+      uploadedBy {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      uploadedById
+      displayOrder
+      year
+      isArchived
+      type
+      categoryIndex
+      accessLevelIndex
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const updateDocument = /* GraphQL */ `
+  mutation UpdateDocument(
+    $input: UpdateDocumentInput!
+    $condition: ModelDocumentConditionInput
+  ) {
+    updateDocument(input: $input, condition: $condition) {
+      id
+      title
+      description
+      category
+      accessLevel
+      fileName
+      fileSize
+      fileType
+      s3Key
+      s3Url
+      uploadedBy {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      uploadedById
+      displayOrder
+      year
+      isArchived
+      type
+      categoryIndex
+      accessLevelIndex
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const deleteDocument = /* GraphQL */ `
+  mutation DeleteDocument(
+    $input: DeleteDocumentInput!
+    $condition: ModelDocumentConditionInput
+  ) {
+    deleteDocument(input: $input, condition: $condition) {
+      id
+      title
+      description
+      category
+      accessLevel
+      fileName
+      fileSize
+      fileType
+      s3Key
+      s3Url
+      uploadedBy {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      uploadedById
+      displayOrder
+      year
+      isArchived
+      type
+      categoryIndex
+      accessLevelIndex
+      createdAt
+      updatedAt
+      owner
       __typename
     }
   }

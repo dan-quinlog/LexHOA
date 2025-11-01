@@ -51,6 +51,10 @@ export const onCreateProfile = /* GraphQL */ `
         nextToken
         __typename
       }
+      uploadedDocuments {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -107,6 +111,10 @@ export const onUpdateProfile = /* GraphQL */ `
         nextToken
         __typename
       }
+      uploadedDocuments {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -160,6 +168,10 @@ export const onDeleteProfile = /* GraphQL */ `
       }
       tenantAtId
       createdPings {
+        nextToken
+        __typename
+      }
+      uploadedDocuments {
         nextToken
         __typename
       }
@@ -660,6 +672,165 @@ export const onDeletePing = /* GraphQL */ `
       profCreatorId
       createdAt
       updatedAt
+      __typename
+    }
+  }
+`;
+export const onCreateDocument = /* GraphQL */ `
+  subscription OnCreateDocument(
+    $filter: ModelSubscriptionDocumentFilterInput
+    $owner: String
+  ) {
+    onCreateDocument(filter: $filter, owner: $owner) {
+      id
+      title
+      description
+      category
+      accessLevel
+      fileName
+      fileSize
+      fileType
+      s3Key
+      s3Url
+      uploadedBy {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      uploadedById
+      displayOrder
+      year
+      isArchived
+      type
+      categoryIndex
+      accessLevelIndex
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const onUpdateDocument = /* GraphQL */ `
+  subscription OnUpdateDocument(
+    $filter: ModelSubscriptionDocumentFilterInput
+    $owner: String
+  ) {
+    onUpdateDocument(filter: $filter, owner: $owner) {
+      id
+      title
+      description
+      category
+      accessLevel
+      fileName
+      fileSize
+      fileType
+      s3Key
+      s3Url
+      uploadedBy {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      uploadedById
+      displayOrder
+      year
+      isArchived
+      type
+      categoryIndex
+      accessLevelIndex
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const onDeleteDocument = /* GraphQL */ `
+  subscription OnDeleteDocument(
+    $filter: ModelSubscriptionDocumentFilterInput
+    $owner: String
+  ) {
+    onDeleteDocument(filter: $filter, owner: $owner) {
+      id
+      title
+      description
+      category
+      accessLevel
+      fileName
+      fileSize
+      fileType
+      s3Key
+      s3Url
+      uploadedBy {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      uploadedById
+      displayOrder
+      year
+      isArchived
+      type
+      categoryIndex
+      accessLevelIndex
+      createdAt
+      updatedAt
+      owner
       __typename
     }
   }

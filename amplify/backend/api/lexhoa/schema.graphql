@@ -59,6 +59,7 @@ type Profile @model
   tenantAt: Property @belongsTo(fields: ["tenantAtId"])
   tenantAtId: ID @index(name: "byTenantAt")
   createdPings: [Ping] @hasMany(indexName: "byCreator", fields: ["id"])
+  uploadedDocuments: [Document] @hasMany(indexName: "byUploader", fields: ["id"])
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
 }
@@ -259,6 +260,80 @@ type MutationResult {
 # Define your custom queries and mutations
 type Query {
   listUsersInGroup(groupName: String!): [CognitoUser]
+}
+
+type Document @model
+  @auth(
+    rules: [
+      # Public documents accessible to everyone
+      { allow: public, provider: apiKey, operations: [read] },
+      # Authenticated users can read documents marked for them
+      { allow: private, provider: userPools, operations: [read] },
+      # Owners can read owner-level documents
+      { allow: owner, operations: [read] },
+      # Board members can read board documents and manage all documents
+      { allow: groups, groups: ["BOARD"], operations: [read] },
+      # President and Secretary can create, update, delete
+      { allow: groups, groups: ["PRESIDENT", "SECRETARY"], operations: [create, read, update, delete] },
+      # Treasurer can manage financial documents
+      { allow: groups, groups: ["TREASURER"], operations: [create, read, update, delete] }
+    ]
+  ) {
+  id: ID!
+  title: String!
+  description: String
+  category: DocumentCategory!
+  accessLevel: DocumentAccessLevel! @default(value: "PUBLIC")
+  fileName: String!
+  fileSize: Int
+  fileType: String!
+  s3Key: String!
+  s3Url: String
+  uploadedBy: Profile @belongsTo(fields: ["uploadedById"])
+  uploadedById: ID @index(name: "byUploader", sortKeyFields: ["createdAt"])
+  displayOrder: Int @default(value: "0")
+  year: Int
+  isArchived: Boolean @default(value: "false")
+  type: String @default(value: "DOCUMENT")
+    @index(
+      name: "documentsByDate"
+      queryField: "documentsByDate"
+      sortKeyFields: ["createdAt"]
+    )
+  categoryIndex: String
+    @index(
+      name: "documentsByCategory"
+      queryField: "documentsByCategory"
+      sortKeyFields: ["displayOrder", "createdAt"]
+    )
+  accessLevelIndex: String
+    @index(
+      name: "documentsByAccessLevel"
+      queryField: "documentsByAccessLevel"
+      sortKeyFields: ["category", "displayOrder"]
+    )
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+enum DocumentCategory {
+  BYLAWS_CCRS
+  INSURANCE
+  MEETING_MINUTES
+  FINANCIAL_REPORTS
+  POLICIES
+  FORMS
+  BOARD_ONLY
+  OTHER
+}
+
+enum DocumentAccessLevel {
+  PUBLIC
+  AUTHENTICATED
+  OWNERS_ONLY
+  BOARD_ONLY
+  TREASURER_ONLY
+  PRESIDENT_ONLY
 }
 
 type Mutation {

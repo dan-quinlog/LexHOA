@@ -10,6 +10,7 @@ import mapImage from './images/map-view.jpg';
 import Amenities from './pages/public/Amenities';
 import Contact from './pages/public/Contact';
 import Login from './pages/public/Login';
+import Documents from './pages/public/Documents';
 import Profile from './pages/profile/Profile';
 import Board from './pages/board/Board';
 import amplifyConfig from './services/amplify-config';
@@ -22,16 +23,16 @@ import MenuState from './components/menu/MenuState';
 import DatabaseReset from './components/dev/DatabaseReset'
 import 'react-quill/dist/quill.bubble.css';
 
-// Configure Amplify
+// Import amplify configuration
+import awsconfig from './amplifyconfiguration.json';
+
+// Configure Amplify with merged configuration (single call to avoid overwriting)
 Amplify.configure({
-  ...amplifyConfig,
-  Auth: {
-    region: 'us-east-1',
-    mandatorySignIn: false
-  },
-  // Add REST API configuration directly here
+  ...awsconfig,
   API: {
+    ...(awsconfig.API ?? {}),
     REST: {
+      ...(awsconfig.API?.REST ?? {}),
       cognitoGroupManagement: {
         endpoint: 'https://7vxyhwwje0.execute-api.us-east-1.amazonaws.com/dev',
         region: 'us-east-1'
@@ -282,6 +283,7 @@ function App() {
             ) : (
               <nav className="desktop-menu">
                 <Link to="/amenities">Amenities</Link>
+                <Link to="/documents">Documents</Link>
                 <Link to="/contact">Contact</Link>
                 <Login />
               </nav>
@@ -291,7 +293,8 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/profile" element={<Profile cognitoId={user?.username} />} />
             <Route path="/amenities" element={<Amenities />} />
-            <Route path="/board" element={<Board userGroups={userGroups} />} />
+            <Route path="/documents" element={<Documents user={user} userGroups={userGroups} />} />
+            <Route path="/board" element={<Board userGroups={userGroups} user={user} />} />
             <Route path="/contact" element={<Contact />} />
           </Routes>
           <footer className="bottom-bar">
@@ -304,6 +307,7 @@ function App() {
               ) : (
                 <>
                   <Link to="/amenities">Amenities</Link>
+                  <Link to="/documents">Documents</Link>
                   <Link to="/contact">Contact</Link>
                   <Login />
                 </>

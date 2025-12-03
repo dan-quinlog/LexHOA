@@ -172,10 +172,41 @@ export const CREATE_PAYMENT = gql`
       checkAmount
       invoiceNumber
       invoiceAmount
+      paymentMethod
+      stripePaymentIntentId
+      stripeCustomerId
+      amount
+      processingFee
+      totalAmount
+      status
+      description
       ownerPaymentsId
       createdAt
       updatedAt
       owner
+    }
+  }
+`;
+
+// Stripe Mutations
+export const CREATE_STRIPE_PAYMENT_INTENT = gql`
+  mutation CreateStripePaymentIntent($amount: Float!, $profileId: ID!, $description: String) {
+    createStripePaymentIntent(amount: $amount, profileId: $profileId, description: $description) {
+      clientSecret
+      paymentIntentId
+      amount
+      processingFee
+      totalAmount
+    }
+  }
+`;
+
+export const CREATE_STRIPE_CUSTOMER = gql`
+  mutation CreateStripeCustomer($profileId: ID!, $email: String!, $name: String!) {
+    createStripeCustomer(profileId: $profileId, email: $email, name: $name) {
+      customerId
+      success
+      message
     }
   }
 `;

@@ -1,0 +1,127 @@
+.payment-history {
+  background: var(--background-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-large);
+}
+
+.payment-history h3 {
+  margin: 0 0 var(--spacing-large) 0;
+  color: var(--text-color);
+  font-size: var(--font-size-large);
+}
+
+.payments-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-medium);
+}
+
+.payment-item {
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-medium);
+  transition: box-shadow var(--transition-fast);
+}
+
+.payment-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.payment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-small);
+}
+
+.payment-date {
+  font-weight: var(--font-weight-medium);
+  color: var(--text-color);
+}
+
+.payment-status {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+}
+
+.status-success {
+  background: rgba(46, 125, 50, 0.1);
+  color: var(--success-color);
+}
+
+.status-pending {
+  background: rgba(237, 108, 2, 0.1);
+  color: var(--warning-color);
+}
+
+.status-processing {
+  background: rgba(25, 118, 210, 0.1);
+  color: var(--primary-color);
+}
+
+.status-failed {
+  background: rgba(211, 47, 47, 0.1);
+  color: var(--error-color);
+}
+
+.status-canceled {
+  background: rgba(158, 158, 158, 0.1);
+  color: var(--secondary-color);
+}
+
+.status-refunded {
+  background: rgba(156, 39, 176, 0.1);
+  color: #9c27b0;
+}
+
+.payment-details {
+  margin-bottom: var(--spacing-medium);
+  padding-bottom: var(--spacing-medium);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.payment-description {
+  color: var(--text-color);
+  margin-bottom: 4px;
+}
+
+.payment-method {
+  color: var(--secondary-color);
+  font-size: var(--font-size-small);
+}
+
+.payment-amounts {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.amount-row {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-color);
+  font-size: var(--font-size-small);
+}
+
+.amount-row.fee {
+  color: var(--secondary-color);
+}
+
+.amount-row.total {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-base);
+  margin-top: var(--spacing-small);
+  padding-top: var(--spacing-small);
+  border-top: 1px solid var(--border-color);
+}
+
+.no-payments,
+.loading {
+  text-align: center;
+  color: var(--secondary-color);
+  padding: var(--spacing-xl);
+}

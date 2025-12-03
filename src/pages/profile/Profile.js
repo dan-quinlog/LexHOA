@@ -5,6 +5,7 @@ import { UPDATE_PROFILE, CREATE_PING } from '../../queries/mutations';
 import ProfileCard from '../../components/user/ProfileCard';
 import PropertyCard from '../../components/user/PropertyCard';
 import PingCard from '../../components/user/PingCard';
+import BalanceCard from '../../components/billing/BalanceCard';
 import Modal from '../../components/shared/Modal';
 import ProfileEditModal from '../../components/shared/ProfileEditModal';
 import NotificationModal from '../../components/modals/NotificationModal';
@@ -275,6 +276,11 @@ const Profile = ({ cognitoId }) => {
                 ))}
               </div>
             )}
+
+            <BalanceCard 
+              balance={profile.balance} 
+              billingFreq={profile.billingFreq} 
+            />
 
             <ProfileCard profile={profile} />
             {showEditModal && (

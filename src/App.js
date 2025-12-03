@@ -12,6 +12,7 @@ import Contact from './pages/public/Contact';
 import Login from './pages/public/Login';
 import Documents from './pages/public/Documents';
 import Profile from './pages/profile/Profile';
+import Billing from './pages/billing/Billing';
 import Board from './pages/board/Board';
 import amplifyConfig from './services/amplify-config';
 import { createAuthLink } from 'aws-appsync-auth-link';
@@ -140,6 +141,7 @@ function App() {
   const renderMenuItems = () => {
     const menuItems = [
       { label: 'Profile', path: '/profile' },
+      { label: 'Billing', path: '/billing' },
       { label: 'Board', path: '/board', group: BOARD_GROUP },
       { label: 'Amenities', path: '/amenities' },
       { label: 'Contact', path: '/contact' }
@@ -292,6 +294,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/profile" element={<Profile cognitoId={user?.username} />} />
+            <Route path="/billing" element={<Billing cognitoId={user?.username} />} />
             <Route path="/amenities" element={<Amenities />} />
             <Route path="/documents" element={<Documents user={user} userGroups={userGroups} />} />
             <Route path="/board" element={<Board userGroups={userGroups} user={user} />} />

@@ -24,6 +24,7 @@ export const onCreateProfile = /* GraphQL */ `
       billingFreq
       allowText
       balance
+      stripeCustomerId
       ownedProperties {
         nextToken
         __typename
@@ -84,6 +85,7 @@ export const onUpdateProfile = /* GraphQL */ `
       billingFreq
       allowText
       balance
+      stripeCustomerId
       ownedProperties {
         nextToken
         __typename
@@ -144,6 +146,7 @@ export const onDeleteProfile = /* GraphQL */ `
       billingFreq
       allowText
       balance
+      stripeCustomerId
       ownedProperties {
         nextToken
         __typename
@@ -212,6 +215,7 @@ export const onCreateProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -236,6 +240,7 @@ export const onCreateProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -279,6 +284,7 @@ export const onUpdateProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -303,6 +309,7 @@ export const onUpdateProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -346,6 +353,7 @@ export const onDeleteProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -370,6 +378,7 @@ export const onDeleteProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -397,6 +406,14 @@ export const onCreatePayment = /* GraphQL */ `
       checkAmount
       invoiceNumber
       invoiceAmount
+      paymentMethod
+      stripePaymentIntentId
+      stripeCustomerId
+      amount
+      processingFee
+      totalAmount
+      status
+      description
       ownerPayments {
         id
         byTypeName
@@ -415,6 +432,7 @@ export const onCreatePayment = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -443,6 +461,14 @@ export const onUpdatePayment = /* GraphQL */ `
       checkAmount
       invoiceNumber
       invoiceAmount
+      paymentMethod
+      stripePaymentIntentId
+      stripeCustomerId
+      amount
+      processingFee
+      totalAmount
+      status
+      description
       ownerPayments {
         id
         byTypeName
@@ -461,6 +487,7 @@ export const onUpdatePayment = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -489,6 +516,14 @@ export const onDeletePayment = /* GraphQL */ `
       checkAmount
       invoiceNumber
       invoiceAmount
+      paymentMethod
+      stripePaymentIntentId
+      stripeCustomerId
+      amount
+      processingFee
+      totalAmount
+      status
+      description
       ownerPayments {
         id
         byTypeName
@@ -507,6 +542,7 @@ export const onDeletePayment = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -588,6 +624,7 @@ export const onCreatePing = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -626,6 +663,7 @@ export const onUpdatePing = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -664,6 +702,7 @@ export const onDeletePing = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -710,6 +749,7 @@ export const onCreateDocument = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -763,6 +803,7 @@ export const onUpdateDocument = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -816,6 +857,7 @@ export const onDeleteDocument = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt

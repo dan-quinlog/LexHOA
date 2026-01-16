@@ -45,6 +45,9 @@ exports.handler = async (event) => {
             case 'payment_intent.succeeded':
                 await handlePaymentSuccess(stripeEvent.data.object);
                 break;
+            case 'payment_intent.processing':
+                await handlePaymentProcessing(stripeEvent.data.object);
+                break;
             case 'payment_intent.payment_failed':
                 await handlePaymentFailure(stripeEvent.data.object);
                 break;
@@ -69,6 +72,14 @@ exports.handler = async (event) => {
     }
 };
 
+function getPaymentMethod(metadata) {
+    const methodType = metadata.paymentMethodType;
+    if (methodType === 'us_bank_account') {
+        return 'STRIPE_ACH';
+    }
+    return 'STRIPE_CARD';
+}
+
 async function handlePaymentSuccess(paymentIntent) {
     console.log('Payment succeeded:', paymentIntent.id);
     
@@ -77,6 +88,7 @@ async function handlePaymentSuccess(paymentIntent) {
     const duesAmount = parseFloat(metadata.duesAmount);
     const processingFee = parseFloat(metadata.processingFee);
     const description = metadata.description;
+    const paymentMethod = getPaymentMethod(metadata);
 
     const createPaymentMutation = `
         mutation CreatePayment($input: CreatePaymentInput!) {
@@ -90,7 +102,7 @@ async function handlePaymentSuccess(paymentIntent) {
 
     const paymentInput = {
         ownerPaymentsId: profileId,
-        paymentMethod: 'STRIPE_CARD',
+        paymentMethod: paymentMethod,
         stripePaymentIntentId: paymentIntent.id,
         stripeCustomerId: paymentIntent.customer,
         amount: duesAmount,
@@ -147,13 +159,14 @@ async function handlePaymentSuccess(paymentIntent) {
     console.log(`Payment recorded and balance updated for profile ${profileId}`);
 }
 
-async function handlePaymentFailure(paymentIntent) {
-    console.log('Payment failed:', paymentIntent.id);
+async function handlePaymentProcessing(paymentIntent) {
+    console.log('Payment processing (ACH):', paymentIntent.id);
     
     const metadata = paymentIntent.metadata;
     const profileId = metadata.profileId;
     const duesAmount = parseFloat(metadata.duesAmount);
     const processingFee = parseFloat(metadata.processingFee);
+    const paymentMethod = getPaymentMethod(metadata);
 
     const createPaymentMutation = `
         mutation CreatePayment($input: CreatePaymentInput!) {
@@ -166,7 +179,48 @@ async function handlePaymentFailure(paymentIntent) {
 
     const paymentInput = {
         ownerPaymentsId: profileId,
-        paymentMethod: 'STRIPE_CARD',
+        paymentMethod: paymentMethod,
+        stripePaymentIntentId: paymentIntent.id,
+        stripeCustomerId: paymentIntent.customer,
+        amount: duesAmount,
+        processingFee: processingFee,
+        totalAmount: duesAmount + processingFee,
+        status: 'PROCESSING',
+        description: metadata.description || 'HOA Dues Payment (ACH)',
+        invoiceNumber: paymentIntent.id,
+        invoiceAmount: duesAmount
+    };
+
+    await graphqlRequest(
+        process.env.API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT,
+        createPaymentMutation,
+        { input: paymentInput }
+    );
+
+    console.log(`ACH payment processing recorded for profile ${profileId}`);
+}
+
+async function handlePaymentFailure(paymentIntent) {
+    console.log('Payment failed:', paymentIntent.id);
+    
+    const metadata = paymentIntent.metadata;
+    const profileId = metadata.profileId;
+    const duesAmount = parseFloat(metadata.duesAmount);
+    const processingFee = parseFloat(metadata.processingFee);
+    const paymentMethod = getPaymentMethod(metadata);
+
+    const createPaymentMutation = `
+        mutation CreatePayment($input: CreatePaymentInput!) {
+            createPayment(input: $input) {
+                id
+                status
+            }
+        }
+    `;
+
+    const paymentInput = {
+        ownerPaymentsId: profileId,
+        paymentMethod: paymentMethod,
         stripePaymentIntentId: paymentIntent.id,
         stripeCustomerId: paymentIntent.customer,
         amount: duesAmount,
@@ -194,6 +248,7 @@ async function handlePaymentCanceled(paymentIntent) {
     const profileId = metadata.profileId;
     const duesAmount = parseFloat(metadata.duesAmount);
     const processingFee = parseFloat(metadata.processingFee);
+    const paymentMethod = getPaymentMethod(metadata);
 
     const createPaymentMutation = `
         mutation CreatePayment($input: CreatePaymentInput!) {
@@ -206,7 +261,7 @@ async function handlePaymentCanceled(paymentIntent) {
 
     const paymentInput = {
         ownerPaymentsId: profileId,
-        paymentMethod: 'STRIPE_CARD',
+        paymentMethod: paymentMethod,
         stripePaymentIntentId: paymentIntent.id,
         stripeCustomerId: paymentIntent.customer,
         amount: duesAmount,

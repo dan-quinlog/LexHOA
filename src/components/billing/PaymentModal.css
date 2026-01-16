@@ -207,6 +207,100 @@
   margin: var(--spacing-small) 0;
 }
 
+/* Payment Method Selection */
+.payment-method-selection {
+  padding: var(--spacing-medium);
+}
+
+.payment-method-selection h4 {
+  margin: 0 0 var(--spacing-medium) 0;
+  color: var(--text-color);
+  text-align: center;
+}
+
+.payment-method-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-medium);
+  margin-bottom: var(--spacing-large);
+}
+
+.payment-method-option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-medium);
+  padding: var(--spacing-large);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--background-white);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.payment-method-option:hover {
+  border-color: var(--primary-color);
+  background: rgba(25, 118, 210, 0.05);
+}
+
+.payment-method-icon {
+  font-size: 2rem;
+}
+
+.payment-method-label {
+  font-weight: var(--font-weight-bold);
+  color: var(--text-color);
+  display: block;
+}
+
+.payment-method-desc {
+  font-size: var(--font-size-small);
+  color: var(--success-color);
+  display: block;
+  margin-top: var(--spacing-xs);
+}
+
+.back-btn {
+  background: transparent;
+  border: none;
+  color: var(--primary-color);
+  cursor: pointer;
+  font-size: var(--font-size-small);
+  padding: var(--spacing-small) 0;
+  margin-bottom: var(--spacing-medium);
+  transition: color var(--transition-fast);
+}
+
+.back-btn:hover {
+  color: var(--hover-color);
+  text-decoration: underline;
+}
+
+/* ACH Section */
+.ach-section {
+  margin-bottom: var(--spacing-large);
+}
+
+.ach-section h4 {
+  margin: 0 0 var(--spacing-medium) 0;
+  color: var(--text-color);
+}
+
+.ach-info {
+  background: rgba(25, 118, 210, 0.1);
+  padding: var(--spacing-medium);
+  border-radius: var(--border-radius);
+  color: var(--text-color);
+  font-size: var(--font-size-small);
+  line-height: 1.5;
+}
+
+.ach-notice {
+  color: var(--secondary-color);
+  font-size: var(--font-size-small);
+  font-style: italic;
+}
+
 @media (max-width: 480px) {
   .amount-options {
     grid-template-columns: 1fr;

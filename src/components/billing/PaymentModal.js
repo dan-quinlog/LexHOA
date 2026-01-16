@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { Elements, CardElement, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useMutation } from '@apollo/client';
 import { CREATE_STRIPE_PAYMENT_INTENT, CREATE_PAYMENT } from '../../queries/mutations';
 import Modal from '../shared/Modal';
@@ -15,7 +15,20 @@ const SUGGESTED_AMOUNTS = {
   MONTHLY: { label: 'Monthly', amount: 100, description: '1 month' }
 };
 
-const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
+const PAYMENT_METHODS = {
+  card: { 
+    label: 'Credit/Debit Card', 
+    description: '2.9% + $0.30 fee',
+    icon: '💳'
+  },
+  us_bank_account: { 
+    label: 'Bank Account (ACH)', 
+    description: '0.8% fee (max $5.00)',
+    icon: '🏦'
+  }
+};
+
+const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMethodType }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [selectedAmount, setSelectedAmount] = useState('CUSTOM');
@@ -29,6 +42,8 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
   const [createPaymentIntent] = useMutation(CREATE_STRIPE_PAYMENT_INTENT);
   const [createPayment] = useMutation(CREATE_PAYMENT);
   const [paymentIntentId, setPaymentIntentId] = useState('');
+  
+  const isACH = paymentMethodType === 'us_bank_account';
 
   const getPaymentAmount = () => {
     if (selectedAmount === 'CUSTOM') {
@@ -67,7 +82,9 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
         variables: {
           amount,
           profileId,
-          description: 'HOA Dues Payment'
+          description: 'HOA Dues Payment',
+          email: email || null,
+          paymentMethodType: paymentMethodType || 'card'
         }
       });
 
@@ -90,39 +107,80 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!stripe || !elements || !clientSecret) {
+    if (!stripe || !clientSecret) {
       return;
     }
 
     setProcessing(true);
     setError(null);
 
-    const cardElement = elements.getElement(CardElement);
+    let result;
+    
+    if (isACH) {
+      // First, collect bank account using Financial Connections
+      const { paymentIntent: collectResult, error: collectError } = await stripe.collectBankAccountForPayment({
+        clientSecret,
+        params: {
+          payment_method_type: 'us_bank_account',
+          payment_method_data: {
+            billing_details: {
+              name: email?.split('@')[0] || 'HOA Member',
+              email: email
+            }
+          }
+        },
+        expand: ['payment_method']
+      });
 
-    const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
-      clientSecret,
-      {
+      if (collectError) {
+        setError(collectError.message);
+        setProcessing(false);
+        return;
+      }
+
+      // If user closed the modal without completing
+      if (collectResult.status === 'requires_payment_method') {
+        setError('Bank account connection was cancelled. Please try again.');
+        setProcessing(false);
+        return;
+      }
+
+      // Now confirm the payment with the collected bank account
+      if (collectResult.status === 'requires_confirmation') {
+        result = await stripe.confirmUsBankAccountPayment(clientSecret);
+      } else {
+        // Payment is already processing or succeeded
+        result = { paymentIntent: collectResult };
+      }
+    } else {
+      if (!elements) {
+        return;
+      }
+      const cardElement = elements.getElement(CardElement);
+      result = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card: cardElement
         }
-      }
-    );
+      });
+    }
+
+    const { error: stripeError, paymentIntent } = result;
 
     if (stripeError) {
       setError(stripeError.message);
       setProcessing(false);
-    } else if (paymentIntent.status === 'succeeded') {
+    } else if (paymentIntent.status === 'succeeded' || paymentIntent.status === 'processing') {
       try {
         await createPayment({
           variables: {
             input: {
               ownerPaymentsId: profileId,
-              paymentMethod: 'STRIPE_CARD',
+              paymentMethod: isACH ? 'STRIPE_ACH' : 'STRIPE_CARD',
               stripePaymentIntentId: paymentIntentId,
               amount: paymentDetails.amount,
               processingFee: paymentDetails.processingFee,
               totalAmount: paymentDetails.totalAmount,
-              status: 'SUCCEEDED',
+              status: paymentIntent.status === 'processing' ? 'PROCESSING' : 'SUCCEEDED',
               description: 'HOA Dues Payment',
               invoiceNumber: paymentIntentId,
               invoiceAmount: paymentDetails.amount
@@ -138,6 +196,9 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
       setTimeout(() => {
         onSuccess && onSuccess(paymentIntent);
       }, 2000);
+    } else if (paymentIntent.status === 'requires_action') {
+      setError('Additional verification required. Please follow the prompts.');
+      setProcessing(false);
     }
   };
 
@@ -152,8 +213,9 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
     return (
       <div className="payment-success">
         <div className="success-icon">✓</div>
-        <h3>Payment Successful!</h3>
-        <p>Your payment of {formatCurrency(paymentDetails?.totalAmount)} has been processed.</p>
+        <h3>{isACH ? 'Payment Processing!' : 'Payment Successful!'}</h3>
+        <p>Your payment of {formatCurrency(paymentDetails?.totalAmount)} has been {isACH ? 'submitted' : 'processed'}.</p>
+        {isACH && <p className="ach-notice">ACH payments typically take 2-3 business days to complete.</p>}
         <p>A receipt will be sent to your email.</p>
       </div>
     );
@@ -215,7 +277,7 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
               <span>{formatCurrency(paymentDetails.amount)}</span>
             </div>
             <div className="fee-row">
-              <span>Processing Fee</span>
+              <span>Processing Fee {isACH ? '(ACH)' : '(Card)'}</span>
               <span>{formatCurrency(paymentDetails.processingFee)}</span>
             </div>
             <div className="fee-row total">
@@ -224,25 +286,35 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
             </div>
           </div>
 
-          <div className="card-section">
-            <h4>Card Details</h4>
-            <CardElement
-              options={{
-                style: {
-                  base: {
-                    fontSize: '16px',
-                    color: '#333',
-                    '::placeholder': {
-                      color: '#aab7c4',
+          {isACH ? (
+            <div className="ach-section">
+              <h4>Bank Account</h4>
+              <p className="ach-info">
+                Click "Pay" to connect your bank account securely via Stripe.
+                ACH payments have lower fees and typically take 2-3 business days.
+              </p>
+            </div>
+          ) : (
+            <div className="card-section">
+              <h4>Card Details</h4>
+              <CardElement
+                options={{
+                  style: {
+                    base: {
+                      fontSize: '16px',
+                      color: '#333',
+                      '::placeholder': {
+                        color: '#aab7c4',
+                      },
+                    },
+                    invalid: {
+                      color: '#d32f2f',
                     },
                   },
-                  invalid: {
-                    color: '#d32f2f',
-                  },
-                },
-              }}
-            />
-          </div>
+                }}
+              />
+            </div>
+          )}
 
           <button
             type="submit"
@@ -263,23 +335,66 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
   );
 };
 
-const PaymentModal = ({ isOpen, onClose, profileId, balance, onPaymentSuccess }) => {
+const PaymentModal = ({ isOpen, onClose, profileId, balance, email, onPaymentSuccess }) => {
+  const [paymentMethodType, setPaymentMethodType] = useState(null);
+  
   const handleSuccess = (paymentIntent) => {
     onPaymentSuccess && onPaymentSuccess(paymentIntent);
+    setPaymentMethodType(null);
     onClose();
   };
 
+  const handleClose = () => {
+    setPaymentMethodType(null);
+    onClose();
+  };
+
+  const handleBack = () => {
+    setPaymentMethodType(null);
+  };
+
   return (
-    <Modal show={isOpen} onClose={onClose}>
+    <Modal show={isOpen} onClose={handleClose}>
       <h2>Make a Payment</h2>
-      <Elements stripe={stripePromise}>
-        <PaymentForm
-          profileId={profileId}
-          balance={balance}
-          onSuccess={handleSuccess}
-          onCancel={onClose}
-        />
-      </Elements>
+      
+      {!paymentMethodType ? (
+        <div className="payment-method-selection">
+          <h4>Select Payment Method</h4>
+          <div className="payment-method-options">
+            {Object.entries(PAYMENT_METHODS).map(([key, { label, description, icon }]) => (
+              <button
+                key={key}
+                type="button"
+                className="payment-method-option"
+                onClick={() => setPaymentMethodType(key)}
+              >
+                <span className="payment-method-icon">{icon}</span>
+                <span className="payment-method-label">{label}</span>
+                <span className="payment-method-desc">{description}</span>
+              </button>
+            ))}
+          </div>
+          <button type="button" onClick={handleClose} className="cancel-btn">
+            Cancel
+          </button>
+        </div>
+      ) : (
+        <>
+          <button type="button" onClick={handleBack} className="back-btn">
+            ← Change Payment Method
+          </button>
+          <Elements stripe={stripePromise}>
+            <PaymentForm
+              profileId={profileId}
+              balance={balance}
+              email={email}
+              paymentMethodType={paymentMethodType}
+              onSuccess={handleSuccess}
+              onCancel={handleClose}
+            />
+          </Elements>
+        </>
+      )}
     </Modal>
   );
 };

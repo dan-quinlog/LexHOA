@@ -32,17 +32,22 @@ export const createStripePaymentIntent = /* GraphQL */ `
     $amount: Float!
     $profileId: ID!
     $description: String
+    $email: String
+    $paymentMethodType: String
   ) {
     createStripePaymentIntent(
       amount: $amount
       profileId: $profileId
       description: $description
+      email: $email
+      paymentMethodType: $paymentMethodType
     ) {
       clientSecret
       paymentIntentId
       amount
       processingFee
       totalAmount
+      paymentMethodType
       __typename
     }
   }

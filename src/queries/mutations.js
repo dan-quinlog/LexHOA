@@ -190,13 +190,14 @@ export const CREATE_PAYMENT = gql`
 
 // Stripe Mutations
 export const CREATE_STRIPE_PAYMENT_INTENT = gql`
-  mutation CreateStripePaymentIntent($amount: Float!, $profileId: ID!, $description: String) {
-    createStripePaymentIntent(amount: $amount, profileId: $profileId, description: $description) {
+  mutation CreateStripePaymentIntent($amount: Float!, $profileId: ID!, $description: String, $email: String, $paymentMethodType: String) {
+    createStripePaymentIntent(amount: $amount, profileId: $profileId, description: $description, email: $email, paymentMethodType: $paymentMethodType) {
       clientSecret
       paymentIntentId
       amount
       processingFee
       totalAmount
+      paymentMethodType
     }
   }
 `;

@@ -371,6 +371,7 @@ type StripePaymentIntentResult {
   amount: Float!
   processingFee: Float!
   totalAmount: Float!
+  paymentMethodType: String
 }
 
 type StripeCustomerResult {
@@ -384,7 +385,7 @@ type Mutation {
     @function(name: "manageCognitoGroups-${env}")
   processMonthlyPropertyDues: MutationResult
     @function(name: "monthlyPropertyDues-${env}")
-  createStripePaymentIntent(amount: Float!, profileId: ID!, description: String): StripePaymentIntentResult
+  createStripePaymentIntent(amount: Float!, profileId: ID!, description: String, email: String, paymentMethodType: String): StripePaymentIntentResult
     @function(name: "createStripePaymentIntent-${env}")
   createStripeCustomer(profileId: ID!, email: String!, name: String!): StripeCustomerResult
     @function(name: "createStripeCustomer-${env}")

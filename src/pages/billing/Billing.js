@@ -128,6 +128,7 @@ const Billing = ({ cognitoId }) => {
         onClose={() => setShowPaymentModal(false)}
         profileId={profile.id}
         balance={profile.balance}
+        email={profile.email}
         onPaymentSuccess={handlePaymentSuccess}
       />
     </div>

@@ -2,6 +2,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: var(--spacing-large);
+  padding-top: 115px;
 }
 
 .billing-page h2 {
@@ -126,6 +127,10 @@
 }
 
 @media (max-width: 768px) {
+  .billing-page {
+    padding-top: 80px;
+  }
+  
   .billing-content {
     grid-template-columns: 1fr;
   }

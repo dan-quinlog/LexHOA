@@ -35,9 +35,7 @@ exports.handler = async (event) => {
         const paymentIntent = await stripe.paymentIntents.create({
             amount: Math.round(totalAmount * 100),
             currency: 'usd',
-            automatic_payment_methods: {
-                enabled: true,
-            },
+            payment_method_types: ['card'],
             metadata: {
                 profileId: profileId,
                 duesAmount: amount.toFixed(2),

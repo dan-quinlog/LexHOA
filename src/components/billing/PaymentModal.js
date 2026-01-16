@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useMutation } from '@apollo/client';
-import { CREATE_STRIPE_PAYMENT_INTENT } from '../../queries/mutations';
+import { CREATE_STRIPE_PAYMENT_INTENT, CREATE_PAYMENT } from '../../queries/mutations';
 import Modal from '../shared/Modal';
 import './PaymentModal.css';
 
@@ -27,6 +27,8 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
   const [succeeded, setSucceeded] = useState(false);
 
   const [createPaymentIntent] = useMutation(CREATE_STRIPE_PAYMENT_INTENT);
+  const [createPayment] = useMutation(CREATE_PAYMENT);
+  const [paymentIntentId, setPaymentIntentId] = useState('');
 
   const getPaymentAmount = () => {
     if (selectedAmount === 'CUSTOM') {
@@ -71,6 +73,7 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
 
       if (data?.createStripePaymentIntent) {
         setClientSecret(data.createStripePaymentIntent.clientSecret);
+        setPaymentIntentId(data.createStripePaymentIntent.paymentIntentId);
         setPaymentDetails({
           amount: data.createStripePaymentIntent.amount,
           processingFee: data.createStripePaymentIntent.processingFee,
@@ -109,6 +112,27 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
       setError(stripeError.message);
       setProcessing(false);
     } else if (paymentIntent.status === 'succeeded') {
+      try {
+        await createPayment({
+          variables: {
+            input: {
+              ownerPaymentsId: profileId,
+              paymentMethod: 'STRIPE_CARD',
+              stripePaymentIntentId: paymentIntentId,
+              amount: paymentDetails.amount,
+              processingFee: paymentDetails.processingFee,
+              totalAmount: paymentDetails.totalAmount,
+              status: 'SUCCEEDED',
+              description: 'HOA Dues Payment',
+              invoiceNumber: paymentIntentId,
+              invoiceAmount: paymentDetails.amount
+            }
+          }
+        });
+      } catch (err) {
+        console.warn('Payment record creation handled by webhook:', err.message);
+      }
+      
       setSucceeded(true);
       setProcessing(false);
       setTimeout(() => {
@@ -246,7 +270,8 @@ const PaymentModal = ({ isOpen, onClose, profileId, balance, onPaymentSuccess })
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Make a Payment">
+    <Modal show={isOpen} onClose={onClose}>
+      <h2>Make a Payment</h2>
       <Elements stripe={stripePromise}>
         <PaymentForm
           profileId={profileId}

@@ -59,8 +59,13 @@ function App() {
     apiKey: process.env.REACT_APP_API_KEY,
     jwtToken: async () => {
       if (user) {
-        const session = await fetchAuthSession();
-        return session?.tokens?.idToken?.toString() || '';
+        try {
+          const session = await fetchAuthSession();
+          return session?.tokens?.idToken?.toString() || '';
+        } catch (error) {
+          console.warn('Error fetching auth session:', error.message);
+          return '';
+        }
       }
       return null;
     },
@@ -98,9 +103,14 @@ function App() {
         const currentUser = await getCurrentUser();
         if (currentUser) {
           setUser(currentUser);
-          const session = await fetchAuthSession();
-          const groups = session.tokens.idToken.payload['cognito:groups'] || [];
-          setUserGroups(groups);
+          try {
+            const session = await fetchAuthSession();
+            const groups = session?.tokens?.idToken?.payload?.['cognito:groups'] || [];
+            setUserGroups(groups);
+          } catch (sessionError) {
+            console.warn('Session fetch error (may resolve on refresh):', sessionError.message);
+            setUserGroups([]);
+          }
         }
       } catch (error) {
         setUser(null);

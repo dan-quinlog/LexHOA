@@ -111,9 +111,10 @@ type Property @model
 
 type Payment @model
   @auth(rules: [
-    { allow: owner, operations: [read] },
+    { allow: owner, operations: [create, read] },
     { allow: groups, groups: ["BOARD"], operations: [read] },
-    { allow: groups, groups: ["TREASURER", "PRESIDENT"], operations: [create, read, update, delete] }
+    { allow: groups, groups: ["TREASURER", "PRESIDENT"], operations: [create, read, update, delete] },
+    { allow: private, provider: iam, operations: [create, read, update] }
   ]) {
   id: ID!
   byTypeCreatedAt: String @default(value: "PAYMENT")

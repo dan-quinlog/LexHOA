@@ -12,6 +12,7 @@ import Contact from './pages/public/Contact';
 import Login from './pages/public/Login';
 import Documents from './pages/public/Documents';
 import Profile from './pages/profile/Profile';
+import Billing from './pages/billing/Billing';
 import Board from './pages/board/Board';
 import amplifyConfig from './services/amplify-config';
 import { createAuthLink } from 'aws-appsync-auth-link';
@@ -58,8 +59,13 @@ function App() {
     apiKey: process.env.REACT_APP_API_KEY,
     jwtToken: async () => {
       if (user) {
-        const session = await fetchAuthSession();
-        return session?.tokens?.idToken?.toString() || '';
+        try {
+          const session = await fetchAuthSession();
+          return session?.tokens?.idToken?.toString() || '';
+        } catch (error) {
+          console.warn('Error fetching auth session:', error.message);
+          return '';
+        }
       }
       return null;
     },
@@ -97,9 +103,14 @@ function App() {
         const currentUser = await getCurrentUser();
         if (currentUser) {
           setUser(currentUser);
-          const session = await fetchAuthSession();
-          const groups = session.tokens.idToken.payload['cognito:groups'] || [];
-          setUserGroups(groups);
+          try {
+            const session = await fetchAuthSession();
+            const groups = session?.tokens?.idToken?.payload?.['cognito:groups'] || [];
+            setUserGroups(groups);
+          } catch (sessionError) {
+            console.warn('Session fetch error (may resolve on refresh):', sessionError.message);
+            setUserGroups([]);
+          }
         }
       } catch (error) {
         setUser(null);
@@ -140,6 +151,7 @@ function App() {
   const renderMenuItems = () => {
     const menuItems = [
       { label: 'Profile', path: '/profile' },
+      { label: 'Billing', path: '/billing' },
       { label: 'Board', path: '/board', group: BOARD_GROUP },
       { label: 'Amenities', path: '/amenities' },
       { label: 'Contact', path: '/contact' }
@@ -292,6 +304,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/profile" element={<Profile cognitoId={user?.username} />} />
+            <Route path="/billing" element={<Billing cognitoId={user?.username} />} />
             <Route path="/amenities" element={<Amenities />} />
             <Route path="/documents" element={<Documents user={user} userGroups={userGroups} />} />
             <Route path="/board" element={<Board userGroups={userGroups} user={user} />} />

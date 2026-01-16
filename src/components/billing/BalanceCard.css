@@ -1,0 +1,62 @@
+.balance-card {
+  background: var(--background-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-large);
+  margin-bottom: var(--spacing-large);
+}
+
+.balance-header h3 {
+  margin: 0 0 var(--spacing-medium) 0;
+  color: var(--text-color);
+  font-size: var(--font-size-large);
+}
+
+.balance-content {
+  text-align: center;
+  padding: var(--spacing-large) 0;
+}
+
+.balance-amount {
+  font-size: 2.5rem;
+  font-weight: var(--font-weight-bold);
+}
+
+.balance-amount.has-balance {
+  color: var(--error-color);
+}
+
+.balance-amount.zero-balance {
+  color: var(--success-color);
+}
+
+.balance-status {
+  margin: var(--spacing-small) 0 0 0;
+  color: var(--secondary-color);
+  font-size: var(--font-size-small);
+}
+
+.balance-status.paid {
+  color: var(--success-color);
+}
+
+.balance-actions {
+  text-align: center;
+  padding-top: var(--spacing-medium);
+  border-top: 1px solid var(--border-color);
+}
+
+.billing-link {
+  display: inline-block;
+  padding: var(--spacing-small) var(--spacing-large);
+  background: var(--primary-color);
+  color: white;
+  text-decoration: none;
+  border-radius: var(--border-radius);
+  font-weight: var(--font-weight-medium);
+  transition: background var(--transition-fast);
+}
+
+.billing-link:hover {
+  background: var(--hover-color);
+}

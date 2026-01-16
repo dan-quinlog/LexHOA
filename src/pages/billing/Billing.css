@@ -1,0 +1,141 @@
+.billing-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-large);
+  padding-top: 115px;
+}
+
+.billing-page h2 {
+  margin: 0 0 var(--spacing-large) 0;
+  color: var(--text-color);
+}
+
+.billing-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-large);
+}
+
+.balance-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-large);
+}
+
+.balance-card-large {
+  background: var(--background-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-xl);
+  text-align: center;
+}
+
+.balance-card-large h3 {
+  margin: 0 0 var(--spacing-medium) 0;
+  color: var(--text-color);
+  font-size: var(--font-size-large);
+}
+
+.balance-card-large .balance-amount {
+  font-size: 3rem;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-small);
+}
+
+.balance-card-large .balance-amount.has-balance {
+  color: var(--error-color);
+}
+
+.balance-card-large .balance-amount.zero-balance {
+  color: var(--success-color);
+}
+
+.balance-card-large .balance-status {
+  color: var(--secondary-color);
+  margin-bottom: var(--spacing-large);
+}
+
+.balance-card-large .balance-status.paid {
+  color: var(--success-color);
+}
+
+.pay-now-btn {
+  padding: var(--spacing-medium) var(--spacing-xl);
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.pay-now-btn:hover {
+  background: var(--hover-color);
+}
+
+.dues-info {
+  background: var(--background-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-large);
+}
+
+.dues-info h4 {
+  margin: 0 0 var(--spacing-medium) 0;
+  color: var(--text-color);
+}
+
+.billing-freq {
+  color: var(--secondary-color);
+  margin-bottom: var(--spacing-medium);
+  font-size: var(--font-size-small);
+}
+
+.dues-amounts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-small);
+}
+
+.dues-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--spacing-small) 0;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-color);
+}
+
+.dues-row:last-child {
+  border-bottom: none;
+}
+
+.history-section {
+  min-height: 400px;
+}
+
+.loading,
+.error {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--secondary-color);
+}
+
+.error {
+  color: var(--error-color);
+}
+
+@media (max-width: 768px) {
+  .billing-page {
+    padding-top: 80px;
+  }
+  
+  .billing-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .balance-card-large .balance-amount {
+    font-size: 2.5rem;
+  }
+}

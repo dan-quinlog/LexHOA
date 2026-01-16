@@ -54,6 +54,10 @@ type Profile @model
     queryField: "profilesByBalance"
     sortKeyFields: ["name"]
   )
+  stripeCustomerId: String @auth(rules: [
+    { allow: owner, operations: [read] },
+    { allow: groups, groups: ["TREASURER", "PRESIDENT", "SECRETARY"], operations: [create, read, update, delete] }
+  ])
   ownedProperties: [Property] @hasMany(indexName: "byOwner", fields: ["id"])
   payments: [Payment] @hasMany(indexName: "byOwnerPayments", fields: ["id"])
   tenantAt: Property @belongsTo(fields: ["tenantAtId"])
@@ -107,9 +111,10 @@ type Property @model
 
 type Payment @model
   @auth(rules: [
-    { allow: owner, operations: [read] },
+    { allow: owner, operations: [create, read] },
     { allow: groups, groups: ["BOARD"], operations: [read] },
-    { allow: groups, groups: ["TREASURER", "PRESIDENT"], operations: [create, read, update, delete] }
+    { allow: groups, groups: ["TREASURER", "PRESIDENT"], operations: [create, read, update, delete] },
+    { allow: private, provider: iam, operations: [create, read, update] }
   ]) {
   id: ID!
   byTypeCreatedAt: String @default(value: "PAYMENT")
@@ -130,13 +135,21 @@ type Payment @model
       queryField: "paymentsByTypeInvoiceNumber"
       sortKeyFields: ["invoiceNumber"]
     )
-  checkDate: AWSDate! @index(name: "byCheckDate", queryField: "paymentsByCheckDate")
-  checkNumber: String! @index(name: "byCheckNumber", queryField: "paymentsByCheckNumber")
-  checkAmount: Float!
-  invoiceNumber: String! @index(name: "byInvoiceNumber", queryField: "paymentsByInvoiceNumber")
-  invoiceAmount: Float!
+  checkDate: AWSDate @index(name: "byCheckDate", queryField: "paymentsByCheckDate")
+  checkNumber: String @index(name: "byCheckNumber", queryField: "paymentsByCheckNumber")
+  checkAmount: Float
+  invoiceNumber: String @index(name: "byInvoiceNumber", queryField: "paymentsByInvoiceNumber")
+  invoiceAmount: Float
+  paymentMethod: PaymentMethod @default(value: "CHECK")
+  stripePaymentIntentId: String @index(name: "byStripePaymentIntent", queryField: "paymentsByStripePaymentIntent")
+  stripeCustomerId: String
+  amount: Float!
+  processingFee: Float @default(value: "0.00")
+  totalAmount: Float!
+  status: PaymentStatus @default(value: "PENDING")
+  description: String
   ownerPayments: Profile @belongsTo(fields: ["ownerPaymentsId"])
-  ownerPaymentsId: ID! @index(name: "byOwnerPayments", queryField: "paymentsByOwner", sortKeyFields: ["checkDate", "invoiceNumber"])
+  ownerPaymentsId: ID! @index(name: "byOwnerPayments", queryField: "paymentsByOwner", sortKeyFields: ["createdAt"])
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
 }
@@ -204,6 +217,22 @@ enum BillingFreq {
   QUARTERLY
   SEMI
   ANNUAL
+}
+
+enum PaymentMethod {
+  CHECK
+  STRIPE_CARD
+  STRIPE_ACH
+  CASH
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELED
+  REFUNDED
 }
 
 enum Audience {
@@ -336,9 +365,28 @@ enum DocumentAccessLevel {
   PRESIDENT_ONLY
 }
 
+type StripePaymentIntentResult {
+  clientSecret: String!
+  paymentIntentId: String!
+  amount: Float!
+  processingFee: Float!
+  totalAmount: Float!
+  paymentMethodType: String
+}
+
+type StripeCustomerResult {
+  customerId: String!
+  success: Boolean!
+  message: String
+}
+
 type Mutation {
   manageCognitoGroups(action: String!, groupName: String!, cognitoId: String!): MutationResult
     @function(name: "manageCognitoGroups-${env}")
   processMonthlyPropertyDues: MutationResult
     @function(name: "monthlyPropertyDues-${env}")
+  createStripePaymentIntent(amount: Float!, profileId: ID!, description: String, email: String, paymentMethodType: String): StripePaymentIntentResult
+    @function(name: "createStripePaymentIntent-${env}")
+  createStripeCustomer(profileId: ID!, email: String!, name: String!): StripeCustomerResult
+    @function(name: "createStripeCustomer-${env}")
 }

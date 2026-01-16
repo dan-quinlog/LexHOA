@@ -34,6 +34,7 @@ export const getProfile = /* GraphQL */ `
       billingFreq
       allowText
       balance
+      stripeCustomerId
       ownedProperties {
         nextToken
         __typename
@@ -96,6 +97,7 @@ export const listProfiles = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -141,6 +143,7 @@ export const profilesByTypeName = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -186,6 +189,7 @@ export const profilesByTypeBalance = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -231,6 +235,7 @@ export const profilesByTypeCreatedAt = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -274,6 +279,7 @@ export const profileByCognitoID = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -317,6 +323,7 @@ export const profileByName = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -360,6 +367,7 @@ export const profileByEmail = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -405,6 +413,7 @@ export const profilesByBalance = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -448,6 +457,7 @@ export const profilesByTenantAtId = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -486,6 +496,7 @@ export const getProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -510,6 +521,7 @@ export const getProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -698,6 +710,14 @@ export const getPayment = /* GraphQL */ `
       checkAmount
       invoiceNumber
       invoiceAmount
+      paymentMethod
+      stripePaymentIntentId
+      stripeCustomerId
+      amount
+      processingFee
+      totalAmount
+      status
+      description
       ownerPayments {
         id
         byTypeName
@@ -716,6 +736,7 @@ export const getPayment = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -746,6 +767,14 @@ export const listPayments = /* GraphQL */ `
         checkAmount
         invoiceNumber
         invoiceAmount
+        paymentMethod
+        stripePaymentIntentId
+        stripeCustomerId
+        amount
+        processingFee
+        totalAmount
+        status
+        description
         ownerPaymentsId
         createdAt
         updatedAt
@@ -784,6 +813,14 @@ export const paymentsByTypeCreatedAt = /* GraphQL */ `
         checkAmount
         invoiceNumber
         invoiceAmount
+        paymentMethod
+        stripePaymentIntentId
+        stripeCustomerId
+        amount
+        processingFee
+        totalAmount
+        status
+        description
         ownerPaymentsId
         createdAt
         updatedAt
@@ -822,6 +859,14 @@ export const paymentsByTypeCheckDate = /* GraphQL */ `
         checkAmount
         invoiceNumber
         invoiceAmount
+        paymentMethod
+        stripePaymentIntentId
+        stripeCustomerId
+        amount
+        processingFee
+        totalAmount
+        status
+        description
         ownerPaymentsId
         createdAt
         updatedAt
@@ -860,6 +905,14 @@ export const paymentsByTypeInvoiceNumber = /* GraphQL */ `
         checkAmount
         invoiceNumber
         invoiceAmount
+        paymentMethod
+        stripePaymentIntentId
+        stripeCustomerId
+        amount
+        processingFee
+        totalAmount
+        status
+        description
         ownerPaymentsId
         createdAt
         updatedAt
@@ -896,6 +949,14 @@ export const paymentsByCheckDate = /* GraphQL */ `
         checkAmount
         invoiceNumber
         invoiceAmount
+        paymentMethod
+        stripePaymentIntentId
+        stripeCustomerId
+        amount
+        processingFee
+        totalAmount
+        status
+        description
         ownerPaymentsId
         createdAt
         updatedAt
@@ -932,6 +993,14 @@ export const paymentsByCheckNumber = /* GraphQL */ `
         checkAmount
         invoiceNumber
         invoiceAmount
+        paymentMethod
+        stripePaymentIntentId
+        stripeCustomerId
+        amount
+        processingFee
+        totalAmount
+        status
+        description
         ownerPaymentsId
         createdAt
         updatedAt
@@ -968,6 +1037,14 @@ export const paymentsByInvoiceNumber = /* GraphQL */ `
         checkAmount
         invoiceNumber
         invoiceAmount
+        paymentMethod
+        stripePaymentIntentId
+        stripeCustomerId
+        amount
+        processingFee
+        totalAmount
+        status
+        description
         ownerPaymentsId
         createdAt
         updatedAt
@@ -979,18 +1056,16 @@ export const paymentsByInvoiceNumber = /* GraphQL */ `
     }
   }
 `;
-export const paymentsByOwner = /* GraphQL */ `
-  query PaymentsByOwner(
-    $ownerPaymentsId: ID!
-    $checkDateInvoiceNumber: ModelPaymentByOwnerPaymentsCompositeKeyConditionInput
+export const paymentsByStripePaymentIntent = /* GraphQL */ `
+  query PaymentsByStripePaymentIntent(
+    $stripePaymentIntentId: String!
     $sortDirection: ModelSortDirection
     $filter: ModelPaymentFilterInput
     $limit: Int
     $nextToken: String
   ) {
-    paymentsByOwner(
-      ownerPaymentsId: $ownerPaymentsId
-      checkDateInvoiceNumber: $checkDateInvoiceNumber
+    paymentsByStripePaymentIntent(
+      stripePaymentIntentId: $stripePaymentIntentId
       sortDirection: $sortDirection
       filter: $filter
       limit: $limit
@@ -1006,6 +1081,60 @@ export const paymentsByOwner = /* GraphQL */ `
         checkAmount
         invoiceNumber
         invoiceAmount
+        paymentMethod
+        stripePaymentIntentId
+        stripeCustomerId
+        amount
+        processingFee
+        totalAmount
+        status
+        description
+        ownerPaymentsId
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const paymentsByOwner = /* GraphQL */ `
+  query PaymentsByOwner(
+    $ownerPaymentsId: ID!
+    $createdAt: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelPaymentFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    paymentsByOwner(
+      ownerPaymentsId: $ownerPaymentsId
+      createdAt: $createdAt
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        byTypeCreatedAt
+        byTypeCheckDate
+        byTypeInvoiceNumber
+        checkDate
+        checkNumber
+        checkAmount
+        invoiceNumber
+        invoiceAmount
+        paymentMethod
+        stripePaymentIntentId
+        stripeCustomerId
+        amount
+        processingFee
+        totalAmount
+        status
+        description
         ownerPaymentsId
         createdAt
         updatedAt
@@ -1111,6 +1240,7 @@ export const getPing = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -1243,6 +1373,7 @@ export const getDocument = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt

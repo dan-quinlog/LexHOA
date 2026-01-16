@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "api": {
+      "lexhoa": [
+        "Query",
+        "Mutation",
+        "Subscription"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "stripeSecretKey",
+      "environmentVariableName": "STRIPE_SECRET_KEY"
+    },
+    {
+      "cloudFormationParameterName": "stripeWebhookSecret",
+      "environmentVariableName": "STRIPE_WEBHOOK_SECRET"
+    }
+  ]
+}

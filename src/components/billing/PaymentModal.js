@@ -8,11 +8,11 @@ import './PaymentModal.css';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
-const SUGGESTED_AMOUNTS = {
-  ANNUAL: { label: 'Annual', amount: 1200, description: '12 months' },
-  SEMI: { label: '6-Month', amount: 600, description: '6 months' },
-  QUARTERLY: { label: 'Quarterly', amount: 300, description: '3 months' },
-  MONTHLY: { label: 'Monthly', amount: 100, description: '1 month' }
+const BASE_AMOUNTS = {
+  ANNUAL: { label: 'Annual', baseAmount: 1200, description: '12 months' },
+  SEMI: { label: '6-Month', baseAmount: 600, description: '6 months' },
+  QUARTERLY: { label: 'Quarterly', baseAmount: 300, description: '3 months' },
+  MONTHLY: { label: 'Monthly', baseAmount: 100, description: '1 month' }
 };
 
 const PAYMENT_METHODS = {
@@ -28,7 +28,7 @@ const PAYMENT_METHODS = {
   }
 };
 
-const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMethodType }) => {
+const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMethodType, propertyCount = 1 }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [selectedAmount, setSelectedAmount] = useState('CUSTOM');
@@ -45,11 +45,23 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
   
   const isACH = paymentMethodType === 'us_bank_account';
 
+  // Calculate suggested amounts based on number of properties
+  const suggestedAmounts = Object.entries(BASE_AMOUNTS).reduce((acc, [key, value]) => {
+    acc[key] = {
+      ...value,
+      amount: value.baseAmount * propertyCount,
+      description: propertyCount > 1 
+        ? `${value.description} × ${propertyCount} properties` 
+        : value.description
+    };
+    return acc;
+  }, {});
+
   const getPaymentAmount = () => {
     if (selectedAmount === 'CUSTOM') {
       return parseFloat(customAmount) || 0;
     }
-    return SUGGESTED_AMOUNTS[selectedAmount]?.amount || 0;
+    return suggestedAmounts[selectedAmount]?.amount || 0;
   };
 
   const handleAmountSelect = (key) => {
@@ -194,7 +206,7 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
       setSucceeded(true);
       setProcessing(false);
       setTimeout(() => {
-        onSuccess && onSuccess(paymentIntent);
+        onSuccess && onSuccess({ ...paymentIntent, amount: paymentDetails.amount });
       }, 2000);
     } else if (paymentIntent.status === 'requires_action') {
       setError('Additional verification required. Please follow the prompts.');
@@ -228,7 +240,7 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
         <p className="balance-info">Current Balance: {formatCurrency(balance)}</p>
         
         <div className="amount-options">
-          {Object.entries(SUGGESTED_AMOUNTS).map(([key, { label, amount, description }]) => (
+          {Object.entries(suggestedAmounts).map(([key, { label, amount, description }]) => (
             <button
               key={key}
               type="button"
@@ -335,7 +347,7 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
   );
 };
 
-const PaymentModal = ({ isOpen, onClose, profileId, balance, email, onPaymentSuccess }) => {
+const PaymentModal = ({ isOpen, onClose, profileId, balance, email, propertyCount = 1, onPaymentSuccess }) => {
   const [paymentMethodType, setPaymentMethodType] = useState(null);
   
   const handleSuccess = (paymentIntent) => {
@@ -388,6 +400,7 @@ const PaymentModal = ({ isOpen, onClose, profileId, balance, email, onPaymentSuc
               profileId={profileId}
               balance={balance}
               email={email}
+              propertyCount={propertyCount}
               paymentMethodType={paymentMethodType}
               onSuccess={handleSuccess}
               onCancel={handleClose}

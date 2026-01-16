@@ -277,10 +277,13 @@ const Profile = ({ cognitoId }) => {
               </div>
             )}
 
-            <BalanceCard 
-              balance={profile.balance} 
-              billingFreq={profile.billingFreq} 
-            />
+            {(profile.balance > 0 || profile?.ownedProperties?.items?.length > 0) && (
+              <BalanceCard 
+                balance={profile.balance} 
+                billingFreq={profile.billingFreq}
+                propertyCount={profile?.ownedProperties?.items?.length || 0}
+              />
+            )}
 
             <ProfileCard profile={profile} />
             {showEditModal && (

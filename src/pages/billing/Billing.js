@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useQuery } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client';
 import { PROFILE_BY_COGNITO_ID, PAYMENTS_BY_OWNER } from '../../queries/queries';
+import { UPDATE_PROFILE } from '../../queries/mutations';
 import PaymentModal from '../../components/billing/PaymentModal';
 import PaymentHistory from '../../components/billing/PaymentHistory';
 import './Billing.css';
@@ -32,6 +33,8 @@ const Billing = ({ cognitoId }) => {
 
   const payments = paymentsData?.paymentsByOwner?.items || [];
 
+  const [updateProfile] = useMutation(UPDATE_PROFILE);
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -39,8 +42,26 @@ const Billing = ({ cognitoId }) => {
     }).format(amount || 0);
   };
 
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = async (paymentDetails) => {
     setShowPaymentModal(false);
+    
+    // Optimistically update the balance immediately
+    if (profile && paymentDetails?.amount) {
+      const newBalance = Math.max(0, (profile.balance || 0) - paymentDetails.amount);
+      try {
+        await updateProfile({
+          variables: {
+            input: {
+              id: profile.id,
+              balance: newBalance
+            }
+          }
+        });
+      } catch (err) {
+        console.warn('Balance update handled by webhook:', err.message);
+      }
+    }
+    
     refetchProfile();
     refetchPayments();
   };
@@ -129,6 +150,7 @@ const Billing = ({ cognitoId }) => {
         profileId={profile.id}
         balance={profile.balance}
         email={profile.email}
+        propertyCount={profile?.ownedProperties?.items?.length || 1}
         onPaymentSuccess={handlePaymentSuccess}
       />
     </div>

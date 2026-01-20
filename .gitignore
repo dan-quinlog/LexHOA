@@ -45,5 +45,6 @@ amplifytools.xcconfig
 **.sample
 #amplify-do-not-edit-end
 
-# Amplify team provider info (contains environment secrets)
+# Amplify auto-generated files (regenerated per environment)
 amplify/team-provider-info.json
+src/graphql/schema.json

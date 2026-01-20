@@ -27,6 +27,45 @@ export const processMonthlyPropertyDues = /* GraphQL */ `
     }
   }
 `;
+export const createStripePaymentIntent = /* GraphQL */ `
+  mutation CreateStripePaymentIntent(
+    $amount: Float!
+    $profileId: ID!
+    $description: String
+    $email: String
+    $paymentMethodType: String
+  ) {
+    createStripePaymentIntent(
+      amount: $amount
+      profileId: $profileId
+      description: $description
+      email: $email
+      paymentMethodType: $paymentMethodType
+    ) {
+      clientSecret
+      paymentIntentId
+      amount
+      processingFee
+      totalAmount
+      paymentMethodType
+      __typename
+    }
+  }
+`;
+export const createStripeCustomer = /* GraphQL */ `
+  mutation CreateStripeCustomer(
+    $profileId: ID!
+    $email: String!
+    $name: String!
+  ) {
+    createStripeCustomer(profileId: $profileId, email: $email, name: $name) {
+      customerId
+      success
+      message
+      __typename
+    }
+  }
+`;
 export const createProfile = /* GraphQL */ `
   mutation CreateProfile(
     $input: CreateProfileInput!
@@ -50,6 +89,7 @@ export const createProfile = /* GraphQL */ `
       billingFreq
       allowText
       balance
+      stripeCustomerId
       ownedProperties {
         nextToken
         __typename
@@ -74,6 +114,10 @@ export const createProfile = /* GraphQL */ `
       }
       tenantAtId
       createdPings {
+        nextToken
+        __typename
+      }
+      uploadedDocuments {
         nextToken
         __typename
       }
@@ -106,6 +150,7 @@ export const updateProfile = /* GraphQL */ `
       billingFreq
       allowText
       balance
+      stripeCustomerId
       ownedProperties {
         nextToken
         __typename
@@ -130,6 +175,10 @@ export const updateProfile = /* GraphQL */ `
       }
       tenantAtId
       createdPings {
+        nextToken
+        __typename
+      }
+      uploadedDocuments {
         nextToken
         __typename
       }
@@ -162,6 +211,7 @@ export const deleteProfile = /* GraphQL */ `
       billingFreq
       allowText
       balance
+      stripeCustomerId
       ownedProperties {
         nextToken
         __typename
@@ -186,6 +236,10 @@ export const deleteProfile = /* GraphQL */ `
       }
       tenantAtId
       createdPings {
+        nextToken
+        __typename
+      }
+      uploadedDocuments {
         nextToken
         __typename
       }
@@ -226,6 +280,7 @@ export const createProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -250,6 +305,7 @@ export const createProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -293,6 +349,7 @@ export const updateProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -317,6 +374,7 @@ export const updateProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -360,6 +418,7 @@ export const deleteProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -384,6 +443,7 @@ export const deleteProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -411,6 +471,14 @@ export const createPayment = /* GraphQL */ `
       checkAmount
       invoiceNumber
       invoiceAmount
+      paymentMethod
+      stripePaymentIntentId
+      stripeCustomerId
+      amount
+      processingFee
+      totalAmount
+      status
+      description
       ownerPayments {
         id
         byTypeName
@@ -429,6 +497,7 @@ export const createPayment = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -457,6 +526,14 @@ export const updatePayment = /* GraphQL */ `
       checkAmount
       invoiceNumber
       invoiceAmount
+      paymentMethod
+      stripePaymentIntentId
+      stripeCustomerId
+      amount
+      processingFee
+      totalAmount
+      status
+      description
       ownerPayments {
         id
         byTypeName
@@ -475,6 +552,7 @@ export const updatePayment = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -503,6 +581,14 @@ export const deletePayment = /* GraphQL */ `
       checkAmount
       invoiceNumber
       invoiceAmount
+      paymentMethod
+      stripePaymentIntentId
+      stripeCustomerId
+      amount
+      processingFee
+      totalAmount
+      status
+      description
       ownerPayments {
         id
         byTypeName
@@ -521,6 +607,7 @@ export const deletePayment = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -614,6 +701,7 @@ export const createPing = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -655,6 +743,7 @@ export const updatePing = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -696,6 +785,7 @@ export const deletePing = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -704,6 +794,168 @@ export const deletePing = /* GraphQL */ `
       profCreatorId
       createdAt
       updatedAt
+      __typename
+    }
+  }
+`;
+export const createDocument = /* GraphQL */ `
+  mutation CreateDocument(
+    $input: CreateDocumentInput!
+    $condition: ModelDocumentConditionInput
+  ) {
+    createDocument(input: $input, condition: $condition) {
+      id
+      title
+      description
+      category
+      accessLevel
+      fileName
+      fileSize
+      fileType
+      s3Key
+      s3Url
+      uploadedBy {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        stripeCustomerId
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      uploadedById
+      displayOrder
+      year
+      isArchived
+      type
+      categoryIndex
+      accessLevelIndex
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const updateDocument = /* GraphQL */ `
+  mutation UpdateDocument(
+    $input: UpdateDocumentInput!
+    $condition: ModelDocumentConditionInput
+  ) {
+    updateDocument(input: $input, condition: $condition) {
+      id
+      title
+      description
+      category
+      accessLevel
+      fileName
+      fileSize
+      fileType
+      s3Key
+      s3Url
+      uploadedBy {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        stripeCustomerId
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      uploadedById
+      displayOrder
+      year
+      isArchived
+      type
+      categoryIndex
+      accessLevelIndex
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const deleteDocument = /* GraphQL */ `
+  mutation DeleteDocument(
+    $input: DeleteDocumentInput!
+    $condition: ModelDocumentConditionInput
+  ) {
+    deleteDocument(input: $input, condition: $condition) {
+      id
+      title
+      description
+      category
+      accessLevel
+      fileName
+      fileSize
+      fileType
+      s3Key
+      s3Url
+      uploadedBy {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        stripeCustomerId
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      uploadedById
+      displayOrder
+      year
+      isArchived
+      type
+      categoryIndex
+      accessLevelIndex
+      createdAt
+      updatedAt
+      owner
       __typename
     }
   }

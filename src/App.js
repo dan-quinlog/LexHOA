@@ -7,10 +7,12 @@ import './styles/variables.css';
 import './styles/global.css';
 import hoaImage from './images/hoa-property.jpg';
 import mapImage from './images/map-view.jpg';
-import Amenities from './Amenities';
-import Contact from './Contact';
-import Login from './Login';
+import Amenities from './pages/public/Amenities';
+import Contact from './pages/public/Contact';
+import Login from './pages/public/Login';
+import Documents from './pages/public/Documents';
 import Profile from './pages/profile/Profile';
+import Billing from './pages/billing/Billing';
 import Board from './pages/board/Board';
 import amplifyConfig from './services/amplify-config';
 import { createAuthLink } from 'aws-appsync-auth-link';
@@ -22,16 +24,16 @@ import MenuState from './components/menu/MenuState';
 import DatabaseReset from './components/dev/DatabaseReset'
 import 'react-quill/dist/quill.bubble.css';
 
-// Configure Amplify
+// Import amplify configuration
+import awsconfig from './amplifyconfiguration.json';
+
+// Configure Amplify with merged configuration (single call to avoid overwriting)
 Amplify.configure({
-  ...amplifyConfig,
-  Auth: {
-    region: 'us-east-1',
-    mandatorySignIn: false
-  },
-  // Add REST API configuration directly here
+  ...awsconfig,
   API: {
+    ...(awsconfig.API ?? {}),
     REST: {
+      ...(awsconfig.API?.REST ?? {}),
       cognitoGroupManagement: {
         endpoint: 'https://7vxyhwwje0.execute-api.us-east-1.amazonaws.com/dev',
         region: 'us-east-1'
@@ -57,8 +59,13 @@ function App() {
     apiKey: process.env.REACT_APP_API_KEY,
     jwtToken: async () => {
       if (user) {
-        const session = await fetchAuthSession();
-        return session?.tokens?.idToken?.toString() || '';
+        try {
+          const session = await fetchAuthSession();
+          return session?.tokens?.idToken?.toString() || '';
+        } catch (error) {
+          console.warn('Error fetching auth session:', error.message);
+          return '';
+        }
       }
       return null;
     },
@@ -96,9 +103,14 @@ function App() {
         const currentUser = await getCurrentUser();
         if (currentUser) {
           setUser(currentUser);
-          const session = await fetchAuthSession();
-          const groups = session.tokens.idToken.payload['cognito:groups'] || [];
-          setUserGroups(groups);
+          try {
+            const session = await fetchAuthSession();
+            const groups = session?.tokens?.idToken?.payload?.['cognito:groups'] || [];
+            setUserGroups(groups);
+          } catch (sessionError) {
+            console.warn('Session fetch error (may resolve on refresh):', sessionError.message);
+            setUserGroups([]);
+          }
         }
       } catch (error) {
         setUser(null);
@@ -139,6 +151,7 @@ function App() {
   const renderMenuItems = () => {
     const menuItems = [
       { label: 'Profile', path: '/profile' },
+      { label: 'Billing', path: '/billing' },
       { label: 'Board', path: '/board', group: BOARD_GROUP },
       { label: 'Amenities', path: '/amenities' },
       { label: 'Contact', path: '/contact' }
@@ -265,52 +278,73 @@ function App() {
     );
   };
 
+  // AppContent component to enable useQuery inside ApolloProvider
+  const AppContent = () => {
+    // Query profile to determine isOwner for Documents page
+    const { data: appProfileData } = useQuery(PROFILE_BY_COGNITO_ID, {
+      variables: { cognitoID: user?.username },
+      skip: !user,
+      client: authenticatedClient
+    });
+    
+    const appProfile = appProfileData?.profileByCognitoID?.items[0];
+    const isOwner = appProfile?.ownedProperties?.items?.length > 0;
+
+    return (
+      <div className="App">
+        <header className="top-bar">
+          <Link to="/" className="site-title">
+            <h1>Lexington Commons HOA</h1>
+          </Link>
+          {user ? (
+            <MenuState
+              userGroups={userGroups}
+              onSignOut={handleSignOut}
+              renderMenuItems={renderMenuItems}
+            />
+          ) : (
+            <nav className="desktop-menu">
+              <Link to="/amenities">Amenities</Link>
+              <Link to="/documents">Documents</Link>
+              <Link to="/contact">Contact</Link>
+              <Login />
+            </nav>
+          )}
+        </header>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/profile" element={<Profile cognitoId={user?.username} />} />
+          <Route path="/billing" element={<Billing cognitoId={user?.username} />} />
+          <Route path="/amenities" element={<Amenities />} />
+          <Route path="/documents" element={<Documents user={user} userGroups={userGroups} isOwner={isOwner} />} />
+          <Route path="/board" element={<Board userGroups={userGroups} user={user} />} />
+          <Route path="/contact" element={<Contact />} />
+        </Routes>
+        <footer className="bottom-bar">
+          <nav className="mobile-menu">
+            {user ? (
+              <>
+                {renderMenuItems()}
+                <button onClick={handleSignOut}>Sign Out</button>
+              </>
+            ) : (
+              <>
+                <Link to="/amenities">Amenities</Link>
+                <Link to="/documents">Documents</Link>
+                <Link to="/contact">Contact</Link>
+                <Login />
+              </>
+            )}
+          </nav>
+        </footer>
+      </div>
+    );
+  };
+
   return (
     <ApolloProvider client={user ? authenticatedClient : publicClient}>
       <BrowserRouter>
-        <div className="App">
-          <header className="top-bar">
-            <Link to="/" className="site-title">
-              <h1>Lexington Commons HOA</h1>
-            </Link>
-            {user ? (
-              <MenuState
-                userGroups={userGroups}
-                onSignOut={handleSignOut}
-                renderMenuItems={renderMenuItems}
-              />
-            ) : (
-              <nav className="desktop-menu">
-                <Link to="/amenities">Amenities</Link>
-                <Link to="/contact">Contact</Link>
-                <Login />
-              </nav>
-            )}
-          </header>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/profile" element={<Profile cognitoId={user?.username} />} />
-            <Route path="/amenities" element={<Amenities />} />
-            <Route path="/board" element={<Board userGroups={userGroups} />} />
-            <Route path="/contact" element={<Contact />} />
-          </Routes>
-          <footer className="bottom-bar">
-            <nav className="mobile-menu">
-              {user ? (
-                <>
-                  {renderMenuItems()}
-                  <button onClick={handleSignOut}>Sign Out</button>
-                </>
-              ) : (
-                <>
-                  <Link to="/amenities">Amenities</Link>
-                  <Link to="/contact">Contact</Link>
-                  <Login />
-                </>
-              )}
-            </nav>
-          </footer>
-        </div>
+        <AppContent />
       </BrowserRouter>
     </ApolloProvider>
   );

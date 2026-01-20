@@ -24,6 +24,7 @@ export const onCreateProfile = /* GraphQL */ `
       billingFreq
       allowText
       balance
+      stripeCustomerId
       ownedProperties {
         nextToken
         __typename
@@ -48,6 +49,10 @@ export const onCreateProfile = /* GraphQL */ `
       }
       tenantAtId
       createdPings {
+        nextToken
+        __typename
+      }
+      uploadedDocuments {
         nextToken
         __typename
       }
@@ -80,6 +85,7 @@ export const onUpdateProfile = /* GraphQL */ `
       billingFreq
       allowText
       balance
+      stripeCustomerId
       ownedProperties {
         nextToken
         __typename
@@ -104,6 +110,10 @@ export const onUpdateProfile = /* GraphQL */ `
       }
       tenantAtId
       createdPings {
+        nextToken
+        __typename
+      }
+      uploadedDocuments {
         nextToken
         __typename
       }
@@ -136,6 +146,7 @@ export const onDeleteProfile = /* GraphQL */ `
       billingFreq
       allowText
       balance
+      stripeCustomerId
       ownedProperties {
         nextToken
         __typename
@@ -160,6 +171,10 @@ export const onDeleteProfile = /* GraphQL */ `
       }
       tenantAtId
       createdPings {
+        nextToken
+        __typename
+      }
+      uploadedDocuments {
         nextToken
         __typename
       }
@@ -200,6 +215,7 @@ export const onCreateProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -224,6 +240,7 @@ export const onCreateProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -267,6 +284,7 @@ export const onUpdateProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -291,6 +309,7 @@ export const onUpdateProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -334,6 +353,7 @@ export const onDeleteProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -358,6 +378,7 @@ export const onDeleteProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -385,6 +406,14 @@ export const onCreatePayment = /* GraphQL */ `
       checkAmount
       invoiceNumber
       invoiceAmount
+      paymentMethod
+      stripePaymentIntentId
+      stripeCustomerId
+      amount
+      processingFee
+      totalAmount
+      status
+      description
       ownerPayments {
         id
         byTypeName
@@ -403,6 +432,7 @@ export const onCreatePayment = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -431,6 +461,14 @@ export const onUpdatePayment = /* GraphQL */ `
       checkAmount
       invoiceNumber
       invoiceAmount
+      paymentMethod
+      stripePaymentIntentId
+      stripeCustomerId
+      amount
+      processingFee
+      totalAmount
+      status
+      description
       ownerPayments {
         id
         byTypeName
@@ -449,6 +487,7 @@ export const onUpdatePayment = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -477,6 +516,14 @@ export const onDeletePayment = /* GraphQL */ `
       checkAmount
       invoiceNumber
       invoiceAmount
+      paymentMethod
+      stripePaymentIntentId
+      stripeCustomerId
+      amount
+      processingFee
+      totalAmount
+      status
+      description
       ownerPayments {
         id
         byTypeName
@@ -495,6 +542,7 @@ export const onDeletePayment = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -576,6 +624,7 @@ export const onCreatePing = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -614,6 +663,7 @@ export const onUpdatePing = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -652,6 +702,7 @@ export const onDeletePing = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -660,6 +711,168 @@ export const onDeletePing = /* GraphQL */ `
       profCreatorId
       createdAt
       updatedAt
+      __typename
+    }
+  }
+`;
+export const onCreateDocument = /* GraphQL */ `
+  subscription OnCreateDocument(
+    $filter: ModelSubscriptionDocumentFilterInput
+    $owner: String
+  ) {
+    onCreateDocument(filter: $filter, owner: $owner) {
+      id
+      title
+      description
+      category
+      accessLevel
+      fileName
+      fileSize
+      fileType
+      s3Key
+      s3Url
+      uploadedBy {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        stripeCustomerId
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      uploadedById
+      displayOrder
+      year
+      isArchived
+      type
+      categoryIndex
+      accessLevelIndex
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const onUpdateDocument = /* GraphQL */ `
+  subscription OnUpdateDocument(
+    $filter: ModelSubscriptionDocumentFilterInput
+    $owner: String
+  ) {
+    onUpdateDocument(filter: $filter, owner: $owner) {
+      id
+      title
+      description
+      category
+      accessLevel
+      fileName
+      fileSize
+      fileType
+      s3Key
+      s3Url
+      uploadedBy {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        stripeCustomerId
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      uploadedById
+      displayOrder
+      year
+      isArchived
+      type
+      categoryIndex
+      accessLevelIndex
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const onDeleteDocument = /* GraphQL */ `
+  subscription OnDeleteDocument(
+    $filter: ModelSubscriptionDocumentFilterInput
+    $owner: String
+  ) {
+    onDeleteDocument(filter: $filter, owner: $owner) {
+      id
+      title
+      description
+      category
+      accessLevel
+      fileName
+      fileSize
+      fileType
+      s3Key
+      s3Url
+      uploadedBy {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        stripeCustomerId
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      uploadedById
+      displayOrder
+      year
+      isArchived
+      type
+      categoryIndex
+      accessLevelIndex
+      createdAt
+      updatedAt
+      owner
       __typename
     }
   }

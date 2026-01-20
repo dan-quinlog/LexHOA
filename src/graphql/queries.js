@@ -34,6 +34,7 @@ export const getProfile = /* GraphQL */ `
       billingFreq
       allowText
       balance
+      stripeCustomerId
       ownedProperties {
         nextToken
         __typename
@@ -58,6 +59,10 @@ export const getProfile = /* GraphQL */ `
       }
       tenantAtId
       createdPings {
+        nextToken
+        __typename
+      }
+      uploadedDocuments {
         nextToken
         __typename
       }
@@ -92,6 +97,7 @@ export const listProfiles = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -137,6 +143,7 @@ export const profilesByTypeName = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -182,6 +189,7 @@ export const profilesByTypeBalance = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -227,6 +235,7 @@ export const profilesByTypeCreatedAt = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -270,6 +279,7 @@ export const profileByCognitoID = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -313,6 +323,7 @@ export const profileByName = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -356,6 +367,7 @@ export const profileByEmail = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -401,6 +413,7 @@ export const profilesByBalance = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -444,6 +457,7 @@ export const profilesByTenantAtId = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -482,6 +496,7 @@ export const getProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -506,6 +521,7 @@ export const getProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -694,6 +710,14 @@ export const getPayment = /* GraphQL */ `
       checkAmount
       invoiceNumber
       invoiceAmount
+      paymentMethod
+      stripePaymentIntentId
+      stripeCustomerId
+      amount
+      processingFee
+      totalAmount
+      status
+      description
       ownerPayments {
         id
         byTypeName
@@ -712,6 +736,7 @@ export const getPayment = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -742,6 +767,14 @@ export const listPayments = /* GraphQL */ `
         checkAmount
         invoiceNumber
         invoiceAmount
+        paymentMethod
+        stripePaymentIntentId
+        stripeCustomerId
+        amount
+        processingFee
+        totalAmount
+        status
+        description
         ownerPaymentsId
         createdAt
         updatedAt
@@ -780,6 +813,14 @@ export const paymentsByTypeCreatedAt = /* GraphQL */ `
         checkAmount
         invoiceNumber
         invoiceAmount
+        paymentMethod
+        stripePaymentIntentId
+        stripeCustomerId
+        amount
+        processingFee
+        totalAmount
+        status
+        description
         ownerPaymentsId
         createdAt
         updatedAt
@@ -818,6 +859,14 @@ export const paymentsByTypeCheckDate = /* GraphQL */ `
         checkAmount
         invoiceNumber
         invoiceAmount
+        paymentMethod
+        stripePaymentIntentId
+        stripeCustomerId
+        amount
+        processingFee
+        totalAmount
+        status
+        description
         ownerPaymentsId
         createdAt
         updatedAt
@@ -856,6 +905,14 @@ export const paymentsByTypeInvoiceNumber = /* GraphQL */ `
         checkAmount
         invoiceNumber
         invoiceAmount
+        paymentMethod
+        stripePaymentIntentId
+        stripeCustomerId
+        amount
+        processingFee
+        totalAmount
+        status
+        description
         ownerPaymentsId
         createdAt
         updatedAt
@@ -892,6 +949,14 @@ export const paymentsByCheckDate = /* GraphQL */ `
         checkAmount
         invoiceNumber
         invoiceAmount
+        paymentMethod
+        stripePaymentIntentId
+        stripeCustomerId
+        amount
+        processingFee
+        totalAmount
+        status
+        description
         ownerPaymentsId
         createdAt
         updatedAt
@@ -928,6 +993,14 @@ export const paymentsByCheckNumber = /* GraphQL */ `
         checkAmount
         invoiceNumber
         invoiceAmount
+        paymentMethod
+        stripePaymentIntentId
+        stripeCustomerId
+        amount
+        processingFee
+        totalAmount
+        status
+        description
         ownerPaymentsId
         createdAt
         updatedAt
@@ -964,6 +1037,14 @@ export const paymentsByInvoiceNumber = /* GraphQL */ `
         checkAmount
         invoiceNumber
         invoiceAmount
+        paymentMethod
+        stripePaymentIntentId
+        stripeCustomerId
+        amount
+        processingFee
+        totalAmount
+        status
+        description
         ownerPaymentsId
         createdAt
         updatedAt
@@ -975,18 +1056,16 @@ export const paymentsByInvoiceNumber = /* GraphQL */ `
     }
   }
 `;
-export const paymentsByOwner = /* GraphQL */ `
-  query PaymentsByOwner(
-    $ownerPaymentsId: ID!
-    $checkDateInvoiceNumber: ModelPaymentByOwnerPaymentsCompositeKeyConditionInput
+export const paymentsByStripePaymentIntent = /* GraphQL */ `
+  query PaymentsByStripePaymentIntent(
+    $stripePaymentIntentId: String!
     $sortDirection: ModelSortDirection
     $filter: ModelPaymentFilterInput
     $limit: Int
     $nextToken: String
   ) {
-    paymentsByOwner(
-      ownerPaymentsId: $ownerPaymentsId
-      checkDateInvoiceNumber: $checkDateInvoiceNumber
+    paymentsByStripePaymentIntent(
+      stripePaymentIntentId: $stripePaymentIntentId
       sortDirection: $sortDirection
       filter: $filter
       limit: $limit
@@ -1002,6 +1081,60 @@ export const paymentsByOwner = /* GraphQL */ `
         checkAmount
         invoiceNumber
         invoiceAmount
+        paymentMethod
+        stripePaymentIntentId
+        stripeCustomerId
+        amount
+        processingFee
+        totalAmount
+        status
+        description
+        ownerPaymentsId
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const paymentsByOwner = /* GraphQL */ `
+  query PaymentsByOwner(
+    $ownerPaymentsId: ID!
+    $createdAt: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelPaymentFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    paymentsByOwner(
+      ownerPaymentsId: $ownerPaymentsId
+      createdAt: $createdAt
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        byTypeCreatedAt
+        byTypeCheckDate
+        byTypeInvoiceNumber
+        checkDate
+        checkNumber
+        checkAmount
+        invoiceNumber
+        invoiceAmount
+        paymentMethod
+        stripePaymentIntentId
+        stripeCustomerId
+        amount
+        processingFee
+        totalAmount
+        status
+        description
         ownerPaymentsId
         createdAt
         updatedAt
@@ -1107,6 +1240,7 @@ export const getPing = /* GraphQL */ `
         billingFreq
         allowText
         balance
+        stripeCustomerId
         tenantAtId
         createdAt
         updatedAt
@@ -1201,6 +1335,272 @@ export const pingsByProfCreatorIdAndCreatedAt = /* GraphQL */ `
         profCreatorId
         createdAt
         updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getDocument = /* GraphQL */ `
+  query GetDocument($id: ID!) {
+    getDocument(id: $id) {
+      id
+      title
+      description
+      category
+      accessLevel
+      fileName
+      fileSize
+      fileType
+      s3Key
+      s3Url
+      uploadedBy {
+        id
+        byTypeName
+        byTypeBalance
+        byTypeCreatedAt
+        owner
+        cognitoID
+        name
+        email
+        phone
+        address
+        city
+        state
+        zip
+        contactPref
+        billingFreq
+        allowText
+        balance
+        stripeCustomerId
+        tenantAtId
+        createdAt
+        updatedAt
+        __typename
+      }
+      uploadedById
+      displayOrder
+      year
+      isArchived
+      type
+      categoryIndex
+      accessLevelIndex
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const listDocuments = /* GraphQL */ `
+  query ListDocuments(
+    $filter: ModelDocumentFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listDocuments(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        title
+        description
+        category
+        accessLevel
+        fileName
+        fileSize
+        fileType
+        s3Key
+        s3Url
+        uploadedById
+        displayOrder
+        year
+        isArchived
+        type
+        categoryIndex
+        accessLevelIndex
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const documentsByUploadedByIdAndCreatedAt = /* GraphQL */ `
+  query DocumentsByUploadedByIdAndCreatedAt(
+    $uploadedById: ID!
+    $createdAt: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelDocumentFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    documentsByUploadedByIdAndCreatedAt(
+      uploadedById: $uploadedById
+      createdAt: $createdAt
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        title
+        description
+        category
+        accessLevel
+        fileName
+        fileSize
+        fileType
+        s3Key
+        s3Url
+        uploadedById
+        displayOrder
+        year
+        isArchived
+        type
+        categoryIndex
+        accessLevelIndex
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const documentsByDate = /* GraphQL */ `
+  query DocumentsByDate(
+    $type: String!
+    $createdAt: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelDocumentFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    documentsByDate(
+      type: $type
+      createdAt: $createdAt
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        title
+        description
+        category
+        accessLevel
+        fileName
+        fileSize
+        fileType
+        s3Key
+        s3Url
+        uploadedById
+        displayOrder
+        year
+        isArchived
+        type
+        categoryIndex
+        accessLevelIndex
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const documentsByCategory = /* GraphQL */ `
+  query DocumentsByCategory(
+    $categoryIndex: String!
+    $displayOrderCreatedAt: ModelDocumentDocumentsByCategoryCompositeKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelDocumentFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    documentsByCategory(
+      categoryIndex: $categoryIndex
+      displayOrderCreatedAt: $displayOrderCreatedAt
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        title
+        description
+        category
+        accessLevel
+        fileName
+        fileSize
+        fileType
+        s3Key
+        s3Url
+        uploadedById
+        displayOrder
+        year
+        isArchived
+        type
+        categoryIndex
+        accessLevelIndex
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const documentsByAccessLevel = /* GraphQL */ `
+  query DocumentsByAccessLevel(
+    $accessLevelIndex: String!
+    $categoryDisplayOrder: ModelDocumentDocumentsByAccessLevelCompositeKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelDocumentFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    documentsByAccessLevel(
+      accessLevelIndex: $accessLevelIndex
+      categoryDisplayOrder: $categoryDisplayOrder
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        title
+        description
+        category
+        accessLevel
+        fileName
+        fileSize
+        fileType
+        s3Key
+        s3Url
+        uploadedById
+        displayOrder
+        year
+        isArchived
+        type
+        categoryIndex
+        accessLevelIndex
+        createdAt
+        updatedAt
+        owner
         __typename
       }
       nextToken

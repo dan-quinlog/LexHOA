@@ -582,6 +582,14 @@ export const PAYMENTS_BY_OWNER = gql`
         checkAmount
         invoiceNumber
         invoiceAmount
+        paymentMethod
+        stripePaymentIntentId
+        stripeCustomerId
+        amount
+        processingFee
+        totalAmount
+        status
+        description
         ownerPayments {
           id
           name

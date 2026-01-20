@@ -25,12 +25,16 @@ export const updateCognitoUserAttributes = async (attributes) => {
  */
 export const verifyNewEmail = async (verificationCode) => {
   try {
-    return await confirmUserAttribute({
+    console.log('cognitoUtils: Confirming email with code:', verificationCode);
+    const result = await confirmUserAttribute({
       userAttributeKey: 'email',
-      confirmationCode: verificationCode
+      confirmationCode: verificationCode.trim() // Remove any whitespace
     });
+    console.log('cognitoUtils: Email confirmation successful');
+    return result;
   } catch (error) {
-    console.error("Error verifying email:", error);
+    console.error("cognitoUtils: Error verifying email:", error);
+    console.error("cognitoUtils: Error details:", error.name, error.message);
     throw error;
   }
 };

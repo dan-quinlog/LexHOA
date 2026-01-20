@@ -12,6 +12,7 @@ const MenuState = ({ userGroups, onSignOut, renderMenuItems }) => {
   const renderMenuItemsWithClose = () => {
     const menuItems = [
       { label: 'Profile', path: '/profile' },
+      { label: 'Documents', path: '/documents' },
       { label: 'Board', path: '/board', group: BOARD_GROUP },
       { label: 'Amenities', path: '/amenities' },
       { label: 'Contact', path: '/contact' }

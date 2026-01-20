@@ -1,6 +1,8 @@
 {
   "version": "1",
   "cognitoConfig": {
+    "identityPoolName": "lexhoa4faca5b8_identitypool_f199a5f8",
+    "allowUnauthenticatedIdentities": true,
     "resourceNameTruncated": "lexhoa4faca5b8",
     "userPoolName": "lexhoa4faca5b8_userpool_4faca5b8",
     "autoVerifiedAttributes": [
@@ -34,7 +36,7 @@
     "userpoolClientSetAttributes": false,
     "sharedId": "4faca5b8",
     "resourceName": "lexhoa4faca5b8",
-    "authSelections": "userPoolOnly",
+    "authSelections": "identityPoolAndUserPool",
     "useDefault": "manual",
     "usernameAttributes": [
       "email"

@@ -278,56 +278,73 @@ function App() {
     );
   };
 
-  return (
-    <ApolloProvider client={user ? authenticatedClient : publicClient}>
-      <BrowserRouter>
-        <div className="App">
-          <header className="top-bar">
-            <Link to="/" className="site-title">
-              <h1>Lexington Commons HOA</h1>
-            </Link>
+  // AppContent component to enable useQuery inside ApolloProvider
+  const AppContent = () => {
+    // Query profile to determine isOwner for Documents page
+    const { data: appProfileData } = useQuery(PROFILE_BY_COGNITO_ID, {
+      variables: { cognitoID: user?.username },
+      skip: !user,
+      client: authenticatedClient
+    });
+    
+    const appProfile = appProfileData?.profileByCognitoID?.items[0];
+    const isOwner = appProfile?.ownedProperties?.items?.length > 0;
+
+    return (
+      <div className="App">
+        <header className="top-bar">
+          <Link to="/" className="site-title">
+            <h1>Lexington Commons HOA</h1>
+          </Link>
+          {user ? (
+            <MenuState
+              userGroups={userGroups}
+              onSignOut={handleSignOut}
+              renderMenuItems={renderMenuItems}
+            />
+          ) : (
+            <nav className="desktop-menu">
+              <Link to="/amenities">Amenities</Link>
+              <Link to="/documents">Documents</Link>
+              <Link to="/contact">Contact</Link>
+              <Login />
+            </nav>
+          )}
+        </header>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/profile" element={<Profile cognitoId={user?.username} />} />
+          <Route path="/billing" element={<Billing cognitoId={user?.username} />} />
+          <Route path="/amenities" element={<Amenities />} />
+          <Route path="/documents" element={<Documents user={user} userGroups={userGroups} isOwner={isOwner} />} />
+          <Route path="/board" element={<Board userGroups={userGroups} user={user} />} />
+          <Route path="/contact" element={<Contact />} />
+        </Routes>
+        <footer className="bottom-bar">
+          <nav className="mobile-menu">
             {user ? (
-              <MenuState
-                userGroups={userGroups}
-                onSignOut={handleSignOut}
-                renderMenuItems={renderMenuItems}
-              />
+              <>
+                {renderMenuItems()}
+                <button onClick={handleSignOut}>Sign Out</button>
+              </>
             ) : (
-              <nav className="desktop-menu">
+              <>
                 <Link to="/amenities">Amenities</Link>
                 <Link to="/documents">Documents</Link>
                 <Link to="/contact">Contact</Link>
                 <Login />
-              </nav>
+              </>
             )}
-          </header>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/profile" element={<Profile cognitoId={user?.username} />} />
-            <Route path="/billing" element={<Billing cognitoId={user?.username} />} />
-            <Route path="/amenities" element={<Amenities />} />
-            <Route path="/documents" element={<Documents user={user} userGroups={userGroups} />} />
-            <Route path="/board" element={<Board userGroups={userGroups} user={user} />} />
-            <Route path="/contact" element={<Contact />} />
-          </Routes>
-          <footer className="bottom-bar">
-            <nav className="mobile-menu">
-              {user ? (
-                <>
-                  {renderMenuItems()}
-                  <button onClick={handleSignOut}>Sign Out</button>
-                </>
-              ) : (
-                <>
-                  <Link to="/amenities">Amenities</Link>
-                  <Link to="/documents">Documents</Link>
-                  <Link to="/contact">Contact</Link>
-                  <Login />
-                </>
-              )}
-            </nav>
-          </footer>
-        </div>
+          </nav>
+        </footer>
+      </div>
+    );
+  };
+
+  return (
+    <ApolloProvider client={user ? authenticatedClient : publicClient}>
+      <BrowserRouter>
+        <AppContent />
       </BrowserRouter>
     </ApolloProvider>
   );

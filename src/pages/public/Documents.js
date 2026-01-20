@@ -4,7 +4,7 @@ import { LIST_DOCUMENTS } from '../../queries/documentQueries';
 import { getUrl } from 'aws-amplify/storage';
 import './Documents.css';
 
-const Documents = ({ user, userGroups = [] }) => {
+const Documents = ({ user, userGroups = [], isOwner = false }) => {
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -22,7 +22,6 @@ const Documents = ({ user, userGroups = [] }) => {
                   userGroups.includes('SECRETARY') || userGroups.includes('TREASURER');
   const isTreasurer = userGroups.includes('TREASURER') || userGroups.includes('PRESIDENT');
   const isPresident = userGroups.includes('PRESIDENT');
-  const isOwner = user && !isBoard; // Simplified - in reality check if user owns property
 
   // Filter documents based on user's access level
   const filteredDocuments = useMemo(() => {

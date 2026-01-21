@@ -28,15 +28,22 @@ import 'react-quill/dist/quill.bubble.css';
 import awsconfig from './amplifyconfiguration.json';
 
 // Configure Amplify with merged configuration (single call to avoid overwriting)
+// Override OAuth redirects with environment variables to support different deploy targets
 Amplify.configure({
   ...awsconfig,
+  oauth: {
+    ...awsconfig.oauth,
+    domain: process.env.REACT_APP_AUTH_DOMAIN || awsconfig.oauth?.domain,
+    redirectSignIn: process.env.REACT_APP_REDIRECT_SIGN_IN || awsconfig.oauth?.redirectSignIn,
+    redirectSignOut: process.env.REACT_APP_REDIRECT_SIGN_OUT || awsconfig.oauth?.redirectSignOut,
+  },
   API: {
     ...(awsconfig.API ?? {}),
     REST: {
       ...(awsconfig.API?.REST ?? {}),
       cognitoGroupManagement: {
-        endpoint: 'https://7vxyhwwje0.execute-api.us-east-1.amazonaws.com/dev',
-        region: 'us-east-1'
+        endpoint: process.env.REACT_APP_API_ENDPOINT || 'https://7vxyhwwje0.execute-api.us-east-1.amazonaws.com/dev',
+        region: process.env.REACT_APP_AWS_REGION || 'us-east-1'
       }
     }
   }

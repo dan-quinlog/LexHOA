@@ -105,10 +105,19 @@ const PaymentManager = ({ searchState, setSearchState, userGroups = [] }) => {
           break;
       }
 
+      // Get results and sort by checkDate descending (newest first)
+      let results = response.data?.listPayments?.items ||
+        response.data?.paymentsByOwner?.items || [];
+      
+      results = [...results].sort((a, b) => {
+        const dateA = a.checkDate ? new Date(a.checkDate) : new Date(0);
+        const dateB = b.checkDate ? new Date(b.checkDate) : new Date(0);
+        return dateB - dateA; // Descending order (newest first)
+      });
+
       setSearchState({
         ...searchState,
-        searchResults: response.data?.listPayments?.items ||
-          response.data?.paymentsByOwner?.items || []
+        searchResults: results
       });
     } catch (error) {
       console.error('Search error:', error);

@@ -150,11 +150,13 @@ const DocumentUploadModal = ({ document, user, onClose, onSuccess }) => {
 
       if (document) {
         // Update existing document
+        // Include createdAt to satisfy composite sort key requirements for @index 'documentsByCategory'
         await updateDocument({
           variables: {
             input: {
               id: document.id,
-              ...input
+              ...input,
+              createdAt: document.createdAt // Required for composite sort key
             }
           }
         });

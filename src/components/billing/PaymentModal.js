@@ -183,6 +183,9 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
       setProcessing(false);
     } else if (paymentIntent.status === 'succeeded' || paymentIntent.status === 'processing') {
       try {
+        // Get today's date in YYYY-MM-DD format for checkDate
+        const today = new Date().toISOString().split('T')[0];
+        
         await createPayment({
           variables: {
             input: {
@@ -195,7 +198,9 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
               status: paymentIntent.status === 'processing' ? 'PROCESSING' : 'SUCCEEDED',
               description: 'HOA Dues Payment',
               invoiceNumber: paymentIntentId,
-              invoiceAmount: paymentDetails.amount
+              invoiceAmount: paymentDetails.amount,
+              checkDate: today,
+              checkAmount: paymentDetails.amount
             }
           }
         });

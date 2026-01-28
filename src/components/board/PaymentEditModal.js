@@ -13,7 +13,9 @@ const PaymentEditModal = ({ payment, onClose, show }) => {
     invoiceNumber: payment?.invoiceNumber || '',
     invoiceAmount: payment?.invoiceAmount || '',
     ownerPaymentsId: payment?.ownerPaymentsId || '',
-    notes: payment?.notes || ''
+    notes: payment?.notes || '',
+    amount: payment?.amount || '',
+    totalAmount: payment?.totalAmount || ''
   });
   
   const [applyPayment, setApplyPayment] = useState(false);
@@ -43,6 +45,15 @@ const PaymentEditModal = ({ payment, onClose, show }) => {
         }
         return acc;
     }, {});
+    
+    // Ensure required Float! fields are set (amount and totalAmount are required by schema)
+    const checkAmountValue = parseFloat(formData.checkAmount) || 0;
+    if (!input.amount && input.amount !== 0) {
+        input.amount = checkAmountValue;
+    }
+    if (!input.totalAmount && input.totalAmount !== 0) {
+        input.totalAmount = checkAmountValue;
+    }
 
     try {
       if (payment?.id) {

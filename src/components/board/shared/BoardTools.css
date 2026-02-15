@@ -187,3 +187,15 @@
   background-color: #dee2e6;
   transform: translateY(1px);
 }
+
+/* Merge Selection Styles */
+.item-card.selected-for-merge {
+  border: 2px solid var(--primary-color, #007bff);
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+}
+
+.merge-selected-btn {
+  background-color: var(--primary-color, #007bff);
+  color: white;
+  font-weight: 600;
+}

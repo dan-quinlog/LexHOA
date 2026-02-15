@@ -29,6 +29,8 @@ const Board = ({ userGroups = [], user }) => {
     searchResults: []
   });
 
+  const [mergeSelectedProfiles, setMergeSelectedProfiles] = useState([]);
+
   const [propertySearchState, setPropertySearchState] = useState({
     searchType: 'propertyId',
     searchTerm: '',
@@ -62,6 +64,8 @@ const Board = ({ userGroups = [], user }) => {
         return <PersonManager
           searchState={personSearchState}
           setSearchState={setPersonSearchState}
+          selectedProfiles={mergeSelectedProfiles}
+          setSelectedProfiles={setMergeSelectedProfiles}
           userGroups={userGroups}
         />;
       case 'properties':

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLazyQuery, useMutation, useApolloClient } from '@apollo/client';
-import { SEARCH_PROFILES, GET_PROFILE, PROFILE_BY_COGNITO_ID, FIND_RELATED_PROPERTIES } from '../../queries/queries';
-import { CREATE_PROFILE, UPDATE_PROFILE, DELETE_PROFILE, UPDATE_PROPERTY } from '../../queries/mutations';
+import { SEARCH_PROFILES, GET_PROFILE, PROFILE_BY_COGNITO_ID, FIND_RELATED_PROPERTIES, PAYMENTS_BY_OWNER, FIND_RELATED_PINGS, FIND_RELATED_DOCUMENTS } from '../../queries/queries';
+import { CREATE_PROFILE, UPDATE_PROFILE, DELETE_PROFILE, UPDATE_PROPERTY, UPDATE_PAYMENT, UPDATE_PING, UPDATE_DOCUMENT } from '../../queries/mutations';
 import BoardCard from './shared/BoardCard';
 import ProfileEditModal from '../shared/ProfileEditModal';
 import DeleteConfirmationModal from '../shared/DeleteConfirmationModal';
@@ -48,6 +48,9 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
   const [searchById] = useLazyQuery(GET_PROFILE);
   const [searchByCognito] = useLazyQuery(PROFILE_BY_COGNITO_ID);
   const [updateProperty] = useMutation(UPDATE_PROPERTY);
+  const [updatePayment] = useMutation(UPDATE_PAYMENT);
+  const [updatePing] = useMutation(UPDATE_PING);
+  const [updateDocument] = useMutation(UPDATE_DOCUMENT);
 
   // Add mutations
   const [createPerson] = useMutation(CREATE_PROFILE);
@@ -126,7 +129,7 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
       });
 
       // Update properties to point to cognito profile
-      const updatePromises = relatedProperties.data.listProperties.items.map(property => {
+      const propertyPromises = relatedProperties.data.listProperties.items.map(property => {
         const updates = { id: property.id };
         
         if (property.profOwnerId === manualProfile.id) {
@@ -141,15 +144,63 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
         return updateProperty({ variables: { input: updates } });
       });
 
-      await Promise.all(updatePromises);
+      await Promise.all(propertyPromises);
+
+      // Find and transfer payments
+      let allPayments = [];
+      let nextToken = null;
+      do {
+        const paymentResult = await client.query({
+          query: PAYMENTS_BY_OWNER,
+          variables: { ownerPaymentsId: manualProfile.id, limit: 100, nextToken }
+        });
+        allPayments = [...allPayments, ...paymentResult.data.paymentsByOwner.items];
+        nextToken = paymentResult.data.paymentsByOwner.nextToken;
+      } while (nextToken);
+
+      const paymentPromises = allPayments.map(payment =>
+        updatePayment({
+          variables: { input: { id: payment.id, ownerPaymentsId: cognitoProfile.id } }
+        })
+      );
+      await Promise.all(paymentPromises);
+
+      // Find and transfer pings
+      const relatedPings = await client.query({
+        query: FIND_RELATED_PINGS,
+        variables: { profileId: manualProfile.id }
+      });
+
+      const pingPromises = relatedPings.data.listPings.items.map(ping =>
+        updatePing({
+          variables: { input: { id: ping.id, profCreatorId: cognitoProfile.id } }
+        })
+      );
+      await Promise.all(pingPromises);
+
+      // Find and transfer documents
+      const relatedDocuments = await client.query({
+        query: FIND_RELATED_DOCUMENTS,
+        variables: { profileId: manualProfile.id }
+      });
+
+      const documentPromises = relatedDocuments.data.listDocuments.items.map(doc =>
+        updateDocument({
+          variables: { input: { id: doc.id, uploadedById: cognitoProfile.id } }
+        })
+      );
+      await Promise.all(documentPromises);
+
+      // Transfer stripeCustomerId if manual profile has one and cognito profile doesn't
+      const mergeInput = { id: cognitoProfile.id, ...mergedData };
+      if (manualProfile.stripeCustomerId && !cognitoProfile.stripeCustomerId) {
+        mergeInput.stripeCustomerId = manualProfile.stripeCustomerId;
+      }
 
       // Update cognito profile with merged data
       await updatePerson({
         variables: {
-          input: {
-            id: cognitoProfile.id,
-            ...mergedData
-          }
+          input: mergeInput
         }
       });
 
@@ -218,25 +269,20 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
 
     try {
       let response;
+      let newResults = [];
       
       switch (searchState.searchType) {
         case 'id':
           response = await searchById({
             variables: { id: searchState.searchTerm }
           });
-          setSearchState(prev => ({
-            ...prev,
-            searchResults: response.data?.getProfile ? [response.data.getProfile] : []
-          }));
+          newResults = response.data?.getProfile ? [response.data.getProfile] : [];
           break;
         case 'cognitoID':
           response = await searchByCognito({
             variables: { cognitoID: searchState.searchTerm }
           });
-          setSearchState(prev => ({
-            ...prev,
-            searchResults: response.data?.profileByCognitoID?.items || []
-          }));
+          newResults = response.data?.profileByCognitoID?.items || [];
           break;
         case 'email':
         case 'name':
@@ -248,12 +294,21 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
               }
             }
           });
-          setSearchState(prev => ({
-            ...prev,
-            searchResults: response.data?.listProfiles?.items || []
-          }));
+          newResults = response.data?.listProfiles?.items || [];
           break;
       }
+
+      // Preserve selected profiles at the top of results
+      if (selectedProfiles.length > 0) {
+        const selectedIds = new Set(selectedProfiles.map(p => p.id));
+        const filteredResults = newResults.filter(r => !selectedIds.has(r.id));
+        newResults = [...selectedProfiles, ...filteredResults];
+      }
+
+      setSearchState(prev => ({
+        ...prev,
+        searchResults: newResults
+      }));
     } catch (error) {
       console.error('Search error:', error);
       setErrors({ search: 'Error performing search' });

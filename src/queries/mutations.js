@@ -363,3 +363,18 @@ export const DELETE_PING = gql`
     }
   }
 `;
+
+export const UPDATE_DOCUMENT = gql`
+  mutation UpdateDocument(
+    $input: UpdateDocumentInput!
+    $condition: ModelDocumentConditionInput
+  ) {
+    updateDocument(input: $input, condition: $condition) {
+      id
+      title
+      uploadedById
+      createdAt
+      updatedAt
+    }
+  }
+`;

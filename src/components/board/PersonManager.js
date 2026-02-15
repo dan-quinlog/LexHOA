@@ -16,11 +16,10 @@ const SECRETARY_GROUP = process.env.REACT_APP_SECRETARY_GROUP_NAME;
 const TREASURER_GROUP = process.env.REACT_APP_TREASURER_GROUP_NAME;
 const BOARD_GROUP = process.env.REACT_APP_BOARD_GROUP_NAME;
 
-const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
+const PersonManager = ({ searchState, setSearchState, selectedProfiles, setSelectedProfiles, userGroups = [] }) => {
   const client = useApolloClient();
   const [selectedPerson, setSelectedPerson] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedProfiles, setSelectedProfiles] = useState([]);
   const [errors, setErrors] = useState({});
   const [showMergeModal, setShowMergeModal] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
@@ -211,7 +210,10 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
 
       setShowMergeModal(false);
       setSelectedProfiles([]);
-      handleSearch();
+      setSearchState(prev => ({
+        ...prev,
+        searchResults: prev.searchResults.filter(p => p.id !== manualProfile.id)
+      }));
     } catch (error) {
       console.error('Error merging profiles:', error);
     }
@@ -412,6 +414,7 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
           {searchState.searchResults.map(person => (
             <BoardCard
               key={person.id}
+              className={selectedProfiles.find(p => p.id === person.id) ? 'selected-for-merge' : ''}
               header={
                 <div className="person-header">
                   <h3>{person.name}</h3>
@@ -464,8 +467,11 @@ const PersonManager = ({ searchState, setSearchState, userGroups = [] }) => {
                   
                   {/* PRESIDENT and SECRETARY can merge profiles */}
                   {(isPresident || isSecretary) && (
-                    <button onClick={() => handleProfileSelect(person)}>
-                      {selectedProfiles.find(p => p.id === person.id) ? 'Unselect' : 'Select for Merge'}
+                    <button 
+                      className={selectedProfiles.find(p => p.id === person.id) ? 'merge-selected-btn' : ''}
+                      onClick={() => handleProfileSelect(person)}
+                    >
+                      {selectedProfiles.find(p => p.id === person.id) ? '✓ Selected for Merge' : 'Select for Merge'}
                     </button>
                   )}
                 </>

@@ -14,7 +14,6 @@ const MergeProfilesModal = ({ profiles, show, onClose, onMerge }) => {
     city: cognitoProfile?.city || '',
     state: cognitoProfile?.state || '',
     zip: cognitoProfile?.zip || '',
-    allowText: cognitoProfile?.allowText || false,
     contactPref: cognitoProfile?.contactPref || 'EMAIL'
   });
 

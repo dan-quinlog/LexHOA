@@ -504,6 +504,32 @@ export const FIND_RELATED_PROPERTIES = gql`
   }
 `;
 
+export const FIND_RELATED_PINGS = gql`
+  query FindRelatedPings($profileId: ID!) {
+    listPings(filter: {
+      profCreatorId: { eq: $profileId }
+    }) {
+      items {
+        id
+        profCreatorId
+      }
+    }
+  }
+`;
+
+export const FIND_RELATED_DOCUMENTS = gql`
+  query FindRelatedDocuments($profileId: ID!) {
+    listDocuments(filter: {
+      uploadedById: { eq: $profileId }
+    }) {
+      items {
+        id
+        uploadedById
+      }
+    }
+  }
+`;
+
 // Payment Queries
 export const GET_PAYMENT = gql`
   query GetPayment($id: ID!) {

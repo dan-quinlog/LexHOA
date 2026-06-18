@@ -54,7 +54,7 @@ type Profile @model
     queryField: "profilesByBalance"
     sortKeyFields: ["name"]
   )
-  stripeCustomerId: String @auth(rules: [
+  authNetCustomerProfileId: String @auth(rules: [
     { allow: owner, operations: [read] },
     { allow: groups, groups: ["TREASURER", "PRESIDENT", "SECRETARY"], operations: [create, read, update, delete] }
   ])
@@ -141,8 +141,8 @@ type Payment @model
   invoiceNumber: String @index(name: "byInvoiceNumber", queryField: "paymentsByInvoiceNumber")
   invoiceAmount: Float
   paymentMethod: PaymentMethod @default(value: "CHECK")
-  stripePaymentIntentId: String @index(name: "byStripePaymentIntent", queryField: "paymentsByStripePaymentIntent")
-  stripeCustomerId: String
+  authNetTransactionId: String @index(name: "byAuthNetTransaction", queryField: "paymentsByAuthNetTransaction")
+  authNetCustomerProfileId: String
   amount: Float!
   processingFee: Float @default(value: "0.00")
   totalAmount: Float!
@@ -221,8 +221,8 @@ enum BillingFreq {
 
 enum PaymentMethod {
   CHECK
-  STRIPE_CARD
-  STRIPE_ACH
+  CARD
+  BANK_ACCOUNT
   CASH
 }
 
@@ -365,16 +365,19 @@ enum DocumentAccessLevel {
   PRESIDENT_ONLY
 }
 
-type StripePaymentIntentResult {
-  clientSecret: String!
-  paymentIntentId: String!
+type AuthNetTransactionResult {
+  transactionId: String!
+  authCode: String!
   amount: Float!
   processingFee: Float!
   totalAmount: Float!
   paymentMethodType: String
+  responseCode: String
+  messageCode: String
+  messageText: String
 }
 
-type StripeCustomerResult {
+type AuthNetCustomerResult {
   customerId: String!
   success: Boolean!
   message: String
@@ -385,8 +388,8 @@ type Mutation {
     @function(name: "manageCognitoGroups-${env}")
   processMonthlyPropertyDues: MutationResult
     @function(name: "monthlyPropertyDues-${env}")
-  createStripePaymentIntent(amount: Float!, profileId: ID!, description: String, email: String, paymentMethodType: String): StripePaymentIntentResult
-    @function(name: "createStripePaymentIntent-${env}")
-  createStripeCustomer(profileId: ID!, email: String!, name: String!): StripeCustomerResult
-    @function(name: "createStripeCustomer-${env}")
+  createAuthNetTransaction(amount: Float!, profileId: ID!, description: String, email: String, paymentMethodType: String, opaqueDataDescriptor: String!, opaqueDataValue: String!): AuthNetTransactionResult
+    @function(name: "createAuthNetTransaction-${env}")
+  createAuthNetCustomerProfile(profileId: ID!, email: String!, name: String!): AuthNetCustomerResult
+    @function(name: "createAuthNetCustomerProfile-${env}")
 }

@@ -1,11 +1,11 @@
 {
-  "name": "createstripecustomer",
+  "name": "createauthnetcustomerprofile",
   "version": "1.0.0",
-  "description": "Lambda function for creating Stripe customers",
+  "description": "Lambda function for creating Authorize.Net customer profiles",
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "stripe": "^17.5.0",
+    "authorizenet": "^1.0.8",
     "aws-sdk": "^2.1030.0"
   }
 }

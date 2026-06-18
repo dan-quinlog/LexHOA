@@ -28,10 +28,13 @@
       "Type": "String",
       "Default": "apilexhoaGraphQLAPIKeyOutput"
     },
-    "stripeSecretKey": {
+    "authNetApiLoginId": {
       "Type": "String"
     },
-    "stripeWebhookSecret": {
+    "authNetTransactionKey": {
+      "Type": "String"
+    },
+    "authNetEnvironment": {
       "Type": "String"
     }
   },
@@ -65,12 +68,12 @@
         "FunctionName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "createStripePaymentIntent",
+            "createAuthNetTransaction",
             {
               "Fn::Join": [
                 "",
                 [
-                  "createStripePaymentIntent",
+                  "createAuthNetTransaction",
                   "-",
                   {
                     "Ref": "env"
@@ -97,11 +100,14 @@
             "API_LEXHOA_GRAPHQLAPIKEYOUTPUT": {
               "Ref": "apilexhoaGraphQLAPIKeyOutput"
             },
-            "STRIPE_SECRET_KEY": {
-              "Ref": "stripeSecretKey"
+            "AUTHNET_API_LOGIN_ID": {
+              "Ref": "authNetApiLoginId"
             },
-            "STRIPE_WEBHOOK_SECRET": {
-              "Ref": "stripeWebhookSecret"
+            "AUTHNET_TRANSACTION_KEY": {
+              "Ref": "authNetTransactionKey"
+            },
+            "AUTHNET_ENVIRONMENT": {
+              "Ref": "authNetEnvironment"
             }
           }
         },
@@ -122,12 +128,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "lexhoaLambdaRole9b08f97e",
+            "lexhoaLambdaRoleAuthNetTx",
             {
               "Fn::Join": [
                 "",
                 [
-                  "lexhoaLambdaRole9b08f97e",
+                  "lexhoaLambdaRoleAuthNetTx",
                   "-",
                   {
                     "Ref": "env"

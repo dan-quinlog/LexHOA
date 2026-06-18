@@ -28,10 +28,7 @@
       "Type": "String",
       "Default": "apilexhoaGraphQLAPIKeyOutput"
     },
-    "stripeSecretKey": {
-      "Type": "String"
-    },
-    "stripeWebhookSecret": {
+    "authNetSignatureKey": {
       "Type": "String"
     }
   },
@@ -65,12 +62,12 @@
         "FunctionName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "createStripeCustomer",
+            "handleAuthNetWebhook",
             {
               "Fn::Join": [
                 "",
                 [
-                  "createStripeCustomer",
+                  "handleAuthNetWebhook",
                   "-",
                   {
                     "Ref": "env"
@@ -97,11 +94,8 @@
             "API_LEXHOA_GRAPHQLAPIKEYOUTPUT": {
               "Ref": "apilexhoaGraphQLAPIKeyOutput"
             },
-            "STRIPE_SECRET_KEY": {
-              "Ref": "stripeSecretKey"
-            },
-            "STRIPE_WEBHOOK_SECRET": {
-              "Ref": "stripeWebhookSecret"
+            "AUTHNET_SIGNATURE_KEY": {
+              "Ref": "authNetSignatureKey"
             }
           }
         },
@@ -122,12 +116,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "lexhoaLambdaRoleb932c901",
+            "lexhoaLambdaRoleAuthNetWH",
             {
               "Fn::Join": [
                 "",
                 [
-                  "lexhoaLambdaRoleb932c901",
+                  "lexhoaLambdaRoleAuthNetWH",
                   "-",
                   {
                     "Ref": "env"

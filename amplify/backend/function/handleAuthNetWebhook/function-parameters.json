@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "api": {
+      "lexhoa": [
+        "Query",
+        "Mutation",
+        "Subscription"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "authNetSignatureKey",
+      "environmentVariableName": "AUTHNET_SIGNATURE_KEY"
+    }
+  ]
+}

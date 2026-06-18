@@ -389,7 +389,7 @@ type Mutation {
   processMonthlyPropertyDues: MutationResult
     @function(name: "monthlyPropertyDues-${env}")
   createAuthNetTransaction(amount: Float!, profileId: ID!, description: String, email: String, paymentMethodType: String, opaqueDataDescriptor: String!, opaqueDataValue: String!): AuthNetTransactionResult
-    @function(name: "createStripePaymentIntent-${env}")
+    @function(name: "createAuthNetTransaction-${env}")
   createAuthNetCustomerProfile(profileId: ID!, email: String!, name: String!): AuthNetCustomerResult
-    @function(name: "createStripeCustomer-${env}")
+    @function(name: "createAuthNetCustomerProfile-${env}")
 }

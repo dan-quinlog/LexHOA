@@ -36,7 +36,7 @@
       "providerPlugin": "awscloudformation",
       "service": "AppSync"
     },
-    "stripeWebhook": {
+    "authNetWebhook": {
       "dependsOn": [
         {
           "attributes": [
@@ -44,7 +44,7 @@
             "Arn"
           ],
           "category": "function",
-          "resourceName": "handleStripeWebhook"
+          "resourceName": "handleAuthNetWebhook"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -97,7 +97,7 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
-    "createStripeCustomer": {
+    "createAuthNetCustomerProfile": {
       "build": true,
       "dependsOn": [
         {
@@ -113,7 +113,7 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
-    "createStripePaymentIntent": {
+    "createAuthNetTransaction": {
       "build": true,
       "dependsOn": [
         {
@@ -129,7 +129,7 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
-    "handleStripeWebhook": {
+    "handleAuthNetWebhook": {
       "build": true,
       "dependsOn": [
         {
@@ -199,99 +199,107 @@
         }
       ]
     },
-    "AMPLIFY_function_createStripeCustomer_deploymentBucketName": {
+    "AMPLIFY_function_createAuthNetCustomerProfile_deploymentBucketName": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "createStripeCustomer"
+          "resourceName": "createAuthNetCustomerProfile"
         }
       ]
     },
-    "AMPLIFY_function_createStripeCustomer_s3Key": {
+    "AMPLIFY_function_createAuthNetCustomerProfile_s3Key": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "createStripeCustomer"
+          "resourceName": "createAuthNetCustomerProfile"
         }
       ]
     },
-    "AMPLIFY_function_createStripeCustomer_stripeSecretKey": {
+    "AMPLIFY_function_createAuthNetCustomerProfile_authNetApiLoginId": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "createStripeCustomer"
+          "resourceName": "createAuthNetCustomerProfile"
         }
       ]
     },
-    "AMPLIFY_function_createStripeCustomer_stripeWebhookSecret": {
+    "AMPLIFY_function_createAuthNetCustomerProfile_authNetTransactionKey": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "createStripeCustomer"
+          "resourceName": "createAuthNetCustomerProfile"
         }
       ]
     },
-    "AMPLIFY_function_createStripePaymentIntent_deploymentBucketName": {
+    "AMPLIFY_function_createAuthNetCustomerProfile_authNetEnvironment": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "createStripePaymentIntent"
+          "resourceName": "createAuthNetCustomerProfile"
         }
       ]
     },
-    "AMPLIFY_function_createStripePaymentIntent_s3Key": {
+    "AMPLIFY_function_createAuthNetTransaction_deploymentBucketName": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "createStripePaymentIntent"
+          "resourceName": "createAuthNetTransaction"
         }
       ]
     },
-    "AMPLIFY_function_createStripePaymentIntent_stripeSecretKey": {
+    "AMPLIFY_function_createAuthNetTransaction_s3Key": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "createStripePaymentIntent"
+          "resourceName": "createAuthNetTransaction"
         }
       ]
     },
-    "AMPLIFY_function_createStripePaymentIntent_stripeWebhookSecret": {
+    "AMPLIFY_function_createAuthNetTransaction_authNetApiLoginId": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "createStripePaymentIntent"
+          "resourceName": "createAuthNetTransaction"
         }
       ]
     },
-    "AMPLIFY_function_handleStripeWebhook_deploymentBucketName": {
+    "AMPLIFY_function_createAuthNetTransaction_authNetTransactionKey": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "handleStripeWebhook"
+          "resourceName": "createAuthNetTransaction"
         }
       ]
     },
-    "AMPLIFY_function_handleStripeWebhook_s3Key": {
+    "AMPLIFY_function_createAuthNetTransaction_authNetEnvironment": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "handleStripeWebhook"
+          "resourceName": "createAuthNetTransaction"
         }
       ]
     },
-    "AMPLIFY_function_handleStripeWebhook_stripeSecretKey": {
+    "AMPLIFY_function_handleAuthNetWebhook_deploymentBucketName": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "handleStripeWebhook"
+          "resourceName": "handleAuthNetWebhook"
         }
       ]
     },
-    "AMPLIFY_function_handleStripeWebhook_stripeWebhookSecret": {
+    "AMPLIFY_function_handleAuthNetWebhook_s3Key": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "handleStripeWebhook"
+          "resourceName": "handleAuthNetWebhook"
+        }
+      ]
+    },
+    "AMPLIFY_function_handleAuthNetWebhook_authNetSignatureKey": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "handleAuthNetWebhook"
         }
       ]
     },

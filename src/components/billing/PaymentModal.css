@@ -111,20 +111,44 @@
   color: var(--text-color);
 }
 
-.card-section .StripeElement {
+.card-section input,
+.ach-section input,
+.ach-section select {
   padding: var(--spacing-medium);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   background: var(--background-white);
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 16px;
 }
 
-.card-section .StripeElement--focus {
+.card-section input:focus,
+.ach-section input:focus,
+.ach-section select:focus {
   border-color: var(--primary-color);
   box-shadow: 0 0 0 1px var(--primary-color);
+  outline: none;
 }
 
-.card-section .StripeElement--invalid {
-  border-color: var(--error-color);
+.form-field {
+  margin-bottom: var(--spacing-medium);
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: var(--spacing-small, 4px);
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.form-row {
+  display: flex;
+  gap: var(--spacing-medium);
+}
+
+.form-row .form-field {
+  flex: 1;
 }
 
 .prepare-payment-btn,

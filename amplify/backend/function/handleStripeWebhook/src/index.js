@@ -1,13 +1,12 @@
 /* Amplify Params - DO NOT EDIT
 	ENV
 	REGION
-	STRIPE_SECRET_KEY
-	STRIPE_WEBHOOK_SECRET
+	AUTHNET_SIGNATURE_KEY
 	API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT
 	API_LEXHOA_GRAPHQLAPIIDOUTPUT
 Amplify Params - DO NOT EDIT */
 
-const Stripe = require('stripe');
+const crypto = require('crypto');
 const https = require('https');
 const AWS = require('aws-sdk');
 const urlParse = require('url').URL;
@@ -16,46 +15,48 @@ exports.handler = async (event) => {
     console.log(`EVENT: ${JSON.stringify(event)}`);
     
     try {
-        const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-        const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+        const signatureKey = process.env.AUTHNET_SIGNATURE_KEY;
         
-        if (!stripeSecretKey || !webhookSecret) {
-            throw new Error("Stripe keys not configured");
+        if (!signatureKey) {
+            throw new Error("Authorize.Net signature key not configured");
         }
 
-        const stripe = new Stripe(stripeSecretKey);
-        
-        const sig = event.headers['Stripe-Signature'] || event.headers['stripe-signature'];
+        // Verify webhook signature
+        const webhookSignature = event.headers['X-ANET-Signature'] || event.headers['x-anet-signature'];
         const body = event.body;
 
-        let stripeEvent;
-        try {
-            stripeEvent = stripe.webhooks.constructEvent(body, sig, webhookSecret);
-        } catch (err) {
-            console.error('Webhook signature verification failed:', err.message);
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ error: 'Webhook signature verification failed' })
-            };
+        if (webhookSignature) {
+            const hash = crypto.createHmac('sha512', signatureKey)
+                .update(body)
+                .digest('hex')
+                .toUpperCase();
+            
+            const receivedHash = webhookSignature.replace('sha512=', '').toUpperCase();
+            
+            if (hash !== receivedHash) {
+                console.error('Webhook signature verification failed');
+                return {
+                    statusCode: 400,
+                    body: JSON.stringify({ error: 'Webhook signature verification failed' })
+                };
+            }
         }
 
-        console.log('Webhook event type:', stripeEvent.type);
+        const webhookEvent = JSON.parse(body);
+        console.log('Webhook event type:', webhookEvent.eventType);
 
-        switch (stripeEvent.type) {
-            case 'payment_intent.succeeded':
-                await handlePaymentSuccess(stripeEvent.data.object);
+        switch (webhookEvent.eventType) {
+            case 'net.authorize.payment.authcapture.created':
+                await handlePaymentCreated(webhookEvent.payload);
                 break;
-            case 'payment_intent.processing':
-                await handlePaymentProcessing(stripeEvent.data.object);
+            case 'net.authorize.payment.refund.created':
+                await handleRefund(webhookEvent.payload);
                 break;
-            case 'payment_intent.payment_failed':
-                await handlePaymentFailure(stripeEvent.data.object);
-                break;
-            case 'payment_intent.canceled':
-                await handlePaymentCanceled(stripeEvent.data.object);
+            case 'net.authorize.payment.void.created':
+                await handleVoid(webhookEvent.payload);
                 break;
             default:
-                console.log(`Unhandled event type: ${stripeEvent.type}`);
+                console.log(`Unhandled event type: ${webhookEvent.eventType}`);
         }
 
         return {
@@ -72,214 +73,91 @@ exports.handler = async (event) => {
     }
 };
 
-function getPaymentMethod(metadata) {
-    const methodType = metadata.paymentMethodType;
-    if (methodType === 'us_bank_account') {
-        return 'STRIPE_ACH';
+async function handlePaymentCreated(payload) {
+    console.log('Payment created:', payload.id);
+    // Payment records are created synchronously when the transaction is processed,
+    // so this webhook primarily serves as a backup confirmation.
+    // No action needed unless we want to reconcile.
+}
+
+async function handleRefund(payload) {
+    console.log('Refund created:', payload.id);
+    
+    const transactionId = payload.id;
+    
+    // Update the payment status to REFUNDED
+    const updatePaymentMutation = `
+        mutation UpdatePayment($input: UpdatePaymentInput!) {
+            updatePayment(input: $input) {
+                id
+                status
+            }
+        }
+    `;
+
+    // Find payment by transaction ID and update status
+    const findPaymentQuery = `
+        query PaymentsByAuthNetTransaction($authNetTransactionId: String!) {
+            paymentsByAuthNetTransaction(authNetTransactionId: $authNetTransactionId) {
+                items {
+                    id
+                    amount
+                    ownerPaymentsId
+                }
+            }
+        }
+    `;
+
+    try {
+        const paymentResult = await graphqlRequest(
+            process.env.API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT,
+            findPaymentQuery,
+            { authNetTransactionId: transactionId }
+        );
+
+        const payment = paymentResult?.paymentsByAuthNetTransaction?.items?.[0];
+        if (payment) {
+            await graphqlRequest(
+                process.env.API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT,
+                updatePaymentMutation,
+                { input: { id: payment.id, status: 'REFUNDED' } }
+            );
+
+            // Restore the balance
+            const getProfileQuery = `
+                query GetProfile($id: ID!) {
+                    getProfile(id: $id) {
+                        id
+                        balance
+                    }
+                }
+            `;
+
+            const profileResult = await graphqlRequest(
+                process.env.API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT,
+                getProfileQuery,
+                { id: payment.ownerPaymentsId }
+            );
+
+            const currentBalance = profileResult.getProfile.balance || 0;
+            const newBalance = currentBalance + payment.amount;
+
+            await graphqlRequest(
+                process.env.API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT,
+                `mutation UpdateProfile($input: UpdateProfileInput!) {
+                    updateProfile(input: $input) { id balance }
+                }`,
+                { input: { id: payment.ownerPaymentsId, balance: newBalance } }
+            );
+        }
+    } catch (err) {
+        console.error('Error processing refund webhook:', err);
     }
-    return 'STRIPE_CARD';
 }
 
-async function handlePaymentSuccess(paymentIntent) {
-    console.log('Payment succeeded:', paymentIntent.id);
-    
-    const metadata = paymentIntent.metadata;
-    const profileId = metadata.profileId;
-    const duesAmount = parseFloat(metadata.duesAmount);
-    const processingFee = parseFloat(metadata.processingFee);
-    const description = metadata.description;
-    const paymentMethod = getPaymentMethod(metadata);
-
-    const createPaymentMutation = `
-        mutation CreatePayment($input: CreatePaymentInput!) {
-            createPayment(input: $input) {
-                id
-                amount
-                status
-            }
-        }
-    `;
-
-    const paymentInput = {
-        ownerPaymentsId: profileId,
-        paymentMethod: paymentMethod,
-        stripePaymentIntentId: paymentIntent.id,
-        stripeCustomerId: paymentIntent.customer,
-        amount: duesAmount,
-        processingFee: processingFee,
-        totalAmount: duesAmount + processingFee,
-        status: 'SUCCEEDED',
-        description: description || 'HOA Dues Payment',
-        checkDate: null,
-        checkNumber: null,
-        checkAmount: null,
-        invoiceNumber: paymentIntent.id,
-        invoiceAmount: duesAmount
-    };
-
-    await graphqlRequest(
-        process.env.API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT,
-        createPaymentMutation,
-        { input: paymentInput }
-    );
-
-    const getProfileQuery = `
-        query GetProfile($id: ID!) {
-            getProfile(id: $id) {
-                id
-                balance
-            }
-        }
-    `;
-
-    const profileResult = await graphqlRequest(
-        process.env.API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT,
-        getProfileQuery,
-        { id: profileId }
-    );
-
-    const currentBalance = profileResult.getProfile.balance || 0;
-    const newBalance = currentBalance - duesAmount;
-
-    const updateProfileMutation = `
-        mutation UpdateProfile($input: UpdateProfileInput!) {
-            updateProfile(input: $input) {
-                id
-                balance
-            }
-        }
-    `;
-
-    await graphqlRequest(
-        process.env.API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT,
-        updateProfileMutation,
-        { input: { id: profileId, balance: newBalance } }
-    );
-
-    console.log(`Payment recorded and balance updated for profile ${profileId}`);
-}
-
-async function handlePaymentProcessing(paymentIntent) {
-    console.log('Payment processing (ACH):', paymentIntent.id);
-    
-    const metadata = paymentIntent.metadata;
-    const profileId = metadata.profileId;
-    const duesAmount = parseFloat(metadata.duesAmount);
-    const processingFee = parseFloat(metadata.processingFee);
-    const paymentMethod = getPaymentMethod(metadata);
-
-    const createPaymentMutation = `
-        mutation CreatePayment($input: CreatePaymentInput!) {
-            createPayment(input: $input) {
-                id
-                status
-            }
-        }
-    `;
-
-    const paymentInput = {
-        ownerPaymentsId: profileId,
-        paymentMethod: paymentMethod,
-        stripePaymentIntentId: paymentIntent.id,
-        stripeCustomerId: paymentIntent.customer,
-        amount: duesAmount,
-        processingFee: processingFee,
-        totalAmount: duesAmount + processingFee,
-        status: 'PROCESSING',
-        description: metadata.description || 'HOA Dues Payment (ACH)',
-        invoiceNumber: paymentIntent.id,
-        invoiceAmount: duesAmount
-    };
-
-    await graphqlRequest(
-        process.env.API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT,
-        createPaymentMutation,
-        { input: paymentInput }
-    );
-
-    console.log(`ACH payment processing recorded for profile ${profileId}`);
-}
-
-async function handlePaymentFailure(paymentIntent) {
-    console.log('Payment failed:', paymentIntent.id);
-    
-    const metadata = paymentIntent.metadata;
-    const profileId = metadata.profileId;
-    const duesAmount = parseFloat(metadata.duesAmount);
-    const processingFee = parseFloat(metadata.processingFee);
-    const paymentMethod = getPaymentMethod(metadata);
-
-    const createPaymentMutation = `
-        mutation CreatePayment($input: CreatePaymentInput!) {
-            createPayment(input: $input) {
-                id
-                status
-            }
-        }
-    `;
-
-    const paymentInput = {
-        ownerPaymentsId: profileId,
-        paymentMethod: paymentMethod,
-        stripePaymentIntentId: paymentIntent.id,
-        stripeCustomerId: paymentIntent.customer,
-        amount: duesAmount,
-        processingFee: processingFee,
-        totalAmount: duesAmount + processingFee,
-        status: 'FAILED',
-        description: metadata.description || 'HOA Dues Payment',
-        invoiceNumber: paymentIntent.id,
-        invoiceAmount: duesAmount
-    };
-
-    await graphqlRequest(
-        process.env.API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT,
-        createPaymentMutation,
-        { input: paymentInput }
-    );
-
-    console.log(`Failed payment recorded for profile ${profileId}`);
-}
-
-async function handlePaymentCanceled(paymentIntent) {
-    console.log('Payment canceled:', paymentIntent.id);
-    
-    const metadata = paymentIntent.metadata;
-    const profileId = metadata.profileId;
-    const duesAmount = parseFloat(metadata.duesAmount);
-    const processingFee = parseFloat(metadata.processingFee);
-    const paymentMethod = getPaymentMethod(metadata);
-
-    const createPaymentMutation = `
-        mutation CreatePayment($input: CreatePaymentInput!) {
-            createPayment(input: $input) {
-                id
-                status
-            }
-        }
-    `;
-
-    const paymentInput = {
-        ownerPaymentsId: profileId,
-        paymentMethod: paymentMethod,
-        stripePaymentIntentId: paymentIntent.id,
-        stripeCustomerId: paymentIntent.customer,
-        amount: duesAmount,
-        processingFee: processingFee,
-        totalAmount: duesAmount + processingFee,
-        status: 'CANCELED',
-        description: metadata.description || 'HOA Dues Payment',
-        invoiceNumber: paymentIntent.id,
-        invoiceAmount: duesAmount
-    };
-
-    await graphqlRequest(
-        process.env.API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT,
-        createPaymentMutation,
-        { input: paymentInput }
-    );
-
-    console.log(`Canceled payment recorded for profile ${profileId}`);
+async function handleVoid(payload) {
+    console.log('Void created:', payload.id);
+    // Similar to refund handling
 }
 
 async function graphqlRequest(endpoint, query, variables) {

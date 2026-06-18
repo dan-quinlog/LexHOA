@@ -1,12 +1,16 @@
 /* Amplify Params - DO NOT EDIT
 	ENV
 	REGION
-	STRIPE_SECRET_KEY
+	AUTHNET_API_LOGIN_ID
+	AUTHNET_TRANSACTION_KEY
+	AUTHNET_ENVIRONMENT
 	API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT
 	API_LEXHOA_GRAPHQLAPIIDOUTPUT
 Amplify Params - DO NOT EDIT */
 
-const Stripe = require('stripe');
+const ApiContracts = require('authorizenet').APIContracts;
+const ApiControllers = require('authorizenet').APIControllers;
+const SDKConstants = require('authorizenet').Constants;
 const https = require('https');
 const AWS = require('aws-sdk');
 const urlParse = require('url').URL;
@@ -21,27 +25,36 @@ exports.handler = async (event) => {
             throw new Error("Missing required parameters: profileId, email, and name");
         }
 
-        const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-        if (!stripeSecretKey) {
-            throw new Error("Stripe secret key not configured");
+        const apiLoginId = process.env.AUTHNET_API_LOGIN_ID;
+        const transactionKey = process.env.AUTHNET_TRANSACTION_KEY;
+        if (!apiLoginId || !transactionKey) {
+            throw new Error("Authorize.Net credentials not configured");
         }
 
-        const stripe = new Stripe(stripeSecretKey);
+        // Set up merchant authentication
+        const merchantAuth = new ApiContracts.MerchantAuthenticationType();
+        merchantAuth.setName(apiLoginId);
+        merchantAuth.setTransactionKey(transactionKey);
 
-        const customer = await stripe.customers.create({
-            email: email,
-            name: name,
-            metadata: {
-                profileId: profileId
-            }
-        });
+        // Create customer profile
+        const customerProfile = new ApiContracts.CustomerProfileType();
+        customerProfile.setMerchantCustomerId(profileId);
+        customerProfile.setEmail(email);
+        customerProfile.setDescription(name);
 
+        const createRequest = new ApiContracts.CreateCustomerProfileRequest();
+        createRequest.setMerchantAuthentication(merchantAuth);
+        createRequest.setProfile(customerProfile);
+
+        const customerId = await executeCreateCustomerProfile(createRequest);
+
+        // Update profile in database with Authorize.Net customer profile ID
         const graphqlEndpoint = process.env.API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT;
         const updateMutation = `
             mutation UpdateProfile($input: UpdateProfileInput!) {
                 updateProfile(input: $input) {
                     id
-                    stripeCustomerId
+                    authNetCustomerProfileId
                 }
             }
         `;
@@ -49,27 +62,54 @@ exports.handler = async (event) => {
         const variables = {
             input: {
                 id: profileId,
-                stripeCustomerId: customer.id
+                authNetCustomerProfileId: customerId
             }
         };
 
         await graphqlRequest(graphqlEndpoint, updateMutation, variables);
 
         return {
-            customerId: customer.id,
+            customerId: customerId,
             success: true,
-            message: `Successfully created Stripe customer for ${name}`
+            message: `Successfully created Authorize.Net customer profile for ${name}`
         };
 
     } catch (error) {
-        console.error('Error creating Stripe customer:', error);
+        console.error('Error creating Authorize.Net customer profile:', error);
         return {
             customerId: '',
             success: false,
-            message: `Failed to create customer: ${error.message}`
+            message: `Failed to create customer profile: ${error.message}`
         };
     }
 };
+
+function executeCreateCustomerProfile(createRequest) {
+    return new Promise((resolve, reject) => {
+        const environment = process.env.AUTHNET_ENVIRONMENT === 'production' 
+            ? SDKConstants.endpoint.production 
+            : SDKConstants.endpoint.sandbox;
+
+        const ctrl = new ApiControllers.CreateCustomerProfileController(createRequest.getJSON());
+        ctrl.setEnvironment(environment);
+
+        ctrl.execute(function() {
+            const apiResponse = ctrl.getResponse();
+            const response = new ApiContracts.CreateCustomerProfileResponse(apiResponse);
+
+            if (response === null) {
+                reject(new Error('No response from Authorize.Net'));
+                return;
+            }
+
+            if (response.getMessages().getResultCode() === ApiContracts.MessageTypeEnum.OK) {
+                resolve(response.getCustomerProfileId());
+            } else {
+                reject(new Error(response.getMessages().getMessage()[0].getText()));
+            }
+        });
+    });
+}
 
 async function graphqlRequest(endpoint, query, variables) {
     const uri = new urlParse(endpoint);

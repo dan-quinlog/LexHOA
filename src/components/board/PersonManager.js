@@ -190,10 +190,10 @@ const PersonManager = ({ searchState, setSearchState, selectedProfiles, setSelec
       );
       await Promise.all(documentPromises);
 
-      // Transfer stripeCustomerId if manual profile has one and cognito profile doesn't
+      // Transfer authNetCustomerProfileId if manual profile has one and cognito profile doesn't
       const mergeInput = { id: cognitoProfile.id, ...mergedData };
-      if (manualProfile.stripeCustomerId && !cognitoProfile.stripeCustomerId) {
-        mergeInput.stripeCustomerId = manualProfile.stripeCustomerId;
+      if (manualProfile.authNetCustomerProfileId && !cognitoProfile.authNetCustomerProfileId) {
+        mergeInput.authNetCustomerProfileId = manualProfile.authNetCustomerProfileId;
       }
 
       // Update cognito profile with merged data

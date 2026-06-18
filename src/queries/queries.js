@@ -609,8 +609,8 @@ export const PAYMENTS_BY_OWNER = gql`
         invoiceNumber
         invoiceAmount
         paymentMethod
-        stripePaymentIntentId
-        stripeCustomerId
+        authNetTransactionId
+        authNetCustomerProfileId
         amount
         processingFee
         totalAmount

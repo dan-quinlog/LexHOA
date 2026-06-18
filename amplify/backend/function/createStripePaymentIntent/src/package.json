@@ -1,10 +1,10 @@
 {
-  "name": "createstripepaymentintent",
+  "name": "createauthnettransaction",
   "version": "1.0.0",
-  "description": "Lambda function for creating Stripe payment intents with fee calculation",
+  "description": "Lambda function for creating Authorize.Net transactions with fee calculation",
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "stripe": "^17.5.0"
+    "authorizenet": "^1.0.8"
   }
 }

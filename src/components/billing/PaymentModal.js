@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import React, { useState, useEffect, useRef } from 'react';
 import { useMutation } from '@apollo/client';
-import { CREATE_STRIPE_PAYMENT_INTENT, CREATE_PAYMENT } from '../../queries/mutations';
+import { CREATE_AUTHNET_TRANSACTION, CREATE_PAYMENT } from '../../queries/mutations';
 import Modal from '../shared/Modal';
 import './PaymentModal.css';
 
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
+const AUTHNET_CLIENT_KEY = process.env.REACT_APP_AUTHNET_CLIENT_KEY;
+const AUTHNET_API_LOGIN_ID = process.env.REACT_APP_AUTHNET_API_LOGIN_ID;
+const AUTHNET_ENVIRONMENT = process.env.REACT_APP_AUTHNET_ENVIRONMENT || 'sandbox';
+
+const ACCEPT_JS_URL = AUTHNET_ENVIRONMENT === 'production'
+  ? 'https://js.authorize.net/v1/Accept.js'
+  : 'https://jstest.authorize.net/v1/Accept.js';
 
 const BASE_AMOUNTS = {
   ANNUAL: { label: 'Annual', baseAmount: 1200, description: '12 months' },
@@ -21,29 +25,57 @@ const PAYMENT_METHODS = {
     description: '2.9% + $0.30 fee',
     icon: '💳'
   },
-  us_bank_account: { 
-    label: 'Bank Account (ACH)', 
+  bank_account: { 
+    label: 'Bank Account (eCheck)', 
     description: '0.8% fee (max $5.00)',
     icon: '🏦'
   }
 };
 
 const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMethodType, propertyCount = 1 }) => {
-  const stripe = useStripe();
-  const elements = useElements();
   const [selectedAmount, setSelectedAmount] = useState('CUSTOM');
   const [customAmount, setCustomAmount] = useState('');
-  const [clientSecret, setClientSecret] = useState('');
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(null);
   const [succeeded, setSucceeded] = useState(false);
+  const [acceptJsLoaded, setAcceptJsLoaded] = useState(false);
 
-  const [createPaymentIntent] = useMutation(CREATE_STRIPE_PAYMENT_INTENT);
+  // Card fields
+  const [cardNumber, setCardNumber] = useState('');
+  const [expMonth, setExpMonth] = useState('');
+  const [expYear, setExpYear] = useState('');
+  const [cvv, setCvv] = useState('');
+
+  // Bank account fields
+  const [routingNumber, setRoutingNumber] = useState('');
+  const [accountNumber, setAccountNumber] = useState('');
+  const [nameOnAccount, setNameOnAccount] = useState('');
+  const [accountType, setAccountType] = useState('checking');
+
+  const [createAuthNetTransaction] = useMutation(CREATE_AUTHNET_TRANSACTION);
   const [createPayment] = useMutation(CREATE_PAYMENT);
-  const [paymentIntentId, setPaymentIntentId] = useState('');
   
-  const isACH = paymentMethodType === 'us_bank_account';
+  const isACH = paymentMethodType === 'bank_account';
+
+  // Load Accept.js script
+  useEffect(() => {
+    if (document.querySelector(`script[src="${ACCEPT_JS_URL}"]`)) {
+      setAcceptJsLoaded(true);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = ACCEPT_JS_URL;
+    script.async = true;
+    script.onload = () => setAcceptJsLoaded(true);
+    script.onerror = () => setError('Failed to load payment processor');
+    document.head.appendChild(script);
+
+    return () => {
+      // Don't remove — other instances may need it
+    };
+  }, []);
 
   // Calculate suggested amounts based on number of properties
   const suggestedAmounts = Object.entries(BASE_AMOUNTS).reduce((acc, [key, value]) => {
@@ -64,10 +96,16 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
     return suggestedAmounts[selectedAmount]?.amount || 0;
   };
 
+  const calculateFee = (amount) => {
+    if (isACH) {
+      return Math.min(amount * 0.008, 5.00);
+    }
+    return (amount * 0.029) + 0.30;
+  };
+
   const handleAmountSelect = (key) => {
     setSelectedAmount(key);
     setError(null);
-    setClientSecret('');
     setPaymentDetails(null);
   };
 
@@ -75,14 +113,69 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
     const value = e.target.value.replace(/[^0-9.]/g, '');
     setCustomAmount(value);
     setError(null);
-    setClientSecret('');
     setPaymentDetails(null);
   };
 
-  const handlePreparePayment = async () => {
+  const handlePreparePayment = () => {
     const amount = getPaymentAmount();
     if (amount <= 0) {
       setError('Please enter a valid amount');
+      return;
+    }
+
+    const fee = calculateFee(amount);
+    const total = Math.round((amount + fee) * 100) / 100;
+
+    setPaymentDetails({
+      amount: amount,
+      processingFee: Math.round(fee * 100) / 100,
+      totalAmount: total
+    });
+  };
+
+  const dispatchAcceptJs = () => {
+    return new Promise((resolve, reject) => {
+      const secureData = {
+        authData: {
+          clientKey: AUTHNET_CLIENT_KEY,
+          apiLoginID: AUTHNET_API_LOGIN_ID
+        }
+      };
+
+      if (isACH) {
+        secureData.bankData = {
+          routingNumber: routingNumber,
+          accountNumber: accountNumber,
+          nameOnAccount: nameOnAccount,
+          accountType: accountType
+        };
+      } else {
+        secureData.cardData = {
+          cardNumber: cardNumber.replace(/\s/g, ''),
+          month: expMonth,
+          year: expYear,
+          cardCode: cvv
+        };
+      }
+
+      window.Accept.dispatchData(secureData, (response) => {
+        if (response.messages.resultCode === 'Error') {
+          const errors = response.messages.message.map(m => m.text).join(', ');
+          reject(new Error(errors));
+        } else {
+          resolve({
+            opaqueDataDescriptor: response.opaqueData.dataDescriptor,
+            opaqueDataValue: response.opaqueData.dataValue
+          });
+        }
+      });
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!acceptJsLoaded || !paymentDetails) {
       return;
     }
 
@@ -90,114 +183,43 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
     setError(null);
 
     try {
-      const { data } = await createPaymentIntent({
+      // Step 1: Tokenize payment data via Accept.js
+      const { opaqueDataDescriptor, opaqueDataValue } = await dispatchAcceptJs();
+
+      // Step 2: Send token to backend to create the transaction
+      const { data } = await createAuthNetTransaction({
         variables: {
-          amount,
+          amount: paymentDetails.amount,
           profileId,
           description: 'HOA Dues Payment',
           email: email || null,
-          paymentMethodType: paymentMethodType || 'card'
+          paymentMethodType: paymentMethodType || 'card',
+          opaqueDataDescriptor,
+          opaqueDataValue
         }
       });
 
-      if (data?.createStripePaymentIntent) {
-        setClientSecret(data.createStripePaymentIntent.clientSecret);
-        setPaymentIntentId(data.createStripePaymentIntent.paymentIntentId);
-        setPaymentDetails({
-          amount: data.createStripePaymentIntent.amount,
-          processingFee: data.createStripePaymentIntent.processingFee,
-          totalAmount: data.createStripePaymentIntent.totalAmount
-        });
-      }
-    } catch (err) {
-      setError(err.message || 'Failed to prepare payment');
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!stripe || !clientSecret) {
-      return;
-    }
-
-    setProcessing(true);
-    setError(null);
-
-    let result;
-    
-    if (isACH) {
-      // First, collect bank account using Financial Connections
-      const { paymentIntent: collectResult, error: collectError } = await stripe.collectBankAccountForPayment({
-        clientSecret,
-        params: {
-          payment_method_type: 'us_bank_account',
-          payment_method_data: {
-            billing_details: {
-              name: email?.split('@')[0] || 'HOA Member',
-              email: email
-            }
-          }
-        },
-        expand: ['payment_method']
-      });
-
-      if (collectError) {
-        setError(collectError.message);
-        setProcessing(false);
-        return;
+      const result = data?.createAuthNetTransaction;
+      if (!result || !result.transactionId) {
+        throw new Error(result?.messageText || 'Transaction failed');
       }
 
-      // If user closed the modal without completing
-      if (collectResult.status === 'requires_payment_method') {
-        setError('Bank account connection was cancelled. Please try again.');
-        setProcessing(false);
-        return;
-      }
-
-      // Now confirm the payment with the collected bank account
-      if (collectResult.status === 'requires_confirmation') {
-        result = await stripe.confirmUsBankAccountPayment(clientSecret);
-      } else {
-        // Payment is already processing or succeeded
-        result = { paymentIntent: collectResult };
-      }
-    } else {
-      if (!elements) {
-        return;
-      }
-      const cardElement = elements.getElement(CardElement);
-      result = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: cardElement
-        }
-      });
-    }
-
-    const { error: stripeError, paymentIntent } = result;
-
-    if (stripeError) {
-      setError(stripeError.message);
-      setProcessing(false);
-    } else if (paymentIntent.status === 'succeeded' || paymentIntent.status === 'processing') {
+      // Step 3: Create payment record
+      const today = new Date().toISOString().split('T')[0];
+      
       try {
-        // Get today's date in YYYY-MM-DD format for checkDate
-        const today = new Date().toISOString().split('T')[0];
-        
         await createPayment({
           variables: {
             input: {
               ownerPaymentsId: profileId,
-              paymentMethod: isACH ? 'STRIPE_ACH' : 'STRIPE_CARD',
-              stripePaymentIntentId: paymentIntentId,
+              paymentMethod: isACH ? 'BANK_ACCOUNT' : 'CARD',
+              authNetTransactionId: result.transactionId,
               amount: paymentDetails.amount,
               processingFee: paymentDetails.processingFee,
               totalAmount: paymentDetails.totalAmount,
-              status: paymentIntent.status === 'processing' ? 'PROCESSING' : 'SUCCEEDED',
+              status: 'SUCCEEDED',
               description: 'HOA Dues Payment',
-              invoiceNumber: paymentIntentId,
+              invoiceNumber: result.transactionId,
               invoiceAmount: paymentDetails.amount,
               checkDate: today,
               checkAmount: paymentDetails.amount
@@ -205,16 +227,17 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
           }
         });
       } catch (err) {
-        console.warn('Payment record creation handled by webhook:', err.message);
+        console.warn('Payment record creation error (may be handled by webhook):', err.message);
       }
-      
+
       setSucceeded(true);
       setProcessing(false);
       setTimeout(() => {
-        onSuccess && onSuccess({ ...paymentIntent, amount: paymentDetails.amount });
+        onSuccess && onSuccess({ transactionId: result.transactionId, amount: paymentDetails.amount });
       }, 2000);
-    } else if (paymentIntent.status === 'requires_action') {
-      setError('Additional verification required. Please follow the prompts.');
+
+    } catch (err) {
+      setError(err.message || 'Payment failed');
       setProcessing(false);
     }
   };
@@ -226,13 +249,24 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
     }).format(amount);
   };
 
+  const formatCardNumber = (value) => {
+    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    const matches = v.match(/\d{4,16}/g);
+    const match = (matches && matches[0]) || '';
+    const parts = [];
+    for (let i = 0, len = match.length; i < len; i += 4) {
+      parts.push(match.substring(i, i + 4));
+    }
+    return parts.length ? parts.join(' ') : v;
+  };
+
   if (succeeded) {
     return (
       <div className="payment-success">
         <div className="success-icon">✓</div>
-        <h3>{isACH ? 'Payment Processing!' : 'Payment Successful!'}</h3>
-        <p>Your payment of {formatCurrency(paymentDetails?.totalAmount)} has been {isACH ? 'submitted' : 'processed'}.</p>
-        {isACH && <p className="ach-notice">ACH payments typically take 2-3 business days to complete.</p>}
+        <h3>Payment Successful!</h3>
+        <p>Your payment of {formatCurrency(paymentDetails?.totalAmount)} has been processed.</p>
+        {isACH && <p className="ach-notice">eCheck payments may take 2-3 business days to settle.</p>}
         <p>A receipt will be sent to your email.</p>
       </div>
     );
@@ -275,18 +309,18 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
         </div>
       </div>
 
-      {!clientSecret && (
+      {!paymentDetails && (
         <button
           type="button"
           onClick={handlePreparePayment}
           disabled={processing || getPaymentAmount() <= 0}
           className="prepare-payment-btn"
         >
-          {processing ? 'Calculating...' : 'Continue to Payment'}
+          Continue to Payment
         </button>
       )}
 
-      {clientSecret && paymentDetails && (
+      {paymentDetails && (
         <>
           <div className="fee-breakdown">
             <div className="fee-row">
@@ -294,7 +328,7 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
               <span>{formatCurrency(paymentDetails.amount)}</span>
             </div>
             <div className="fee-row">
-              <span>Processing Fee {isACH ? '(ACH)' : '(Card)'}</span>
+              <span>Processing Fee {isACH ? '(eCheck)' : '(Card)'}</span>
               <span>{formatCurrency(paymentDetails.processingFee)}</span>
             </div>
             <div className="fee-row total">
@@ -305,37 +339,101 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
 
           {isACH ? (
             <div className="ach-section">
-              <h4>Bank Account</h4>
-              <p className="ach-info">
-                Click "Pay" to connect your bank account securely via Stripe.
-                ACH payments have lower fees and typically take 2-3 business days.
-              </p>
+              <h4>Bank Account Details</h4>
+              <div className="form-field">
+                <label>Name on Account</label>
+                <input
+                  type="text"
+                  value={nameOnAccount}
+                  onChange={(e) => setNameOnAccount(e.target.value)}
+                  placeholder="John Doe"
+                  required
+                />
+              </div>
+              <div className="form-field">
+                <label>Routing Number</label>
+                <input
+                  type="text"
+                  value={routingNumber}
+                  onChange={(e) => setRoutingNumber(e.target.value.replace(/\D/g, '').slice(0, 9))}
+                  placeholder="123456789"
+                  maxLength="9"
+                  required
+                />
+              </div>
+              <div className="form-field">
+                <label>Account Number</label>
+                <input
+                  type="text"
+                  value={accountNumber}
+                  onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, '').slice(0, 17))}
+                  placeholder="Account number"
+                  required
+                />
+              </div>
+              <div className="form-field">
+                <label>Account Type</label>
+                <select value={accountType} onChange={(e) => setAccountType(e.target.value)}>
+                  <option value="checking">Checking</option>
+                  <option value="savings">Savings</option>
+                </select>
+              </div>
             </div>
           ) : (
             <div className="card-section">
               <h4>Card Details</h4>
-              <CardElement
-                options={{
-                  style: {
-                    base: {
-                      fontSize: '16px',
-                      color: '#333',
-                      '::placeholder': {
-                        color: '#aab7c4',
-                      },
-                    },
-                    invalid: {
-                      color: '#d32f2f',
-                    },
-                  },
-                }}
-              />
+              <div className="form-field">
+                <label>Card Number</label>
+                <input
+                  type="text"
+                  value={cardNumber}
+                  onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
+                  placeholder="4111 1111 1111 1111"
+                  maxLength="19"
+                  required
+                />
+              </div>
+              <div className="form-row">
+                <div className="form-field">
+                  <label>Month</label>
+                  <input
+                    type="text"
+                    value={expMonth}
+                    onChange={(e) => setExpMonth(e.target.value.replace(/\D/g, '').slice(0, 2))}
+                    placeholder="MM"
+                    maxLength="2"
+                    required
+                  />
+                </div>
+                <div className="form-field">
+                  <label>Year</label>
+                  <input
+                    type="text"
+                    value={expYear}
+                    onChange={(e) => setExpYear(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    placeholder="YYYY"
+                    maxLength="4"
+                    required
+                  />
+                </div>
+                <div className="form-field">
+                  <label>CVV</label>
+                  <input
+                    type="text"
+                    value={cvv}
+                    onChange={(e) => setCvv(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    placeholder="123"
+                    maxLength="4"
+                    required
+                  />
+                </div>
+              </div>
             </div>
           )}
 
           <button
             type="submit"
-            disabled={!stripe || processing}
+            disabled={!acceptJsLoaded || processing}
             className="submit-payment-btn"
           >
             {processing ? 'Processing...' : `Pay ${formatCurrency(paymentDetails.totalAmount)}`}
@@ -355,8 +453,8 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
 const PaymentModal = ({ isOpen, onClose, profileId, balance, email, propertyCount = 1, onPaymentSuccess }) => {
   const [paymentMethodType, setPaymentMethodType] = useState(null);
   
-  const handleSuccess = (paymentIntent) => {
-    onPaymentSuccess && onPaymentSuccess(paymentIntent);
+  const handleSuccess = (result) => {
+    onPaymentSuccess && onPaymentSuccess(result);
     setPaymentMethodType(null);
     onClose();
   };
@@ -400,17 +498,15 @@ const PaymentModal = ({ isOpen, onClose, profileId, balance, email, propertyCoun
           <button type="button" onClick={handleBack} className="back-btn">
             ← Change Payment Method
           </button>
-          <Elements stripe={stripePromise}>
-            <PaymentForm
-              profileId={profileId}
-              balance={balance}
-              email={email}
-              propertyCount={propertyCount}
-              paymentMethodType={paymentMethodType}
-              onSuccess={handleSuccess}
-              onCancel={handleClose}
-            />
-          </Elements>
+          <PaymentForm
+            profileId={profileId}
+            balance={balance}
+            email={email}
+            propertyCount={propertyCount}
+            paymentMethodType={paymentMethodType}
+            onSuccess={handleSuccess}
+            onCancel={handleClose}
+          />
         </>
       )}
     </Modal>

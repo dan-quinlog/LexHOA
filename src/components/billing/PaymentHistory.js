@@ -33,10 +33,10 @@ const PaymentHistory = ({ payments = [], loading = false }) => {
 
   const getPaymentMethodDisplay = (payment) => {
     switch (payment.paymentMethod) {
-      case 'STRIPE_CARD':
+      case 'CARD':
         return 'Card Payment';
-      case 'STRIPE_ACH':
-        return 'Bank Transfer';
+      case 'BANK_ACCOUNT':
+        return 'Bank Transfer (eCheck)';
       case 'CHECK':
         return payment.checkNumber ? `Check #${payment.checkNumber}` : 'Check';
       case 'CASH':

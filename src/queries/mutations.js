@@ -173,8 +173,8 @@ export const CREATE_PAYMENT = gql`
       invoiceNumber
       invoiceAmount
       paymentMethod
-      stripePaymentIntentId
-      stripeCustomerId
+      authNetTransactionId
+      authNetCustomerProfileId
       amount
       processingFee
       totalAmount
@@ -188,23 +188,26 @@ export const CREATE_PAYMENT = gql`
   }
 `;
 
-// Stripe Mutations
-export const CREATE_STRIPE_PAYMENT_INTENT = gql`
-  mutation CreateStripePaymentIntent($amount: Float!, $profileId: ID!, $description: String, $email: String, $paymentMethodType: String) {
-    createStripePaymentIntent(amount: $amount, profileId: $profileId, description: $description, email: $email, paymentMethodType: $paymentMethodType) {
-      clientSecret
-      paymentIntentId
+// Authorize.Net Mutations
+export const CREATE_AUTHNET_TRANSACTION = gql`
+  mutation CreateAuthNetTransaction($amount: Float!, $profileId: ID!, $description: String, $email: String, $paymentMethodType: String, $opaqueDataDescriptor: String!, $opaqueDataValue: String!) {
+    createAuthNetTransaction(amount: $amount, profileId: $profileId, description: $description, email: $email, paymentMethodType: $paymentMethodType, opaqueDataDescriptor: $opaqueDataDescriptor, opaqueDataValue: $opaqueDataValue) {
+      transactionId
+      authCode
       amount
       processingFee
       totalAmount
       paymentMethodType
+      responseCode
+      messageCode
+      messageText
     }
   }
 `;
 
-export const CREATE_STRIPE_CUSTOMER = gql`
-  mutation CreateStripeCustomer($profileId: ID!, $email: String!, $name: String!) {
-    createStripeCustomer(profileId: $profileId, email: $email, name: $name) {
+export const CREATE_AUTHNET_CUSTOMER_PROFILE = gql`
+  mutation CreateAuthNetCustomerProfile($profileId: ID!, $email: String!, $name: String!) {
+    createAuthNetCustomerProfile(profileId: $profileId, email: $email, name: $name) {
       customerId
       success
       message

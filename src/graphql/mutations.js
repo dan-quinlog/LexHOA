@@ -27,38 +27,49 @@ export const processMonthlyPropertyDues = /* GraphQL */ `
     }
   }
 `;
-export const createStripePaymentIntent = /* GraphQL */ `
-  mutation CreateStripePaymentIntent(
+export const createAuthNetTransaction = /* GraphQL */ `
+  mutation CreateAuthNetTransaction(
     $amount: Float!
     $profileId: ID!
     $description: String
     $email: String
     $paymentMethodType: String
+    $opaqueDataDescriptor: String!
+    $opaqueDataValue: String!
   ) {
-    createStripePaymentIntent(
+    createAuthNetTransaction(
       amount: $amount
       profileId: $profileId
       description: $description
       email: $email
       paymentMethodType: $paymentMethodType
+      opaqueDataDescriptor: $opaqueDataDescriptor
+      opaqueDataValue: $opaqueDataValue
     ) {
-      clientSecret
-      paymentIntentId
+      transactionId
+      authCode
       amount
       processingFee
       totalAmount
       paymentMethodType
+      responseCode
+      messageCode
+      messageText
       __typename
     }
   }
 `;
-export const createStripeCustomer = /* GraphQL */ `
-  mutation CreateStripeCustomer(
+export const createAuthNetCustomerProfile = /* GraphQL */ `
+  mutation CreateAuthNetCustomerProfile(
     $profileId: ID!
     $email: String!
     $name: String!
   ) {
-    createStripeCustomer(profileId: $profileId, email: $email, name: $name) {
+    createAuthNetCustomerProfile(
+      profileId: $profileId
+      email: $email
+      name: $name
+    ) {
       customerId
       success
       message
@@ -89,7 +100,7 @@ export const createProfile = /* GraphQL */ `
       billingFreq
       allowText
       balance
-      stripeCustomerId
+      authNetCustomerProfileId
       ownedProperties {
         nextToken
         __typename
@@ -150,7 +161,7 @@ export const updateProfile = /* GraphQL */ `
       billingFreq
       allowText
       balance
-      stripeCustomerId
+      authNetCustomerProfileId
       ownedProperties {
         nextToken
         __typename
@@ -211,7 +222,7 @@ export const deleteProfile = /* GraphQL */ `
       billingFreq
       allowText
       balance
-      stripeCustomerId
+      authNetCustomerProfileId
       ownedProperties {
         nextToken
         __typename
@@ -280,7 +291,7 @@ export const createProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -305,7 +316,7 @@ export const createProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -349,7 +360,7 @@ export const updateProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -374,7 +385,7 @@ export const updateProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -418,7 +429,7 @@ export const deleteProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -443,7 +454,7 @@ export const deleteProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -472,8 +483,8 @@ export const createPayment = /* GraphQL */ `
       invoiceNumber
       invoiceAmount
       paymentMethod
-      stripePaymentIntentId
-      stripeCustomerId
+      authNetTransactionId
+      authNetCustomerProfileId
       amount
       processingFee
       totalAmount
@@ -497,7 +508,7 @@ export const createPayment = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -527,8 +538,8 @@ export const updatePayment = /* GraphQL */ `
       invoiceNumber
       invoiceAmount
       paymentMethod
-      stripePaymentIntentId
-      stripeCustomerId
+      authNetTransactionId
+      authNetCustomerProfileId
       amount
       processingFee
       totalAmount
@@ -552,7 +563,7 @@ export const updatePayment = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -582,8 +593,8 @@ export const deletePayment = /* GraphQL */ `
       invoiceNumber
       invoiceAmount
       paymentMethod
-      stripePaymentIntentId
-      stripeCustomerId
+      authNetTransactionId
+      authNetCustomerProfileId
       amount
       processingFee
       totalAmount
@@ -607,7 +618,7 @@ export const deletePayment = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -701,7 +712,7 @@ export const createPing = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -743,7 +754,7 @@ export const updatePing = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -785,7 +796,7 @@ export const deletePing = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -832,7 +843,7 @@ export const createDocument = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -886,7 +897,7 @@ export const updateDocument = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -940,7 +951,7 @@ export const deleteDocument = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt

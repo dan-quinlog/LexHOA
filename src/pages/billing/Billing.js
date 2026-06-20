@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 import { PROFILE_BY_COGNITO_ID, PAYMENTS_BY_OWNER } from '../../queries/queries';
-import { UPDATE_PROFILE } from '../../queries/mutations';
 import PaymentModal from '../../components/billing/PaymentModal';
 import PaymentHistory from '../../components/billing/PaymentHistory';
 import './Billing.css';
@@ -33,8 +32,6 @@ const Billing = ({ cognitoId }) => {
 
   const payments = paymentsData?.paymentsByOwner?.items || [];
 
-  const [updateProfile] = useMutation(UPDATE_PROFILE);
-
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -44,24 +41,9 @@ const Billing = ({ cognitoId }) => {
 
   const handlePaymentSuccess = async (paymentDetails) => {
     setShowPaymentModal(false);
-    
-    // Optimistically update the balance immediately
-    if (profile && paymentDetails?.amount) {
-      const newBalance = Math.max(0, (profile.balance || 0) - paymentDetails.amount);
-      try {
-        await updateProfile({
-          variables: {
-            input: {
-              id: profile.id,
-              balance: newBalance
-            }
-          }
-        });
-      } catch (err) {
-        console.warn('Balance update handled by webhook:', err.message);
-      }
-    }
-    
+
+    // The balance is reduced server-side by the createAuthNetTransaction Lambda
+    // on a successful payment, so just refetch to pick up the updated values.
     refetchProfile();
     refetchPayments();
   };

@@ -1,5 +1,19 @@
 {
   "api": {
+    "authNetWebhook": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "handleAuthNetWebhook"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway"
+    },
     "lexhoa": {
       "dependsOn": [
         {
@@ -35,20 +49,6 @@
       },
       "providerPlugin": "awscloudformation",
       "service": "AppSync"
-    },
-    "authNetWebhook": {
-      "dependsOn": [
-        {
-          "attributes": [
-            "Name",
-            "Arn"
-          ],
-          "category": "function",
-          "resourceName": "handleAuthNetWebhook"
-        }
-      ],
-      "providerPlugin": "awscloudformation",
-      "service": "API Gateway"
     }
   },
   "auth": {
@@ -199,6 +199,30 @@
         }
       ]
     },
+    "AMPLIFY_function_createAuthNetCustomerProfile_authNetApiLoginId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "createAuthNetCustomerProfile"
+        }
+      ]
+    },
+    "AMPLIFY_function_createAuthNetCustomerProfile_authNetEnvironment": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "createAuthNetCustomerProfile"
+        }
+      ]
+    },
+    "AMPLIFY_function_createAuthNetCustomerProfile_authNetTransactionKey": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "createAuthNetCustomerProfile"
+        }
+      ]
+    },
     "AMPLIFY_function_createAuthNetCustomerProfile_deploymentBucketName": {
       "usedBy": [
         {
@@ -215,27 +239,27 @@
         }
       ]
     },
-    "AMPLIFY_function_createAuthNetCustomerProfile_authNetApiLoginId": {
+    "AMPLIFY_function_createAuthNetTransaction_authNetApiLoginId": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "createAuthNetCustomerProfile"
+          "resourceName": "createAuthNetTransaction"
         }
       ]
     },
-    "AMPLIFY_function_createAuthNetCustomerProfile_authNetTransactionKey": {
+    "AMPLIFY_function_createAuthNetTransaction_authNetEnvironment": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "createAuthNetCustomerProfile"
+          "resourceName": "createAuthNetTransaction"
         }
       ]
     },
-    "AMPLIFY_function_createAuthNetCustomerProfile_authNetEnvironment": {
+    "AMPLIFY_function_createAuthNetTransaction_authNetTransactionKey": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "createAuthNetCustomerProfile"
+          "resourceName": "createAuthNetTransaction"
         }
       ]
     },
@@ -255,27 +279,11 @@
         }
       ]
     },
-    "AMPLIFY_function_createAuthNetTransaction_authNetApiLoginId": {
+    "AMPLIFY_function_handleAuthNetWebhook_authNetSignatureKey": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "createAuthNetTransaction"
-        }
-      ]
-    },
-    "AMPLIFY_function_createAuthNetTransaction_authNetTransactionKey": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "createAuthNetTransaction"
-        }
-      ]
-    },
-    "AMPLIFY_function_createAuthNetTransaction_authNetEnvironment": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "createAuthNetTransaction"
+          "resourceName": "handleAuthNetWebhook"
         }
       ]
     },
@@ -288,14 +296,6 @@
       ]
     },
     "AMPLIFY_function_handleAuthNetWebhook_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "handleAuthNetWebhook"
-        }
-      ]
-    },
-    "AMPLIFY_function_handleAuthNetWebhook_authNetSignatureKey": {
       "usedBy": [
         {
           "category": "function",

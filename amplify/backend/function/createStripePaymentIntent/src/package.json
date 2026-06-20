@@ -5,7 +5,6 @@
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "authorizenet": "^1.0.8",
-    "aws-sdk": "^2.1030.0"
+    "authorizenet": "^1.0.8"
   }
 }

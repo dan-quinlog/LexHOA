@@ -9,9 +9,6 @@ Amplify Params - DO NOT EDIT */
 const ApiContracts = require('authorizenet').APIContracts;
 const ApiControllers = require('authorizenet').APIControllers;
 const SDKConstants = require('authorizenet').Constants;
-const AWS = require('aws-sdk');
-const https = require('https');
-const urlParse = require('url').URL;
 
 exports.handler = async (event) => {
     console.log(`EVENT: ${JSON.stringify(event)}`);
@@ -106,14 +103,6 @@ exports.handler = async (event) => {
         // Execute the transaction
         const result = await executeTransaction(createRequest);
 
-        // Reduce the profile balance by the dues amount on a successful payment.
-        // Failure here must not fail the payment (funds were already captured).
-        try {
-            await reduceProfileBalance(profileId, amount);
-        } catch (balanceError) {
-            console.error('Failed to update profile balance after payment:', balanceError);
-        }
-
         return {
             transactionId: result.transactionId,
             authCode: result.authCode,
@@ -175,73 +164,5 @@ function executeTransaction(createRequest) {
                 }
             }
         });
-    });
-}
-
-async function reduceProfileBalance(profileId, duesAmount) {
-    const endpoint = process.env.API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT;
-
-    const getProfileQuery = `
-        query GetProfile($id: ID!) {
-            getProfile(id: $id) {
-                id
-                balance
-            }
-        }
-    `;
-
-    const profileResult = await graphqlRequest(endpoint, getProfileQuery, { id: profileId });
-    const profile = profileResult?.getProfile;
-    if (!profile) {
-        throw new Error(`Profile ${profileId} not found`);
-    }
-
-    const currentBalance = profile.balance || 0;
-    const newBalance = Math.max(0, Math.round((currentBalance - duesAmount) * 100) / 100);
-
-    const updateProfileMutation = `
-        mutation UpdateProfile($input: UpdateProfileInput!) {
-            updateProfile(input: $input) {
-                id
-                balance
-            }
-        }
-    `;
-
-    await graphqlRequest(endpoint, updateProfileMutation, {
-        input: { id: profileId, balance: newBalance }
-    });
-
-    console.log(`Profile ${profileId} balance updated: ${currentBalance} -> ${newBalance}`);
-}
-
-function graphqlRequest(endpoint, query, variables) {
-    const uri = new urlParse(endpoint);
-    const httpRequest = new AWS.HttpRequest(endpoint, process.env.REGION);
-
-    httpRequest.headers.host = uri.host;
-    httpRequest.headers['Content-Type'] = 'application/json';
-    httpRequest.method = 'POST';
-    httpRequest.body = JSON.stringify({ query, variables });
-
-    const signer = new AWS.Signers.V4(httpRequest, 'appsync', true);
-    signer.addAuthorization(AWS.config.credentials, new Date());
-
-    return new Promise((resolve, reject) => {
-        const request = https.request({ ...httpRequest, host: uri.host }, (result) => {
-            let data = '';
-            result.on('data', (chunk) => { data += chunk; });
-            result.on('end', () => {
-                const response = JSON.parse(data);
-                if (response.errors) {
-                    reject(new Error(JSON.stringify(response.errors)));
-                } else {
-                    resolve(response.data);
-                }
-            });
-        });
-        request.on('error', reject);
-        request.write(httpRequest.body);
-        request.end();
     });
 }

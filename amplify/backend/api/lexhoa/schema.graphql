@@ -4,7 +4,7 @@ type Profile @model
     { allow: owner, operations: [update] },
     { allow: groups, groups: ["PRESIDENT", "SECRETARY"], operations: [create, update, delete] },
     { allow: groups, groups: ["BOARD"], operations: [create, update] },
-    { allow: private, provider: iam, operations: [create] }
+    { allow: private, provider: iam, operations: [create, read, update] }
   ]) {
   id: ID!
   byTypeName: String @default(value: "PROFILE")

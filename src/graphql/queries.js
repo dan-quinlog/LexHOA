@@ -34,7 +34,7 @@ export const getProfile = /* GraphQL */ `
       billingFreq
       allowText
       balance
-      stripeCustomerId
+      authNetCustomerProfileId
       ownedProperties {
         nextToken
         __typename
@@ -97,7 +97,7 @@ export const listProfiles = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -143,7 +143,7 @@ export const profilesByTypeName = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -189,7 +189,7 @@ export const profilesByTypeBalance = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -235,7 +235,7 @@ export const profilesByTypeCreatedAt = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -279,7 +279,7 @@ export const profileByCognitoID = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -323,7 +323,7 @@ export const profileByName = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -367,7 +367,7 @@ export const profileByEmail = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -413,7 +413,7 @@ export const profilesByBalance = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -457,7 +457,7 @@ export const profilesByTenantAtId = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -496,7 +496,7 @@ export const getProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -521,7 +521,7 @@ export const getProperty = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -711,8 +711,8 @@ export const getPayment = /* GraphQL */ `
       invoiceNumber
       invoiceAmount
       paymentMethod
-      stripePaymentIntentId
-      stripeCustomerId
+      authNetTransactionId
+      authNetCustomerProfileId
       amount
       processingFee
       totalAmount
@@ -736,7 +736,7 @@ export const getPayment = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -768,8 +768,8 @@ export const listPayments = /* GraphQL */ `
         invoiceNumber
         invoiceAmount
         paymentMethod
-        stripePaymentIntentId
-        stripeCustomerId
+        authNetTransactionId
+        authNetCustomerProfileId
         amount
         processingFee
         totalAmount
@@ -814,8 +814,8 @@ export const paymentsByTypeCreatedAt = /* GraphQL */ `
         invoiceNumber
         invoiceAmount
         paymentMethod
-        stripePaymentIntentId
-        stripeCustomerId
+        authNetTransactionId
+        authNetCustomerProfileId
         amount
         processingFee
         totalAmount
@@ -860,8 +860,8 @@ export const paymentsByTypeCheckDate = /* GraphQL */ `
         invoiceNumber
         invoiceAmount
         paymentMethod
-        stripePaymentIntentId
-        stripeCustomerId
+        authNetTransactionId
+        authNetCustomerProfileId
         amount
         processingFee
         totalAmount
@@ -906,8 +906,8 @@ export const paymentsByTypeInvoiceNumber = /* GraphQL */ `
         invoiceNumber
         invoiceAmount
         paymentMethod
-        stripePaymentIntentId
-        stripeCustomerId
+        authNetTransactionId
+        authNetCustomerProfileId
         amount
         processingFee
         totalAmount
@@ -950,8 +950,8 @@ export const paymentsByCheckDate = /* GraphQL */ `
         invoiceNumber
         invoiceAmount
         paymentMethod
-        stripePaymentIntentId
-        stripeCustomerId
+        authNetTransactionId
+        authNetCustomerProfileId
         amount
         processingFee
         totalAmount
@@ -994,8 +994,8 @@ export const paymentsByCheckNumber = /* GraphQL */ `
         invoiceNumber
         invoiceAmount
         paymentMethod
-        stripePaymentIntentId
-        stripeCustomerId
+        authNetTransactionId
+        authNetCustomerProfileId
         amount
         processingFee
         totalAmount
@@ -1038,8 +1038,8 @@ export const paymentsByInvoiceNumber = /* GraphQL */ `
         invoiceNumber
         invoiceAmount
         paymentMethod
-        stripePaymentIntentId
-        stripeCustomerId
+        authNetTransactionId
+        authNetCustomerProfileId
         amount
         processingFee
         totalAmount
@@ -1056,16 +1056,16 @@ export const paymentsByInvoiceNumber = /* GraphQL */ `
     }
   }
 `;
-export const paymentsByStripePaymentIntent = /* GraphQL */ `
-  query PaymentsByStripePaymentIntent(
-    $stripePaymentIntentId: String!
+export const paymentsByAuthNetTransaction = /* GraphQL */ `
+  query PaymentsByAuthNetTransaction(
+    $authNetTransactionId: String!
     $sortDirection: ModelSortDirection
     $filter: ModelPaymentFilterInput
     $limit: Int
     $nextToken: String
   ) {
-    paymentsByStripePaymentIntent(
-      stripePaymentIntentId: $stripePaymentIntentId
+    paymentsByAuthNetTransaction(
+      authNetTransactionId: $authNetTransactionId
       sortDirection: $sortDirection
       filter: $filter
       limit: $limit
@@ -1082,8 +1082,8 @@ export const paymentsByStripePaymentIntent = /* GraphQL */ `
         invoiceNumber
         invoiceAmount
         paymentMethod
-        stripePaymentIntentId
-        stripeCustomerId
+        authNetTransactionId
+        authNetCustomerProfileId
         amount
         processingFee
         totalAmount
@@ -1128,8 +1128,8 @@ export const paymentsByOwner = /* GraphQL */ `
         invoiceNumber
         invoiceAmount
         paymentMethod
-        stripePaymentIntentId
-        stripeCustomerId
+        authNetTransactionId
+        authNetCustomerProfileId
         amount
         processingFee
         totalAmount
@@ -1240,7 +1240,7 @@ export const getPing = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt
@@ -1373,7 +1373,7 @@ export const getDocument = /* GraphQL */ `
         billingFreq
         allowText
         balance
-        stripeCustomerId
+        authNetCustomerProfileId
         tenantAtId
         createdAt
         updatedAt

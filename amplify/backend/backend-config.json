@@ -180,6 +180,22 @@
       ],
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
+    },
+    "reconcileAuthNetPayments": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "lexhoa"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
     }
   },
   "parameters": {
@@ -372,6 +388,38 @@
         {
           "category": "function",
           "resourceName": "monthlyPropertyDues"
+        }
+      ]
+    },
+    "AMPLIFY_function_reconcileAuthNetPayments_authNetApiLoginId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "reconcileAuthNetPayments"
+        }
+      ]
+    },
+    "AMPLIFY_function_reconcileAuthNetPayments_authNetEnvironment": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "reconcileAuthNetPayments"
+        }
+      ]
+    },
+    "AMPLIFY_function_reconcileAuthNetPayments_authNetTransactionKey": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "reconcileAuthNetPayments"
+        }
+      ]
+    },
+    "AMPLIFY_function_reconcileAuthNetPayments_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "reconcileAuthNetPayments"
         }
       ]
     }

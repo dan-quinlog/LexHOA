@@ -21,6 +21,7 @@ import { ApolloLink } from '@apollo/client';
 import { BULLETINS_BY_DATE, PROFILE_BY_COGNITO_ID } from './queries/queries';
 import ReactQuill from 'react-quill';
 import MenuState from './components/menu/MenuState';
+import PrivacyBanner from './components/PrivacyBanner';
 import DatabaseReset from './components/dev/DatabaseReset'
 import 'react-quill/dist/quill.bubble.css';
 
@@ -344,6 +345,7 @@ function App() {
             )}
           </nav>
         </footer>
+        <PrivacyBanner />
       </div>
     );
   };

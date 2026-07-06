@@ -4,6 +4,21 @@ import { LIST_DOCUMENTS } from '../../queries/documentQueries';
 import { getUrl } from 'aws-amplify/storage';
 import './Documents.css';
 
+// Static, always-available legal document served from the public/ folder.
+// This is not stored in S3/DynamoDB so it is guaranteed to be present.
+const PRIVACY_POLICY_DOC = {
+  id: 'static-privacy-policy',
+  title: 'Privacy Policy',
+  description: 'How the HOA collects, uses, and protects your information.',
+  category: 'POLICIES',
+  accessLevel: 'PUBLIC',
+  fileType: 'application/pdf',
+  fileSize: null,
+  displayOrder: -1,
+  createdAt: '2026-07-06T00:00:00.000Z',
+  staticUrl: `${process.env.PUBLIC_URL || ''}/privacy-policy.pdf`
+};
+
 const Documents = ({ user, userGroups = [], isOwner = false }) => {
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [searchTerm, setSearchTerm] = useState('');
@@ -25,9 +40,9 @@ const Documents = ({ user, userGroups = [], isOwner = false }) => {
 
   // Filter documents based on user's access level
   const filteredDocuments = useMemo(() => {
-    if (!data?.listDocuments?.items) return [];
+    const items = [PRIVACY_POLICY_DOC, ...(data?.listDocuments?.items || [])];
 
-    return data.listDocuments.items.filter(doc => {
+    return items.filter(doc => {
       // Filter by category
       if (selectedCategory !== 'ALL' && doc.category !== selectedCategory) {
         return false;
@@ -73,6 +88,11 @@ const Documents = ({ user, userGroups = [], isOwner = false }) => {
   }, [filteredDocuments]);
 
   const handleDownload = async (document) => {
+    // Static documents (e.g., the Privacy Policy) are served from public/ directly.
+    if (document.staticUrl) {
+      window.open(document.staticUrl, '_blank');
+      return;
+    }
     try {
       const result = await getUrl({
         key: document.s3Key,

@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { getEffectiveBalance } from '../../utils/payments';
 import './BalanceCard.css';
 
-const BalanceCard = ({ balance = 0, billingFreq = 'MONTHLY' }) => {
+const BalanceCard = ({ balance = 0, billingFreq = 'MONTHLY', pendingTotal = 0 }) => {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -10,7 +11,9 @@ const BalanceCard = ({ balance = 0, billingFreq = 'MONTHLY' }) => {
     }).format(amount);
   };
 
-  const hasBalance = balance > 0;
+  const effectiveBalance = getEffectiveBalance(balance, pendingTotal);
+  const hasPending = pendingTotal > 0;
+  const hasBalance = effectiveBalance > 0;
 
   return (
     <div className="balance-card">
@@ -19,12 +22,16 @@ const BalanceCard = ({ balance = 0, billingFreq = 'MONTHLY' }) => {
       </div>
       <div className="balance-content">
         <div className={`balance-amount ${hasBalance ? 'has-balance' : 'zero-balance'}`}>
-          {formatCurrency(balance)}
+          {formatCurrency(effectiveBalance)}
+          {hasPending && <span className="pending-asterisk">*</span>}
         </div>
         {hasBalance ? (
           <p className="balance-status">Amount Due</p>
         ) : (
           <p className="balance-status paid">Paid in Full</p>
+        )}
+        {hasPending && (
+          <p className="pending-note">*Including pending payments</p>
         )}
       </div>
       <div className="balance-actions">

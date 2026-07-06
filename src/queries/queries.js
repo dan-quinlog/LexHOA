@@ -170,6 +170,13 @@ export const PROFILE_BY_COGNITO_ID = gql`
             createdAt
           }
         }
+        payments {
+          items {
+            id
+            amount
+            status
+          }
+        }
         createdAt
         updatedAt
         owner

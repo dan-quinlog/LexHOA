@@ -6,6 +6,7 @@ import ProfileCard from '../../components/user/ProfileCard';
 import PropertyCard from '../../components/user/PropertyCard';
 import PingCard from '../../components/user/PingCard';
 import BalanceCard from '../../components/billing/BalanceCard';
+import { getPendingTotal } from '../../utils/payments';
 import Modal from '../../components/shared/Modal';
 import ProfileEditModal from '../../components/shared/ProfileEditModal';
 import NotificationModal from '../../components/modals/NotificationModal';
@@ -281,6 +282,7 @@ const Profile = ({ cognitoId }) => {
               <BalanceCard 
                 balance={profile.balance} 
                 billingFreq={profile.billingFreq}
+                pendingTotal={getPendingTotal(profile?.payments?.items)}
                 propertyCount={profile?.ownedProperties?.items?.length || 0}
               />
             )}

@@ -106,12 +106,20 @@ exports.handler = async (event) => {
         // Execute the transaction
         const result = await executeTransaction(createRequest);
 
-        // Reduce the profile balance by the dues amount on a successful payment.
-        // Failure here must not fail the payment (funds were already captured).
-        try {
-            await reduceProfileBalance(profileId, amount);
-        } catch (balanceError) {
-            console.error('Failed to update profile balance after payment:', balanceError);
+        // Card payments capture and settle immediately, so reduce the balance now.
+        // eCheck (bank_account) payments only "approve" at submission and take
+        // 1-5 business days to actually settle, and can still be returned (NSF,
+        // closed account, etc.). We therefore hold the balance and leave the
+        // payment PENDING; the balance is reduced later during reconciliation
+        // once the transaction settles successfully.
+        const settlementPending = paymentMethodType === 'bank_account';
+        if (!settlementPending) {
+            // Failure here must not fail the payment (funds were already captured).
+            try {
+                await reduceProfileBalance(profileId, amount);
+            } catch (balanceError) {
+                console.error('Failed to update profile balance after payment:', balanceError);
+            }
         }
 
         return {
@@ -121,6 +129,7 @@ exports.handler = async (event) => {
             processingFee: processingFee,
             totalAmount: totalAmount,
             paymentMethodType: paymentMethodType || 'card',
+            settlementPending: settlementPending,
             responseCode: result.responseCode,
             messageCode: result.messageCode,
             messageText: result.messageText

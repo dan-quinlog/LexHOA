@@ -3,6 +3,7 @@ import { useQuery } from '@apollo/client';
 import { PROFILE_BY_COGNITO_ID, PAYMENTS_BY_OWNER } from '../../queries/queries';
 import PaymentModal from '../../components/billing/PaymentModal';
 import PaymentHistory from '../../components/billing/PaymentHistory';
+import { getPendingTotal, getEffectiveBalance } from '../../utils/payments';
 import './Billing.css';
 
 const Billing = ({ cognitoId }) => {
@@ -42,8 +43,9 @@ const Billing = ({ cognitoId }) => {
   const handlePaymentSuccess = async (paymentDetails) => {
     setShowPaymentModal(false);
 
-    // The balance is reduced server-side by the createAuthNetTransaction Lambda
-    // on a successful payment, so just refetch to pick up the updated values.
+    // Card payments reduce the balance server-side immediately. eCheck payments
+    // are held as PENDING (balance unchanged) and shown as pending in the
+    // displayed balance until they settle. Refetch to pick up both cases.
     refetchProfile();
     refetchPayments();
   };
@@ -64,7 +66,10 @@ const Billing = ({ cognitoId }) => {
     );
   }
 
-  const hasBalance = profile.balance > 0;
+  const pendingTotal = getPendingTotal(payments);
+  const effectiveBalance = getEffectiveBalance(profile.balance, pendingTotal);
+  const hasPending = pendingTotal > 0;
+  const hasBalance = effectiveBalance > 0;
 
   return (
     <div className="billing-page">
@@ -75,7 +80,8 @@ const Billing = ({ cognitoId }) => {
           <div className="balance-card-large">
             <h3>Account Balance</h3>
             <div className={`balance-amount ${hasBalance ? 'has-balance' : 'zero-balance'}`}>
-              {formatCurrency(profile.balance)}
+              {formatCurrency(effectiveBalance)}
+              {hasPending && <span className="pending-asterisk">*</span>}
             </div>
             {hasBalance ? (
               <>
@@ -89,6 +95,9 @@ const Billing = ({ cognitoId }) => {
               </>
             ) : (
               <p className="balance-status paid">Paid in Full - Thank You!</p>
+            )}
+            {hasPending && (
+              <p className="pending-note">*Including {formatCurrency(pendingTotal)} in pending payments</p>
             )}
           </div>
 

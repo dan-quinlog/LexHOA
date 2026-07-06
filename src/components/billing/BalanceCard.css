@@ -40,6 +40,20 @@
   color: var(--success-color);
 }
 
+.pending-asterisk {
+  color: var(--secondary-color);
+  font-size: 1.5rem;
+  vertical-align: super;
+  margin-left: 2px;
+}
+
+.pending-note {
+  margin: var(--spacing-small) 0 0 0;
+  color: var(--secondary-color);
+  font-size: var(--font-size-small);
+  font-style: italic;
+}
+
 .balance-actions {
   text-align: center;
   padding-top: var(--spacing-medium);

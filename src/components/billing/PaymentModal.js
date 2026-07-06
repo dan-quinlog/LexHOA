@@ -217,7 +217,9 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
               amount: paymentDetails.amount,
               processingFee: paymentDetails.processingFee,
               totalAmount: paymentDetails.totalAmount,
-              status: 'SUCCEEDED',
+              // Card payments settle instantly; eCheck (ACH) takes 1-5 business
+              // days to clear, so it starts PENDING and is reconciled later.
+              status: isACH ? 'PENDING' : 'SUCCEEDED',
               description: 'HOA Dues Payment',
               invoiceNumber: result.transactionId,
               invoiceAmount: paymentDetails.amount,
@@ -264,9 +266,9 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
     return (
       <div className="payment-success">
         <div className="success-icon">✓</div>
-        <h3>Payment Successful!</h3>
-        <p>Your payment of {formatCurrency(paymentDetails?.totalAmount)} has been processed.</p>
-        {isACH && <p className="ach-notice">eCheck payments may take 2-3 business days to settle.</p>}
+        <h3>{isACH ? 'Payment Submitted!' : 'Payment Successful!'}</h3>
+        <p>Your payment of {formatCurrency(paymentDetails?.totalAmount)} has been {isACH ? 'submitted' : 'processed'}.</p>
+        {isACH && <p className="ach-notice">eCheck payments may take 2-3 business days to settle. Your balance reflects this payment as pending until it clears.</p>}
         <p>A receipt will be sent to your email.</p>
       </div>
     );

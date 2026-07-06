@@ -59,6 +59,20 @@
   color: var(--success-color);
 }
 
+.balance-card-large .pending-asterisk {
+  font-size: 1.5rem;
+  vertical-align: super;
+  color: var(--secondary-color);
+  margin-left: 2px;
+}
+
+.balance-card-large .pending-note {
+  margin-top: var(--spacing-small);
+  color: var(--secondary-color);
+  font-size: var(--font-size-small);
+  font-style: italic;
+}
+
 .pay-now-btn {
   padding: var(--spacing-medium) var(--spacing-xl);
   background: var(--primary-color);

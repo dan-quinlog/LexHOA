@@ -49,6 +49,11 @@ exports.handler = async (event) => {
         throw new Error('Authorize.Net credentials not configured');
     }
 
+    console.log(
+        `Reconciling against Authorize.Net env=${process.env.AUTHNET_ENVIRONMENT || 'sandbox'} ` +
+        `apiLoginId=${apiLoginId}`
+    );
+
     const summary = { checked: 0, settled: 0, failed: 0, stillPending: 0, errors: 0 };
 
     try {
@@ -62,6 +67,12 @@ exports.handler = async (event) => {
                 console.warn(`Payment ${payment.id} has no Authorize.Net transaction ID; skipping.`);
                 continue;
             }
+
+            console.log(
+                `Reconciling payment ${payment.id}: ` +
+                `authNetTransactionId=${payment.authNetTransactionId} ` +
+                `method=${payment.paymentMethod} status=${payment.status} amount=${payment.amount}`
+            );
 
             try {
                 const { transactionStatus } = await getTransactionDetails(payment.authNetTransactionId);
@@ -86,7 +97,11 @@ exports.handler = async (event) => {
                 }
             } catch (paymentError) {
                 summary.errors++;
-                console.error(`Error reconciling payment ${payment.id}:`, paymentError);
+                console.error(
+                    `Error reconciling payment ${payment.id} ` +
+                    `(authNetTransactionId=${payment.authNetTransactionId}):`,
+                    paymentError
+                );
             }
         }
 
@@ -122,9 +137,14 @@ async function getPendingEcheckPayments(endpoint) {
         }
     `;
 
+    // Enum filter inputs (ModelPaymentStatusInput) only support eq/ne, not `in`,
+    // so match the two pending states with an `or`.
     const filter = {
-        status: { in: ['PENDING', 'PROCESSING'] },
-        paymentMethod: { eq: 'BANK_ACCOUNT' }
+        paymentMethod: { eq: 'BANK_ACCOUNT' },
+        or: [
+            { status: { eq: 'PENDING' } },
+            { status: { eq: 'PROCESSING' } }
+        ]
     };
 
     const payments = [];

@@ -1,0 +1,9 @@
+{
+  "adminRoleNames": [
+    "lexhoaLambdaRoleAuthNetRecon-${env}",
+    "lexhoaLambdaRoleAuthNetWH-${env}",
+    "lexhoaLambdaRoleAuthNetTx-${env}",
+    "lexhoaLambdaRoleAuthNetCP-${env}",
+    "lexhoaLambdaRole98b6da82-${env}"
+  ]
+}

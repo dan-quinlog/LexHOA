@@ -422,6 +422,14 @@
           "resourceName": "reconcileAuthNetPayments"
         }
       ]
+    },
+    "AMPLIFY_function_reconcileAuthNetPayments_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "reconcileAuthNetPayments"
+        }
+      ]
     }
   },
   "storage": {

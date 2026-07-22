@@ -1,192 +1,39 @@
-/* Amplify Params - DO NOT EDIT
-	ENV
-	REGION
-	AUTHNET_SIGNATURE_KEY
-	API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT
-	API_LEXHOA_GRAPHQLAPIIDOUTPUT
-Amplify Params - DO NOT EDIT */
-
 const crypto = require('crypto');
-const https = require('https');
 const AWS = require('aws-sdk');
-const urlParse = require('url').URL;
-
-exports.handler = async (event) => {
-    console.log(`EVENT: ${JSON.stringify(event)}`);
-    
-    try {
-        const signatureKey = process.env.AUTHNET_SIGNATURE_KEY;
-        
-        if (!signatureKey) {
-            throw new Error("Authorize.Net signature key not configured");
-        }
-
-        // Verify webhook signature
-        const webhookSignature = event.headers['X-ANET-Signature'] || event.headers['x-anet-signature'];
-        const body = event.body;
-
-        if (webhookSignature) {
-            const hash = crypto.createHmac('sha512', signatureKey)
-                .update(body)
-                .digest('hex')
-                .toUpperCase();
-            
-            const receivedHash = webhookSignature.replace('sha512=', '').toUpperCase();
-            
-            if (hash !== receivedHash) {
-                console.error('Webhook signature verification failed');
-                return {
-                    statusCode: 400,
-                    body: JSON.stringify({ error: 'Webhook signature verification failed' })
-                };
-            }
-        }
-
-        const webhookEvent = JSON.parse(body);
-        console.log('Webhook event type:', webhookEvent.eventType);
-
-        switch (webhookEvent.eventType) {
-            case 'net.authorize.payment.authcapture.created':
-                await handlePaymentCreated(webhookEvent.payload);
-                break;
-            case 'net.authorize.payment.refund.created':
-                await handleRefund(webhookEvent.payload);
-                break;
-            case 'net.authorize.payment.void.created':
-                await handleVoid(webhookEvent.payload);
-                break;
-            default:
-                console.log(`Unhandled event type: ${webhookEvent.eventType}`);
-        }
-
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ received: true })
-        };
-
-    } catch (error) {
-        console.error('Error handling webhook:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: error.message })
-        };
-    }
-};
-
-async function handlePaymentCreated(payload) {
-    console.log('Payment created:', payload.id);
-    // Payment records are created synchronously when the transaction is processed,
-    // so this webhook primarily serves as a backup confirmation.
-    // No action needed unless we want to reconcile.
+const ApiContracts = require('authorizenet').APIContracts;
+const ApiControllers = require('authorizenet').APIControllers;
+const Constants = require('authorizenet').Constants;
+const ddb = new AWS.DynamoDB.DocumentClient();
+const ALLOWED = new Set(['net.authorize.payment.authcapture.created', 'net.authorize.payment.refund.created', 'net.authorize.payment.void.created']);
+const tables = () => { const s = `${process.env.API_LEXHOA_GRAPHQLAPIIDOUTPUT}-${process.env.ENV}`; return { profile: `Profile-${s}`, payment: `Payment-${s}`, receipt: `WebhookReceipt-${s}` }; };
+const signature = (headers = {}) => Object.entries(headers).find(([k]) => k.toLowerCase() === 'x-anet-signature')?.[1];
+function verify(raw, supplied, key) { if (!Buffer.isBuffer(raw) || typeof key !== 'string' || key.length !== 128 || typeof supplied !== 'string' || !/^sha512=[a-f\d]{128}$/i.test(supplied)) return false; const expected = crypto.createHmac('sha512', Buffer.from(key, 'utf8')).update(raw).digest(); const actual = Buffer.from(supplied.slice(7), 'hex'); return actual.length === expected.length && crypto.timingSafeEqual(expected, actual); }
+const get = async (TableName, id) => (await ddb.get({ TableName, Key: { id }, ConsistentRead: true }).promise()).Item;
+async function queryIndex(index, field, value) { const out = await ddb.query({ TableName: tables().payment, IndexName: index, KeyConditionExpression: '#k=:v', ExpressionAttributeNames: { '#k': field }, ExpressionAttributeValues: { ':v': value }, Limit: 1 }).promise(); return out.Items?.[0]; }
+function details(transId) { return new Promise((resolve, reject) => { const auth = new ApiContracts.MerchantAuthenticationType(); auth.setName(process.env.AUTHNET_API_LOGIN_ID); auth.setTransactionKey(process.env.AUTHNET_TRANSACTION_KEY); const req = new ApiContracts.GetTransactionDetailsRequest(); req.setMerchantAuthentication(auth); req.setTransId(transId); const ctrl = new ApiControllers.GetTransactionDetailsController(req.getJSON()); ctrl.setEnvironment(process.env.AUTHNET_ENVIRONMENT === 'production' ? Constants.endpoint.production : Constants.endpoint.sandbox); ctrl.execute(() => { const res = new ApiContracts.GetTransactionDetailsResponse(ctrl.getResponse()); if (res?.getMessages().getResultCode() !== ApiContracts.MessageTypeEnum.OK) return reject(new Error('Unable to verify processor transaction')); const tx = res.getTransaction(); resolve({ id: String(tx.getTransId()), refTransId: tx.getRefTransId?.() && String(tx.getRefTransId()), amount: Number(tx.getSettleAmount?.() || tx.getAuthAmount()), status: tx.getTransactionStatus(), accountType: String(tx.getAccountType?.() || ''), reference: tx.getOrder?.()?.getInvoiceNumber?.() || res.getRefId?.() }); }); }); }
+const rail = d => /echeck|bank/i.test(d.accountType) ? 'BANK_ACCOUNT' : d.accountType ? 'CARD' : null;
+async function transition(payment, status, amount, notificationId, transactionId, client = ddb) { const t = tables(); const now = new Date().toISOString(); const receipt = { Put: { TableName: t.receipt, Item: { id: notificationId, __typename: 'WebhookReceipt', eventType: status, createdAt: now, updatedAt: now }, ConditionExpression: 'attribute_not_exists(id)' } };
+  if ((status === 'SUCCEEDED' && payment.balanceApplied) || (status === 'PENDING' && payment.status === 'PENDING')) { await client.transactWrite({ TransactItems: [receipt] }).promise(); return; }
+  const profile = (await client.get({ TableName: t.profile, Key: { id: payment.ownerPaymentsId }, ConsistentRead: true }).promise()).Item; if (!profile) throw new Error('Payment profile not found');
+  if (status === 'PENDING') { await client.transactWrite({ TransactItems: [receipt, { Update: { TableName: t.payment, Key: { id: payment.id }, UpdateExpression: 'SET #s=:status, authNetTransactionId=if_not_exists(authNetTransactionId,:tx), updatedAt=:now', ConditionExpression: '#s=:processing AND balanceApplied=:no', ExpressionAttributeNames: { '#s': 'status' }, ExpressionAttributeValues: { ':status': 'PENDING', ':processing': 'PROCESSING', ':no': false, ':tx': transactionId, ':now': now } } }] }).promise(); return; }
+  if (status === 'CANCELED' && !payment.balanceApplied) { await client.transactWrite({ TransactItems: [receipt,
+    { Update: { TableName: t.profile, Key: { id: profile.id }, UpdateExpression: 'SET updatedAt=:now REMOVE activePaymentId', ConditionExpression: 'activePaymentId=:pid', ExpressionAttributeValues: { ':pid': payment.id, ':now': now } } },
+    { Update: { TableName: t.payment, Key: { id: payment.id }, UpdateExpression: 'SET #s=:status, updatedAt=:now', ConditionExpression: 'balanceApplied=:no AND (#s=:pending OR #s=:processing)', ExpressionAttributeNames: { '#s': 'status' }, ExpressionAttributeValues: { ':status': 'CANCELED', ':pending': 'PENDING', ':processing': 'PROCESSING', ':no': false, ':now': now } } }
+  ] }).promise(); return; }
+  const restoring = ['REFUNDED', 'CANCELED'].includes(status); const newBalance = Math.max(0, Math.round((Number(profile.balance) + (restoring ? amount : -payment.amount)) * 100) / 100); const profileCondition = restoring ? 'balance=:old AND (attribute_not_exists(activePaymentId) OR activePaymentId=:pid)' : 'balance=:old AND activePaymentId=:pid';
+  await client.transactWrite({ TransactItems: [receipt,
+    { Update: { TableName: t.profile, Key: { id: profile.id }, UpdateExpression: 'SET balance=:new, updatedAt=:now REMOVE activePaymentId', ConditionExpression: profileCondition, ExpressionAttributeValues: { ':new': newBalance, ':old': profile.balance, ':pid': payment.id, ':now': now } } },
+    { Update: { TableName: t.payment, Key: { id: payment.id }, UpdateExpression: 'SET #s=:status, balanceApplied=:applied, authNetTransactionId=if_not_exists(authNetTransactionId,:tx), updatedAt=:now', ConditionExpression: 'balanceApplied=:expected', ExpressionAttributeNames: { '#s': 'status' }, ExpressionAttributeValues: { ':status': status, ':applied': !restoring, ':expected': restoring, ':tx': transactionId, ':now': now } } }
+  ] }).promise(); }
+async function processEvent(webhook, deps) { if (!webhook?.notificationId || !ALLOWED.has(webhook.eventType) || !webhook.payload?.id) throw new Error('Invalid webhook event'); if (await deps.received(webhook.notificationId)) return;
+  const d = await deps.details(String(webhook.payload.id)); let payment;
+  if (webhook.eventType.endsWith('authcapture.created')) payment = await deps.byTransaction(d.id) || (d.reference && await deps.byReference(d.reference));
+  else payment = await deps.byTransaction(d.refTransId || d.id);
+  if (!payment) throw new Error('Payment not found');
+  if (webhook.eventType.endsWith('authcapture.created')) { if (!['capturedPendingSettlement', 'settledSuccessfully'].includes(d.status) || rail(d) !== payment.paymentMethod || Math.round(d.amount * 100) !== Math.round(payment.totalAmount * 100)) throw new Error('Processor transaction mismatch'); await deps.transition(payment, payment.paymentMethod === 'CARD' || payment.balanceApplied ? 'SUCCEEDED' : 'PENDING', payment.amount, webhook.notificationId, d.id); return; }
+  if (webhook.eventType.includes('.refund.')) { if (!['refundPendingSettlement', 'refundSettledSuccessfully'].includes(d.status) || !d.refTransId) throw new Error('Refund is not processor verified'); if (Math.round(d.amount * 100) !== Math.round(payment.totalAmount * 100)) throw new Error('Partial refunds require manual accounting'); await deps.transition(payment, 'REFUNDED', payment.amount, webhook.notificationId, payment.authNetTransactionId); return; }
+  if (d.status !== 'voided') throw new Error('Void is not processor verified'); await deps.transition(payment, 'CANCELED', payment.amount, webhook.notificationId, payment.authNetTransactionId);
 }
-
-async function handleRefund(payload) {
-    console.log('Refund created:', payload.id);
-    
-    const transactionId = payload.id;
-    
-    // Update the payment status to REFUNDED
-    const updatePaymentMutation = `
-        mutation UpdatePayment($input: UpdatePaymentInput!) {
-            updatePayment(input: $input) {
-                id
-                status
-            }
-        }
-    `;
-
-    // Find payment by transaction ID and update status
-    const findPaymentQuery = `
-        query PaymentsByAuthNetTransaction($authNetTransactionId: String!) {
-            paymentsByAuthNetTransaction(authNetTransactionId: $authNetTransactionId) {
-                items {
-                    id
-                    amount
-                    ownerPaymentsId
-                }
-            }
-        }
-    `;
-
-    try {
-        const paymentResult = await graphqlRequest(
-            process.env.API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT,
-            findPaymentQuery,
-            { authNetTransactionId: transactionId }
-        );
-
-        const payment = paymentResult?.paymentsByAuthNetTransaction?.items?.[0];
-        if (payment) {
-            await graphqlRequest(
-                process.env.API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT,
-                updatePaymentMutation,
-                { input: { id: payment.id, status: 'REFUNDED' } }
-            );
-
-            // Restore the balance
-            const getProfileQuery = `
-                query GetProfile($id: ID!) {
-                    getProfile(id: $id) {
-                        id
-                        balance
-                    }
-                }
-            `;
-
-            const profileResult = await graphqlRequest(
-                process.env.API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT,
-                getProfileQuery,
-                { id: payment.ownerPaymentsId }
-            );
-
-            const currentBalance = profileResult.getProfile.balance || 0;
-            const newBalance = currentBalance + payment.amount;
-
-            await graphqlRequest(
-                process.env.API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT,
-                `mutation UpdateProfile($input: UpdateProfileInput!) {
-                    updateProfile(input: $input) { id balance }
-                }`,
-                { input: { id: payment.ownerPaymentsId, balance: newBalance } }
-            );
-        }
-    } catch (err) {
-        console.error('Error processing refund webhook:', err);
-    }
-}
-
-async function handleVoid(payload) {
-    console.log('Void created:', payload.id);
-    // Similar to refund handling
-}
-
-async function graphqlRequest(endpoint, query, variables) {
-    const uri = new urlParse(endpoint);
-    const httpRequest = new AWS.HttpRequest(endpoint, process.env.REGION);
-    
-    httpRequest.headers.host = uri.host;
-    httpRequest.headers['Content-Type'] = 'application/json';
-    httpRequest.method = 'POST';
-    httpRequest.body = JSON.stringify({ query, variables });
-
-    const signer = new AWS.Signers.V4(httpRequest, 'appsync', true);
-    signer.addAuthorization(AWS.config.credentials, new Date());
-
-    return new Promise((resolve, reject) => {
-        const request = https.request({ ...httpRequest, host: uri.host }, (result) => {
-            let data = '';
-            result.on('data', (chunk) => { data += chunk; });
-            result.on('end', () => {
-                const response = JSON.parse(data);
-                if (response.errors) {
-                    reject(new Error(JSON.stringify(response.errors)));
-                } else {
-                    resolve(response.data);
-                }
-            });
-        });
-        request.on('error', reject);
-        request.write(httpRequest.body);
-        request.end();
-    });
-}
+const deps = { details, received: async id => !!await get(tables().receipt, id), byTransaction: id => queryIndex('byAuthNetTransaction', 'authNetTransactionId', id), byReference: id => queryIndex('byProcessorReference', 'processorReference', id), transition };
+exports.handler = async event => { const raw = typeof event?.body === 'string' ? Buffer.from(event.body, event.isBase64Encoded ? 'base64' : 'utf8') : null; if (!raw || !verify(raw, signature(event.headers), process.env.AUTHNET_SIGNATURE_KEY)) return { statusCode: 400, body: '{"error":"Invalid signature"}' }; let body; try { body = JSON.parse(raw.toString('utf8')); } catch (_) { return { statusCode: 400, body: '{"error":"Malformed JSON"}' }; } try { await processEvent(body, deps); return { statusCode: 200, body: '{"received":true}' }; } catch (e) { return { statusCode: e.message === 'Invalid webhook event' ? 400 : 500, body: JSON.stringify({ error: e.message === 'Invalid webhook event' ? e.message : 'Processing failed' }) }; } };
+exports._internals = { verify, signature, processEvent, rail, transition, ALLOWED };

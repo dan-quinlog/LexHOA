@@ -295,7 +295,31 @@
         }
       ]
     },
+    "AMPLIFY_function_handleAuthNetWebhook_authNetApiLoginId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "handleAuthNetWebhook"
+        }
+      ]
+    },
+    "AMPLIFY_function_handleAuthNetWebhook_authNetEnvironment": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "handleAuthNetWebhook"
+        }
+      ]
+    },
     "AMPLIFY_function_handleAuthNetWebhook_authNetSignatureKey": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "handleAuthNetWebhook"
+        }
+      ]
+    },
+    "AMPLIFY_function_handleAuthNetWebhook_authNetTransactionKey": {
       "usedBy": [
         {
           "category": "function",

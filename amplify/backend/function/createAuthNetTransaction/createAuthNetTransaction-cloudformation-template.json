@@ -286,6 +286,18 @@
                   ]
                 }
               ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:TransactWriteItems"
+              ],
+              "Resource": {
+                "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/*-${apilexhoaGraphQLAPIIdOutput}-${env}*"
+              }
             }
           ]
         }

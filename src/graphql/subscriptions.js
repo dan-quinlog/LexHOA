@@ -25,6 +25,7 @@ export const onCreateProfile = /* GraphQL */ `
       allowText
       balance
       authNetCustomerProfileId
+      activePaymentId
       ownedProperties {
         nextToken
         __typename
@@ -86,6 +87,7 @@ export const onUpdateProfile = /* GraphQL */ `
       allowText
       balance
       authNetCustomerProfileId
+      activePaymentId
       ownedProperties {
         nextToken
         __typename
@@ -147,6 +149,7 @@ export const onDeleteProfile = /* GraphQL */ `
       allowText
       balance
       authNetCustomerProfileId
+      activePaymentId
       ownedProperties {
         nextToken
         __typename
@@ -216,6 +219,7 @@ export const onCreateProperty = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -241,6 +245,7 @@ export const onCreateProperty = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -285,6 +290,7 @@ export const onUpdateProperty = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -310,6 +316,7 @@ export const onUpdateProperty = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -354,6 +361,7 @@ export const onDeleteProperty = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -379,6 +387,7 @@ export const onDeleteProperty = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -408,6 +417,9 @@ export const onCreatePayment = /* GraphQL */ `
       invoiceAmount
       paymentMethod
       authNetTransactionId
+      processorReference
+      idempotencyKey
+      balanceApplied
       authNetCustomerProfileId
       amount
       processingFee
@@ -433,6 +445,7 @@ export const onCreatePayment = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -463,6 +476,9 @@ export const onUpdatePayment = /* GraphQL */ `
       invoiceAmount
       paymentMethod
       authNetTransactionId
+      processorReference
+      idempotencyKey
+      balanceApplied
       authNetCustomerProfileId
       amount
       processingFee
@@ -488,6 +504,7 @@ export const onUpdatePayment = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -518,6 +535,9 @@ export const onDeletePayment = /* GraphQL */ `
       invoiceAmount
       paymentMethod
       authNetTransactionId
+      processorReference
+      idempotencyKey
+      balanceApplied
       authNetCustomerProfileId
       amount
       processingFee
@@ -543,6 +563,7 @@ export const onDeletePayment = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -552,6 +573,45 @@ export const onDeletePayment = /* GraphQL */ `
       createdAt
       updatedAt
       owner
+      __typename
+    }
+  }
+`;
+export const onCreateWebhookReceipt = /* GraphQL */ `
+  subscription OnCreateWebhookReceipt(
+    $filter: ModelSubscriptionWebhookReceiptFilterInput
+  ) {
+    onCreateWebhookReceipt(filter: $filter) {
+      id
+      eventType
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateWebhookReceipt = /* GraphQL */ `
+  subscription OnUpdateWebhookReceipt(
+    $filter: ModelSubscriptionWebhookReceiptFilterInput
+  ) {
+    onUpdateWebhookReceipt(filter: $filter) {
+      id
+      eventType
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteWebhookReceipt = /* GraphQL */ `
+  subscription OnDeleteWebhookReceipt(
+    $filter: ModelSubscriptionWebhookReceiptFilterInput
+  ) {
+    onDeleteWebhookReceipt(filter: $filter) {
+      id
+      eventType
+      createdAt
+      updatedAt
       __typename
     }
   }
@@ -625,6 +685,7 @@ export const onCreatePing = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -664,6 +725,7 @@ export const onUpdatePing = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -703,6 +765,7 @@ export const onDeletePing = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -750,6 +813,7 @@ export const onCreateDocument = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -804,6 +868,7 @@ export const onUpdateDocument = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -858,6 +923,7 @@ export const onDeleteDocument = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt

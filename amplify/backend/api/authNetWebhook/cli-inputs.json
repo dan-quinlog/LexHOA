@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "paths": {
+    "/webhook/authnet": {
+      "name": "/webhook/authnet",
+      "lambdaFunction": "handleAuthNetWebhook",
+      "permissions": {
+        "setting": "open"
+      }
+    }
+  }
+}

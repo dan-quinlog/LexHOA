@@ -29,25 +29,25 @@ export const processMonthlyPropertyDues = /* GraphQL */ `
 `;
 export const createAuthNetTransaction = /* GraphQL */ `
   mutation CreateAuthNetTransaction(
-    $amount: Float!
     $profileId: ID!
-    $description: String
-    $email: String
+    $idempotencyKey: String!
+    $expectedAmount: Float!
     $paymentMethodType: String
     $opaqueDataDescriptor: String!
     $opaqueDataValue: String!
   ) {
     createAuthNetTransaction(
-      amount: $amount
       profileId: $profileId
-      description: $description
-      email: $email
+      idempotencyKey: $idempotencyKey
+      expectedAmount: $expectedAmount
       paymentMethodType: $paymentMethodType
       opaqueDataDescriptor: $opaqueDataDescriptor
       opaqueDataValue: $opaqueDataValue
     ) {
+      paymentId
       transactionId
-      authCode
+      status
+      settlementPending
       amount
       processingFee
       totalAmount
@@ -101,6 +101,7 @@ export const createProfile = /* GraphQL */ `
       allowText
       balance
       authNetCustomerProfileId
+      activePaymentId
       ownedProperties {
         nextToken
         __typename
@@ -162,6 +163,7 @@ export const updateProfile = /* GraphQL */ `
       allowText
       balance
       authNetCustomerProfileId
+      activePaymentId
       ownedProperties {
         nextToken
         __typename
@@ -223,6 +225,7 @@ export const deleteProfile = /* GraphQL */ `
       allowText
       balance
       authNetCustomerProfileId
+      activePaymentId
       ownedProperties {
         nextToken
         __typename
@@ -292,6 +295,7 @@ export const createProperty = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -317,6 +321,7 @@ export const createProperty = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -361,6 +366,7 @@ export const updateProperty = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -386,6 +392,7 @@ export const updateProperty = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -430,6 +437,7 @@ export const deleteProperty = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -455,6 +463,7 @@ export const deleteProperty = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -484,6 +493,9 @@ export const createPayment = /* GraphQL */ `
       invoiceAmount
       paymentMethod
       authNetTransactionId
+      processorReference
+      idempotencyKey
+      balanceApplied
       authNetCustomerProfileId
       amount
       processingFee
@@ -509,6 +521,7 @@ export const createPayment = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -539,6 +552,9 @@ export const updatePayment = /* GraphQL */ `
       invoiceAmount
       paymentMethod
       authNetTransactionId
+      processorReference
+      idempotencyKey
+      balanceApplied
       authNetCustomerProfileId
       amount
       processingFee
@@ -564,6 +580,7 @@ export const updatePayment = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -594,6 +611,9 @@ export const deletePayment = /* GraphQL */ `
       invoiceAmount
       paymentMethod
       authNetTransactionId
+      processorReference
+      idempotencyKey
+      balanceApplied
       authNetCustomerProfileId
       amount
       processingFee
@@ -619,6 +639,7 @@ export const deletePayment = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -628,6 +649,48 @@ export const deletePayment = /* GraphQL */ `
       createdAt
       updatedAt
       owner
+      __typename
+    }
+  }
+`;
+export const createWebhookReceipt = /* GraphQL */ `
+  mutation CreateWebhookReceipt(
+    $input: CreateWebhookReceiptInput!
+    $condition: ModelWebhookReceiptConditionInput
+  ) {
+    createWebhookReceipt(input: $input, condition: $condition) {
+      id
+      eventType
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateWebhookReceipt = /* GraphQL */ `
+  mutation UpdateWebhookReceipt(
+    $input: UpdateWebhookReceiptInput!
+    $condition: ModelWebhookReceiptConditionInput
+  ) {
+    updateWebhookReceipt(input: $input, condition: $condition) {
+      id
+      eventType
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteWebhookReceipt = /* GraphQL */ `
+  mutation DeleteWebhookReceipt(
+    $input: DeleteWebhookReceiptInput!
+    $condition: ModelWebhookReceiptConditionInput
+  ) {
+    deleteWebhookReceipt(input: $input, condition: $condition) {
+      id
+      eventType
+      createdAt
+      updatedAt
       __typename
     }
   }
@@ -713,6 +776,7 @@ export const createPing = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -755,6 +819,7 @@ export const updatePing = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -797,6 +862,7 @@ export const deletePing = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -844,6 +910,7 @@ export const createDocument = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -898,6 +965,7 @@ export const updateDocument = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -952,6 +1020,7 @@ export const deleteDocument = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt

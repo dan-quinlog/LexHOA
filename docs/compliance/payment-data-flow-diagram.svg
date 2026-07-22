@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="1120" viewBox="0 0 1700 1120" role="img" aria-labelledby="title desc">
+  <title id="title">LexHOA Authorize.Net payment data-flow diagram</title>
+  <desc id="desc">Card or bank data is entered into LexHOA-rendered browser fields and passed by Accept.js directly to Authorize.Net. Opaque token data travels through AppSync and Lambda to Authorize.Net. Only transaction and member metadata is stored in DynamoDB. Webhooks and scheduled reconciliation update payment status.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="context-stroke"/></marker>
+    <style>
+      .title{font:700 30px Arial,sans-serif;fill:#0f172a}.subtitle{font:16px Arial,sans-serif;fill:#475569}.zone{fill:#f8fafc;stroke:#64748b;stroke-width:2}.browser{fill:#fff7ed;stroke:#f59e0b;stroke-width:3}.aws{fill:#eff6ff;stroke:#2563eb;stroke-width:3}.anet{fill:#f0fdf4;stroke:#16a34a;stroke-width:3}.box{fill:#fff;stroke:#475569;stroke-width:2}.label{font:700 18px Arial,sans-serif;fill:#0f172a}.small{font:14px Arial,sans-serif;fill:#334155}.tiny{font:12px Arial,sans-serif;fill:#475569;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}.flow{fill:none;stroke-width:3;marker-end:url(#arrow)}.chd{stroke:#dc2626}.bank{stroke:#ea580c}.token{stroke:#2563eb}.meta{stroke:#16a34a}.event{stroke:#7c3aed;stroke-dasharray:8 6}.neutral{stroke:#475569}.red{fill:#dc2626}.orange{fill:#ea580c}.blue{fill:#2563eb}.green{fill:#16a34a}.purple{fill:#7c3aed}.warn{fill:#fef2f2;stroke:#dc2626;stroke-width:2}.note{font:700 14px Arial,sans-serif;fill:#991b1b}
+    </style>
+  </defs>
+  <rect width="1700" height="1120" fill="#fff"/>
+  <text x="55" y="55" class="title">LexHOA Authorize.Net Payment Data-Flow Diagram</text>
+  <text x="55" y="85" class="subtitle">Accept.js direct tokenization · card and eCheck paths · reviewed 2026-07-21 · external flows use HTTPS/TLS</text>
+
+  <rect x="45" y="125" width="480" height="690" rx="14" class="browser"/>
+  <text x="70" y="162" class="label">Member device / browser (untrusted endpoint)</text>
+  <rect x="90" y="205" width="390" height="120" rx="10" class="box"/>
+  <text x="285" y="242" text-anchor="middle" class="label">LexHOA React payment page</text>
+  <text x="285" y="270" text-anchor="middle" class="small">Application-rendered, React-controlled fields</text>
+  <text x="285" y="295" text-anchor="middle" class="small">Card or bank values exist transiently in browser memory</text>
+  <rect x="90" y="410" width="390" height="120" rx="10" class="box"/>
+  <text x="285" y="450" text-anchor="middle" class="label">Authorize.Net Accept.js</text>
+  <text x="285" y="478" text-anchor="middle" class="small">Loaded from Authorize.Net domain</text>
+  <text x="285" y="502" text-anchor="middle" class="small">Tokenizes payment data</text>
+  <rect x="90" y="625" width="390" height="120" rx="10" class="box"/>
+  <text x="285" y="665" text-anchor="middle" class="label">Apollo / Amplify API client</text>
+  <text x="285" y="693" text-anchor="middle" class="small">GraphQL mutation · auth P0 fix</text>
+  <text x="285" y="717" text-anchor="middle" class="small">Opaque data + member/payment metadata only</text>
+
+  <rect x="585" y="125" width="480" height="690" rx="14" class="anet"/>
+  <text x="610" y="162" class="label">Authorize.Net service-provider environment</text>
+  <rect x="630" y="365" width="390" height="145" rx="10" class="box"/>
+  <text x="825" y="405" text-anchor="middle" class="label">Accept.js tokenization endpoint</text>
+  <text x="825" y="433" text-anchor="middle" class="small">Receives card or eCheck account data</text>
+  <text x="825" y="457" text-anchor="middle" class="small">Returns opaqueData descriptor + value</text>
+  <text x="825" y="481" text-anchor="middle" class="tiny">Authorize.Net stores/processes payment credentials</text>
+  <rect x="630" y="590" width="390" height="145" rx="10" class="box"/>
+  <text x="825" y="630" text-anchor="middle" class="label">Authorize.Net transaction APIs</text>
+  <text x="825" y="658" text-anchor="middle" class="small">Authorization, capture, settlement, refunds</text>
+  <text x="825" y="682" text-anchor="middle" class="small">eCheck transaction status</text>
+  <text x="825" y="706" text-anchor="middle" class="tiny">Sends asynchronous signed webhook events</text>
+
+  <rect x="1125" y="125" width="530" height="850" rx="14" class="aws"/>
+  <text x="1150" y="162" class="label">LexHOA AWS account — managed service boundary</text>
+  <rect x="1170" y="210" width="440" height="95" rx="10" class="box"/>
+  <text x="1390" y="247" text-anchor="middle" class="label">Amazon Cognito + AWS AppSync</text>
+  <text x="1390" y="274" text-anchor="middle" class="small">Invokes Lambda · enforce auth/ownership</text>
+  <rect x="1170" y="365" width="440" height="120" rx="10" class="box"/>
+  <text x="1390" y="405" text-anchor="middle" class="label">createAuthNetTransaction Lambda</text>
+  <text x="1390" y="433" text-anchor="middle" class="small">Calculates fee and submits opaque payment data</text>
+  <text x="1390" y="457" text-anchor="middle" class="small">Uses backend merchant transaction credentials</text>
+  <rect x="1170" y="550" width="205" height="120" rx="10" class="box"/>
+  <text x="1272" y="589" text-anchor="middle" class="label">API Gateway</text>
+  <text x="1272" y="617" text-anchor="middle" class="small">Public webhook</text>
+  <text x="1272" y="641" text-anchor="middle" class="small">HTTPS endpoint</text>
+  <rect x="1405" y="550" width="205" height="120" rx="10" class="box"/>
+  <text x="1507" y="589" text-anchor="middle" class="label">Webhook Lambda</text>
+  <text x="1507" y="617" text-anchor="middle" class="small">Signature optional today · P0 fix</text>
+  <text x="1507" y="641" text-anchor="middle" class="small">Refund/status updates</text>
+  <rect x="1170" y="725" width="205" height="120" rx="10" class="box"/>
+  <text x="1272" y="765" text-anchor="middle" class="label">Scheduled Lambda</text>
+  <text x="1272" y="793" text-anchor="middle" class="small">Polls pending eCheck</text>
+  <text x="1272" y="817" text-anchor="middle" class="small">settlement status</text>
+  <rect x="1405" y="725" width="205" height="120" rx="10" class="box"/>
+  <text x="1507" y="765" text-anchor="middle" class="label">AppSync + DynamoDB</text>
+  <text x="1507" y="793" text-anchor="middle" class="small">Payment/member metadata</text>
+  <text x="1507" y="817" text-anchor="middle" class="small">No PAN/CVV/bank numbers</text>
+  <rect x="1170" y="885" width="440" height="60" rx="10" class="warn"/>
+  <text x="1390" y="908" text-anchor="middle" class="note">CloudWatch: never log raw payment values</text>
+  <text x="1390" y="929" text-anchor="middle" class="note">or opaque tokens; restrict access and retention</text>
+
+  <path d="M285 325 L285 410" class="flow chd"/><text x="300" y="355" class="tiny red">Card: PAN, expiry, CVV</text><text x="300" y="375" class="tiny orange">eCheck: routing/account/name/type</text>
+  <path d="M480 450 L630 425" class="flow chd"/><text x="550" y="405" text-anchor="middle" class="tiny red">Card data · direct HTTPS</text>
+  <path d="M480 485 L630 465" class="flow bank"/><text x="555" y="505" text-anchor="middle" class="tiny orange">Bank data · direct HTTPS</text>
+  <path d="M630 500 C540 565 430 560 330 625" class="flow token"/><text x="500" y="555" class="tiny blue">Opaque descriptor + value</text>
+  <path d="M480 650 C520 650 540 620 540 560 L540 270 C540 240 560 240 600 240 L1080 240 C1120 240 1135 255 1170 255" class="flow token"/><text x="820" y="212" text-anchor="middle" class="tiny blue">GraphQL: opaque data · require Cognito auth</text><text x="820" y="231" text-anchor="middle" class="tiny green">+ server-validated amount, profile, method, description</text>
+  <path d="M1390 305 L1390 365" class="flow token"/>
+  <path d="M1170 425 C1080 425 1055 610 1020 625" class="flow token"/><text x="1070" y="500" class="tiny blue">Opaque data +</text><text x="1070" y="520" class="tiny green">transaction metadata</text>
+  <path d="M1020 670 C1085 680 1100 780 1170 785" class="flow event"/><text x="1075" y="735" class="tiny purple">status query/response</text>
+  <path d="M825 735 C850 870 1050 610 1170 610" class="flow event"/><text x="985" y="665" class="tiny purple">signed webhook event</text>
+  <path d="M1375 610 L1405 610" class="flow event"/>
+  <path d="M1507 670 L1507 725" class="flow meta"/>
+  <path d="M1375 785 L1405 785" class="flow meta"/>
+  <path d="M1580 485 C1630 540 1630 680 1580 725" class="flow meta"/>
+  <text x="1600" y="520" text-anchor="end" class="tiny green">transaction result</text><text x="1600" y="540" text-anchor="end" class="tiny green">and amounts</text>
+
+  <rect x="55" y="1010" width="1590" height="65" rx="8" fill="#f8fafc" stroke="#94a3b8"/>
+  <circle cx="85" cy="1034" r="7" class="red"/><text x="100" y="1039" class="tiny">Cardholder / sensitive authentication data</text>
+  <circle cx="360" cy="1034" r="7" class="orange"/><text x="375" y="1039" class="tiny">Bank account data</text>
+  <circle cx="570" cy="1034" r="7" class="blue"/><text x="585" y="1039" class="tiny">Opaque payment data</text>
+  <circle cx="760" cy="1034" r="7" class="green"/><text x="775" y="1039" class="tiny">Non-cardholder metadata</text>
+  <circle cx="975" cy="1034" r="7" class="purple"/><text x="990" y="1039" class="tiny">Webhook / reconciliation</text>
+  <text x="85" y="1063" class="small">Scope note: raw values bypass the AWS backend/database, but not the LexHOA-rendered payment page or its browser-side JavaScript.</text>
+  <text x="55" y="1105" class="tiny">Confidential · Validate implementation and live controls during each annual and change-triggered review · Source: docs/compliance/PCI_INFRASTRUCTURE.md</text>
+</svg>

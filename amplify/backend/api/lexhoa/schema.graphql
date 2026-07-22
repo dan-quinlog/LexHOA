@@ -58,6 +58,9 @@ type Profile @model
     { allow: owner, operations: [read] },
     { allow: groups, groups: ["TREASURER", "PRESIDENT", "SECRETARY"], operations: [create, read, update, delete] }
   ])
+  activePaymentId: ID @auth(rules: [
+    { allow: private, provider: iam, operations: [read, update] }
+  ])
   ownedProperties: [Property] @hasMany(indexName: "byOwner", fields: ["id"])
   payments: [Payment] @hasMany(indexName: "byOwnerPayments", fields: ["id"])
   tenantAt: Property @belongsTo(fields: ["tenantAtId"])
@@ -111,7 +114,7 @@ type Property @model
 
 type Payment @model
   @auth(rules: [
-    { allow: owner, operations: [create, read] },
+    { allow: owner, operations: [read] },
     { allow: groups, groups: ["BOARD"], operations: [read] },
     { allow: groups, groups: ["TREASURER", "PRESIDENT"], operations: [create, read, update, delete] },
     { allow: private, provider: iam, operations: [create, read, update] }
@@ -142,6 +145,9 @@ type Payment @model
   invoiceAmount: Float
   paymentMethod: PaymentMethod @default(value: "CHECK")
   authNetTransactionId: String @index(name: "byAuthNetTransaction", queryField: "paymentsByAuthNetTransaction")
+  processorReference: String @index(name: "byProcessorReference", queryField: "paymentsByProcessorReference")
+  idempotencyKey: String @index(name: "byIdempotencyKey", queryField: "paymentsByIdempotencyKey")
+  balanceApplied: Boolean @default(value: "false")
   authNetCustomerProfileId: String
   amount: Float!
   processingFee: Float @default(value: "0.00")
@@ -150,6 +156,16 @@ type Payment @model
   description: String
   ownerPayments: Profile @belongsTo(fields: ["ownerPaymentsId"])
   ownerPaymentsId: ID! @index(name: "byOwnerPayments", queryField: "paymentsByOwner", sortKeyFields: ["createdAt"])
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type WebhookReceipt @model
+  @auth(rules: [
+    { allow: private, provider: iam, operations: [create, read] }
+  ]) {
+  id: ID!
+  eventType: String!
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
 }
@@ -366,8 +382,10 @@ enum DocumentAccessLevel {
 }
 
 type AuthNetTransactionResult {
+  paymentId: ID!
   transactionId: String!
-  authCode: String!
+  status: PaymentStatus!
+  settlementPending: Boolean!
   amount: Float!
   processingFee: Float!
   totalAmount: Float!
@@ -388,9 +406,8 @@ type Mutation {
     @function(name: "manageCognitoGroups-${env}")
   processMonthlyPropertyDues: MutationResult
     @function(name: "monthlyPropertyDues-${env}")
-  createAuthNetTransaction(amount: Float!, profileId: ID!, description: String, email: String, paymentMethodType: String, opaqueDataDescriptor: String!, opaqueDataValue: String!): AuthNetTransactionResult
+  createAuthNetTransaction(profileId: ID!, idempotencyKey: String!, expectedAmount: Float!, paymentMethodType: String, opaqueDataDescriptor: String!, opaqueDataValue: String!): AuthNetTransactionResult
     @function(name: "createAuthNetTransaction-${env}")
   createAuthNetCustomerProfile(profileId: ID!, email: String!, name: String!): AuthNetCustomerResult
     @function(name: "createAuthNetCustomerProfile-${env}")
 }
- 

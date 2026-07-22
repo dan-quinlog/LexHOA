@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useMutation } from '@apollo/client';
-import { CREATE_AUTHNET_TRANSACTION, CREATE_PAYMENT } from '../../queries/mutations';
+import { CREATE_AUTHNET_TRANSACTION } from '../../queries/mutations';
 import Modal from '../shared/Modal';
 import './PaymentModal.css';
 
@@ -11,13 +11,6 @@ const AUTHNET_ENVIRONMENT = process.env.REACT_APP_AUTHNET_ENVIRONMENT || 'sandbo
 const ACCEPT_JS_URL = AUTHNET_ENVIRONMENT === 'production'
   ? 'https://js.authorize.net/v1/Accept.js'
   : 'https://jstest.authorize.net/v1/Accept.js';
-
-const BASE_AMOUNTS = {
-  ANNUAL: { label: 'Annual', baseAmount: 1200, description: '12 months' },
-  SEMI: { label: '6-Month', baseAmount: 600, description: '6 months' },
-  QUARTERLY: { label: 'Quarterly', baseAmount: 300, description: '3 months' },
-  MONTHLY: { label: 'Monthly', baseAmount: 100, description: '1 month' }
-};
 
 const PAYMENT_METHODS = {
   card: { 
@@ -32,14 +25,13 @@ const PAYMENT_METHODS = {
   }
 };
 
-const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMethodType, propertyCount = 1 }) => {
-  const [selectedAmount, setSelectedAmount] = useState('CUSTOM');
-  const [customAmount, setCustomAmount] = useState('');
+const PaymentForm = ({ profileId, balance, onSuccess, onCancel, paymentMethodType }) => {
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(null);
   const [succeeded, setSucceeded] = useState(false);
   const [acceptJsLoaded, setAcceptJsLoaded] = useState(false);
+  const idempotencyKeyRef = useRef(null);
 
   // Card fields
   const [cardNumber, setCardNumber] = useState('');
@@ -54,7 +46,6 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
   const [accountType, setAccountType] = useState('checking');
 
   const [createAuthNetTransaction] = useMutation(CREATE_AUTHNET_TRANSACTION);
-  const [createPayment] = useMutation(CREATE_PAYMENT);
   
   const isACH = paymentMethodType === 'bank_account';
 
@@ -77,43 +68,13 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
     };
   }, []);
 
-  // Calculate suggested amounts based on number of properties
-  const suggestedAmounts = Object.entries(BASE_AMOUNTS).reduce((acc, [key, value]) => {
-    acc[key] = {
-      ...value,
-      amount: value.baseAmount * propertyCount,
-      description: propertyCount > 1 
-        ? `${value.description} × ${propertyCount} properties` 
-        : value.description
-    };
-    return acc;
-  }, {});
-
-  const getPaymentAmount = () => {
-    if (selectedAmount === 'CUSTOM') {
-      return parseFloat(customAmount) || 0;
-    }
-    return suggestedAmounts[selectedAmount]?.amount || 0;
-  };
+  const getPaymentAmount = () => Number(balance) || 0;
 
   const calculateFee = (amount) => {
     if (isACH) {
       return Math.min(amount * 0.008, 5.00);
     }
     return (amount * 0.029) + 0.30;
-  };
-
-  const handleAmountSelect = (key) => {
-    setSelectedAmount(key);
-    setError(null);
-    setPaymentDetails(null);
-  };
-
-  const handleCustomAmountChange = (e) => {
-    const value = e.target.value.replace(/[^0-9.]/g, '');
-    setCustomAmount(value);
-    setError(null);
-    setPaymentDetails(null);
   };
 
   const handlePreparePayment = () => {
@@ -189,10 +150,9 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
       // Step 2: Send token to backend to create the transaction
       const { data } = await createAuthNetTransaction({
         variables: {
-          amount: paymentDetails.amount,
           profileId,
-          description: 'HOA Dues Payment',
-          email: email || null,
+          idempotencyKey: idempotencyKeyRef.current || (idempotencyKeyRef.current = crypto.randomUUID()),
+          expectedAmount: paymentDetails.amount,
           paymentMethodType: paymentMethodType || 'card',
           opaqueDataDescriptor,
           opaqueDataValue
@@ -204,38 +164,10 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
         throw new Error(result?.messageText || 'Transaction failed');
       }
 
-      // Step 3: Create payment record
-      const today = new Date().toISOString().split('T')[0];
-      
-      try {
-        await createPayment({
-          variables: {
-            input: {
-              ownerPaymentsId: profileId,
-              paymentMethod: isACH ? 'BANK_ACCOUNT' : 'CARD',
-              authNetTransactionId: result.transactionId,
-              amount: paymentDetails.amount,
-              processingFee: paymentDetails.processingFee,
-              totalAmount: paymentDetails.totalAmount,
-              // Card payments settle instantly; eCheck (ACH) takes 1-5 business
-              // days to clear, so it starts PENDING and is reconciled later.
-              status: isACH ? 'PENDING' : 'SUCCEEDED',
-              description: 'HOA Dues Payment',
-              invoiceNumber: result.transactionId,
-              invoiceAmount: paymentDetails.amount,
-              checkDate: today,
-              checkAmount: paymentDetails.amount
-            }
-          }
-        });
-      } catch (err) {
-        console.warn('Payment record creation error (may be handled by webhook):', err.message);
-      }
-
       setSucceeded(true);
       setProcessing(false);
       setTimeout(() => {
-        onSuccess && onSuccess({ transactionId: result.transactionId, amount: paymentDetails.amount });
+        onSuccess && onSuccess({ transactionId: result.transactionId, amount: result.amount, totalAmount: result.totalAmount });
       }, 2000);
 
     } catch (err) {
@@ -277,38 +209,9 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
   return (
     <form onSubmit={handleSubmit} className="payment-form">
       <div className="amount-section">
-        <h4>Select Payment Amount</h4>
+        <h4>Payment Amount</h4>
         <p className="balance-info">Current Balance: {formatCurrency(balance)}</p>
-        
-        <div className="amount-options">
-          {Object.entries(suggestedAmounts).map(([key, { label, amount, description }]) => (
-            <button
-              key={key}
-              type="button"
-              className={`amount-option ${selectedAmount === key ? 'selected' : ''}`}
-              onClick={() => handleAmountSelect(key)}
-            >
-              <span className="amount-label">{label}</span>
-              <span className="amount-value">{formatCurrency(amount)}</span>
-              <span className="amount-desc">{description}</span>
-            </button>
-          ))}
-          <button
-            type="button"
-            className={`amount-option custom ${selectedAmount === 'CUSTOM' ? 'selected' : ''}`}
-            onClick={() => handleAmountSelect('CUSTOM')}
-          >
-            <span className="amount-label">Custom</span>
-            <input
-              type="text"
-              placeholder="0.00"
-              value={customAmount}
-              onChange={handleCustomAmountChange}
-              onClick={(e) => e.stopPropagation()}
-              className="custom-amount-input"
-            />
-          </button>
-        </div>
+        <p>Online payments apply to the full current balance.</p>
       </div>
 
       {!paymentDetails && (
@@ -452,7 +355,7 @@ const PaymentForm = ({ profileId, balance, email, onSuccess, onCancel, paymentMe
   );
 };
 
-const PaymentModal = ({ isOpen, onClose, profileId, balance, email, propertyCount = 1, onPaymentSuccess }) => {
+const PaymentModal = ({ isOpen, onClose, profileId, balance, onPaymentSuccess }) => {
   const [paymentMethodType, setPaymentMethodType] = useState(null);
   
   const handleSuccess = (result) => {
@@ -503,8 +406,6 @@ const PaymentModal = ({ isOpen, onClose, profileId, balance, email, propertyCoun
           <PaymentForm
             profileId={profileId}
             balance={balance}
-            email={email}
-            propertyCount={propertyCount}
             paymentMethodType={paymentMethodType}
             onSuccess={handleSuccess}
             onCancel={handleClose}

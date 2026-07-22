@@ -13,6 +13,18 @@
     {
       "cloudFormationParameterName": "authNetSignatureKey",
       "environmentVariableName": "AUTHNET_SIGNATURE_KEY"
+    },
+    {
+      "cloudFormationParameterName": "authNetApiLoginId",
+      "environmentVariableName": "AUTHNET_API_LOGIN_ID"
+    },
+    {
+      "cloudFormationParameterName": "authNetTransactionKey",
+      "environmentVariableName": "AUTHNET_TRANSACTION_KEY"
+    },
+    {
+      "cloudFormationParameterName": "authNetEnvironment",
+      "environmentVariableName": "AUTHNET_ENVIRONMENT"
     }
   ]
 }

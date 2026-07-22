@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">LexHOA network and AWS service-boundary diagram</title>
+  <desc id="desc">Public users and Authorize.Net communicate over HTTPS with AWS-managed Amplify, Cognito, AppSync, and API Gateway endpoints. AppSync and API Gateway invoke Lambda. Application data is stored in DynamoDB and documents in S3. No customer-managed VPC or wireless network exists.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#334155"/></marker>
+    <style>
+      .title{font:700 30px Arial,sans-serif;fill:#0f172a}.subtitle{font:16px Arial,sans-serif;fill:#475569}.zone{fill:#f8fafc;stroke:#64748b;stroke-width:2}.awszone{fill:#fff7ed;stroke:#f59e0b;stroke-width:3}.external{fill:#eff6ff;stroke:#2563eb;stroke-width:2}.service{fill:#fff;stroke:#475569;stroke-width:2}.data{fill:#f0fdf4;stroke:#16a34a;stroke-width:2}.warn{fill:#fef2f2;stroke:#dc2626;stroke-width:2}.label{font:700 18px Arial,sans-serif;fill:#0f172a}.small{font:14px Arial,sans-serif;fill:#334155}.tiny{font:12px Arial,sans-serif;fill:#475569;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}.flow{fill:none;stroke:#334155;stroke-width:2.5;marker-end:url(#arrow)}.dash{stroke-dasharray:8 7}.boundary{font:700 17px Arial,sans-serif;fill:#9a3412}.note{font:700 15px Arial,sans-serif;fill:#991b1b}
+    </style>
+  </defs>
+  <rect width="1600" height="1000" fill="#ffffff"/>
+  <text x="60" y="55" class="title">LexHOA Network and Service-Boundary Diagram</text>
+  <text x="60" y="85" class="subtitle">AWS Amplify serverless environment · us-east-1 · reviewed 2026-07-21 · all external connections use HTTPS/TLS</text>
+
+  <rect x="45" y="125" width="330" height="650" rx="12" class="zone"/>
+  <text x="70" y="160" class="label">Untrusted / external networks</text>
+  <rect x="85" y="210" width="250" height="100" rx="10" class="external"/>
+  <text x="210" y="250" text-anchor="middle" class="label">Member or administrator</text>
+  <text x="210" y="276" text-anchor="middle" class="small">Web browser / user network</text>
+  <rect x="85" y="390" width="250" height="125" rx="10" class="external"/>
+  <text x="210" y="430" text-anchor="middle" class="label">Authorize.Net</text>
+  <text x="210" y="457" text-anchor="middle" class="small">Accept.js + payment APIs</text>
+  <text x="210" y="481" text-anchor="middle" class="small">Webhook source</text>
+  <rect x="85" y="610" width="250" height="105" rx="10" class="warn"/>
+  <text x="210" y="648" text-anchor="middle" class="note">No managed wireless network</text>
+  <text x="210" y="675" text-anchor="middle" class="small">Corporate / guest / POS Wi-Fi</text>
+  <text x="210" y="697" text-anchor="middle" class="small">is not connected to AWS</text>
+
+  <rect x="430" y="125" width="1125" height="790" rx="14" class="awszone"/>
+  <text x="460" y="160" class="boundary">AWS account logical boundary — AWS-managed services (not a customer-managed VPC)</text>
+
+  <rect x="485" y="205" width="265" height="95" rx="10" class="service"/>
+  <text x="617" y="242" text-anchor="middle" class="label">AWS Amplify Hosting</text>
+  <text x="617" y="269" text-anchor="middle" class="small">Static React application / CDN</text>
+
+  <rect x="825" y="205" width="265" height="95" rx="10" class="service"/>
+  <text x="957" y="242" text-anchor="middle" class="label">Amazon Cognito</text>
+  <text x="957" y="269" text-anchor="middle" class="small">Authentication and user tokens</text>
+
+  <rect x="485" y="385" width="265" height="100" rx="10" class="service"/>
+  <text x="617" y="423" text-anchor="middle" class="label">AWS AppSync</text>
+  <text x="617" y="450" text-anchor="middle" class="small">Managed GraphQL endpoint</text>
+
+  <rect x="825" y="385" width="265" height="100" rx="10" class="service"/>
+  <text x="957" y="423" text-anchor="middle" class="label">Amazon API Gateway</text>
+  <text x="957" y="450" text-anchor="middle" class="small">Public Authorize.Net webhook</text>
+
+  <rect x="1170" y="350" width="310" height="165" rx="10" class="service"/>
+  <text x="1325" y="390" text-anchor="middle" class="label">AWS Lambda</text>
+  <text x="1325" y="420" text-anchor="middle" class="small">Transaction processing</text>
+  <text x="1325" y="444" text-anchor="middle" class="small">Webhook processing</text>
+  <text x="1325" y="468" text-anchor="middle" class="small">eCheck reconciliation</text>
+  <text x="1325" y="492" text-anchor="middle" class="tiny">Separated IAM execution roles</text>
+
+  <rect x="515" y="650" width="265" height="105" rx="10" class="data"/>
+  <text x="647" y="690" text-anchor="middle" class="label">Amazon DynamoDB</text>
+  <text x="647" y="717" text-anchor="middle" class="small">Member + payment metadata</text>
+  <text x="647" y="739" text-anchor="middle" class="tiny">No PAN, CVV, or bank account data</text>
+
+  <rect x="860" y="650" width="250" height="105" rx="10" class="data"/>
+  <text x="985" y="690" text-anchor="middle" class="label">Amazon S3</text>
+  <text x="985" y="717" text-anchor="middle" class="small">HOA document storage</text>
+  <text x="985" y="739" text-anchor="middle" class="tiny">Outside payment processing flow</text>
+
+  <rect x="1190" y="650" width="270" height="105" rx="10" class="service"/>
+  <text x="1325" y="690" text-anchor="middle" class="label">Amazon CloudWatch</text>
+  <text x="1325" y="717" text-anchor="middle" class="small">Operational logs / monitoring</text>
+  <text x="1325" y="739" text-anchor="middle" class="tiny">Payment values must not be logged</text>
+
+  <path d="M335 245 L485 245" class="flow"/><text x="410" y="230" text-anchor="middle" class="tiny">HTTPS</text>
+  <path d="M335 275 C410 330 430 420 485 430" class="flow"/><text x="405" y="365" class="tiny">HTTPS GraphQL</text>
+  <path d="M750 245 L825 245" class="flow"/><text x="787" y="230" text-anchor="middle" class="tiny">OAuth</text>
+  <path d="M750 400 C900 320 1050 320 1170 395" class="flow"/>
+  <path d="M1090 435 L1170 448" class="flow"/>
+  <path d="M335 465 C520 590 720 545 825 450" class="flow"/><text x="580" y="555" text-anchor="middle" class="tiny">Signed webhook · HTTPS</text>
+  <path d="M617 485 L647 650" class="flow"/>
+  <path d="M1325 515 L1325 650" class="flow"/><text x="1340" y="585" class="tiny">logs</text>
+  <path d="M1170 370 C900 275 600 315 335 420" class="flow dash"/><text x="750" y="315" text-anchor="middle" class="tiny">Outbound Authorize.Net transaction/status API calls</text>
+
+  <rect x="70" y="820" width="1450" height="65" rx="8" fill="#f1f5f9" stroke="#94a3b8"/>
+  <text x="95" y="848" class="small">Boundary note: no Internet Gateway, subnets, EC2/RDS servers, or web/database security groups are defined by LexHOA.</text>
+  <text x="95" y="872" class="small">Controls include managed boundaries, Cognito/IAM/AppSync rules, S3 policies and TLS; verify payment authorization and live state.</text>
+  <text x="60" y="955" class="tiny">Confidential · Validate live AWS configuration during each annual and change-triggered review · Source: docs/compliance/PCI_INFRASTRUCTURE.md</text>
+</svg>

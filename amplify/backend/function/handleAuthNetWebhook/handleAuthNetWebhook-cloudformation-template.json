@@ -30,6 +30,15 @@
     },
     "authNetSignatureKey": {
       "Type": "String"
+    },
+    "authNetApiLoginId": {
+      "Type": "String"
+    },
+    "authNetTransactionKey": {
+      "Type": "String"
+    },
+    "authNetEnvironment": {
+      "Type": "String"
     }
   },
   "Conditions": {
@@ -96,6 +105,15 @@
             },
             "AUTHNET_SIGNATURE_KEY": {
               "Ref": "authNetSignatureKey"
+            },
+            "AUTHNET_API_LOGIN_ID": {
+              "Ref": "authNetApiLoginId"
+            },
+            "AUTHNET_TRANSACTION_KEY": {
+              "Ref": "authNetTransactionKey"
+            },
+            "AUTHNET_ENVIRONMENT": {
+              "Ref": "authNetEnvironment"
             }
           }
         },
@@ -274,6 +292,19 @@
                   ]
                 }
               ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:Query",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:TransactWriteItems"
+              ],
+              "Resource": {
+                "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/*-${apilexhoaGraphQLAPIIdOutput}-${env}*"
+              }
             }
           ]
         }

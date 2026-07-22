@@ -35,6 +35,7 @@ export const getProfile = /* GraphQL */ `
       allowText
       balance
       authNetCustomerProfileId
+      activePaymentId
       ownedProperties {
         nextToken
         __typename
@@ -98,6 +99,7 @@ export const listProfiles = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -144,6 +146,7 @@ export const profilesByTypeName = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -190,6 +193,7 @@ export const profilesByTypeBalance = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -236,6 +240,7 @@ export const profilesByTypeCreatedAt = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -280,6 +285,7 @@ export const profileByCognitoID = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -324,6 +330,7 @@ export const profileByName = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -368,6 +375,7 @@ export const profileByEmail = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -414,6 +422,7 @@ export const profilesByBalance = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -458,6 +467,7 @@ export const profilesByTenantAtId = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -497,6 +507,7 @@ export const getProperty = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -522,6 +533,7 @@ export const getProperty = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -712,6 +724,9 @@ export const getPayment = /* GraphQL */ `
       invoiceAmount
       paymentMethod
       authNetTransactionId
+      processorReference
+      idempotencyKey
+      balanceApplied
       authNetCustomerProfileId
       amount
       processingFee
@@ -737,6 +752,7 @@ export const getPayment = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -769,6 +785,9 @@ export const listPayments = /* GraphQL */ `
         invoiceAmount
         paymentMethod
         authNetTransactionId
+        processorReference
+        idempotencyKey
+        balanceApplied
         authNetCustomerProfileId
         amount
         processingFee
@@ -815,6 +834,9 @@ export const paymentsByTypeCreatedAt = /* GraphQL */ `
         invoiceAmount
         paymentMethod
         authNetTransactionId
+        processorReference
+        idempotencyKey
+        balanceApplied
         authNetCustomerProfileId
         amount
         processingFee
@@ -861,6 +883,9 @@ export const paymentsByTypeCheckDate = /* GraphQL */ `
         invoiceAmount
         paymentMethod
         authNetTransactionId
+        processorReference
+        idempotencyKey
+        balanceApplied
         authNetCustomerProfileId
         amount
         processingFee
@@ -907,6 +932,9 @@ export const paymentsByTypeInvoiceNumber = /* GraphQL */ `
         invoiceAmount
         paymentMethod
         authNetTransactionId
+        processorReference
+        idempotencyKey
+        balanceApplied
         authNetCustomerProfileId
         amount
         processingFee
@@ -951,6 +979,9 @@ export const paymentsByCheckDate = /* GraphQL */ `
         invoiceAmount
         paymentMethod
         authNetTransactionId
+        processorReference
+        idempotencyKey
+        balanceApplied
         authNetCustomerProfileId
         amount
         processingFee
@@ -995,6 +1026,9 @@ export const paymentsByCheckNumber = /* GraphQL */ `
         invoiceAmount
         paymentMethod
         authNetTransactionId
+        processorReference
+        idempotencyKey
+        balanceApplied
         authNetCustomerProfileId
         amount
         processingFee
@@ -1039,6 +1073,9 @@ export const paymentsByInvoiceNumber = /* GraphQL */ `
         invoiceAmount
         paymentMethod
         authNetTransactionId
+        processorReference
+        idempotencyKey
+        balanceApplied
         authNetCustomerProfileId
         amount
         processingFee
@@ -1083,6 +1120,103 @@ export const paymentsByAuthNetTransaction = /* GraphQL */ `
         invoiceAmount
         paymentMethod
         authNetTransactionId
+        processorReference
+        idempotencyKey
+        balanceApplied
+        authNetCustomerProfileId
+        amount
+        processingFee
+        totalAmount
+        status
+        description
+        ownerPaymentsId
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const paymentsByProcessorReference = /* GraphQL */ `
+  query PaymentsByProcessorReference(
+    $processorReference: String!
+    $sortDirection: ModelSortDirection
+    $filter: ModelPaymentFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    paymentsByProcessorReference(
+      processorReference: $processorReference
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        byTypeCreatedAt
+        byTypeCheckDate
+        byTypeInvoiceNumber
+        checkDate
+        checkNumber
+        checkAmount
+        invoiceNumber
+        invoiceAmount
+        paymentMethod
+        authNetTransactionId
+        processorReference
+        idempotencyKey
+        balanceApplied
+        authNetCustomerProfileId
+        amount
+        processingFee
+        totalAmount
+        status
+        description
+        ownerPaymentsId
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const paymentsByIdempotencyKey = /* GraphQL */ `
+  query PaymentsByIdempotencyKey(
+    $idempotencyKey: String!
+    $sortDirection: ModelSortDirection
+    $filter: ModelPaymentFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    paymentsByIdempotencyKey(
+      idempotencyKey: $idempotencyKey
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        byTypeCreatedAt
+        byTypeCheckDate
+        byTypeInvoiceNumber
+        checkDate
+        checkNumber
+        checkAmount
+        invoiceNumber
+        invoiceAmount
+        paymentMethod
+        authNetTransactionId
+        processorReference
+        idempotencyKey
+        balanceApplied
         authNetCustomerProfileId
         amount
         processingFee
@@ -1129,6 +1263,9 @@ export const paymentsByOwner = /* GraphQL */ `
         invoiceAmount
         paymentMethod
         authNetTransactionId
+        processorReference
+        idempotencyKey
+        balanceApplied
         authNetCustomerProfileId
         amount
         processingFee
@@ -1139,6 +1276,36 @@ export const paymentsByOwner = /* GraphQL */ `
         createdAt
         updatedAt
         owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getWebhookReceipt = /* GraphQL */ `
+  query GetWebhookReceipt($id: ID!) {
+    getWebhookReceipt(id: $id) {
+      id
+      eventType
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listWebhookReceipts = /* GraphQL */ `
+  query ListWebhookReceipts(
+    $filter: ModelWebhookReceiptFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listWebhookReceipts(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        eventType
+        createdAt
+        updatedAt
         __typename
       }
       nextToken
@@ -1241,6 +1408,7 @@ export const getPing = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt
@@ -1374,6 +1542,7 @@ export const getDocument = /* GraphQL */ `
         allowText
         balance
         authNetCustomerProfileId
+        activePaymentId
         tenantAtId
         createdAt
         updatedAt

@@ -4,6 +4,7 @@
   "description": "Scheduled Lambda that reconciles pending Authorize.Net eCheck (ACH) payments by polling the Transaction Details API",
   "main": "index.js",
   "license": "Apache-2.0",
+  "scripts": { "test": "node --test" },
   "dependencies": {
     "authorizenet": "^1.0.8",
     "aws-sdk": "^2.1030.0"

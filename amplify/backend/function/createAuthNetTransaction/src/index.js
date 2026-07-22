@@ -1,256 +1,80 @@
-/* Amplify Params - DO NOT EDIT
-	ENV
-	REGION
-	AUTHNET_API_LOGIN_ID
-	AUTHNET_TRANSACTION_KEY
-	AUTHNET_ENVIRONMENT
-Amplify Params - DO NOT EDIT */
-
+const crypto = require('crypto');
+const AWS = require('aws-sdk');
 const ApiContracts = require('authorizenet').APIContracts;
 const ApiControllers = require('authorizenet').APIControllers;
-const SDKConstants = require('authorizenet').Constants;
-const AWS = require('aws-sdk');
-const https = require('https');
-const urlParse = require('url').URL;
+const Constants = require('authorizenet').Constants;
 
-exports.handler = async (event) => {
-    console.log(`EVENT: ${JSON.stringify(event)}`);
-    
+const ddb = new AWS.DynamoDB.DocumentClient();
+const tables = () => { const suffix = `${process.env.API_LEXHOA_GRAPHQLAPIIDOUTPUT}-${process.env.ENV}`; return { profile: `Profile-${suffix}`, payment: `Payment-${suffix}` }; };
+const cents = value => Math.round(Number(value) * 100);
+const paymentId = (subject, profileId, key) => crypto.createHash('sha256').update(`${subject}:${profileId}:${key}`).digest('hex');
+const reference = id => `L${id.slice(0, 19)}`;
+function fees(amount, method) { const fee = method === 'bank_account' ? Math.min(amount * .008, 5) : amount * .029 + .30; const processingFee = Math.round(fee * 100) / 100; return { processingFee, totalAmount: Math.round((amount + processingFee) * 100) / 100 }; }
+const get = async (TableName, id, client = ddb) => (await client.get({ TableName, Key: { id }, ConsistentRead: true }).promise()).Item;
+
+async function reserve(profile, payment, client = ddb) {
+  const t = tables();
+  await client.transactWrite({ TransactItems: [
+    { Update: { TableName: t.profile, Key: { id: profile.id }, UpdateExpression: 'SET activePaymentId=:pid, updatedAt=:now', ConditionExpression: 'attribute_exists(id) AND balance=:balance AND attribute_not_exists(activePaymentId)', ExpressionAttributeValues: { ':pid': payment.id, ':balance': profile.balance, ':now': payment.updatedAt } } },
+    { Put: { TableName: t.payment, Item: payment, ConditionExpression: 'attribute_not_exists(id)' } }
+  ] }).promise();
+}
+
+async function finalize(payment, expectedStatus, nextStatus, applyBalance, client = ddb) {
+  if (payment.balanceApplied || payment.status === 'SUCCEEDED') return payment;
+  const t = tables(); const profile = await get(t.profile, payment.ownerPaymentsId, client);
+  if (!profile) throw new Error('Profile missing during finalization');
+  const now = new Date().toISOString(); const next = Math.max(0, (cents(profile.balance) - cents(payment.amount)) / 100);
+  const paymentUpdate = applyBalance ? 'SET #s=:next, balanceApplied=:yes, updatedAt=:now' : 'SET #s=:next, updatedAt=:now';
+  const profileValues = { ':pid': payment.id, ':old': profile.balance, ':now': now };
+  const paymentValues = { ':next': nextStatus, ':expected': expectedStatus, ':no': false, ':now': now };
+  if (applyBalance) { profileValues[':new'] = next; paymentValues[':yes'] = true; }
+  await client.transactWrite({ TransactItems: [
+    { Update: { TableName: t.profile, Key: { id: profile.id }, UpdateExpression: applyBalance ? 'SET balance=:new, updatedAt=:now REMOVE activePaymentId' : 'SET updatedAt=:now', ConditionExpression: 'activePaymentId=:pid AND balance=:old', ExpressionAttributeValues: profileValues } },
+    { Update: { TableName: t.payment, Key: { id: payment.id }, UpdateExpression: paymentUpdate, ConditionExpression: '#s=:expected AND balanceApplied=:no', ExpressionAttributeNames: { '#s': 'status' }, ExpressionAttributeValues: paymentValues } }
+  ] }).promise();
+  return { ...payment, status: nextStatus, balanceApplied: applyBalance };
+}
+
+async function processPayment(event, deps) {
+  const args = event.arguments || {}; const subject = event.identity?.claims?.sub || event.identity?.username;
+  if (!subject) throw new Error('Unauthenticated');
+  if (!args.profileId || !args.idempotencyKey || !args.opaqueDataDescriptor || !args.opaqueDataValue) throw new Error('Missing required parameters');
+  const profile = await deps.getProfile(args.profileId);
+  if (!profile || (profile.cognitoID || profile.id) !== subject) throw new Error('Profile access denied');
+  const id = paymentId(subject, profile.id, args.idempotencyKey); let payment = await deps.getPayment(id); let won = false;
+  if (payment && ['SUCCEEDED', 'PENDING'].includes(payment.status)) return result(payment);
+  const amount = cents(profile.balance) / 100;
+  if (!(amount > 0)) throw new Error('No positive balance due');
+  if (cents(args.expectedAmount) !== cents(amount)) throw new Error('Balance changed; refresh payment amount');
+  const requested = args.paymentMethodType === 'bank_account' ? 'BANK_ACCOUNT' : 'CARD';
+  if (!payment) {
+    const now = new Date().toISOString(); payment = { id, __typename: 'Payment', owner: subject, ownerPaymentsId: profile.id, idempotencyKey: args.idempotencyKey, processorReference: reference(id), amount, ...fees(amount, requested === 'BANK_ACCOUNT' ? 'bank_account' : 'card'), invoiceAmount: amount, paymentMethod: requested, status: 'PROCESSING', balanceApplied: false, description: 'HOA Dues Payment', byTypeCreatedAt: 'PAYMENT', createdAt: now, updatedAt: now };
+    try { await deps.reserve(profile, payment); won = true; } catch (e) { payment = await deps.getPayment(id); if (!payment) throw new Error('Another payment is active for this profile'); }
+  }
+  if (['SUCCEEDED', 'PENDING'].includes(payment.status)) return result(payment);
+  if (!payment.authNetTransactionId) {
+    if (!won) throw new Error('Payment request is already processing');
+    let captured;
     try {
-        const { amount, profileId, description, email, paymentMethodType, opaqueDataDescriptor, opaqueDataValue } = event.arguments;
-        
-        if (!amount || !profileId) {
-            throw new Error("Missing required parameters: amount and profileId");
-        }
-
-        if (amount <= 0) {
-            throw new Error("Amount must be greater than 0");
-        }
-
-        if (!opaqueDataDescriptor || !opaqueDataValue) {
-            throw new Error("Missing payment token data");
-        }
-
-        const apiLoginId = process.env.AUTHNET_API_LOGIN_ID;
-        const transactionKey = process.env.AUTHNET_TRANSACTION_KEY;
-        if (!apiLoginId || !transactionKey) {
-            throw new Error("Authorize.Net credentials not configured");
-        }
-
-        // Calculate fees based on payment method type
-        let processingFee;
-        if (paymentMethodType === 'bank_account') {
-            processingFee = Math.min(amount * 0.008, 5.00);
-        } else {
-            processingFee = (amount * 0.029) + 0.30;
-        }
-        
-        const totalAmount = Math.round((amount + processingFee) * 100) / 100;
-        processingFee = Math.round(processingFee * 100) / 100;
-
-        // Set up merchant authentication
-        const merchantAuth = new ApiContracts.MerchantAuthenticationType();
-        merchantAuth.setName(apiLoginId);
-        merchantAuth.setTransactionKey(transactionKey);
-
-        // Set up payment with opaque data from Accept.js
-        const opaqueData = new ApiContracts.OpaqueDataType();
-        opaqueData.setDataDescriptor(opaqueDataDescriptor);
-        opaqueData.setDataValue(opaqueDataValue);
-
-        const paymentType = new ApiContracts.PaymentType();
-        paymentType.setOpaqueData(opaqueData);
-
-        // Set up order
-        const orderDetails = new ApiContracts.OrderType();
-        orderDetails.setInvoiceNumber('INV-' + Date.now().toString(36).toUpperCase());
-        orderDetails.setDescription(description || 'HOA Dues Payment');
-
-        // Set up customer
-        const customer = new ApiContracts.CustomerDataType();
-        customer.setEmail(email || '');
-
-        // Set up user fields to store metadata
-        const userField1 = new ApiContracts.UserField();
-        userField1.setName('profileId');
-        userField1.setValue(profileId);
-
-        const userField2 = new ApiContracts.UserField();
-        userField2.setName('duesAmount');
-        userField2.setValue(amount.toFixed(2));
-
-        const userField3 = new ApiContracts.UserField();
-        userField3.setName('processingFee');
-        userField3.setValue(processingFee.toFixed(2));
-
-        const userField4 = new ApiContracts.UserField();
-        userField4.setName('paymentMethodType');
-        userField4.setValue(paymentMethodType || 'card');
-
-        const userFields = new ApiContracts.TransactionRequestType.UserFields();
-        userFields.setUserField([userField1, userField2, userField3, userField4]);
-
-        // Create transaction request
-        const transactionRequest = new ApiContracts.TransactionRequestType();
-        transactionRequest.setTransactionType(ApiContracts.TransactionTypeEnum.AUTHCAPTURETRANSACTION);
-        transactionRequest.setPayment(paymentType);
-        transactionRequest.setAmount(totalAmount);
-        transactionRequest.setOrder(orderDetails);
-        transactionRequest.setCustomer(customer);
-        transactionRequest.setUserFields(userFields);
-
-        const createRequest = new ApiContracts.CreateTransactionRequest();
-        createRequest.setMerchantAuthentication(merchantAuth);
-        createRequest.setTransactionRequest(transactionRequest);
-
-        // Execute the transaction
-        const result = await executeTransaction(createRequest);
-
-        // Card payments capture and settle immediately, so reduce the balance now.
-        // eCheck (bank_account) payments only "approve" at submission and take
-        // 1-5 business days to actually settle, and can still be returned (NSF,
-        // closed account, etc.). We therefore hold the balance and leave the
-        // payment PENDING; the balance is reduced later during reconciliation
-        // once the transaction settles successfully.
-        const settlementPending = paymentMethodType === 'bank_account';
-        if (!settlementPending) {
-            // Failure here must not fail the payment (funds were already captured).
-            try {
-                await reduceProfileBalance(profileId, amount);
-            } catch (balanceError) {
-                console.error('Failed to update profile balance after payment:', balanceError);
-            }
-        }
-
-        return {
-            transactionId: result.transactionId,
-            authCode: result.authCode,
-            amount: parseFloat(amount.toFixed(2)),
-            processingFee: processingFee,
-            totalAmount: totalAmount,
-            paymentMethodType: paymentMethodType || 'card',
-            settlementPending: settlementPending,
-            responseCode: result.responseCode,
-            messageCode: result.messageCode,
-            messageText: result.messageText
-        };
-
+      captured = await deps.capture({ amount: payment.totalAmount, descriptor: args.opaqueDataDescriptor, token: args.opaqueDataValue, reference: payment.processorReference, email: profile.email || '' });
     } catch (error) {
-        console.error('Error creating transaction:', error);
-        throw new Error(`Failed to create transaction: ${error.message}`);
+      if (error.definitive) await deps.fail(payment);
+      throw error;
     }
-};
-
-function executeTransaction(createRequest) {
-    return new Promise((resolve, reject) => {
-        const environment = process.env.AUTHNET_ENVIRONMENT === 'production' 
-            ? SDKConstants.endpoint.production 
-            : SDKConstants.endpoint.sandbox;
-
-        const ctrl = new ApiControllers.CreateTransactionController(createRequest.getJSON());
-        ctrl.setEnvironment(environment);
-
-        ctrl.execute(function() {
-            const apiResponse = ctrl.getResponse();
-            const response = new ApiContracts.CreateTransactionResponse(apiResponse);
-
-            if (response === null) {
-                reject(new Error('No response from Authorize.Net'));
-                return;
-            }
-
-            if (response.getMessages().getResultCode() === ApiContracts.MessageTypeEnum.OK) {
-                const transactionResponse = response.getTransactionResponse();
-                if (transactionResponse.getMessages()) {
-                    resolve({
-                        transactionId: transactionResponse.getTransId(),
-                        authCode: transactionResponse.getAuthCode(),
-                        responseCode: transactionResponse.getResponseCode(),
-                        messageCode: transactionResponse.getMessages().getMessage()[0].getCode(),
-                        messageText: transactionResponse.getMessages().getMessage()[0].getDescription()
-                    });
-                } else {
-                    const errorText = transactionResponse.getErrors() 
-                        ? transactionResponse.getErrors().getError()[0].getErrorText()
-                        : 'Transaction failed';
-                    reject(new Error(errorText));
-                }
-            } else {
-                const transactionResponse = response.getTransactionResponse();
-                if (transactionResponse && transactionResponse.getErrors()) {
-                    reject(new Error(transactionResponse.getErrors().getError()[0].getErrorText()));
-                } else {
-                    reject(new Error(response.getMessages().getMessage()[0].getText()));
-                }
-            }
-        });
-    });
+    if (captured.paymentMethod !== payment.paymentMethod) throw new Error('Processor payment rail could not be verified');
+    payment = await deps.attachTransaction(payment, captured.transactionId);
+  }
+  return result(await deps.finalize(payment, 'PROCESSING', payment.paymentMethod === 'CARD' ? 'SUCCEEDED' : 'PENDING', payment.paymentMethod === 'CARD'));
 }
 
-async function reduceProfileBalance(profileId, duesAmount) {
-    const endpoint = process.env.API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT;
-
-    const getProfileQuery = `
-        query GetProfile($id: ID!) {
-            getProfile(id: $id) {
-                id
-                balance
-            }
-        }
-    `;
-
-    const profileResult = await graphqlRequest(endpoint, getProfileQuery, { id: profileId });
-    const profile = profileResult?.getProfile;
-    if (!profile) {
-        throw new Error(`Profile ${profileId} not found`);
-    }
-
-    const currentBalance = profile.balance || 0;
-    const newBalance = Math.max(0, Math.round((currentBalance - duesAmount) * 100) / 100);
-
-    const updateProfileMutation = `
-        mutation UpdateProfile($input: UpdateProfileInput!) {
-            updateProfile(input: $input) {
-                id
-                balance
-            }
-        }
-    `;
-
-    await graphqlRequest(endpoint, updateProfileMutation, {
-        input: { id: profileId, balance: newBalance }
-    });
-
-    console.log(`Profile ${profileId} balance updated: ${currentBalance} -> ${newBalance}`);
-}
-
-function graphqlRequest(endpoint, query, variables) {
-    const uri = new urlParse(endpoint);
-    const httpRequest = new AWS.HttpRequest(endpoint, process.env.REGION);
-
-    httpRequest.headers.host = uri.host;
-    httpRequest.headers['Content-Type'] = 'application/json';
-    httpRequest.method = 'POST';
-    httpRequest.body = JSON.stringify({ query, variables });
-
-    const signer = new AWS.Signers.V4(httpRequest, 'appsync', true);
-    signer.addAuthorization(AWS.config.credentials, new Date());
-
-    return new Promise((resolve, reject) => {
-        const request = https.request({ ...httpRequest, host: uri.host }, (result) => {
-            let data = '';
-            result.on('data', (chunk) => { data += chunk; });
-            result.on('end', () => {
-                const response = JSON.parse(data);
-                if (response.errors) {
-                    reject(new Error(JSON.stringify(response.errors)));
-                } else {
-                    resolve(response.data);
-                }
-            });
-        });
-        request.on('error', reject);
-        request.write(httpRequest.body);
-        request.end();
-    });
-}
+function result(p) { return { paymentId: p.id, transactionId: p.authNetTransactionId || '', status: p.status, settlementPending: p.status === 'PENDING', amount: p.amount, processingFee: p.processingFee, totalAmount: p.totalAmount, paymentMethodType: p.paymentMethod === 'BANK_ACCOUNT' ? 'bank_account' : 'card' }; }
+async function attachTransaction(payment, transactionId, client = ddb) { const t = tables(); const now = new Date().toISOString(); await client.update({ TableName: t.payment, Key: { id: payment.id }, UpdateExpression: 'SET authNetTransactionId=:tx, updatedAt=:now', ConditionExpression: '#s=:processing AND attribute_not_exists(authNetTransactionId)', ExpressionAttributeNames: { '#s': 'status' }, ExpressionAttributeValues: { ':tx': transactionId, ':now': now, ':processing': 'PROCESSING' } }).promise(); return { ...payment, authNetTransactionId: transactionId, updatedAt: now }; }
+async function failPayment(payment, client = ddb) { const t = tables(); const now = new Date().toISOString(); await client.transactWrite({ TransactItems: [
+  { Update: { TableName: t.profile, Key: { id: payment.ownerPaymentsId }, UpdateExpression: 'SET updatedAt=:now REMOVE activePaymentId', ConditionExpression: 'activePaymentId=:pid', ExpressionAttributeValues: { ':pid': payment.id, ':now': now } } },
+  { Update: { TableName: t.payment, Key: { id: payment.id }, UpdateExpression: 'SET #s=:failed, updatedAt=:now', ConditionExpression: '#s=:processing AND attribute_not_exists(authNetTransactionId)', ExpressionAttributeNames: { '#s': 'status' }, ExpressionAttributeValues: { ':processing': 'PROCESSING', ':failed': 'FAILED', ':now': now } } }
+] }).promise(); }
+function captureTransaction(data) { return new Promise((resolve, reject) => { const auth = new ApiContracts.MerchantAuthenticationType(); auth.setName(process.env.AUTHNET_API_LOGIN_ID); auth.setTransactionKey(process.env.AUTHNET_TRANSACTION_KEY); const opaque = new ApiContracts.OpaqueDataType(); opaque.setDataDescriptor(data.descriptor); opaque.setDataValue(data.token); const pay = new ApiContracts.PaymentType(); pay.setOpaqueData(opaque); const order = new ApiContracts.OrderType(); order.setInvoiceNumber(data.reference); const txr = new ApiContracts.TransactionRequestType(); txr.setTransactionType(ApiContracts.TransactionTypeEnum.AUTHCAPTURETRANSACTION); txr.setPayment(pay); txr.setAmount(data.amount); txr.setOrder(order); const req = new ApiContracts.CreateTransactionRequest(); req.setRefId(data.reference); req.setMerchantAuthentication(auth); req.setTransactionRequest(txr); const ctrl = new ApiControllers.CreateTransactionController(req.getJSON()); ctrl.setEnvironment(process.env.AUTHNET_ENVIRONMENT === 'production' ? Constants.endpoint.production : Constants.endpoint.sandbox); ctrl.execute(() => { const raw = ctrl.getResponse(); const res = raw && new ApiContracts.CreateTransactionResponse(raw); const tx = res?.getTransactionResponse(); const accountType = String(tx?.getAccountType?.() || '').toLowerCase(); const rail = accountType.includes('echeck') || accountType.includes('bank') ? 'BANK_ACCOUNT' : accountType ? 'CARD' : null; if (res?.getMessages().getResultCode() === ApiContracts.MessageTypeEnum.OK && String(tx?.getResponseCode?.()) === '1' && tx?.getTransId() && rail) return resolve({ transactionId: tx.getTransId(), paymentMethod: rail }); const error = new Error('Payment processor declined or rail was unverifiable'); error.definitive = Boolean(res); reject(error); }); }); }
+const defaultDeps = { getProfile: id => get(tables().profile, id), getPayment: id => get(tables().payment, id), reserve, attachTransaction, finalize, fail: failPayment, capture: captureTransaction };
+exports.handler = async event => processPayment(event, defaultDeps);
+exports._internals = { processPayment, paymentId, reference, fees, reserve, finalize, failPayment, result };

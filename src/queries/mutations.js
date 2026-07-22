@@ -190,10 +190,12 @@ export const CREATE_PAYMENT = gql`
 
 // Authorize.Net Mutations
 export const CREATE_AUTHNET_TRANSACTION = gql`
-  mutation CreateAuthNetTransaction($amount: Float!, $profileId: ID!, $description: String, $email: String, $paymentMethodType: String, $opaqueDataDescriptor: String!, $opaqueDataValue: String!) {
-    createAuthNetTransaction(amount: $amount, profileId: $profileId, description: $description, email: $email, paymentMethodType: $paymentMethodType, opaqueDataDescriptor: $opaqueDataDescriptor, opaqueDataValue: $opaqueDataValue) {
+  mutation CreateAuthNetTransaction($profileId: ID!, $idempotencyKey: String!, $expectedAmount: Float!, $paymentMethodType: String, $opaqueDataDescriptor: String!, $opaqueDataValue: String!) {
+    createAuthNetTransaction(profileId: $profileId, idempotencyKey: $idempotencyKey, expectedAmount: $expectedAmount, paymentMethodType: $paymentMethodType, opaqueDataDescriptor: $opaqueDataDescriptor, opaqueDataValue: $opaqueDataValue) {
+      paymentId
       transactionId
-      authCode
+      status
+      settlementPending
       amount
       processingFee
       totalAmount

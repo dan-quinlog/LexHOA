@@ -63,6 +63,7 @@
 
 .amount-option.custom {
   grid-column: span 2;
+  cursor: default;
 }
 
 .custom-amount-input {
@@ -243,8 +244,8 @@
 }
 
 .payment-method-options {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--spacing-medium);
   margin-bottom: var(--spacing-large);
 }
@@ -267,8 +268,14 @@
   background: rgba(25, 118, 210, 0.05);
 }
 
-.payment-method-icon {
-  font-size: 2rem;
+.payment-method-option.selected {
+  border-color: var(--primary-color);
+  background: rgba(25, 118, 210, 0.05);
+}
+
+.payment-method-copy {
+  display: flex;
+  flex-direction: column;
 }
 
 .payment-method-label {
@@ -332,5 +339,9 @@
   
   .amount-option.custom {
     grid-column: span 1;
+  }
+
+  .payment-method-options {
+    grid-template-columns: 1fr;
   }
 }

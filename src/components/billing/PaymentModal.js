@@ -12,21 +12,28 @@ const ACCEPT_JS_URL = AUTHNET_ENVIRONMENT === 'production'
   ? 'https://js.authorize.net/v1/Accept.js'
   : 'https://jstest.authorize.net/v1/Accept.js';
 
+const SUGGESTED_AMOUNTS = {
+  MONTHLY: { label: '1 Month', amount: 100, description: 'Monthly dues' },
+  QUARTERLY: { label: '1 Quarter', amount: 300, description: '3 months' },
+  SEMI_ANNUAL: { label: '1 Half-Year', amount: 600, description: '6 months' },
+  ANNUAL: { label: '1 Year', amount: 1200, description: '12 months' }
+};
+
 const PAYMENT_METHODS = {
   card: { 
     label: 'Credit/Debit Card', 
-    description: '2.9% + $0.30 fee',
-    icon: '💳'
+    description: '2.9% + $0.30 fee'
   },
   bank_account: { 
     label: 'Bank Account (eCheck)', 
-    description: '0.8% fee (max $5.00)',
-    icon: '🏦'
+    description: '0.8% fee (max $5.00)'
   }
 };
 
-const PaymentForm = ({ profileId, balance, onSuccess, onCancel, paymentMethodType }) => {
-  const [paymentDetails, setPaymentDetails] = useState(null);
+const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
+  const [selectedAmount, setSelectedAmount] = useState(null);
+  const [customAmount, setCustomAmount] = useState('');
+  const [paymentMethodType, setPaymentMethodType] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(null);
   const [succeeded, setSucceeded] = useState(false);
@@ -68,7 +75,12 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel, paymentMethodTyp
     };
   }, []);
 
-  const getPaymentAmount = () => Number(balance) || 0;
+  const getPaymentAmount = () => {
+    if (selectedAmount === 'CUSTOM') {
+      return Number(customAmount) || 0;
+    }
+    return SUGGESTED_AMOUNTS[selectedAmount]?.amount || 0;
+  };
 
   const calculateFee = (amount) => {
     if (isACH) {
@@ -77,22 +89,47 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel, paymentMethodTyp
     return (amount * 0.029) + 0.30;
   };
 
-  const handlePreparePayment = () => {
+  const getPaymentDetails = () => {
+    const amount = getPaymentAmount();
+    const fee = calculateFee(amount);
+    return {
+      amount,
+      processingFee: Math.round(fee * 100) / 100,
+      totalAmount: Math.round((amount + fee) * 100) / 100
+    };
+  };
+
+  const handleAmountSelect = (key) => {
+    setSelectedAmount(key);
+    setPaymentMethodType(null);
+    setError(null);
+    idempotencyKeyRef.current = null;
+  };
+
+  const handleCustomAmountChange = (e) => {
+    setCustomAmount(e.target.value);
+    setSelectedAmount('CUSTOM');
+    setPaymentMethodType(null);
+    setError(null);
+    idempotencyKeyRef.current = null;
+  };
+
+  const handlePaymentMethodSelect = (method) => {
     const amount = getPaymentAmount();
     if (amount <= 0) {
-      setError('Please enter a valid amount');
+      setError('Please select or enter a valid payment amount first.');
       return;
     }
-
-    const fee = calculateFee(amount);
-    const total = Math.round((amount + fee) * 100) / 100;
-
-    setPaymentDetails({
-      amount: amount,
-      processingFee: Math.round(fee * 100) / 100,
-      totalAmount: total
-    });
+    if (amount > Number(balance)) {
+      setError('Payment amount cannot exceed the current balance.');
+      return;
+    }
+    setPaymentMethodType(method);
+    setError(null);
+    idempotencyKeyRef.current = null;
   };
+
+  const paymentDetails = paymentMethodType ? getPaymentDetails() : null;
 
   const dispatchAcceptJs = () => {
     return new Promise((resolve, reject) => {
@@ -136,7 +173,10 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel, paymentMethodTyp
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!acceptJsLoaded || !paymentDetails) {
+    if (!acceptJsLoaded || !paymentDetails || paymentDetails.amount > Number(balance)) {
+      if (paymentDetails?.amount > Number(balance)) {
+        setError('Payment amount cannot exceed the current balance.');
+      }
       return;
     }
 
@@ -209,21 +249,56 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel, paymentMethodTyp
   return (
     <form onSubmit={handleSubmit} className="payment-form">
       <div className="amount-section">
-        <h4>Payment Amount</h4>
+        <h4>Select Payment Amount</h4>
         <p className="balance-info">Current Balance: {formatCurrency(balance)}</p>
-        <p>Online payments apply to the full current balance.</p>
+        <div className="amount-options">
+          {Object.entries(SUGGESTED_AMOUNTS).map(([key, { label, amount, description }]) => (
+            <button
+              key={key}
+              type="button"
+              className={`amount-option ${selectedAmount === key ? 'selected' : ''}`}
+              onClick={() => handleAmountSelect(key)}
+            >
+              <span className="amount-label">{label}</span>
+              <span className="amount-value">{formatCurrency(amount)}</span>
+              <span className="amount-desc">{description}</span>
+            </button>
+          ))}
+          <div className={`amount-option custom ${selectedAmount === 'CUSTOM' ? 'selected' : ''}`}>
+            <label htmlFor="custom-payment-amount" className="amount-label">Custom Amount</label>
+            <input
+              id="custom-payment-amount"
+              type="number"
+              min="0.01"
+              step="0.01"
+              placeholder="0.00"
+              value={customAmount}
+              onChange={handleCustomAmountChange}
+              onFocus={() => handleAmountSelect('CUSTOM')}
+              className="custom-amount-input"
+            />
+          </div>
+        </div>
       </div>
 
-      {!paymentDetails && (
-        <button
-          type="button"
-          onClick={handlePreparePayment}
-          disabled={processing || getPaymentAmount() <= 0}
-          className="prepare-payment-btn"
-        >
-          Continue to Payment
-        </button>
-      )}
+      <div className="payment-method-selection">
+        <h4>Select Payment Method</h4>
+        <div className="payment-method-options">
+          {Object.entries(PAYMENT_METHODS).map(([key, { label, description }]) => (
+            <button
+              key={key}
+              type="button"
+              className={`payment-method-option ${paymentMethodType === key ? 'selected' : ''}`}
+              onClick={() => handlePaymentMethodSelect(key)}
+            >
+              <span className="payment-method-copy">
+                <span className="payment-method-label">{label}</span>
+                <span className="payment-method-desc">{description}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
 
       {paymentDetails && (
         <>
@@ -356,62 +431,20 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel, paymentMethodTyp
 };
 
 const PaymentModal = ({ isOpen, onClose, profileId, balance, onPaymentSuccess }) => {
-  const [paymentMethodType, setPaymentMethodType] = useState(null);
-  
   const handleSuccess = (result) => {
     onPaymentSuccess && onPaymentSuccess(result);
-    setPaymentMethodType(null);
     onClose();
-  };
-
-  const handleClose = () => {
-    setPaymentMethodType(null);
-    onClose();
-  };
-
-  const handleBack = () => {
-    setPaymentMethodType(null);
   };
 
   return (
-    <Modal show={isOpen} onClose={handleClose}>
+    <Modal show={isOpen} onClose={onClose}>
       <h2>Make a Payment</h2>
-      
-      {!paymentMethodType ? (
-        <div className="payment-method-selection">
-          <h4>Select Payment Method</h4>
-          <div className="payment-method-options">
-            {Object.entries(PAYMENT_METHODS).map(([key, { label, description, icon }]) => (
-              <button
-                key={key}
-                type="button"
-                className="payment-method-option"
-                onClick={() => setPaymentMethodType(key)}
-              >
-                <span className="payment-method-icon">{icon}</span>
-                <span className="payment-method-label">{label}</span>
-                <span className="payment-method-desc">{description}</span>
-              </button>
-            ))}
-          </div>
-          <button type="button" onClick={handleClose} className="cancel-btn">
-            Cancel
-          </button>
-        </div>
-      ) : (
-        <>
-          <button type="button" onClick={handleBack} className="back-btn">
-            ← Change Payment Method
-          </button>
-          <PaymentForm
-            profileId={profileId}
-            balance={balance}
-            paymentMethodType={paymentMethodType}
-            onSuccess={handleSuccess}
-            onCancel={handleClose}
-          />
-        </>
-      )}
+      <PaymentForm
+        profileId={profileId}
+        balance={balance}
+        onSuccess={handleSuccess}
+        onCancel={onClose}
+      />
     </Modal>
   );
 };

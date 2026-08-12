@@ -2,7 +2,6 @@
 	ENV
 	REGION
 	AUTHNET_API_LOGIN_ID
-	AUTHNET_TRANSACTION_KEY
 	AUTHNET_ENVIRONMENT
 	API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT
 	API_LEXHOA_GRAPHQLAPIIDOUTPUT
@@ -15,9 +14,31 @@ const https = require('https');
 const AWS = require('aws-sdk');
 const urlParse = require('url').URL;
 
+const secretsManager = new AWS.SecretsManager();
+let transactionKeyPromise;
+
+async function loadSecret(secretId, client = secretsManager) {
+    if (!secretId) throw new Error('Authorize.Net transaction secret is not configured');
+    const secret = await client.getSecretValue({ SecretId: secretId }).promise();
+    if (typeof secret.SecretString !== 'string' || !secret.SecretString) {
+        throw new Error('Authorize.Net transaction secret is empty');
+    }
+    return secret.SecretString;
+}
+
+async function getTransactionKey() {
+    if (!transactionKeyPromise) {
+        transactionKeyPromise = loadSecret(process.env.AUTHNET_TRANSACTION_SECRET_ID);
+    }
+    try {
+        return await transactionKeyPromise;
+    } catch (error) {
+        transactionKeyPromise = undefined;
+        throw error;
+    }
+}
+
 exports.handler = async (event) => {
-    console.log(`EVENT: ${JSON.stringify(event)}`);
-    
     try {
         const { profileId, email, name } = event.arguments;
         
@@ -26,7 +47,7 @@ exports.handler = async (event) => {
         }
 
         const apiLoginId = process.env.AUTHNET_API_LOGIN_ID;
-        const transactionKey = process.env.AUTHNET_TRANSACTION_KEY;
+        const transactionKey = await getTransactionKey();
         if (!apiLoginId || !transactionKey) {
             throw new Error("Authorize.Net credentials not configured");
         }
@@ -141,3 +162,5 @@ async function graphqlRequest(endpoint, query, variables) {
         request.end();
     });
 }
+
+exports._internals = { loadSecret };

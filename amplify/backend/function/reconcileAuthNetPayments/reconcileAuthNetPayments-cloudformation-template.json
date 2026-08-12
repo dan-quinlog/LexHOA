@@ -32,7 +32,8 @@
       "Type": "String"
     },
     "authNetTransactionKey": {
-      "Type": "String"
+      "Type": "String",
+      "NoEcho": true
     },
     "authNetEnvironment": {
       "Type": "String"
@@ -103,8 +104,8 @@
             "AUTHNET_API_LOGIN_ID": {
               "Ref": "authNetApiLoginId"
             },
-            "AUTHNET_TRANSACTION_KEY": {
-              "Ref": "authNetTransactionKey"
+            "AUTHNET_TRANSACTION_SECRET_ID": {
+              "Fn::Sub": "lexhoa/${env}/authorizenet/transaction-key"
             },
             "AUTHNET_ENVIRONMENT": {
               "Ref": "authNetEnvironment"
@@ -278,6 +279,15 @@
               ],
               "Resource": {
                 "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/*-${apilexhoaGraphQLAPIIdOutput}-${env}*"
+              }
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "secretsmanager:GetSecretValue"
+              ],
+              "Resource": {
+                "Fn::Sub": "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:lexhoa/${env}/authorizenet/transaction-key-*"
               }
             }
           ]

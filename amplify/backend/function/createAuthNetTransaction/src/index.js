@@ -5,12 +5,27 @@ const ApiControllers = require('authorizenet').APIControllers;
 const Constants = require('authorizenet').Constants;
 
 const ddb = new AWS.DynamoDB.DocumentClient();
+const secretsManager = new AWS.SecretsManager();
+let transactionKeyPromise;
 const tables = () => { const suffix = `${process.env.API_LEXHOA_GRAPHQLAPIIDOUTPUT}-${process.env.ENV}`; return { profile: `Profile-${suffix}`, payment: `Payment-${suffix}` }; };
 const cents = value => Math.round(Number(value) * 100);
 const paymentId = (subject, profileId, key) => crypto.createHash('sha256').update(`${subject}:${profileId}:${key}`).digest('hex');
 const reference = id => `L${id.slice(0, 19)}`;
 function fees(amount, method) { const fee = method === 'bank_account' ? Math.min(amount * .008, 5) : amount * .029 + .30; const processingFee = Math.round(fee * 100) / 100; return { processingFee, totalAmount: Math.round((amount + processingFee) * 100) / 100 }; }
 const get = async (TableName, id, client = ddb) => (await client.get({ TableName, Key: { id }, ConsistentRead: true }).promise()).Item;
+
+async function loadSecret(secretId, client = secretsManager) {
+  if (!secretId) throw new Error('Authorize.Net transaction secret is not configured');
+  const secret = await client.getSecretValue({ SecretId: secretId }).promise();
+  if (typeof secret.SecretString !== 'string' || !secret.SecretString) throw new Error('Authorize.Net transaction secret is empty');
+  return secret.SecretString;
+}
+
+async function getTransactionKey() {
+  if (!transactionKeyPromise) transactionKeyPromise = loadSecret(process.env.AUTHNET_TRANSACTION_SECRET_ID);
+  try { return await transactionKeyPromise; }
+  catch (error) { transactionKeyPromise = undefined; throw error; }
+}
 
 async function reserve(profile, payment, client = ddb) {
   const t = tables();
@@ -76,7 +91,7 @@ async function failPayment(payment, client = ddb) { const t = tables(); const no
   { Update: { TableName: t.profile, Key: { id: payment.ownerPaymentsId }, UpdateExpression: 'SET updatedAt=:now REMOVE activePaymentId', ConditionExpression: 'activePaymentId=:pid', ExpressionAttributeValues: { ':pid': payment.id, ':now': now } } },
   { Update: { TableName: t.payment, Key: { id: payment.id }, UpdateExpression: 'SET #s=:failed, updatedAt=:now', ConditionExpression: '#s=:processing AND attribute_not_exists(authNetTransactionId)', ExpressionAttributeNames: { '#s': 'status' }, ExpressionAttributeValues: { ':processing': 'PROCESSING', ':failed': 'FAILED', ':now': now } } }
 ] }).promise(); }
-function captureTransaction(data) { return new Promise((resolve, reject) => { const auth = new ApiContracts.MerchantAuthenticationType(); auth.setName(process.env.AUTHNET_API_LOGIN_ID); auth.setTransactionKey(process.env.AUTHNET_TRANSACTION_KEY); const opaque = new ApiContracts.OpaqueDataType(); opaque.setDataDescriptor(data.descriptor); opaque.setDataValue(data.token); const pay = new ApiContracts.PaymentType(); pay.setOpaqueData(opaque); const order = new ApiContracts.OrderType(); order.setInvoiceNumber(data.reference); const txr = new ApiContracts.TransactionRequestType(); txr.setTransactionType(ApiContracts.TransactionTypeEnum.AUTHCAPTURETRANSACTION); txr.setPayment(pay); txr.setAmount(data.amount); txr.setOrder(order); const req = new ApiContracts.CreateTransactionRequest(); req.setRefId(data.reference); req.setMerchantAuthentication(auth); req.setTransactionRequest(txr); const ctrl = new ApiControllers.CreateTransactionController(req.getJSON()); ctrl.setEnvironment(process.env.AUTHNET_ENVIRONMENT === 'production' ? Constants.endpoint.production : Constants.endpoint.sandbox); ctrl.execute(() => { const raw = ctrl.getResponse(); const res = raw && new ApiContracts.CreateTransactionResponse(raw); const tx = res?.getTransactionResponse(); const accountType = String(tx?.getAccountType?.() || '').toLowerCase(); const rail = accountType.includes('echeck') || accountType.includes('bank') ? 'BANK_ACCOUNT' : accountType ? 'CARD' : null; if (res?.getMessages().getResultCode() === ApiContracts.MessageTypeEnum.OK && String(tx?.getResponseCode?.()) === '1' && tx?.getTransId() && rail) return resolve({ transactionId: tx.getTransId(), paymentMethod: rail }); const error = new Error('Payment processor declined or rail was unverifiable'); error.definitive = Boolean(res); reject(error); }); }); }
+async function captureTransaction(data) { const transactionKey = await getTransactionKey(); return new Promise((resolve, reject) => { const auth = new ApiContracts.MerchantAuthenticationType(); auth.setName(process.env.AUTHNET_API_LOGIN_ID); auth.setTransactionKey(transactionKey); const opaque = new ApiContracts.OpaqueDataType(); opaque.setDataDescriptor(data.descriptor); opaque.setDataValue(data.token); const pay = new ApiContracts.PaymentType(); pay.setOpaqueData(opaque); const order = new ApiContracts.OrderType(); order.setInvoiceNumber(data.reference); const txr = new ApiContracts.TransactionRequestType(); txr.setTransactionType(ApiContracts.TransactionTypeEnum.AUTHCAPTURETRANSACTION); txr.setPayment(pay); txr.setAmount(data.amount); txr.setOrder(order); const req = new ApiContracts.CreateTransactionRequest(); req.setRefId(data.reference); req.setMerchantAuthentication(auth); req.setTransactionRequest(txr); const ctrl = new ApiControllers.CreateTransactionController(req.getJSON()); ctrl.setEnvironment(process.env.AUTHNET_ENVIRONMENT === 'production' ? Constants.endpoint.production : Constants.endpoint.sandbox); ctrl.execute(() => { const raw = ctrl.getResponse(); const res = raw && new ApiContracts.CreateTransactionResponse(raw); const tx = res?.getTransactionResponse(); const accountType = String(tx?.getAccountType?.() || '').toLowerCase(); const rail = accountType.includes('echeck') || accountType.includes('bank') ? 'BANK_ACCOUNT' : accountType ? 'CARD' : null; if (res?.getMessages().getResultCode() === ApiContracts.MessageTypeEnum.OK && String(tx?.getResponseCode?.()) === '1' && tx?.getTransId() && rail) return resolve({ transactionId: tx.getTransId(), paymentMethod: rail }); const error = new Error('Payment processor declined or rail was unverifiable'); error.definitive = Boolean(res); reject(error); }); }); }
 const defaultDeps = { getProfile: id => get(tables().profile, id), getPayment: id => get(tables().payment, id), reserve, attachTransaction, finalize, fail: failPayment, capture: captureTransaction };
 exports.handler = async event => processPayment(event, defaultDeps);
-exports._internals = { processPayment, paymentId, reference, fees, reserve, finalize, failPayment, result };
+exports._internals = { processPayment, paymentId, reference, fees, reserve, finalize, failPayment, result, loadSecret };

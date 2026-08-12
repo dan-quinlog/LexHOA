@@ -4,11 +4,26 @@ const ApiControllers = require('authorizenet').APIControllers;
 const Constants = require('authorizenet').Constants;
 
 const ddb = new AWS.DynamoDB.DocumentClient();
+const secretsManager = new AWS.SecretsManager();
+let transactionKeyPromise;
 const suffix = () => `${process.env.API_LEXHOA_GRAPHQLAPIIDOUTPUT}-${process.env.ENV}`;
 const tables = () => ({ payment: `Payment-${suffix()}`, profile: `Profile-${suffix()}` });
 const FAILED = new Set(['declined', 'expired', 'generalError', 'failedReview', 'settlementError', 'voided', 'returnedItem', 'chargeback']);
 const cents = value => Math.round(Number(value) * 100);
 const rail = accountType => /echeck|bank/i.test(String(accountType || '')) ? 'BANK_ACCOUNT' : accountType ? 'CARD' : null;
+
+async function loadSecret(secretId, client = secretsManager) {
+  if (!secretId) throw new Error('Authorize.Net transaction secret is not configured');
+  const secret = await client.getSecretValue({ SecretId: secretId }).promise();
+  if (typeof secret.SecretString !== 'string' || !secret.SecretString) throw new Error('Authorize.Net transaction secret is empty');
+  return secret.SecretString;
+}
+
+async function getTransactionKey() {
+  if (!transactionKeyPromise) transactionKeyPromise = loadSecret(process.env.AUTHNET_TRANSACTION_SECRET_ID);
+  try { return await transactionKeyPromise; }
+  catch (error) { transactionKeyPromise = undefined; throw error; }
+}
 
 async function scanPending(client = ddb) {
   const items = []; let ExclusiveStartKey;
@@ -19,9 +34,10 @@ async function scanPending(client = ddb) {
   return items;
 }
 
-function details(transId) {
+async function details(transId) {
+  const transactionKey = await getTransactionKey();
   return new Promise((resolve, reject) => {
-    const auth = new ApiContracts.MerchantAuthenticationType(); auth.setName(process.env.AUTHNET_API_LOGIN_ID); auth.setTransactionKey(process.env.AUTHNET_TRANSACTION_KEY);
+    const auth = new ApiContracts.MerchantAuthenticationType(); auth.setName(process.env.AUTHNET_API_LOGIN_ID); auth.setTransactionKey(transactionKey);
     const req = new ApiContracts.GetTransactionDetailsRequest(); req.setMerchantAuthentication(auth); req.setTransId(transId);
     const ctrl = new ApiControllers.GetTransactionDetailsController(req.getJSON()); ctrl.setEnvironment(process.env.AUTHNET_ENVIRONMENT === 'production' ? Constants.endpoint.production : Constants.endpoint.sandbox);
     ctrl.execute(() => { const res = new ApiContracts.GetTransactionDetailsResponse(ctrl.getResponse()); if (res?.getMessages().getResultCode() !== ApiContracts.MessageTypeEnum.OK) return reject(new Error('Processor verification failed')); const tx = res.getTransaction(); const returned = tx.getReturnedItems?.()?.getReturnedItem?.() || []; resolve({ status: tx.getTransactionStatus(), amount: Number(tx.getSettleAmount?.() || tx.getAuthAmount()), accountType: String(tx.getAccountType?.() || ''), returned: returned.length > 0 }); });
@@ -70,4 +86,4 @@ async function reconcile(deps) {
 }
 const defaultDeps = { scan: scanPending, details, transition, reverseReturned };
 exports.handler = async () => reconcile(defaultDeps);
-exports._internals = { reconcile, scanPending, details, transition, reverseReturned, rail, FAILED, tables };
+exports._internals = { reconcile, scanPending, details, transition, reverseReturned, rail, FAILED, tables, loadSecret };

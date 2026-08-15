@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { reconcile, transition } = require('./index')._internals;
+const { reconcile, scanPending, transition, transactionAccountType } = require('./index')._internals;
 const payment = (overrides = {}) => ({ id: 'p1', ownerPaymentsId: 'u1', status: 'PROCESSING', paymentMethod: 'CARD', amount: 100, totalAmount: 103.2, balanceApplied: false, authNetTransactionId: 'private', ...overrides });
 const run = (p, d, apply = async () => true) => reconcile({ scan: async () => [p], details: async () => d, transition: apply });
 
@@ -25,4 +25,16 @@ test('successful transition is one atomic profile/payment request', async () => 
   const client = { get: () => ({ promise: async () => ({ Item: { id: 'u1', balance: 100, activePaymentId: 'p1' } }) }), transactWrite: p => ({ promise: async () => { request = p; } }) };
   await transition(payment(), true, client);
   assert.equal(request.TransactItems.length, 2); assert.match(request.TransactItems[0].Update.UpdateExpression, /REMOVE activePaymentId/); assert.match(request.TransactItems[1].Update.ConditionExpression, /balanceApplied/);
+});
+test('transaction rail falls back to masked payment details', () => {
+  const payment = value => ({ getPayment: () => value });
+  assert.equal(transactionAccountType(payment({ getBankAccount: () => ({}) })), 'eCheck');
+  assert.equal(transactionAccountType(payment({ getBankAccount: () => undefined, getCreditCard: () => ({}) })), 'card');
+});
+test('scan excludes manual checks and legacy zero-ID transactions', async () => {
+  let request;
+  const client = { scan: value => ({ promise: async () => { request = value; return { Items: [] }; } }) };
+  await scanPending(client);
+  assert.match(request.FilterExpression, /attribute_exists\(authNetTransactionId\)/);
+  assert.equal(request.ExpressionAttributeValues[':zero'], '0');
 });

@@ -4,6 +4,24 @@
 
 > This is a remediation plan, not a compliance finding, legal opinion, QSA certification, or attestation. Completing tasks in this roadmap does **not** itself establish current compliance; controls must operate, be evidenced, and be assessed. LexHOA's custom Accept.js page renders and handles payment fields before direct tokenization, so the AWS backend avoids intentional raw account-data storage but the browser application remains security-relevant.
 
+## Sprint 2 closeout status — August 15, 2026
+
+**Implemented and technically verified in the AWS `main` sandbox:**
+
+- Payment requests require a Cognito identity; the backend derives the member, enforces profile ownership, validates amount/payment metadata, and creates authoritative records.
+- Payment Lambdas no longer log full payment events or opaque payment values and expose only allowlisted processor diagnostics.
+- Authorize.Net transaction and webhook signature keys are stored in AWS Secrets Manager. Deployed Lambda configuration contains secret identifiers rather than key values, and obsolete raw-key Amplify parameters have been removed.
+- The webhook rejects missing or invalid signatures. The active Authorize.Net subscription delivers auth-capture, refund, and void events to the deployed API Gateway endpoint; controlled unsigned and signed tests returned HTTP 400 and 200 respectively.
+- ACH transactions are recognized from Authorize.Net's bank-account payload. The enabled daily EventBridge reconciliation retained the pending payment and profile lock while settlement remained pending.
+- The three payment Lambda unit suites pass, including authorization, redaction, webhook, ACH rail, and reconciliation cases.
+
+**Not yet closed:**
+
+- Observe the current ACH transaction reach final settlement and verify exactly-once balance application and lock release.
+- Gitleaks 8.30.1 found no detector match in the current tracked tree, but found 18 historical potential-secret matches in 9 of 139 commits. Prior Authorize.Net credentials are reported rotated/inactive; retain the redacted scan report and rotation record rather than treating history as clean. Obsolete payment-provider source and local configuration values were removed after confirming the six legacy Lambdas had zero invocations in the 90-day review window. Dev/staging cloud-resource deletion remains open because the legacy dev Amplify GraphQL nested stack requires CloudFormation recovery before Amplify can complete the deletions safely.
+- Replace `ninube`'s long-lived administrator key with tested short-lived IAM Identity Center/role credentials, then deactivate the old key and enable MFA for interactive access. The obsolete `CLIuser`, its stale keys, and `CLIgroup` have been deleted.
+- Perform and retain the break-glass exercise, control-owner approval, current diagram/inventory sign-off, and the Step 0 acquirer/QSA scope confirmation.
+
 ## Step 0 — written scope and questionnaire confirmation (blocker)
 
 The Compliance Owner must obtain written confirmation from the acquirer/payment brands, with QSA assistance as needed, of the merchant level, validation deadline, CDE/connected-to/security-impacting systems, service providers, and applicable questionnaire. **SAQ A-EP appears likely, but this roadmap never claims final eligibility.** Record why SAQ D or another validation form is or is not required, including treatment of eCheck, administrator endpoints, Amplify build/deploy, Git hosting, DNS, AWS, and Authorize.Net.

@@ -14,7 +14,7 @@ Comprehensive planning documents have been created for the next phase of LexHOA 
 Complete roadmap covering:
 - **Feature 1:** Document Library (public-facing document access)
 - **Feature 2:** Annual Dues Management (quarterly tracking with proration)
-- **Feature 3:** Payment Processing Integration (Stripe integration with fee pass-through)
+- **Feature 3:** Payment Processing Integration (Authorize.Net with fee pass-through)
 
 Includes:
 - Technical requirements for each feature
@@ -77,38 +77,23 @@ Comprehensive specification including:
 **Why Third:**
 - Highest risk (financial transactions)
 - Depends on Annual Dues being in place
-- Requires external account setup (Stripe)
+- Requires external account setup (Authorize.Net)
 - Needs extensive testing
 
 **Next Actions:**
-1. Set up Stripe account (test mode)
-2. Review Stripe React SDK documentation
-3. Design fee pass-through UX
-4. Build payment portal
-5. Implement webhook handlers (Lambda)
-6. Extensive testing in test mode
-7. Soft launch with board members
-8. Production rollout
+1. Complete card and ACH sandbox settlement/return testing
+2. Verify webhook delivery and reconciliation alerts
+3. Complete PCI and IAM remediation checklist
+4. Soft launch with board members
+5. Production rollout
 
 ---
 
-## Payment Processing Research Summary
+## Payment Processing Status
 
-### Recommended: Stripe
-**Rationale:**
-- Best developer experience with React
-- Comprehensive API and SDK
-- ACH support (0.8%, capped at $5) for lower-cost option
-- Card processing (2.9% + $0.30)
-- Fee pass-through supported
-- Strong security/compliance
-- Webhook system for automation
-- Industry standard
-
-**Cost Examples:**
-- $100 dues via ACH: Homeowner pays $100.80 (or $105 capped)
-- $100 dues via Card: Homeowner pays $103.29
-- HOA receives $100 in both cases
+Authorize.Net is the selected processor. Card and ACH tokenization, payment creation,
+signed webhooks, and scheduled reconciliation are implemented. Production rollout
+depends on completing the current payment and security testing checklists.
 
 ### Alternative: Square
 - Simpler setup
@@ -145,9 +130,9 @@ Profile Balance Updates (when paid)
 
 ### Payment Processing
 ```
-Homeowner → Stripe Checkout
+Homeowner → Accept.js tokenization
   ↓
-Stripe Payment Success
+Authorize.Net transaction
   ↓
 Webhook → AWS Lambda
   ↓
@@ -181,7 +166,7 @@ See: `.agent-os/product/roadmap.md`
 type Payment {
   # Add new fields:
   paymentMethod: PaymentMethod # CARD, ACH, CHECK
-  stripePaymentIntentId: String
+  authNetTransactionId: String
   processingFee: Float
   totalPaid: Float # checkAmount + processingFee
   status: PaymentStatus # PENDING, COMPLETED, FAILED
@@ -216,7 +201,7 @@ enum PaymentStatus {
 ### New (To Create)
 - 📄 S3 bucket for public documents
 - 💰 Lambda functions for payment processing
-- 💰 Stripe account (test + production)
+- 💰 Authorize.Net account (sandbox + production)
 - 📄 CloudFront distribution (optional, for faster document delivery)
 - 💳 SES configuration (for payment receipts)
 
@@ -234,10 +219,10 @@ enum PaymentStatus {
 - **Total: ~$0.25/month**
 
 ### Payment Processing
-- Stripe fees: Passed to homeowner
+- Processor fees: Passed to homeowner
 - Lambda: ~$0.20 (minimal invocations)
 - SES (email receipts): ~$0.10
-- **Total: ~$0.30/month + Stripe fees (paid by homeowners)**
+- **Total: ~$0.30/month + processor fees (paid by homeowners)**
 
 **Grand Total: ~$0.66/month additional costs**
 
@@ -261,10 +246,10 @@ enum PaymentStatus {
 5. ⏳ Do we backfill historical data?
 
 ### Payment Processing
-1. ⏳ Stripe or Square? (Recommending Stripe)
-2. ⏳ Should we offer ACH (lower fees) in addition to cards?
+1. ✅ Processor selected: Authorize.Net
+2. ✅ Offer ACH in addition to cards
 3. ⏳ Should payment be optional or replace checks entirely?
-4. ⏳ Who manages the Stripe account? (Treasurer? President?)
+4. ⏳ Who manages the Authorize.Net account? (Treasurer? President?)
 5. ⏳ What bank account receives payments?
 6. ⏳ Do we need recurring payment setup (auto-pay)?
 

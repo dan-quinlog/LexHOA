@@ -1,5 +1,5 @@
 const test = require('node:test'); const assert = require('node:assert/strict'); const crypto = require('crypto');
-const mod = require('./index'); const { processEvent, verify, handle } = mod._internals; const key = 'k'.repeat(128);
+const mod = require('./index'); const { processEvent, verify, handle, transactionAccountType } = mod._internals; const key = 'k'.repeat(128);
 const sign = raw => `sha512=${crypto.createHmac('sha512', Buffer.from(key, 'utf8')).update(raw).digest('hex')}`;
 const hook = (type = 'authcapture', id = 'event') => ({ notificationId: id, eventType: `net.authorize.payment.${type}.created`, payload: { id: 'tx' } });
 function deps(payment, detail) { const calls = []; return { calls, received: async () => false, details: async () => detail, byTransaction: async id => id === payment.authNetTransactionId ? payment : null, byReference: async ref => ref === payment.processorReference ? payment : null, transition: async (...x) => calls.push(x) }; }
@@ -11,3 +11,8 @@ test('unsupported event rejected', async () => { await assert.rejects(processEve
 test('authcapture recovers by merchant reference and ACH becomes pending', async () => { const p = { id: 'p', processorReference: 'ref', paymentMethod: 'BANK_ACCOUNT', totalAmount: 10, amount: 9, status: 'PROCESSING' }; const d = deps(p, { id: 'newtx', reference: 'ref', amount: 10, accountType: 'eCheck', status: 'capturedPendingSettlement' }); await processEvent(hook(), d); assert.equal(d.calls[0][1], 'PENDING'); assert.equal(d.calls[0][5], undefined); });
 test('refund resolves refTransId and partial refund fails closed', async () => { const p = { id: 'p', authNetTransactionId: 'original', paymentMethod: 'CARD', totalAmount: 10, amount: 9, balanceApplied: true }; const d = deps(p, { id: 'refund', refTransId: 'original', amount: 10, accountType: 'Visa', status: 'refundSettledSuccessfully' }); await processEvent(hook('refund'), d); assert.equal(d.calls[0][1], 'REFUNDED'); d.details = async () => ({ id: 'refund', refTransId: 'original', amount: 5, status: 'refundSettledSuccessfully' }); await assert.rejects(processEvent(hook('refund', 'event2'), d), /Partial/); });
 test('duplicate receipt is a no-op', async () => { let queried = false; const d = { received: async () => true, details: async () => { queried = true; } }; await processEvent(hook(), d); assert.equal(queried, false); });
+test('transaction rail falls back to masked payment details', () => {
+  const payment = value => ({ getPayment: () => value });
+  assert.equal(transactionAccountType(payment({ getBankAccount: () => ({}) })), 'eCheck');
+  assert.equal(transactionAccountType(payment({ getBankAccount: () => undefined, getCreditCard: () => ({}) })), 'card');
+});

@@ -31,14 +31,6 @@
     "authNetApiLoginId": {
       "Type": "String"
     },
-    "authNetSignatureKey": {
-      "Type": "String",
-      "NoEcho": true
-    },
-    "authNetTransactionKey": {
-      "Type": "String",
-      "NoEcho": true
-    },
     "authNetEnvironment": {
       "Type": "String"
     }

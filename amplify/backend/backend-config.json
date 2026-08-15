@@ -231,14 +231,6 @@
         }
       ]
     },
-    "AMPLIFY_function_createAuthNetCustomerProfile_authNetTransactionKey": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "createAuthNetCustomerProfile"
-        }
-      ]
-    },
     "AMPLIFY_function_createAuthNetCustomerProfile_deploymentBucketName": {
       "usedBy": [
         {
@@ -271,14 +263,6 @@
         }
       ]
     },
-    "AMPLIFY_function_createAuthNetTransaction_authNetTransactionKey": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "createAuthNetTransaction"
-        }
-      ]
-    },
     "AMPLIFY_function_createAuthNetTransaction_deploymentBucketName": {
       "usedBy": [
         {
@@ -304,22 +288,6 @@
       ]
     },
     "AMPLIFY_function_handleAuthNetWebhook_authNetEnvironment": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "handleAuthNetWebhook"
-        }
-      ]
-    },
-    "AMPLIFY_function_handleAuthNetWebhook_authNetSignatureKey": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "handleAuthNetWebhook"
-        }
-      ]
-    },
-    "AMPLIFY_function_handleAuthNetWebhook_authNetTransactionKey": {
       "usedBy": [
         {
           "category": "function",
@@ -424,14 +392,6 @@
       ]
     },
     "AMPLIFY_function_reconcileAuthNetPayments_authNetEnvironment": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "reconcileAuthNetPayments"
-        }
-      ]
-    },
-    "AMPLIFY_function_reconcileAuthNetPayments_authNetTransactionKey": {
       "usedBy": [
         {
           "category": "function",

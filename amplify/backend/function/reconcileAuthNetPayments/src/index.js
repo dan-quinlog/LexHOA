@@ -11,6 +11,7 @@ const tables = () => ({ payment: `Payment-${suffix()}`, profile: `Profile-${suff
 const FAILED = new Set(['declined', 'expired', 'generalError', 'failedReview', 'settlementError', 'voided', 'returnedItem', 'chargeback']);
 const cents = value => Math.round(Number(value) * 100);
 const rail = accountType => /echeck|bank/i.test(String(accountType || '')) ? 'BANK_ACCOUNT' : accountType ? 'CARD' : null;
+const transactionAccountType = tx => String(tx.getAccountType?.() || (tx.getPayment?.()?.getBankAccount?.() ? 'eCheck' : tx.getPayment?.()?.getCreditCard?.() ? 'card' : ''));
 
 async function loadSecret(secretId, client = secretsManager) {
   if (!secretId) throw new Error('Authorize.Net transaction secret is not configured');
@@ -28,7 +29,7 @@ async function getTransactionKey() {
 async function scanPending(client = ddb) {
   const items = []; let ExclusiveStartKey;
   do {
-    const page = await client.scan({ TableName: tables().payment, FilterExpression: '#s=:pending OR #s=:processing OR (#s=:succeeded AND paymentMethod=:bank)', ExpressionAttributeNames: { '#s': 'status' }, ExpressionAttributeValues: { ':pending': 'PENDING', ':processing': 'PROCESSING', ':succeeded': 'SUCCEEDED', ':bank': 'BANK_ACCOUNT' }, ExclusiveStartKey }).promise();
+    const page = await client.scan({ TableName: tables().payment, FilterExpression: 'attribute_exists(authNetTransactionId) AND authNetTransactionId<>:zero AND (#s=:pending OR #s=:processing OR (#s=:succeeded AND paymentMethod=:bank))', ExpressionAttributeNames: { '#s': 'status' }, ExpressionAttributeValues: { ':zero': '0', ':pending': 'PENDING', ':processing': 'PROCESSING', ':succeeded': 'SUCCEEDED', ':bank': 'BANK_ACCOUNT' }, ExclusiveStartKey }).promise();
     items.push(...(page.Items || [])); ExclusiveStartKey = page.LastEvaluatedKey;
   } while (ExclusiveStartKey);
   return items;
@@ -40,7 +41,7 @@ async function details(transId) {
     const auth = new ApiContracts.MerchantAuthenticationType(); auth.setName(process.env.AUTHNET_API_LOGIN_ID); auth.setTransactionKey(transactionKey);
     const req = new ApiContracts.GetTransactionDetailsRequest(); req.setMerchantAuthentication(auth); req.setTransId(transId);
     const ctrl = new ApiControllers.GetTransactionDetailsController(req.getJSON()); ctrl.setEnvironment(process.env.AUTHNET_ENVIRONMENT === 'production' ? Constants.endpoint.production : Constants.endpoint.sandbox);
-    ctrl.execute(() => { const res = new ApiContracts.GetTransactionDetailsResponse(ctrl.getResponse()); if (res?.getMessages().getResultCode() !== ApiContracts.MessageTypeEnum.OK) return reject(new Error('Processor verification failed')); const tx = res.getTransaction(); const returned = tx.getReturnedItems?.()?.getReturnedItem?.() || []; resolve({ status: tx.getTransactionStatus(), amount: Number(tx.getSettleAmount?.() || tx.getAuthAmount()), accountType: String(tx.getAccountType?.() || ''), returned: returned.length > 0 }); });
+    ctrl.execute(() => { const res = new ApiContracts.GetTransactionDetailsResponse(ctrl.getResponse()); if (res?.getMessages().getResultCode() !== ApiContracts.MessageTypeEnum.OK) return reject(new Error('Processor verification failed')); const tx = res.getTransaction(); const returned = tx.getReturnedItems?.()?.getReturnedItem?.() || []; resolve({ status: tx.getTransactionStatus(), amount: Number(tx.getSettleAmount?.() || tx.getAuthAmount()), accountType: transactionAccountType(tx), returned: returned.length > 0 }); });
   });
 }
 
@@ -86,4 +87,4 @@ async function reconcile(deps) {
 }
 const defaultDeps = { scan: scanPending, details, transition, reverseReturned };
 exports.handler = async () => reconcile(defaultDeps);
-exports._internals = { reconcile, scanPending, details, transition, reverseReturned, rail, FAILED, tables, loadSecret };
+exports._internals = { reconcile, scanPending, details, transition, reverseReturned, rail, FAILED, tables, loadSecret, transactionAccountType };

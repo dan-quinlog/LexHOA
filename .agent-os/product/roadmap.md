@@ -124,59 +124,10 @@ type AnnualDue @model
 
 ### Feature 3: Payment Processing Integration 💳
 **Priority:** High  
-**Status:** Research  
-**Target:** Q2 2025  
+**Status:** Implemented; production-readiness validation in progress
 
 #### Purpose
 Enable online payment collection with fees passed through to the payor.
-
-#### Payment Processor Research
-
-**Option 1: Stripe**
-- **Pros:**
-  - Developer-friendly API
-  - Excellent React/JavaScript SDKs
-  - ACH support (lower fees for bank transfers)
-  - Pass fees to customer supported
-  - Strong security and compliance
-  - Detailed reporting
-- **Cons:**
-  - 2.9% + $0.30 per card transaction
-  - 0.8% (capped at $5) for ACH
-  - May hold funds for new accounts
-- **Best For:** Technical integration, flexibility
-
-**Option 2: Square**
-- **Pros:**
-  - Simple setup for nonprofits/organizations
-  - 2.6% + $0.10 per transaction (slightly cheaper)
-  - Free card reader hardware
-  - Easy-to-use dashboard
-  - Good for in-person payments (events)
-- **Cons:**
-  - Less flexible API than Stripe
-  - Limited ACH options
-  - Fee pass-through requires custom implementation
-- **Best For:** Simplicity, in-person + online
-
-**Option 3: PayPal/Venmo**
-- **Pros:**
-  - Familiar to users
-  - 3.49% + $0.49 per transaction for invoicing
-  - Easy setup
-- **Cons:**
-  - Higher fees
-  - Less professional appearance
-  - Limited customization
-  - Controversial dispute resolution
-- **Best For:** Quick setup, low volume
-
-**Recommendation: Stripe**
-- Best developer experience with React
-- ACH option reduces fees significantly for dues
-- Can customize fee pass-through logic
-- Industry standard for payment processing
-- AWS Lambda integration available
 
 #### Requirements
 - Homeowners can pay online via credit card or ACH
@@ -192,49 +143,30 @@ Enable online payment collection with fees passed through to the payor.
 **Architecture:**
 ```
 Frontend (React)
-  ↓ Stripe React SDK
-Stripe Checkout Session
+  ↓ Accept.js tokenization
+Authorize.Net transaction
   ↓ Webhook
 AWS Lambda Function
-  ↓ AppSync Mutation
-DynamoDB (Payment + Profile Update)
-```
-
-**Fee Pass-Through Calculation:**
-```javascript
-// Example: $100 HOA dues
-// Card processing: 2.9% + $0.30
-// To pass fee to customer:
-// amount = (100 + 0.30) / (1 - 0.029) = $103.29
-
-function calculateTotalWithFees(baseAmount, paymentMethod) {
-  if (paymentMethod === 'ach') {
-    // ACH: 0.8% capped at $5
-    const fee = Math.min(baseAmount * 0.008, 5);
-    return baseAmount + fee;
-  } else {
-    // Card: 2.9% + $0.30
-    return (baseAmount + 0.30) / (1 - 0.029);
-  }
-}
+  ↓ DynamoDB transaction
+Payment + Profile balance update
 ```
 
 **Components:**
 - Payment Portal (user-facing)
 - Fee Calculator display
-- Stripe Checkout integration
+- Authorize.Net Accept.js integration
 - Payment confirmation page
 - Admin dashboard for transaction history
 
 **Backend:**
-- Lambda function: `processStripePayment`
-- Lambda function: `stripeWebhookHandler`
-- AppSync mutation: `recordOnlinePayment`
-- S3 storage for payment receipts (PDFs)
+- Lambda function: `createAuthNetTransaction`
+- Lambda function: `handleAuthNetWebhook`
+- Lambda function: `reconcileAuthNetPayments`
+- Secrets Manager for processor credentials
 
 #### Security Considerations
-- Never store card numbers (use Stripe tokens)
-- PCI compliance via Stripe
+- Never store card or bank account numbers; use Accept.js opaque tokens
+- Store processor credentials only in Secrets Manager
 - HTTPS only
 - Webhook signature verification
 - Audit logging for all transactions
@@ -288,13 +220,13 @@ function calculateTotalWithFees(baseAmount, paymentMethod) {
 ---
 
 ### Phase 3: Payment Integration (Weeks 6-10)
-**Feature:** Stripe Payment Processing
-- Set up Stripe account
-- Create Stripe Checkout integration
+**Feature:** Authorize.Net Payment Processing
+- Configure Authorize.Net account and Secrets Manager credentials
+- Create Accept.js card and ACH integration
 - Build fee calculator
 - Implement webhook handlers (Lambda)
 - Create payment receipt generation
-- Testing with Stripe test mode
+- Test card and ACH settlement flows in sandbox
 - Production deployment
 
 **Deliverables:**
@@ -321,8 +253,8 @@ function calculateTotalWithFees(baseAmount, paymentMethod) {
 - Board tools enhancement
 
 ### Payment Processing
-- Stripe account setup
-- Stripe API keys (test and production)
+- Authorize.Net account setup
+- Authorize.Net credentials in AWS Secrets Manager
 - AWS Lambda functions
 - Webhook endpoint configuration
 - Environment variable management
@@ -360,7 +292,7 @@ function calculateTotalWithFees(baseAmount, paymentMethod) {
 - Webhook handling must be robust
 
 **Mitigation:**
-- Extensive testing in Stripe test mode
+- Extensive testing in Authorize.Net sandbox
 - Code review for all payment logic
 - Comprehensive error handling
 - Audit logging

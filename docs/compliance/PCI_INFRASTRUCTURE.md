@@ -2,7 +2,7 @@
 
 **System:** Lexington Commons HOA website (LexHOA)  
 **Environment reviewed:** AWS Amplify `main`, AWS Region `us-east-1`  
-**Last repository review:** July 21, 2026  
+**Last repository review:** August 15, 2026
 **Document owner:** Lexington Commons HOA  
 **Classification:** Confidential — share only with authorized assessors and service providers
 
@@ -27,9 +27,9 @@ No corporate, guest, point-of-sale, or administrative wireless network is connec
 
 The browser loads Authorize.Net Accept.js from an Authorize.Net domain over HTTPS. Card number, expiration date, and card verification code—or bank account and routing information for eCheck—are entered into React-controlled fields in the LexHOA payment page. LexHOA's browser-side JavaScript passes those values directly to Accept.js, which transmits them from the member's browser to Authorize.Net for tokenization.
 
-The raw card or bank values are not sent to AWS AppSync, Lambda, or DynamoDB and are not intentionally stored by LexHOA. Authorize.Net returns a short-lived opaque payment-data descriptor and value to the browser. The browser sends that opaque data, along with amount and member/payment metadata, through the AppSync API to the transaction Lambda. The repository does not yet prove that this custom mutation requires Cognito authentication or validates profile ownership; mandatory server-side authentication, ownership, amount, and record controls are P0 remediation items. The Lambda submits the opaque data to Authorize.Net's transaction API. LexHOA stores only non-cardholder transaction records such as the Authorize.Net transaction ID, payment method category, amount, fee, status, description, member/profile reference, and timestamps.
+The raw card or bank values are not sent to AWS AppSync, Lambda, or DynamoDB and are not intentionally stored by LexHOA. Authorize.Net returns a short-lived opaque payment-data descriptor and value to the browser. The browser sends that opaque data through a Cognito-authenticated AppSync mutation to the transaction Lambda. The Lambda derives the member identity from the Cognito subject, verifies profile ownership, validates the amount and payment metadata, submits the opaque data to Authorize.Net, and creates the authoritative payment record. LexHOA stores only non-cardholder transaction records such as the Authorize.Net transaction ID, payment method category, amount, fee, status, description, member/profile reference, and timestamps.
 
-Authorize.Net sends signed asynchronous transaction events to the public API Gateway webhook endpoint. The webhook Lambda is intended to verify the event signature before updating payment status or member balance through IAM-authenticated AppSync requests. The current implementation validates a signature only when the header is present and accepts missing signatures; mandatory fail-closed verification is a P0 remediation item. A scheduled reconciliation Lambda also queries Authorize.Net for pending eCheck settlement status and updates the application records.
+Authorize.Net sends signed asynchronous transaction events to the public API Gateway webhook endpoint. The webhook Lambda rejects missing, malformed, and invalid signatures before processing supported payment events, then updates payment status or member balance through IAM-authenticated AppSync requests. A scheduled reconciliation Lambda also queries Authorize.Net for pending eCheck settlement status and updates the application records.
 
 ### Important PCI scope statement
 
@@ -44,15 +44,16 @@ The current integration is **Accept.js direct tokenization**, not Accept Hosted,
 | Opaque payment descriptor/value | Authorize.Net → browser → AppSync → transaction Lambda → Authorize.Net | Used transiently; must not be intentionally logged or stored |
 | Member email/profile ID, amount, fee, payment method category | Browser → AppSync/Lambda → Authorize.Net | Stored where required for member and payment records |
 | Transaction ID, status, amounts, description, timestamps | Authorize.Net/Lambda/webhook → AppSync → DynamoDB | Stored as the payment record |
-| Authorize.Net merchant credentials and webhook signature key | Lambda environment/configuration | Never exposed to browser or committed source; verify current secret-management controls in AWS |
+| Authorize.Net transaction and webhook signature keys | AWS Secrets Manager → payment Lambdas | Never exposed to browser or committed source; Lambda configuration contains secret identifiers, not secret values |
 
 ## Security boundaries and controls represented
 
 - All external flows shown in the diagrams are HTTPS/TLS connections.
-- Amazon Cognito authenticates members; AppSync supports Cognito, IAM, API-key, and model-level authorization rules. The payment mutation's Cognito authentication and profile-ownership enforcement require remediation and live verification.
+- Amazon Cognito authenticates members; the payment transaction Lambda derives the caller from Cognito and enforces profile ownership and amount controls server-side.
 - Lambda execution roles provide service-to-service access to AppSync and other required AWS resources.
 - DynamoDB and S3 are managed data services and are not directly reachable as database servers from the public internet.
 - The Authorize.Net client key and API login ID are browser-public integration identifiers; the transaction key and signature key are backend secrets.
+- The transaction and signature keys are stored in AWS Secrets Manager. Payment Lambda roles receive scoped read access to only the key each function requires.
 - CloudWatch receives application and Lambda logs. Raw payment values and opaque payment tokens must not be written to logs.
 - There is no trusted wireless network or wireless entry point within the AWS system boundary.
 
@@ -71,17 +72,21 @@ The repository establishes application intent but cannot prove every live contro
 - Content Security Policy and change/tamper monitoring for the payment page and third-party payment script.
 - Current Authorize.Net webhook subscriptions and eCheck reconciliation schedule.
 
-## Repository findings requiring remediation
+## August 15, 2026 operational verification
 
-The July 21, 2026 repository review identified two implementation details that do not yet satisfy controls stated in this document:
+The Sprint 2 review verified the following in the AWS `main` sandbox environment:
 
-1. The transaction Lambda logs the complete AppSync event, which includes the Authorize.Net opaque payment descriptor and value. Replace that log with a redacted event summary and review existing CloudWatch logs and retention.
-2. The webhook Lambda validates a signature when the `X-ANET-Signature` header is present but does not reject a request when the header is absent. Require the header and reject every missing or invalid signature before parsing or processing the event.
+- Transaction and signature keys are held in Secrets Manager under `lexhoa/main/authorizenet/`; deployed Lambda environment variables contain only secret identifiers.
+- The active Authorize.Net webhook targets API Gateway `d0tqka2jj1` and subscribes to auth-capture, refund, and void events. An unsigned request returned HTTP 400 and a correctly signed controlled request returned HTTP 200.
+- The EventBridge rule targeting `reconcileAuthNetPayments-main` is enabled on `cron(0 12 * * ? *)`. A controlled reconciliation checked the pending ACH payment without error and retained its active-payment lock while Authorize.Net reported `capturedPendingSettlement`.
+- Payment Lambda unit suites passed after adding authentication/ownership, redacted logging, fail-closed webhook, payment-rail, and reconciliation coverage.
+- Gitleaks 8.30.1 scanned the current tracked tree and 139-commit history. Historical findings remain and require retention as rotated-credential incident evidence; see the remediation-roadmap status for the remaining local documentation finding.
 
-Do not mark the related operational-verification items complete until the deployed functions have been remediated and tested.
+The remaining live-control checks in the preceding section still require periodic evidence. In particular, eventual ACH settlement and balance application must be observed before the end-to-end ACH scenario is closed.
 
 ## Review log
 
 | Date | Reviewer | Trigger | Result / changes | Approval |
 |---|---|---|---|---|
 | 2026-07-21 | Repository review | Initial infrastructure documentation | Corrected VPC/server claims and documented Accept.js direct-tokenization flow | Pending operational review |
+| 2026-08-15 | Sprint 2 technical review | Payment security and ACH closeout | Verified deployed authentication, Secrets Manager integration, webhook validation, and scheduled reconciliation; historical secret findings and IAM actions remain | Pending control-owner approval |

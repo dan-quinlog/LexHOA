@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+test -d node_modules
+
+echo "LexHOA orb is ready"

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Installing LexHOA frontend dependencies"
+npm ci --no-audit --no-fund
+
+echo "Installing Lambda dependencies"
+while IFS= read -r -d '' lockfile; do
+  function_dir="$(dirname "$lockfile")"
+  echo "  ${function_dir}"
+  npm ci --prefix "$function_dir" --no-audit --no-fund </dev/null
+done < <(find amplify/backend/function -path '*/src/package-lock.json' -print0 | sort -z)
+
+echo "LexHOA orb setup complete"

@@ -74,19 +74,19 @@ The repository establishes application intent but cannot prove every live contro
 
 ## August 15, 2026 operational verification
 
-The Sprint 2 review verified the following in the AWS `main` sandbox environment:
+The Sprint 1 review verified the following in the AWS `main` sandbox environment:
 
 - Transaction and signature keys are held in Secrets Manager under `lexhoa/main/authorizenet/`; deployed Lambda environment variables contain only secret identifiers.
 - The active Authorize.Net webhook targets API Gateway `d0tqka2jj1` and subscribes to auth-capture, refund, and void events. An unsigned request returned HTTP 400 and a correctly signed controlled request returned HTTP 200.
-- The EventBridge rule targeting `reconcileAuthNetPayments-main` is enabled on `cron(0 12 * * ? *)`. A controlled reconciliation checked the pending ACH payment without error and retained its active-payment lock while Authorize.Net reported `capturedPendingSettlement`.
+- The EventBridge rule targeting `reconcileAuthNetPayments-main` is enabled on `cron(0 12 * * ? *)`. Controlled reconciliation checked the sandbox ACH payment without error and retained its lock while Authorize.Net reported `capturedPendingSettlement`. Because Authorize.Net does not simulate eCheck settlement in sandbox, the test record was later conditionally canceled without applying its balance, its profile lock was released, and reconciliation then reported zero pending records and zero errors.
 - Payment Lambda unit suites passed after adding authentication/ownership, redacted logging, fail-closed webhook, payment-rail, and reconciliation coverage.
 - Gitleaks 8.30.1 scanned the current tracked tree and 139-commit history. Historical findings remain and require retention as rotated-credential incident evidence; see the remediation-roadmap status for the remaining local documentation finding.
 
-The remaining live-control checks in the preceding section still require periodic evidence. In particular, eventual ACH settlement and balance application must be observed before the end-to-end ACH scenario is closed.
+The remaining live-control checks in the preceding section still require periodic evidence. In particular, a controlled production ACH pilot must verify processor-driven settlement or return and exactly-once balance application before the end-to-end ACH scenario is closed.
 
 ## Review log
 
 | Date | Reviewer | Trigger | Result / changes | Approval |
 |---|---|---|---|---|
 | 2026-07-21 | Repository review | Initial infrastructure documentation | Corrected VPC/server claims and documented Accept.js direct-tokenization flow | Pending operational review |
-| 2026-08-15 | Sprint 2 technical review | Payment security and ACH closeout | Verified deployed authentication, Secrets Manager integration, webhook validation, and scheduled reconciliation; historical secret findings and IAM actions remain | Pending control-owner approval |
+| 2026-08-15 | Sprint 1 technical review | Payment security and ACH closeout | Verified deployed authentication, Secrets Manager integration, webhook validation, scheduled reconciliation, and safe sandbox-record cancellation; formal scope and operating evidence remain | Pending control-owner approval |

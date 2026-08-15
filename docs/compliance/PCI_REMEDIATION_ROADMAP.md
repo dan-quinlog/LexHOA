@@ -4,7 +4,10 @@
 
 > This is a remediation plan, not a compliance finding, legal opinion, QSA certification, or attestation. Completing tasks in this roadmap does **not** itself establish current compliance; controls must operate, be evidenced, and be assessed. LexHOA's custom Accept.js page renders and handles payment fields before direct tokenization, so the AWS backend avoids intentional raw account-data storage but the browser application remains security-relevant.
 
-## Sprint 2 closeout status — August 15, 2026
+Delivery sequencing and current sprint status are maintained in the
+[PCI sprint guide](./PCI_SPRINT_GUIDE.md).
+
+## Current implementation status - August 15, 2026
 
 **Implemented and technically verified in the AWS `main` sandbox:**
 
@@ -12,7 +15,7 @@
 - Payment Lambdas no longer log full payment events or opaque payment values and expose only allowlisted processor diagnostics.
 - Authorize.Net transaction and webhook signature keys are stored in AWS Secrets Manager. Deployed Lambda configuration contains secret identifiers rather than key values, and obsolete raw-key Amplify parameters have been removed.
 - The webhook rejects missing or invalid signatures. The active Authorize.Net subscription delivers auth-capture, refund, and void events to the deployed API Gateway endpoint; controlled unsigned and signed tests returned HTTP 400 and 200 respectively.
-- ACH transactions are recognized from Authorize.Net's bank-account payload. The enabled daily EventBridge reconciliation retained the pending payment and profile lock while settlement remained pending.
+- ACH transactions are recognized from Authorize.Net's bank-account payload. Daily EventBridge reconciliation safely retained the sandbox payment while it was pending; after confirming that sandbox cannot simulate eCheck settlement, the test payment was conditionally canceled without applying its balance and its profile lock was released.
 - The three payment Lambda unit suites pass, including authorization, redaction, webhook, ACH rail, and reconciliation cases.
 - The `nisan` IAM Identity Center administrator profile requires MFA at every login and has replaced `ninube` for tested CLI access. The legacy IAM users, groups, and long-lived access keys have been deleted.
 

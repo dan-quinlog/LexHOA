@@ -17,9 +17,9 @@
 
 **Not yet closed:**
 
-- Observe the current ACH transaction reach final settlement and verify exactly-once balance application and lock release.
-- Gitleaks 8.30.1 found no detector match in the current tracked tree, but found 18 historical potential-secret matches in 9 of 139 commits. Prior Authorize.Net credentials are reported rotated/inactive; retain the redacted scan report and rotation record rather than treating history as clean. Obsolete payment-provider source and local configuration values were removed after confirming the six legacy Lambdas had zero invocations in the 90-day review window. Dev/staging cloud-resource deletion remains open because the legacy dev Amplify GraphQL nested stack requires CloudFormation recovery before Amplify can complete the deletions safely.
-- Replace `ninube`'s long-lived administrator key with tested short-lived IAM Identity Center/role credentials, then deactivate the old key and enable MFA for interactive access. The obsolete `CLIuser`, its stale keys, and `CLIgroup` have been deleted.
+- Authorize.Net does not simulate eCheck settlement in sandbox, so the current test transaction cannot reach a processor-driven final state. Perform a controlled production ACH pilot to verify final settlement or return, exactly-once balance application, and lock release.
+- Gitleaks 8.30.1 found no detector match in the current tracked tree, but found 18 historical potential-secret matches in 9 of 139 commits. Prior Authorize.Net credentials are reported rotated/inactive; retain the redacted scan report and rotation record rather than treating history as clean. Obsolete payment-provider source and local configuration values were removed after confirming the six legacy Lambdas had zero invocations in the 90-day review window. The obsolete `dev` environment, including its Stripe resources, was deleted after its legacy GraphQL stack blocked selective cleanup. Stripe resource deletion in the old `staging` environment remains open until that environment is replaced.
+- The `nisan` IAM Identity Center administrator profile is configured with MFA required at every login and has replaced `ninube` for tested CLI access. Delete `ninube`'s now-inactive access key after the rollback window. The obsolete `CLIuser`, its stale keys, and `CLIgroup` have been deleted.
 - Perform and retain the break-glass exercise, control-owner approval, current diagram/inventory sign-off, and the Step 0 acquirer/QSA scope confirmation.
 
 ## Step 0 — written scope and questionnaire confirmation (blocker)

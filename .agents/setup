@@ -11,4 +11,8 @@ while IFS= read -r -d '' lockfile; do
   npm ci --prefix "$function_dir" --no-audit --no-fund </dev/null
 done < <(find amplify/backend/function -path '*/src/package-lock.json' -print0 | sort -z)
 
+if [[ -n "${AWS_OIDC_AUDIENCE:-}${AWS_ROLE_ARN:-}${AWS_WEB_IDENTITY_TOKEN_FILE:-}" ]]; then
+  "$(dirname "$0")/refresh-aws-oidc" --install-aws-cli
+fi
+
 echo "LexHOA orb setup complete"

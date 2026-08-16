@@ -1,0 +1,158 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+install_aws_cli=false
+while (($# > 0)); do
+  case "$1" in
+    --install-aws-cli)
+      install_aws_cli=true
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      echo "Usage: $0 [--install-aws-cli]" >&2
+      exit 2
+      ;;
+  esac
+  shift
+done
+
+required_vars=(
+  AWS_OIDC_AUDIENCE
+  AWS_ROLE_ARN
+  AWS_WEB_IDENTITY_TOKEN_FILE
+)
+
+configured=0
+missing=()
+for name in "${required_vars[@]}"; do
+  if [[ -n "${!name:-}" ]]; then
+    ((configured += 1))
+  else
+    missing+=("$name")
+  fi
+done
+
+if ((configured == 0)); then
+  echo "AWS OIDC is not configured; skipping token refresh"
+  exit 0
+fi
+
+if ((${#missing[@]} > 0)); then
+  printf 'AWS OIDC configuration is incomplete; missing:' >&2
+  printf ' %s' "${missing[@]}" >&2
+  printf '\n' >&2
+  exit 1
+fi
+
+if ! command -v amp >/dev/null 2>&1; then
+  echo "amp is required to refresh the AWS OIDC token" >&2
+  exit 1
+fi
+
+aws_cli_v2() {
+  local candidate version
+  for candidate in \
+    "${XDG_BIN_HOME:-$HOME/.local/bin}/aws" \
+    "$(command -v aws 2>/dev/null || true)"; do
+    if [[ -x "$candidate" ]]; then
+      version="$("$candidate" --version 2>&1 || true)"
+      if [[ "$version" == aws-cli/2.* ]]; then
+        printf '%s\n' "$candidate"
+        return 0
+      fi
+    fi
+  done
+  return 1
+}
+
+install_aws_cli_v2() (
+  set -euo pipefail
+
+  local dependency temp_dir installer
+  for dependency in curl gpg unzip; do
+    if ! command -v "$dependency" >/dev/null 2>&1; then
+      echo "$dependency is required for verified AWS CLI v2 installation" >&2
+      exit 1
+    fi
+  done
+
+  umask 077
+  temp_dir="$(mktemp -d)"
+  trap 'rm -rf "$temp_dir"' EXIT
+  installer="$temp_dir/install-aws-cli-v2"
+
+  echo "Installing verified AWS CLI v2 for OIDC identity verification"
+  curl -fsSL https://awscli.amazonaws.com/v2/install.sh -o "$installer"
+  chmod 700 "$installer"
+  "$installer" --quiet
+)
+
+if ! aws_bin="$(aws_cli_v2)"; then
+  if [[ "$install_aws_cli" != true ]]; then
+    echo "AWS CLI v2 is required for OIDC identity verification; run .agents/setup to install it" >&2
+    exit 1
+  fi
+
+  install_aws_cli_v2
+  if ! aws_bin="$(aws_cli_v2)"; then
+    echo "AWS CLI v2 installation could not be verified" >&2
+    exit 1
+  fi
+fi
+
+token_dir="$(dirname "$AWS_WEB_IDENTITY_TOKEN_FILE")"
+if [[ ! -d "$token_dir" ]]; then
+  install -d -m 700 "$token_dir"
+fi
+
+umask 077
+temporary_token="$(mktemp "$token_dir/.aws-oidc-token.XXXXXX")"
+trap 'rm -f "$temporary_token"' EXIT
+
+amp orb id-token \
+  --audience "$AWS_OIDC_AUDIENCE" \
+  --ttl-seconds 3600 \
+  > "$temporary_token"
+chmod 600 "$temporary_token"
+validation_session_name="amp-oidc-validate-${temporary_token##*.}"
+
+read -r account arn < <(
+  env \
+    -u AWS_ACCESS_KEY_ID \
+    -u AWS_DEFAULT_PROFILE \
+    -u AWS_PROFILE \
+    -u AWS_SECRET_ACCESS_KEY \
+    -u AWS_SESSION_TOKEN \
+    AWS_CONFIG_FILE=/dev/null \
+    AWS_EC2_METADATA_DISABLED=true \
+    AWS_ROLE_SESSION_NAME="$validation_session_name" \
+    AWS_SHARED_CREDENTIALS_FILE=/dev/null \
+    AWS_WEB_IDENTITY_TOKEN_FILE="$temporary_token" \
+    "$aws_bin" sts get-caller-identity \
+      --query '[Account,Arn]' \
+      --output text
+)
+
+expected_account="324037289979"
+if [[ "$account" != "$expected_account" ]]; then
+  echo "AWS OIDC identity returned unexpected account: $account" >&2
+  exit 1
+fi
+
+role_arn_prefix="arn:aws:iam::$expected_account:role/"
+if [[ "$AWS_ROLE_ARN" != "$role_arn_prefix"* ]]; then
+  echo "AWS_ROLE_ARN is not an IAM role in account $expected_account" >&2
+  exit 1
+fi
+
+role_name="${AWS_ROLE_ARN##*/}"
+expected_arn_prefix="arn:aws:sts::$expected_account:assumed-role/$role_name/"
+if [[ "$arn" != "$expected_arn_prefix"* ]]; then
+  echo "AWS OIDC identity does not match configured role $AWS_ROLE_ARN: $arn" >&2
+  exit 1
+fi
+
+mv -f "$temporary_token" "$AWS_WEB_IDENTITY_TOKEN_FILE"
+trap - EXIT
+
+echo "AWS OIDC identity verified: $arn"

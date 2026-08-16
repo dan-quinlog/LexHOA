@@ -57,6 +57,7 @@ amp orb id-token \
   --ttl-seconds 3600 \
   > "$temporary_token"
 chmod 600 "$temporary_token"
+validation_session_name="amp-oidc-validate-${temporary_token##*.}"
 
 read -r account arn < <(
   env \
@@ -67,6 +68,7 @@ read -r account arn < <(
     -u AWS_SESSION_TOKEN \
     AWS_CONFIG_FILE=/dev/null \
     AWS_EC2_METADATA_DISABLED=true \
+    AWS_ROLE_SESSION_NAME="$validation_session_name" \
     AWS_SHARED_CREDENTIALS_FILE=/dev/null \
     AWS_WEB_IDENTITY_TOKEN_FILE="$temporary_token" \
     "$aws_bin" sts get-caller-identity \

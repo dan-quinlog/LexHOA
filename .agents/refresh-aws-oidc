@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+required_vars=(
+  AWS_OIDC_AUDIENCE
+  AWS_ROLE_ARN
+  AWS_WEB_IDENTITY_TOKEN_FILE
+)
+
+configured=0
+missing=()
+for name in "${required_vars[@]}"; do
+  if [[ -n "${!name:-}" ]]; then
+    ((configured += 1))
+  else
+    missing+=("$name")
+  fi
+done
+
+if ((configured == 0)); then
+  echo "AWS OIDC is not configured; skipping token refresh"
+  exit 0
+fi
+
+if ((${#missing[@]} > 0)); then
+  printf 'AWS OIDC configuration is incomplete; missing:' >&2
+  printf ' %s' "${missing[@]}" >&2
+  printf '\n' >&2
+  exit 1
+fi
+
+if ! command -v amp >/dev/null 2>&1; then
+  echo "amp is required to refresh the AWS OIDC token" >&2
+  exit 1
+fi
+
+if command -v aws >/dev/null 2>&1; then
+  aws_bin="$(command -v aws)"
+elif [[ -x "$HOME/.local/bin/aws" ]]; then
+  aws_bin="$HOME/.local/bin/aws"
+else
+  echo "AWS CLI is required to verify the AWS OIDC identity" >&2
+  exit 1
+fi
+
+token_dir="$(dirname "$AWS_WEB_IDENTITY_TOKEN_FILE")"
+if [[ ! -d "$token_dir" ]]; then
+  install -d -m 700 "$token_dir"
+fi
+
+umask 077
+temporary_token="$(mktemp "$token_dir/.aws-oidc-token.XXXXXX")"
+trap 'rm -f "$temporary_token"' EXIT
+
+amp orb id-token \
+  --audience "$AWS_OIDC_AUDIENCE" \
+  --ttl-seconds 3600 \
+  > "$temporary_token"
+chmod 600 "$temporary_token"
+mv -f "$temporary_token" "$AWS_WEB_IDENTITY_TOKEN_FILE"
+trap - EXIT
+
+read -r account arn < <(
+  env \
+    -u AWS_ACCESS_KEY_ID \
+    -u AWS_SECRET_ACCESS_KEY \
+    -u AWS_SESSION_TOKEN \
+    "$aws_bin" sts get-caller-identity \
+      --query '[Account,Arn]' \
+      --output text
+)
+
+expected_account="324037289979"
+if [[ "$account" != "$expected_account" ]]; then
+  echo "AWS OIDC identity returned unexpected account: $account" >&2
+  exit 1
+fi
+
+if [[ "$arn" != "arn:aws:sts::$expected_account:assumed-role/"* ]]; then
+  echo "AWS OIDC identity is not an assumed role in account $expected_account: $arn" >&2
+  exit 1
+fi
+
+echo "AWS OIDC identity verified: $arn"

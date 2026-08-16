@@ -11,4 +11,13 @@ while IFS= read -r -d '' lockfile; do
   npm ci --prefix "$function_dir" --no-audit --no-fund </dev/null
 done < <(find amplify/backend/function -path '*/src/package-lock.json' -print0 | sort -z)
 
+if [[ -n "${AWS_OIDC_AUDIENCE:-}${AWS_ROLE_ARN:-}${AWS_WEB_IDENTITY_TOKEN_FILE:-}" ]]; then
+  if ! command -v aws >/dev/null 2>&1 && [[ ! -x "$HOME/.local/bin/aws" ]]; then
+    echo "Installing AWS CLI for OIDC identity verification"
+    python3 -m pip install --user --disable-pip-version-check awscli
+  fi
+
+  "$(dirname "$0")/refresh-aws-oidc"
+fi
+
 echo "LexHOA orb setup complete"

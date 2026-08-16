@@ -3,4 +3,8 @@ set -euo pipefail
 
 test -d node_modules
 
+if [[ -n "${AWS_OIDC_AUDIENCE:-}${AWS_ROLE_ARN:-}${AWS_WEB_IDENTITY_TOKEN_FILE:-}" ]]; then
+  "$(dirname "$0")/refresh-aws-oidc"
+fi
+
 echo "LexHOA orb is ready"

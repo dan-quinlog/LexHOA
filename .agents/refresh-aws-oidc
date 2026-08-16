@@ -1,6 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+install_aws_cli=false
+while (($# > 0)); do
+  case "$1" in
+    --install-aws-cli)
+      install_aws_cli=true
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      echo "Usage: $0 [--install-aws-cli]" >&2
+      exit 2
+      ;;
+  esac
+  shift
+done
+
 required_vars=(
   AWS_OIDC_AUDIENCE
   AWS_ROLE_ARN
@@ -73,6 +88,11 @@ install_aws_cli_v2() (
 )
 
 if ! aws_bin="$(aws_cli_v2)"; then
+  if [[ "$install_aws_cli" != true ]]; then
+    echo "AWS CLI v2 is required for OIDC identity verification; run .agents/setup to install it" >&2
+    exit 1
+  fi
+
   install_aws_cli_v2
   if ! aws_bin="$(aws_cli_v2)"; then
     echo "AWS CLI v2 installation could not be verified" >&2

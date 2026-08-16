@@ -57,14 +57,18 @@ amp orb id-token \
   --ttl-seconds 3600 \
   > "$temporary_token"
 chmod 600 "$temporary_token"
-mv -f "$temporary_token" "$AWS_WEB_IDENTITY_TOKEN_FILE"
-trap - EXIT
 
 read -r account arn < <(
   env \
     -u AWS_ACCESS_KEY_ID \
+    -u AWS_DEFAULT_PROFILE \
+    -u AWS_PROFILE \
     -u AWS_SECRET_ACCESS_KEY \
     -u AWS_SESSION_TOKEN \
+    AWS_CONFIG_FILE=/dev/null \
+    AWS_EC2_METADATA_DISABLED=true \
+    AWS_SHARED_CREDENTIALS_FILE=/dev/null \
+    AWS_WEB_IDENTITY_TOKEN_FILE="$temporary_token" \
     "$aws_bin" sts get-caller-identity \
       --query '[Account,Arn]' \
       --output text
@@ -76,9 +80,20 @@ if [[ "$account" != "$expected_account" ]]; then
   exit 1
 fi
 
-if [[ "$arn" != "arn:aws:sts::$expected_account:assumed-role/"* ]]; then
-  echo "AWS OIDC identity is not an assumed role in account $expected_account: $arn" >&2
+role_arn_prefix="arn:aws:iam::$expected_account:role/"
+if [[ "$AWS_ROLE_ARN" != "$role_arn_prefix"* ]]; then
+  echo "AWS_ROLE_ARN is not an IAM role in account $expected_account" >&2
   exit 1
 fi
+
+role_name="${AWS_ROLE_ARN##*/}"
+expected_arn_prefix="arn:aws:sts::$expected_account:assumed-role/$role_name/"
+if [[ "$arn" != "$expected_arn_prefix"* ]]; then
+  echo "AWS OIDC identity does not match configured role $AWS_ROLE_ARN: $arn" >&2
+  exit 1
+fi
+
+mv -f "$temporary_token" "$AWS_WEB_IDENTITY_TOKEN_FILE"
+trap - EXIT
 
 echo "AWS OIDC identity verified: $arn"

@@ -34,13 +34,50 @@ if ! command -v amp >/dev/null 2>&1; then
   exit 1
 fi
 
-if command -v aws >/dev/null 2>&1; then
-  aws_bin="$(command -v aws)"
-elif [[ -x "$HOME/.local/bin/aws" ]]; then
-  aws_bin="$HOME/.local/bin/aws"
-else
-  echo "AWS CLI is required to verify the AWS OIDC identity" >&2
-  exit 1
+aws_cli_v2() {
+  local candidate version
+  for candidate in \
+    "${XDG_BIN_HOME:-$HOME/.local/bin}/aws" \
+    "$(command -v aws 2>/dev/null || true)"; do
+    if [[ -x "$candidate" ]]; then
+      version="$("$candidate" --version 2>&1 || true)"
+      if [[ "$version" == aws-cli/2.* ]]; then
+        printf '%s\n' "$candidate"
+        return 0
+      fi
+    fi
+  done
+  return 1
+}
+
+install_aws_cli_v2() (
+  set -euo pipefail
+
+  local dependency temp_dir installer
+  for dependency in curl gpg unzip; do
+    if ! command -v "$dependency" >/dev/null 2>&1; then
+      echo "$dependency is required for verified AWS CLI v2 installation" >&2
+      exit 1
+    fi
+  done
+
+  umask 077
+  temp_dir="$(mktemp -d)"
+  trap 'rm -rf "$temp_dir"' EXIT
+  installer="$temp_dir/install-aws-cli-v2"
+
+  echo "Installing verified AWS CLI v2 for OIDC identity verification"
+  curl -fsSL https://awscli.amazonaws.com/v2/install.sh -o "$installer"
+  chmod 700 "$installer"
+  "$installer" --quiet
+)
+
+if ! aws_bin="$(aws_cli_v2)"; then
+  install_aws_cli_v2
+  if ! aws_bin="$(aws_cli_v2)"; then
+    echo "AWS CLI v2 installation could not be verified" >&2
+    exit 1
+  fi
 fi
 
 token_dir="$(dirname "$AWS_WEB_IDENTITY_TOKEN_FILE")"

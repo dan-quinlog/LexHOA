@@ -2,6 +2,21 @@ const AWS = require('aws-sdk');
 const appsync = require('aws-appsync');
 const gql = require('graphql-tag');
 
+function safeErrorCode(error) {
+  const code = error && (error.code || error.name);
+  const allowedCodes = new Set([
+    'AccessDeniedException',
+    'ApolloError',
+    'CredentialsError',
+    'Error',
+    'NetworkingError',
+    'ThrottlingException'
+  ]);
+  return allowedCodes.has(code)
+    ? code
+    : 'ProfileCreationError';
+}
+
 exports.handler = async (event) => {
   const graphqlClient = new appsync.AWSAppSyncClient({
     url: process.env.API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT,
@@ -37,7 +52,9 @@ exports.handler = async (event) => {
     await graphqlClient.mutate({ mutation, variables });
     return event;
   } catch (error) {
-    console.error('Error creating profile:', error);
+    console.error('profile_creation_failed', { code: safeErrorCode(error) });
     throw error;
   }
 };
+
+exports._internals = { safeErrorCode };

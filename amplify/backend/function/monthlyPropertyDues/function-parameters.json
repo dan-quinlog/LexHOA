@@ -1,12 +1,5 @@
 {
-  "permissions": {
-    "api": {
-      "lexhoa": [
-        "Query",
-        "Mutation"
-      ]
-    }
-  },
+  "permissions": {},
   "lambdaLayers": [],
   "environmentVariableList": [
     {

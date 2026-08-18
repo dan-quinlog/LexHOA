@@ -13,7 +13,7 @@ export const updateCognitoUserAttributes = async (attributes) => {
     // Update user attributes
     return await updateUserAttributes({ userAttributes: attributes });
   } catch (error) {
-    console.error("Error updating Cognito user attributes:", error);
+    console.error('cognito_attribute_update_failed');
     throw error;
   }
 };
@@ -25,16 +25,13 @@ export const updateCognitoUserAttributes = async (attributes) => {
  */
 export const verifyNewEmail = async (verificationCode) => {
   try {
-    console.log('cognitoUtils: Confirming email with code:', verificationCode);
     const result = await confirmUserAttribute({
       userAttributeKey: 'email',
       confirmationCode: verificationCode.trim() // Remove any whitespace
     });
-    console.log('cognitoUtils: Email confirmation successful');
     return result;
   } catch (error) {
-    console.error("cognitoUtils: Error verifying email:", error);
-    console.error("cognitoUtils: Error details:", error.name, error.message);
+    console.error('cognito_email_verification_failed');
     throw error;
   }
 };
@@ -49,7 +46,7 @@ export const requestEmailVerificationCode = async () => {
       userAttributeKey: 'email'
     });
   } catch (error) {
-    console.error("Error requesting verification code:", error);
+    console.error('cognito_verification_code_request_failed');
     throw error;
   }
 };

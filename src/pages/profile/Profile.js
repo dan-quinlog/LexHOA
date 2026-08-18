@@ -124,7 +124,7 @@ const Profile = ({ cognitoId }) => {
         setShowNotification(true);
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error('profile_update_failed');
       setNotificationMessage(
         'You do not have permission to perform this action. Please contact a board member for assistance.'
       );
@@ -161,7 +161,7 @@ const Profile = ({ cognitoId }) => {
           }
         }
       } catch (error) {
-        console.error('Error checking verification status:', error);
+        console.error('profile_verification_status_failed');
       }
     };
 
@@ -173,11 +173,8 @@ const Profile = ({ cognitoId }) => {
   const handleVerificationSubmit = async () => {
     try {
       setVerificationError('');
-      console.log('Attempting verification with code:', verificationCode);
-      console.log('New email:', newEmail);
-      
+
       await verifyNewEmail(verificationCode);
-      console.log('Email verification successful');
 
       if (profile) {
         await updateProfile({
@@ -194,15 +191,13 @@ const Profile = ({ cognitoId }) => {
             }
           ]
         });
-        console.log('Profile updated with new email');
       }
 
       setPendingEmailVerification(false);
       setNotificationMessage('Email successfully verified!');
       setShowNotification(true);
     } catch (error) {
-      console.error('Error verifying email:', error);
-      console.error('Full error object:', error);
+      console.error('profile_email_verification_failed');
       setVerificationError(error.message || 'Failed to verify email');
     }
   };

@@ -18,15 +18,6 @@ export const manageCognitoGroups = /* GraphQL */ `
     }
   }
 `;
-export const processMonthlyPropertyDues = /* GraphQL */ `
-  mutation ProcessMonthlyPropertyDues {
-    processMonthlyPropertyDues {
-      success
-      message
-      __typename
-    }
-  }
-`;
 export const createAuthNetTransaction = /* GraphQL */ `
   mutation CreateAuthNetTransaction(
     $profileId: ID!
@@ -55,24 +46,6 @@ export const createAuthNetTransaction = /* GraphQL */ `
       responseCode
       messageCode
       messageText
-      __typename
-    }
-  }
-`;
-export const createAuthNetCustomerProfile = /* GraphQL */ `
-  mutation CreateAuthNetCustomerProfile(
-    $profileId: ID!
-    $email: String!
-    $name: String!
-  ) {
-    createAuthNetCustomerProfile(
-      profileId: $profileId
-      email: $email
-      name: $name
-    ) {
-      customerId
-      success
-      message
       __typename
     }
   }

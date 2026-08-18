@@ -12,9 +12,7 @@ const cognito = new aws.CognitoIdentityServiceProvider();
  * GraphQL resolver for managing Cognito user groups
  * @type {import('@types/aws-lambda').APIGatewayProxyHandler}
  */
-exports.handler = async (event) => {
-    console.log(`EVENT: ${JSON.stringify(event)}`);
-    
+async function manageCognitoGroups(event, client = cognito) {
     try {
         const { action, groupName, cognitoId } = event.arguments;
         const userPoolId = process.env.AUTH_LEXHOA4FACA5B8_USERPOOLID || process.env.AUTH_LEXHOA_USERPOOLID;
@@ -36,13 +34,12 @@ exports.handler = async (event) => {
         // Check if caller is in PRESIDENT group
         let callerGroups;
         try {
-            const callerGroupsResult = await cognito.adminListGroupsForUser({
+            const callerGroupsResult = await client.adminListGroupsForUser({
                 UserPoolId: userPoolId,
                 Username: callerUsername
             }).promise();
             callerGroups = callerGroupsResult.Groups.map(group => group.GroupName);
         } catch (error) {
-            console.error('Error checking caller groups:', error);
             throw new Error("Unable to verify your permissions");
         }
         
@@ -57,7 +54,7 @@ exports.handler = async (event) => {
 
         // Check if user exists
         try {
-            await cognito.adminGetUser({
+            await client.adminGetUser({
                 UserPoolId: userPoolId,
                 Username: cognitoId
             }).promise();
@@ -70,14 +67,14 @@ exports.handler = async (event) => {
 
         // Ensure the group exists
         try {
-            await cognito.getGroup({
+            await client.getGroup({
                 GroupName: groupName,
                 UserPoolId: userPoolId
             }).promise();
         } catch (error) {
             if (error.code === 'ResourceNotFoundException') {
                 // Create the group if it doesn't exist
-                await cognito.createGroup({
+                await client.createGroup({
                     GroupName: groupName,
                     UserPoolId: userPoolId,
                     Description: `${groupName} group for HOA management`
@@ -90,27 +87,30 @@ exports.handler = async (event) => {
         if (action.toLowerCase() === 'add') {
             // Check if user is already in the group
             try {
-                const userGroups = await cognito.adminListGroupsForUser({
+                const userGroups = await client.adminListGroupsForUser({
                     UserPoolId: userPoolId,
                     Username: cognitoId
                 }).promise();
                 
                 const isInGroup = userGroups.Groups.some(group => group.GroupName === groupName);
                 if (isInGroup) {
+                    console.info('cognito_group_management', { action: 'add', outcome: 'unchanged' });
                     return {
                         success: true,
                         message: `User '${cognitoId}' is already in group '${groupName}'`
                     };
                 }
             } catch (error) {
-                console.error('Error checking user groups:', error);
+                // Continue to the idempotent add operation when membership lookup fails.
             }
 
-            await cognito.adminAddUserToGroup({
+            await client.adminAddUserToGroup({
                 UserPoolId: userPoolId,
                 Username: cognitoId,
                 GroupName: groupName
             }).promise();
+
+            console.info('cognito_group_management', { action: 'add', outcome: 'updated' });
 
             return {
                 success: true,
@@ -125,7 +125,7 @@ exports.handler = async (event) => {
                 if (callerUsername === cognitoId) {
                     // Get all users in PRESIDENT group
                     try {
-                        const presidentsResult = await cognito.listUsersInGroup({
+                        const presidentsResult = await client.listUsersInGroup({
                             UserPoolId: userPoolId,
                             GroupName: 'PRESIDENT'
                         }).promise();
@@ -137,18 +137,19 @@ exports.handler = async (event) => {
                         if (listError.message.includes("Cannot remove yourself")) {
                             throw listError;
                         }
-                        console.error('Error checking president count:', listError);
                         throw new Error("Unable to verify president count before removal");
                     }
                 }
             }
             
             try {
-                await cognito.adminRemoveUserFromGroup({
+                await client.adminRemoveUserFromGroup({
                     UserPoolId: userPoolId,
                     Username: cognitoId,
                     GroupName: groupName
                 }).promise();
+
+                console.info('cognito_group_management', { action: 'remove', outcome: 'updated' });
 
                 return {
                     success: true,
@@ -156,6 +157,7 @@ exports.handler = async (event) => {
                 };
             } catch (error) {
                 if (error.code === 'ResourceNotFoundException') {
+                    console.info('cognito_group_management', { action: 'remove', outcome: 'unchanged' });
                     return {
                         success: true,
                         message: `User '${cognitoId}' was not in group '${groupName}'`
@@ -167,10 +169,13 @@ exports.handler = async (event) => {
         }
 
     } catch (error) {
-        console.error('Error managing Cognito groups:', error);
+        console.error('cognito_group_management_failed', { code: 'GROUP_MANAGEMENT_ERROR' });
         return {
             success: false,
             message: error.message
         };
     }
-};
+}
+
+exports.handler = event => manageCognitoGroups(event);
+exports._internals = { manageCognitoGroups };

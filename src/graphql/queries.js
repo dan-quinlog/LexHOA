@@ -8,8 +8,6 @@ export const listUsersInGroup = /* GraphQL */ `
       email
       enabled
       userStatus
-      userCreateDate
-      userLastModifiedDate
       __typename
     }
   }

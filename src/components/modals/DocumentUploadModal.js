@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useMutation } from '@apollo/client';
 import { CREATE_DOCUMENT, UPDATE_DOCUMENT } from '../../queries/documentMutations';
 import { uploadData } from 'aws-amplify/storage';
-import { Amplify } from 'aws-amplify';
 import Modal from '../shared/Modal';
 import './DocumentUploadModal.css';
+
+const PUBLIC_ACCESS_LEVEL = 'PUBLIC';
 
 const DocumentUploadModal = ({ document, user, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     category: 'INSURANCE',
-    accessLevel: 'PUBLIC',
     year: new Date().getFullYear(),
     displayOrder: 0
   });
@@ -25,7 +25,6 @@ const DocumentUploadModal = ({ document, user, onClose, onSuccess }) => {
         title: document.title || '',
         description: document.description || '',
         category: document.category || 'INSURANCE',
-        accessLevel: document.accessLevel || 'PUBLIC',
         year: document.year || new Date().getFullYear(),
         displayOrder: document.displayOrder || 0
       });
@@ -83,13 +82,6 @@ const DocumentUploadModal = ({ document, user, onClose, onSuccess }) => {
       return;
     }
 
-    // Debug: Check Amplify configuration and user
-    const config = Amplify.getConfig();
-    console.log('Amplify Storage Config:', config.Storage);
-    console.log('User object:', user);
-    console.log('User username:', user?.username);
-    console.log('User profile ID:', user?.profile?.id);
-
     setUploading(true);
     setProgress(0);
 
@@ -105,15 +97,7 @@ const DocumentUploadModal = ({ document, user, onClose, onSuccess }) => {
         const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
         s3Key = `documents/${timestamp}_${sanitizedFileName}`;
 
-        console.log('Attempting upload with:', {
-          key: s3Key,
-          fileName: file.name,
-          fileSize: file.size,
-          fileType: file.type,
-          user: user
-        });
-
-        const result = await uploadData({
+        await uploadData({
           key: s3Key,
           data: file,
           options: {
@@ -127,8 +111,6 @@ const DocumentUploadModal = ({ document, user, onClose, onSuccess }) => {
           }
         }).result;
 
-        console.log('Upload result:', result);
-
         fileName = file.name;
         fileSize = file.size;
         fileType = file.type;
@@ -138,7 +120,7 @@ const DocumentUploadModal = ({ document, user, onClose, onSuccess }) => {
         title: formData.title,
         description: formData.description || null,
         category: formData.category,
-        accessLevel: formData.accessLevel,
+        accessLevel: PUBLIC_ACCESS_LEVEL,
         fileName,
         fileSize,
         fileType,
@@ -171,8 +153,7 @@ const DocumentUploadModal = ({ document, user, onClose, onSuccess }) => {
 
       onSuccess();
     } catch (err) {
-      console.error('Error uploading document:', err);
-      alert('Error uploading document: ' + err.message);
+      alert('Error uploading document. Please try again.');
     } finally {
       setUploading(false);
       setProgress(0);
@@ -223,26 +204,13 @@ const DocumentUploadModal = ({ document, user, onClose, onSuccess }) => {
               <option value="FINANCIAL_REPORTS">Financial Reports</option>
               <option value="POLICIES">Policies & Procedures</option>
               <option value="FORMS">Forms</option>
-              <option value="BOARD_ONLY">Board Documents</option>
               <option value="OTHER">Other</option>
             </select>
           </div>
 
           <div className="form-group">
-            <label>Access Level *</label>
-            <select
-              name="accessLevel"
-              value={formData.accessLevel}
-              onChange={handleChange}
-              required
-            >
-              <option value="PUBLIC">🌐 Public</option>
-              <option value="AUTHENTICATED">🔐 Authenticated Users</option>
-              <option value="OWNERS_ONLY">🏠 Owners Only</option>
-              <option value="BOARD_ONLY">👥 Board Only</option>
-              <option value="TREASURER_ONLY">💰 Treasurer Only</option>
-              <option value="PRESIDENT_ONLY">⭐ President Only</option>
-            </select>
+            <label>Access Level</label>
+            <div>Public</div>
           </div>
         </div>
 

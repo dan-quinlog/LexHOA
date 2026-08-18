@@ -92,18 +92,36 @@ exports.handler = async (event) => {
         return {
             customerId: customerId,
             success: true,
-            message: `Successfully created Authorize.Net customer profile for ${name}`
+            message: 'Customer profile created successfully'
         };
 
     } catch (error) {
-        console.error('Error creating Authorize.Net customer profile:', error);
+        console.error('authnet_customer_profile_failed', {
+            code: safeErrorCode(error)
+        });
         return {
             customerId: '',
             success: false,
-            message: `Failed to create customer profile: ${error.message}`
+            message: 'Unable to create customer profile'
         };
     }
 };
+
+function safeErrorCode(error) {
+    const code = error && (error.code || error.name);
+    const allowedCodes = new Set([
+        'AccessDeniedException',
+        'CredentialsError',
+        'Error',
+        'NetworkingError',
+        'ResourceNotFoundException',
+        'ThrottlingException',
+        'ValidationException'
+    ]);
+    return allowedCodes.has(code)
+        ? code
+        : 'CustomerProfileError';
+}
 
 function executeCreateCustomerProfile(createRequest) {
     return new Promise((resolve, reject) => {
@@ -163,4 +181,4 @@ async function graphqlRequest(endpoint, query, variables) {
     });
 }
 
-exports._internals = { loadSecret };
+exports._internals = { loadSecret, safeErrorCode };

@@ -17,12 +17,3 @@ export const MANAGE_COGNITO_GROUPS = gql`
     }
   }
 `;
-
-export const PROCESS_MONTHLY_PROPERTY_DUES = gql`
-  mutation ProcessMonthlyPropertyDues {
-    processMonthlyPropertyDues {
-      success
-      message
-    }
-  }
-`;

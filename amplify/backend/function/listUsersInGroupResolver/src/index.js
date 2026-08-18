@@ -1,64 +1,59 @@
 const { CognitoIdentityProviderClient, ListUsersInGroupCommand } = require('@aws-sdk/client-cognito-identity-provider');
 
-exports.handler = async (event) => {
-  console.log('Event received:', JSON.stringify(event));
-  
-  // Handle both direct invocation and template-based invocation
-  let field = event.field;
-  let arguments = event.arguments;
-  
-  // If this is a direct invocation (no mapping template)
-  if (!field && event.info && event.info.fieldName) {
-    field = event.info.fieldName;
-    arguments = event.arguments;
-  }
-  
-  // Initialize Cognito Identity Provider Client
-  const client = new CognitoIdentityProviderClient({ region: process.env.REGION });
-  
+const ALLOWED_GROUPS = ['BOARD', 'MEDIA', 'TREASURER', 'SECRETARY', 'PRESIDENT'];
+
+function callerGroups(event) {
+  const claim = event.identity?.claims?.['cognito:groups'];
+  if (Array.isArray(claim)) return claim;
+  if (typeof claim !== 'string') return [];
   try {
-    if (field !== 'listUsersInGroup') {
-      throw new Error(`Unsupported field: ${field}`);
-    }
-    
-    // Extract parameters from the GraphQL query
-    const groupName = arguments.groupName;
-    
-    console.log('Looking for users in group:', groupName);
-    
-    if (!groupName) {
-      throw new Error('groupName is required');
-    }
-    
-    // Call Cognito API to list users in the group
-    const params = {
+    const parsed = JSON.parse(claim);
+    if (Array.isArray(parsed)) return parsed;
+  } catch (error) {
+    return claim.split(',').map(group => group.trim()).filter(Boolean);
+  }
+  return [];
+}
+
+async function listUsersInGroup(event, client) {
+  if (!callerGroups(event).includes('PRESIDENT')) {
+    throw new Error('Access denied');
+  }
+
+  const field = event.field || event.info?.fieldName;
+  if (field !== 'listUsersInGroup') {
+    throw new Error('Unsupported operation');
+  }
+
+  const groupName = event.arguments?.groupName;
+  if (!ALLOWED_GROUPS.includes(groupName)) {
+    throw new Error('Unsupported group');
+  }
+
+  try {
+    const result = await client.send(new ListUsersInGroupCommand({
       GroupName: groupName,
       UserPoolId: process.env.USER_POOL_ID
-    };
-    
-    const command = new ListUsersInGroupCommand(params);
-    const result = await client.send(command);
-    
-    // Transform the result to match your GraphQL schema
-    return result.Users.map(user => {
-      const attributes = {};
-      if (user.Attributes) {
-        user.Attributes.forEach(attr => {
-          attributes[attr.Name] = attr.Value;
-        });
-      }
-      
+    }));
+
+    return (result.Users || []).map(user => {
+      const email = (user.Attributes || []).find(attribute => attribute.Name === 'email');
       return {
         username: user.Username,
-        email: attributes.email || null,
+        email: email?.Value || null,
         enabled: user.Enabled,
-        userStatus: user.UserStatus,
-        userCreateDate: user.UserCreateDate ? user.UserCreateDate.toISOString() : null,
-        userLastModifiedDate: user.UserLastModifiedDate ? user.UserLastModifiedDate.toISOString() : null
+        userStatus: user.UserStatus
       };
     });
   } catch (error) {
-    console.error('Error:', error);
-    throw error;
+    console.error('list_users_in_group_failed', { code: 'COGNITO_DIRECTORY_ERROR' });
+    throw new Error('Unable to list users');
   }
-};
+}
+
+exports.handler = event => listUsersInGroup(
+  event,
+  new CognitoIdentityProviderClient({ region: process.env.REGION })
+);
+
+exports._internals = { ALLOWED_GROUPS, callerGroups, listUsersInGroup };

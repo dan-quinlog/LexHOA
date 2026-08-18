@@ -207,16 +207,6 @@ export const CREATE_AUTHNET_TRANSACTION = gql`
   }
 `;
 
-export const CREATE_AUTHNET_CUSTOMER_PROFILE = gql`
-  mutation CreateAuthNetCustomerProfile($profileId: ID!, $email: String!, $name: String!) {
-    createAuthNetCustomerProfile(profileId: $profileId, email: $email, name: $name) {
-      customerId
-      success
-      message
-    }
-  }
-`;
-
 export const UPDATE_PAYMENT = gql`
   mutation UpdatePayment(
     $input: UpdatePaymentInput!

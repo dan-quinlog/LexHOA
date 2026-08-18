@@ -7,8 +7,6 @@ export const LIST_USERS_IN_GROUP = gql`
       email
       enabled
       userStatus
-      userCreateDate
-      userLastModifiedDate
     }
   }
 `;

@@ -270,8 +270,6 @@ type CognitoUser {
   email: String
   enabled: Boolean
   userStatus: String
-  userCreateDate: String
-  userLastModifiedDate: String
 }
 
 type UserAttributes {
@@ -374,11 +372,6 @@ enum DocumentCategory {
 
 enum DocumentAccessLevel {
   PUBLIC
-  AUTHENTICATED
-  OWNERS_ONLY
-  BOARD_ONLY
-  TREASURER_ONLY
-  PRESIDENT_ONLY
 }
 
 type AuthNetTransactionResult {
@@ -395,19 +388,9 @@ type AuthNetTransactionResult {
   messageText: String
 }
 
-type AuthNetCustomerResult {
-  customerId: String!
-  success: Boolean!
-  message: String
-}
-
 type Mutation {
   manageCognitoGroups(action: String!, groupName: String!, cognitoId: String!): MutationResult
     @function(name: "manageCognitoGroups-${env}")
-  processMonthlyPropertyDues: MutationResult
-    @function(name: "monthlyPropertyDues-${env}")
   createAuthNetTransaction(profileId: ID!, idempotencyKey: String!, expectedAmount: Float!, paymentMethodType: String, opaqueDataDescriptor: String!, opaqueDataValue: String!): AuthNetTransactionResult
     @function(name: "createAuthNetTransaction-${env}")
-  createAuthNetCustomerProfile(profileId: ID!, email: String!, name: String!): AuthNetCustomerResult
-    @function(name: "createAuthNetCustomerProfile-${env}")
 }

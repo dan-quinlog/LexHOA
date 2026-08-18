@@ -26,30 +26,25 @@ import PrivacyBanner from './components/PrivacyBanner';
 import DatabaseReset from './components/dev/DatabaseReset'
 import 'react-quill/dist/quill.bubble.css';
 
-// Import amplify configuration
-import awsconfig from './amplifyconfiguration.json';
-
-// Configure Amplify with merged configuration (single call to avoid overwriting)
-// Override OAuth redirects with environment variables to support different deploy targets
-Amplify.configure({
-  ...awsconfig,
+const amplifyConfiguration = {
+  ...amplifyConfig,
   oauth: {
-    ...awsconfig.oauth,
-    domain: process.env.REACT_APP_AUTH_DOMAIN || awsconfig.oauth?.domain,
-    redirectSignIn: process.env.REACT_APP_REDIRECT_SIGN_IN || awsconfig.oauth?.redirectSignIn,
-    redirectSignOut: process.env.REACT_APP_REDIRECT_SIGN_OUT || awsconfig.oauth?.redirectSignOut,
+    ...amplifyConfig.oauth,
+    domain: process.env.REACT_APP_AUTH_DOMAIN,
+    redirectSignIn: process.env.REACT_APP_REDIRECT_SIGN_IN,
+    redirectSignOut: process.env.REACT_APP_REDIRECT_SIGN_OUT,
   },
   API: {
-    ...(awsconfig.API ?? {}),
+    ...(amplifyConfig.API ?? {}),
     REST: {
-      ...(awsconfig.API?.REST ?? {}),
+      ...(amplifyConfig.API?.REST ?? {}),
       cognitoGroupManagement: {
-        endpoint: process.env.REACT_APP_API_ENDPOINT || 'https://7vxyhwwje0.execute-api.us-east-1.amazonaws.com/dev',
-        region: process.env.REACT_APP_AWS_REGION || 'us-east-1'
+        endpoint: process.env.REACT_APP_API_ENDPOINT,
+        region: process.env.REACT_APP_AWS_REGION
       }
     }
   }
-});
+};
 
 
 
@@ -64,6 +59,7 @@ export function useAuthState() {
 
   useEffect(() => {
     let active = true;
+    let authCompletionObserved = false;
 
     const clearAuth = () => {
       refreshId.current += 1;
@@ -94,14 +90,18 @@ export function useAuthState() {
     };
 
     const unsubscribe = Hub.listen('auth', ({ payload }) => {
-      if (payload.event === 'signedIn') {
+      if (payload.event === 'signInWithRedirect' || payload.event === 'signedIn') {
+        authCompletionObserved = true;
         refreshAuth();
       } else if (payload.event === 'signedOut') {
         clearAuth();
       }
     });
 
-    refreshAuth();
+    Amplify.configure(amplifyConfiguration);
+    if (!authCompletionObserved) {
+      refreshAuth();
+    }
 
     return () => {
       active = false;

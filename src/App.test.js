@@ -1,4 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
+import { Amplify } from 'aws-amplify';
 import { getCurrentUser, fetchAuthSession } from '@aws-amplify/auth';
 import { Hub } from 'aws-amplify/utils';
 import { useAuthState } from './App';
@@ -23,6 +24,7 @@ describe('useAuthState', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    Amplify.configure.mockImplementation(() => {});
     unsubscribe = jest.fn();
     Hub.listen.mockImplementation((channel, listener) => {
       authEvent = listener;
@@ -44,22 +46,42 @@ describe('useAuthState', () => {
     expect(Hub.listen).toHaveBeenCalledWith('auth', expect.any(Function));
   });
 
-  test('refreshes the user after a successful sign-in event', async () => {
-    getCurrentUser.mockRejectedValueOnce(new Error('not signed in'));
-    const { result } = renderHook(() => useAuthState());
-    await waitFor(() => expect(getCurrentUser).toHaveBeenCalledTimes(1));
-
+  test('installs the listener before configure and handles callback completion during configure', async () => {
     const currentUser = { username: 'synthetic-user' };
     getCurrentUser.mockResolvedValue(currentUser);
-    fetchAuthSession.mockResolvedValue({
-      tokens: { idToken: { payload: { 'cognito:groups': ['MEDIA'] } } }
+    fetchAuthSession.mockResolvedValue({ tokens: { idToken: { payload: {} } } });
+    Amplify.configure.mockImplementation(() => {
+      authEvent({ payload: { event: 'signInWithRedirect' } });
     });
 
-    act(() => authEvent({ payload: { event: 'signedIn' } }));
+    const { result } = renderHook(() => useAuthState());
 
     await waitFor(() => expect(result.current.user).toBe(currentUser));
-    expect(result.current.userGroups).toEqual(['MEDIA']);
+    expect(Hub.listen.mock.invocationCallOrder[0]).toBeLessThan(
+      Amplify.configure.mock.invocationCallOrder[0]
+    );
+    expect(getCurrentUser).toHaveBeenCalledTimes(1);
   });
+
+  test.each(['signInWithRedirect', 'signedIn'])(
+    'refreshes the user after the %s event',
+    async (event) => {
+      getCurrentUser.mockRejectedValueOnce(new Error('not signed in'));
+      const { result } = renderHook(() => useAuthState());
+      await waitFor(() => expect(getCurrentUser).toHaveBeenCalledTimes(1));
+
+      const currentUser = { username: 'synthetic-user' };
+      getCurrentUser.mockResolvedValue(currentUser);
+      fetchAuthSession.mockResolvedValue({
+        tokens: { idToken: { payload: { 'cognito:groups': ['MEDIA'] } } }
+      });
+
+      act(() => authEvent({ payload: { event } }));
+
+      await waitFor(() => expect(result.current.user).toBe(currentUser));
+      expect(result.current.userGroups).toEqual(['MEDIA']);
+    }
+  );
 
   test('clears the user and groups after sign-out', async () => {
     getCurrentUser.mockResolvedValue({ username: 'synthetic-user' });
@@ -82,5 +104,10 @@ describe('useAuthState', () => {
     unmount();
 
     expect(unsubscribe).toHaveBeenCalledTimes(1);
+  });
+
+  test('does not depend on generated Amplify configuration', () => {
+    const source = require('fs').readFileSync(require.resolve('./App'), 'utf8');
+    expect(source).not.toContain('amplifyconfiguration');
   });
 });

@@ -74,12 +74,20 @@ export function useAuthState() {
 
       try {
         const currentUser = await getCurrentUser();
-        const session = await fetchAuthSession();
-        const groups = session?.tokens?.idToken?.payload?.['cognito:groups'] || [];
-
         if (active && currentRefreshId === refreshId.current) {
           setUser(currentUser);
-          setUserGroups(groups);
+          setUserGroups([]);
+        }
+
+        try {
+          const session = await fetchAuthSession();
+          const groups = session?.tokens?.idToken?.payload?.['cognito:groups'] || [];
+
+          if (active && currentRefreshId === refreshId.current) {
+            setUserGroups(groups);
+          }
+        } catch (error) {
+          // A valid current user remains authenticated even if group lookup fails.
         }
       } catch (error) {
         if (active && currentRefreshId === refreshId.current) {

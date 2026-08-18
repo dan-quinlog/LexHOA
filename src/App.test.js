@@ -46,6 +46,18 @@ describe('useAuthState', () => {
     expect(Hub.listen).toHaveBeenCalledWith('auth', expect.any(Function));
   });
 
+  test('keeps a valid current user when group session lookup fails', async () => {
+    const currentUser = { username: 'synthetic-user' };
+    getCurrentUser.mockResolvedValue(currentUser);
+    fetchAuthSession.mockRejectedValue(new Error('session unavailable'));
+
+    const { result } = renderHook(() => useAuthState());
+
+    await waitFor(() => expect(result.current.user).toBe(currentUser));
+    expect(fetchAuthSession).toHaveBeenCalledTimes(1);
+    expect(result.current.userGroups).toEqual([]);
+  });
+
   test('installs the listener before configure and handles callback completion during configure', async () => {
     const currentUser = { username: 'synthetic-user' };
     getCurrentUser.mockResolvedValue(currentUser);

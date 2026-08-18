@@ -1,5 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const {
     createDynamoDependencies,
     parseDuesAmount,
@@ -112,6 +114,42 @@ test('DynamoDB update is atomic, conditional, and duplicate-safe', async () => {
         promise: async () => { throw Object.assign(new Error('duplicate'), { code: 'ConditionalCheckFailedException' }); }
     });
     assert.equal(await dependencies.chargeProfile('owner-a', 50, '2026-08', now.toISOString()), 'skipped');
+});
+
+test('legacy GraphQL parameters are declared only as unused Gen1 compatibility inputs', () => {
+    const template = JSON.parse(fs.readFileSync(
+        path.join(__dirname, '..', 'monthlyPropertyDues-cloudformation-template.json'),
+        'utf8'
+    ));
+    const backendConfig = JSON.parse(fs.readFileSync(
+        path.join(__dirname, '..', '..', '..', 'backend-config.json'),
+        'utf8'
+    ));
+    const compatibilityParameters = [
+        'apilexhoaGraphQLAPIEndpointOutput',
+        'apilexhoaGraphQLAPIKeyOutput'
+    ];
+
+    for (const parameter of compatibilityParameters) {
+        assert.deepEqual(template.Parameters[parameter], {
+            Type: 'String',
+            Default: parameter
+        });
+    }
+    assert.deepEqual(
+        backendConfig.function.monthlyPropertyDues.dependsOn[0].attributes,
+        ['GraphQLAPIIdOutput', 'GraphQLAPIEndpointOutput', 'GraphQLAPIKeyOutput']
+    );
+
+    const environment = JSON.stringify(template.Resources.LambdaFunction.Properties.Environment);
+    const iam = JSON.stringify(template.Resources.AmplifyResourcesPolicy);
+    const source = fs.readFileSync(path.join(__dirname, 'index.js'), 'utf8');
+    for (const marker of ['GRAPHQLAPIENDPOINTOUTPUT', 'GRAPHQLAPIKEYOUTPUT']) {
+        assert.equal(environment.includes(marker), false);
+        assert.equal(iam.includes(marker), false);
+        assert.equal(source.includes(marker), false);
+    }
+    assert.equal(iam.includes('appsync:GraphQL'), false);
 });
 
 test('invalid dues configuration fails closed', () => {

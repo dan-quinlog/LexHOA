@@ -170,7 +170,9 @@
       "dependsOn": [
         {
           "attributes": [
-            "GraphQLAPIIdOutput"
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
           ],
           "category": "api",
           "resourceName": "lexhoa"

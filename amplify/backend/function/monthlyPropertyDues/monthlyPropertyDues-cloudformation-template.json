@@ -22,6 +22,14 @@
     "apilexhoaGraphQLAPIIdOutput": {
       "Type": "String",
       "Default": "apilexhoaGraphQLAPIIdOutput"
+    },
+    "apilexhoaGraphQLAPIEndpointOutput": {
+      "Type": "String",
+      "Default": "apilexhoaGraphQLAPIEndpointOutput"
+    },
+    "apilexhoaGraphQLAPIKeyOutput": {
+      "Type": "String",
+      "Default": "apilexhoaGraphQLAPIKeyOutput"
     }
   },
   "Conditions": {

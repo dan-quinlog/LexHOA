@@ -1,23 +1,23 @@
-  import React from 'react';
+  import React, { useState } from 'react';
   import { signInWithRedirect } from '@aws-amplify/auth';
-  import { Amplify } from 'aws-amplify';
 
   function Login() {
-    const handleLogin = () => {
-      const config = Amplify.getConfig();
-      console.log('=== Amplify Full Config ===');
-      console.log(config);
-      console.log('=== Auth Config ===');
-      console.log(config.Auth);
-      console.log('=== Auth.Cognito ===');
-      console.log(config.Auth?.Cognito);
-      console.log('=== OAuth Config ===');
-      console.log(config.Auth?.Cognito?.loginWith?.oauth);
-      signInWithRedirect();
+    const [error, setError] = useState(false);
+
+    const handleLogin = async () => {
+      setError(false);
+      try {
+        await signInWithRedirect();
+      } catch {
+        setError(true);
+      }
     };
 
     return (
-      <button onClick={handleLogin}>Login</button>
+      <>
+        <button onClick={handleLogin}>Login</button>
+        {error && <span role="alert">Unable to start sign in. Please try again.</span>}
+      </>
     );
   }
 

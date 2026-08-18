@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Amplify } from 'aws-amplify';
-import { getCurrentUser, signOut, signInWithRedirect, fetchAuthSession } from '@aws-amplify/auth';
+import { getCurrentUser, signOut, fetchAuthSession } from '@aws-amplify/auth';
+import { Hub } from 'aws-amplify/utils';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { ApolloClient, InMemoryCache, ApolloProvider, useQuery, gql } from '@apollo/client';
 import './styles/variables.css';
@@ -56,9 +57,64 @@ const url = amplifyConfig.aws_appsync_graphqlEndpoint;
 const region = amplifyConfig.aws_appsync_region;
 const BOARD_GROUP = process.env.REACT_APP_BOARD_GROUP_NAME;
 
-function App() {
+export function useAuthState() {
   const [user, setUser] = useState(null);
   const [userGroups, setUserGroups] = useState([]);
+  const refreshId = useRef(0);
+
+  useEffect(() => {
+    let active = true;
+
+    const clearAuth = () => {
+      refreshId.current += 1;
+      if (active) {
+        setUser(null);
+        setUserGroups([]);
+      }
+    };
+
+    const refreshAuth = async () => {
+      const currentRefreshId = ++refreshId.current;
+
+      try {
+        const currentUser = await getCurrentUser();
+        const session = await fetchAuthSession();
+        const groups = session?.tokens?.idToken?.payload?.['cognito:groups'] || [];
+
+        if (active && currentRefreshId === refreshId.current) {
+          setUser(currentUser);
+          setUserGroups(groups);
+        }
+      } catch (error) {
+        if (active && currentRefreshId === refreshId.current) {
+          setUser(null);
+          setUserGroups([]);
+        }
+      }
+    };
+
+    const unsubscribe = Hub.listen('auth', ({ payload }) => {
+      if (payload.event === 'signedIn') {
+        refreshAuth();
+      } else if (payload.event === 'signedOut') {
+        clearAuth();
+      }
+    });
+
+    refreshAuth();
+
+    return () => {
+      active = false;
+      refreshId.current += 1;
+      unsubscribe();
+    };
+  }, []);
+
+  return { user, userGroups };
+}
+
+function App() {
+  const { user, userGroups } = useAuthState();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -106,30 +162,6 @@ function App() {
   });
 
   useEffect(() => {
-    const handleRedirect = async () => {
-      try {
-        const currentUser = await getCurrentUser();
-        if (currentUser) {
-          setUser(currentUser);
-          try {
-            const session = await fetchAuthSession();
-            const groups = session?.tokens?.idToken?.payload?.['cognito:groups'] || [];
-            setUserGroups(groups);
-          } catch (sessionError) {
-            console.warn('Session fetch error (may resolve on refresh):', sessionError.message);
-            setUserGroups([]);
-          }
-        }
-      } catch (error) {
-        setUser(null);
-        setUserGroups([]);
-      }
-    };
-
-    handleRedirect();
-  }, []);
-
-  useEffect(() => {
     function handleClickOutside(event) {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setIsMenuOpen(false);
@@ -145,8 +177,6 @@ function App() {
   async function handleSignOut() {
     try {
       await signOut();
-      setUser(null);
-      setUserGroups([]);
     } catch (error) {
       console.error('Error signing out: ', error);
     }

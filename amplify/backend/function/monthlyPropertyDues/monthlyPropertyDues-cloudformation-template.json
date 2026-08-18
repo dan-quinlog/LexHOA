@@ -33,6 +33,14 @@
     }
   },
   "Conditions": {
+    "IsMainEnvironment": {
+      "Fn::Equals": [
+        {
+          "Ref": "env"
+        },
+        "main"
+      ]
+    },
     "ShouldNotCreateEnvResources": {
       "Fn::Equals": [
         {
@@ -266,7 +274,13 @@
         "ScheduleExpression": {
           "Ref": "CloudWatchRule"
         },
-        "State": "ENABLED",
+        "State": {
+          "Fn::If": [
+            "IsMainEnvironment",
+            "ENABLED",
+            "DISABLED"
+          ]
+        },
         "Targets": [
           {
             "Arn": {

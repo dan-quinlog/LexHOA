@@ -201,6 +201,7 @@ function App() {
       { label: 'Billing', path: '/billing' },
       { label: 'Board', path: '/board', group: BOARD_GROUP },
       { label: 'Amenities', path: '/amenities' },
+      { label: 'Documents', path: '/documents' },
       { label: 'Contact', path: '/contact' }
     ];
 

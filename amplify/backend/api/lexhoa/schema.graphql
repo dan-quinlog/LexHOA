@@ -96,7 +96,7 @@ type Property @model
     { allow: private, operations: [read] },
     { allow: groups, groups: ["BOARD", "PRESIDENT"], operations: [create, read, update, delete] }
   ])
-  profTenant: Profile @hasOne(fields: ["profTenantId"])
+  profTenant: Profile @hasOne
   @auth(rules: [
     { allow: private, operations: [read] },
     { allow: owner, operations: [create, read, update] },

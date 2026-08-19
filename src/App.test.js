@@ -122,4 +122,10 @@ describe('useAuthState', () => {
     const source = require('fs').readFileSync(require.resolve('./App'), 'utf8');
     expect(source).not.toContain('amplifyconfiguration');
   });
+
+  test('includes Documents in authenticated menu items', () => {
+    const source = require('fs').readFileSync(require.resolve('./App'), 'utf8');
+    const authenticatedMenu = source.match(/const renderMenuItems = \(\) => \{([\s\S]*?)const cognitoId/)[1];
+    expect(authenticatedMenu).toContain("{ label: 'Documents', path: '/documents' }");
+  });
 });

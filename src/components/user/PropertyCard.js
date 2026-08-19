@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
-import { useMutation } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { ADD_TENANT_TO_MY_PROPERTY, UPDATE_PROFILE } from '../../queries/mutations';
+import { GET_TENANT_PROFILE } from '../../queries/queries';
 import ProfileEditModal from '../shared/ProfileEditModal';
 import './PropertyCard.css';
 const PropertyCard = ({ property, currentProfileId, onTenantAdded }) => {
@@ -8,11 +9,17 @@ const PropertyCard = ({ property, currentProfileId, onTenantAdded }) => {
   const [showEditTenantModal, setShowEditTenantModal] = useState(false);
   const [createTenantError, setCreateTenantError] = useState('');
   const [isCreatingTenant, setIsCreatingTenant] = useState(false);
+  const [createdTenant, setCreatedTenant] = useState(null);
   const createInFlight = useRef(false);
   const [addTenantToMyProperty] = useMutation(ADD_TENANT_TO_MY_PROPERTY);
   const [updateProfile] = useMutation(UPDATE_PROFILE);
+  const { data: tenantData } = useQuery(GET_TENANT_PROFILE, {
+    variables: { id: property.profTenantId },
+    skip: !property.profTenantId || Boolean(property.profTenant)
+  });
 
   const isOwner = property.profOwnerId === currentProfileId;
+  const tenant = property.profTenant || createdTenant || tenantData?.getProfile;
 
   const handleCreateTenant = async (formData) => {
     if (createInFlight.current) return;
@@ -22,7 +29,7 @@ const PropertyCard = ({ property, currentProfileId, onTenantAdded }) => {
 
     try {
       const { name, email, phone, address, city, state, zip, contactPref, allowText } = formData;
-      await addTenantToMyProperty({
+      const result = await addTenantToMyProperty({
         variables: {
           input: {
             propertyId: property.id,
@@ -39,6 +46,7 @@ const PropertyCard = ({ property, currentProfileId, onTenantAdded }) => {
         }
       });
 
+      setCreatedTenant(result.data.addTenantToMyProperty);
       await onTenantAdded?.();
       setShowCreateTenantModal(false);
     } catch {
@@ -50,13 +58,21 @@ const PropertyCard = ({ property, currentProfileId, onTenantAdded }) => {
   };
 
   const handleUpdateTenant = async (formData) => {
-    const { owner, __typename, balance, ...updateData } = formData;
+    const { name, email, phone, address, city, state, zip, contactPref, allowText } = formData;
 
     await updateProfile({
       variables: {
         input: {
-          id: property.profTenant.id,
-          ...updateData
+          id: tenant.id,
+          name,
+          email,
+          phone,
+          address,
+          city,
+          state,
+          zip,
+          contactPref,
+          allowText
         }
       }
     });
@@ -74,13 +90,13 @@ const PropertyCard = ({ property, currentProfileId, onTenantAdded }) => {
         </div>
         <div className="right-column">
           {isOwner ? (
-            property.profTenant ? (
+            tenant ? (
               <>
                 <h4>Tenant Contact</h4>
-                <p>Name: {property.profTenant.name}</p>
-                <p>Phone: {property.profTenant.phone}</p>
-                <p>Email: {property.profTenant.email}</p>
-                {property.profTenant.owner === currentProfileId && (
+                <p>Name: {tenant.name}</p>
+                <p>Phone: {tenant.phone}</p>
+                <p>Email: {tenant.email}</p>
+                {!tenant.cognitoID && (
                   <button
                     className="edit-tenant-button"
                     onClick={() => setShowEditTenantModal(true)}
@@ -89,6 +105,8 @@ const PropertyCard = ({ property, currentProfileId, onTenantAdded }) => {
                   </button>
                 )}
               </>
+            ) : property.profTenantId ? (
+              <p>Loading tenant information...</p>
             ) : (
               <button
                 className="add-tenant-button"
@@ -141,7 +159,7 @@ const PropertyCard = ({ property, currentProfileId, onTenantAdded }) => {
           show={showEditTenantModal}
           onClose={() => setShowEditTenantModal(false)}
           onSubmit={handleUpdateTenant}
-          initialValues={property.profTenant}
+          initialValues={tenant}
           isOwner={false}
         />
       )}

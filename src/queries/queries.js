@@ -55,6 +55,25 @@ export const GET_PROFILE = gql`
   }
 `;
 
+export const GET_TENANT_PROFILE = gql`
+  query GetTenantProfile($id: ID!) {
+    getProfile(id: $id) {
+      id
+      cognitoID
+      name
+      email
+      phone
+      address
+      city
+      state
+      zip
+      contactPref
+      allowText
+      owner
+    }
+  }
+`;
+
 export const LIST_PROFILES = gql`
   query ListProfiles($filter: ModelProfileFilterInput, $limit: Int, $nextToken: String) {
     listProfiles(filter: $filter, limit: $limit, nextToken: $nextToken) {

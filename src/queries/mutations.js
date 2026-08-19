@@ -162,6 +162,7 @@ export const ADD_TENANT_TO_MY_PROPERTY = gql`
   mutation AddTenantToMyProperty($input: AddTenantToMyPropertyInput!) {
     addTenantToMyProperty(input: $input) {
       id
+      cognitoID
       name
       email
       phone

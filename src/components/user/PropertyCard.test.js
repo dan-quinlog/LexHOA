@@ -1,12 +1,14 @@
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { useMutation } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import PropertyCard from './PropertyCard';
 import { ADD_TENANT_TO_MY_PROPERTY, UPDATE_PROFILE } from '../../queries/mutations';
+import { GET_TENANT_PROFILE } from '../../queries/queries';
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
-  useMutation: jest.fn()
+  useMutation: jest.fn(),
+  useQuery: jest.fn()
 }));
 
 jest.mock('../shared/ProfileEditModal', () => props => props.show ? (
@@ -63,16 +65,29 @@ function renderCard(addTenant, onTenantAdded = jest.fn()) {
 
 beforeEach(() => {
   useMutation.mockReset();
+  useQuery.mockReset();
+  useQuery.mockReturnValue({ data: undefined });
 });
 
 test('uses one allowlisted operation, refetches, and closes only after success', async () => {
-  const addTenant = jest.fn().mockResolvedValue({ data: { addTenantToMyProperty: { id: 'tenant-id' } } });
+  const addTenant = jest.fn().mockResolvedValue({
+    data: {
+      addTenantToMyProperty: {
+        id: 'tenant-id',
+        cognitoID: null,
+        name: 'Synthetic Tenant',
+        email: 'tenant@example.invalid',
+        phone: '555-0100'
+      }
+    }
+  });
   const onTenantAdded = jest.fn().mockResolvedValue();
   renderCard(addTenant, onTenantAdded);
 
   fireEvent.click(screen.getByRole('button', { name: 'Submit tenant' }));
 
   await waitFor(() => expect(onTenantAdded).toHaveBeenCalledTimes(1));
+  expect(await screen.findByText('Name: Synthetic Tenant')).toBeInTheDocument();
   expect(addTenant).toHaveBeenCalledTimes(1);
   expect(addTenant).toHaveBeenCalledWith({
     variables: {
@@ -120,4 +135,58 @@ test('prevents duplicate submits while the operation is pending', async () => {
   await act(async () => {
     resolveMutation({ data: { addTenantToMyProperty: { id: 'tenant-id' } } });
   });
+});
+
+test('loads a linked tenant by id and lets the owner edit a tenant without Cognito', () => {
+  const tenant = {
+    id: 'tenant-id',
+    cognitoID: null,
+    name: 'Linked Tenant',
+    email: 'linked@example.invalid',
+    phone: '555-0101'
+  };
+  useQuery.mockImplementation(query => {
+    expect(query).toBe(GET_TENANT_PROFILE);
+    return { data: { getProfile: tenant } };
+  });
+  const updateProfile = jest.fn();
+  useMutation.mockImplementation(mutation => {
+    if (mutation === ADD_TENANT_TO_MY_PROPERTY) return [jest.fn()];
+    if (mutation === UPDATE_PROFILE) return [updateProfile];
+    throw new Error('Unexpected mutation');
+  });
+
+  render(
+    <PropertyCard
+      property={{ ...property, profTenantId: tenant.id }}
+      currentProfileId="owner-profile"
+    />
+  );
+
+  expect(screen.getByText('Name: Linked Tenant')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Update Tenant' })).toBeInTheDocument();
+});
+
+test('does not let the owner edit a tenant with a Cognito profile', () => {
+  useQuery.mockReturnValue({
+    data: {
+      getProfile: {
+        id: 'tenant-id',
+        cognitoID: 'tenant-cognito-id',
+        name: 'Cognito Tenant',
+        email: 'cognito@example.invalid'
+      }
+    }
+  });
+  useMutation.mockImplementation(() => [jest.fn()]);
+
+  render(
+    <PropertyCard
+      property={{ ...property, profTenantId: 'tenant-id' }}
+      currentProfileId="owner-profile"
+    />
+  );
+
+  expect(screen.getByText('Name: Cognito Tenant')).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Update Tenant' })).not.toBeInTheDocument();
 });

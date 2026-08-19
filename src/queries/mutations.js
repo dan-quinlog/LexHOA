@@ -124,16 +124,6 @@ export const UPDATE_PROPERTY = gql`
       profTenantId
       createdAt
       updatedAt
-      profOwner {
-        id
-        name
-        phone
-      }
-      profTenant {
-        id
-        name
-        phone
-      }
     }
   }
 `;

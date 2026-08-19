@@ -53,6 +53,13 @@ function renderManager(groups, updateProperty = jest.fn().mockResolvedValue({}))
 describe('PropertyManager edits', () => {
   beforeEach(() => jest.clearAllMocks());
 
+  test('update response does not resolve optional profile relationships', () => {
+    const operation = UPDATE_PROPERTY.join('');
+
+    expect(operation).not.toMatch(/profOwner\s*\{/);
+    expect(operation).not.toMatch(/profTenant\s*\{/);
+  });
+
   test('BOARD updates relationships without owner and cannot edit the address', async () => {
     const { updateProperty } = renderManager(['BOARD']);
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }));

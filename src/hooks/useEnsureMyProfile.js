@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
 import { PROFILE_BY_COGNITO_ID } from '../queries/queries';
 import { ENSURE_MY_PROFILE } from '../queries/mutations';
@@ -12,11 +12,21 @@ export default function useEnsureMyProfile(user, client) {
   });
   const [ensureMyProfile] = useMutation(ENSURE_MY_PROFILE, { client });
   const attemptedForUser = useRef(null);
+  const [ensureError, setEnsureError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const { data, error, loading, refetch } = profileQuery;
+
+  const retryInitialization = useCallback(() => {
+    attemptedForUser.current = null;
+    setEnsureError(false);
+    setRetryCount(count => count + 1);
+    refetch().catch(() => setEnsureError(true));
+  }, [refetch]);
 
   useEffect(() => {
     if (!cognitoId) {
       attemptedForUser.current = null;
+      setEnsureError(false);
       return;
     }
 
@@ -31,6 +41,7 @@ export default function useEnsureMyProfile(user, client) {
     }
 
     attemptedForUser.current = cognitoId;
+    setEnsureError(false);
     let active = true;
     ensureMyProfile()
       .then(() => {
@@ -39,7 +50,11 @@ export default function useEnsureMyProfile(user, client) {
         }
         return undefined;
       })
-      .catch(() => {});
+      .catch(() => {
+        if (active) {
+          setEnsureError(true);
+        }
+      });
 
     return () => {
       active = false;
@@ -50,8 +65,13 @@ export default function useEnsureMyProfile(user, client) {
     data,
     error,
     loading,
-    refetch
+    refetch,
+    retryCount
   ]);
 
-  return data?.profileByCognitoID?.items?.[0];
+  return {
+    profile: data?.profileByCognitoID?.items?.[0],
+    initializationError: Boolean(error) || ensureError,
+    retryInitialization
+  };
 }

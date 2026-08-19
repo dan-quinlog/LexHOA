@@ -69,6 +69,18 @@ select {
   color: inherit;
 }
 
+.profile-initialization-error {
+  margin: calc(var(--header-height) + var(--spacing-medium)) var(--spacing-medium) 0;
+  padding: var(--spacing-medium);
+  color: var(--error-color);
+  border: 1px solid var(--error-color);
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-medium);
+}
+
 /* Menu Styles */
 .desktop-menu {
   display: none;

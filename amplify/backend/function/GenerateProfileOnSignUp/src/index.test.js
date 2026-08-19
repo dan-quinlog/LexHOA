@@ -1,8 +1,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { ensureProfile } = require('./index')._internals;
+const { createHandler, ensureProfile } = require('./index')._internals;
 
-const identityEvent = (claims = {}) => ({
+const appsyncEvent = (claims = {}) => ({
   identity: { claims },
   arguments: {
     sub: 'untrusted-sub',
@@ -11,65 +11,106 @@ const identityEvent = (claims = {}) => ({
   }
 });
 
-test('rejects a request without a trusted Cognito identity', async () => {
-  let calls = 0;
-  const client = {
-    query: async () => { calls += 1; },
-    mutate: async () => { calls += 1; }
-  };
-
-  await assert.rejects(ensureProfile({}, client), /Unauthorized/);
-  assert.equal(calls, 0);
+const confirmationEvent = (attributes = {}) => ({
+  triggerSource: 'PostConfirmation_ConfirmSignUp',
+  request: { userAttributes: attributes }
 });
 
-test('creates a profile using only trusted identity claims', async () => {
+function clientWith({ get = [{ Item: undefined }], putError } = {}) {
+  const gets = [...get];
   const calls = [];
-  const client = {
-    query: async () => ({ data: { getProfile: null } }),
-    mutate: async request => {
-      calls.push(request.variables.input);
-      return { data: { createProfile: request.variables.input } };
-    }
+  return {
+    calls,
+    get: request => ({
+      promise: async () => {
+        calls.push({ operation: 'get', request });
+        return gets.shift() || {};
+      }
+    }),
+    put: request => ({
+      promise: async () => {
+        calls.push({ operation: 'put', request });
+        if (putError) throw putError;
+        return {};
+      }
+    })
   };
+}
 
-  const profile = await ensureProfile(identityEvent({
+test('rejects a request without trusted Cognito identity', async () => {
+  const client = clientWith();
+  await assert.rejects(ensureProfile({}, client, 'Profile-dev'), /Unable to initialize profile/);
+  assert.equal(client.calls.length, 0);
+});
+
+test('AppSync creates a complete profile using only trusted claims', async () => {
+  const client = clientWith();
+  const profile = await ensureProfile(appsyncEvent({
     sub: 'trusted-sub',
     name: 'Trusted Name',
     email: 'trusted@example.invalid'
-  }), client);
+  }), client, 'Profile-dev', () => new Date('2026-08-19T12:00:00.000Z'));
 
-  assert.deepEqual(calls[0], {
+  assert.deepEqual(profile, {
     id: 'trusted-sub',
     cognitoID: 'trusted-sub',
     owner: 'trusted-sub',
     name: 'Trusted Name',
-    email: 'trusted@example.invalid'
+    email: 'trusted@example.invalid',
+    byTypeName: 'PROFILE',
+    byTypeBalance: 'PROFILE',
+    byTypeCreatedAt: 'PROFILE',
+    contactPref: 'EMAIL',
+    billingFreq: 'MONTHLY',
+    allowText: false,
+    balance: 0,
+    createdAt: '2026-08-19T12:00:00.000Z',
+    updatedAt: '2026-08-19T12:00:00.000Z',
+    __typename: 'Profile'
   });
-  assert.equal(profile.id, 'trusted-sub');
+  assert.equal(client.calls[1].request.ConditionExpression, 'attribute_not_exists(id)');
+  assert.equal(client.calls[1].request.TableName, 'Profile-dev');
 });
 
-test('returns an existing profile without creating a duplicate', async () => {
-  const existing = { id: 'trusted-sub', cognitoID: 'trusted-sub' };
-  let mutations = 0;
-  const profile = await ensureProfile(identityEvent({ sub: 'trusted-sub' }), {
-    query: async () => ({ data: { getProfile: existing } }),
-    mutate: async () => { mutations += 1; }
+test('Cognito PostConfirmation creates from user attributes and returns the event', async () => {
+  const client = clientWith();
+  const event = confirmationEvent({
+    sub: 'confirmed-sub',
+    name: 'Confirmed User',
+    email: 'confirmed@example.invalid'
   });
 
-  assert.equal(profile, existing);
-  assert.equal(mutations, 0);
+  assert.equal(await createHandler(client, 'Profile-dev')(event), event);
+  assert.equal(client.calls[1].request.Item.id, 'confirmed-sub');
 });
 
-test('treats a concurrent same-id creation as an idempotent retry', async () => {
+test('returns an existing profile without writing', async () => {
   const existing = { id: 'trusted-sub', cognitoID: 'trusted-sub' };
-  let queries = 0;
-  const profile = await ensureProfile(identityEvent({ sub: 'trusted-sub' }), {
-    query: async () => ({
-      data: { getProfile: ++queries === 1 ? null : existing }
-    }),
-    mutate: async () => { throw new Error('duplicate marker'); }
-  });
+  const client = clientWith({ get: [{ Item: existing }] });
+  const profile = await ensureProfile(appsyncEvent({ sub: 'trusted-sub' }), client, 'Profile-dev');
 
   assert.equal(profile, existing);
-  assert.equal(queries, 2);
+  assert.deepEqual(client.calls.map(call => call.operation), ['get']);
+});
+
+test('returns the winning profile after a conditional-create race', async () => {
+  const winner = { id: 'trusted-sub', cognitoID: 'trusted-sub' };
+  const client = clientWith({
+    get: [{}, { Item: winner }],
+    putError: { code: 'ConditionalCheckFailedException' }
+  });
+
+  assert.equal(
+    await ensureProfile(appsyncEvent({ sub: 'trusted-sub' }), client, 'Profile-dev'),
+    winner
+  );
+  assert.deepEqual(client.calls.map(call => call.operation), ['get', 'put', 'get']);
+});
+
+test('surfaces only a generic error when DynamoDB fails', async () => {
+  const client = clientWith({ putError: new Error('sensitive backend detail') });
+  await assert.rejects(
+    createHandler(client, 'Profile-dev')(appsyncEvent({ sub: 'trusted-sub' })),
+    error => error.message === 'Unable to initialize profile'
+  );
 });

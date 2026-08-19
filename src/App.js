@@ -329,7 +329,11 @@ function App() {
 
   // AppContent component to enable useQuery inside ApolloProvider
   const AppContent = () => {
-    const appProfile = useEnsureMyProfile(user, authenticatedClient);
+    const {
+      profile: appProfile,
+      initializationError,
+      retryInitialization
+    } = useEnsureMyProfile(user, authenticatedClient);
     const isOwner = appProfile?.ownedProperties?.items?.length > 0;
 
     return (
@@ -353,6 +357,12 @@ function App() {
             </nav>
           )}
         </header>
+        {initializationError && (
+          <div className="profile-initialization-error" role="alert">
+            <span>We could not initialize your profile.</span>
+            <button type="button" onClick={retryInitialization}>Retry</button>
+          </div>
+        )}
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/profile" element={<Profile cognitoId={cognitoId} />} />

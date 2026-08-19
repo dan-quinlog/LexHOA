@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { useMutation, useQuery } from '@apollo/client';
 import useEnsureMyProfile from './useEnsureMyProfile';
 
@@ -27,13 +27,14 @@ describe('useEnsureMyProfile', () => {
       refetch
     });
 
-    const { rerender } = renderHook(() => useEnsureMyProfile(user, {}));
+    const { result, rerender } = renderHook(() => useEnsureMyProfile(user, {}));
 
     expect(useQuery).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
       variables: { cognitoID: user.userId }
     }));
     await waitFor(() => expect(ensureMyProfile).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(refetch).toHaveBeenCalledTimes(1));
+    expect(result.current.initializationError).toBe(false);
     rerender();
     expect(ensureMyProfile).toHaveBeenCalledTimes(1);
   });
@@ -50,5 +51,28 @@ describe('useEnsureMyProfile', () => {
     await waitFor(() => expect(useQuery).toHaveBeenCalled());
     expect(ensureMyProfile).not.toHaveBeenCalled();
     expect(refetch).not.toHaveBeenCalled();
+  });
+
+  test('surfaces a generic initialization failure and retries successfully', async () => {
+    ensureMyProfile
+      .mockRejectedValueOnce(new Error('sensitive backend detail'))
+      .mockResolvedValueOnce({ data: { ensureMyProfile: { id: user.userId } } });
+    useQuery.mockReturnValue({
+      loading: false,
+      error: undefined,
+      data: { profileByCognitoID: { items: [] } },
+      refetch
+    });
+
+    const { result } = renderHook(() => useEnsureMyProfile(user, {}));
+
+    await waitFor(() => expect(result.current.initializationError).toBe(true));
+    expect(result.current).not.toHaveProperty('error');
+
+    act(() => result.current.retryInitialization());
+
+    await waitFor(() => expect(ensureMyProfile).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(refetch).toHaveBeenCalled());
+    await waitFor(() => expect(result.current.initializationError).toBe(false));
   });
 });

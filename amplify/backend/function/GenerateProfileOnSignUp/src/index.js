@@ -1,90 +1,86 @@
 const AWS = require('aws-sdk');
-const appsync = require('aws-appsync');
-const gql = require('graphql-tag');
 
-const getProfile = gql`
-  query GetProfile($id: ID!) {
-    getProfile(id: $id) {
-      id
-      cognitoID
-      owner
-      name
-      email
-    }
+const documentClient = new AWS.DynamoDB.DocumentClient();
+
+function trustedAttributes(event) {
+  if (event?.triggerSource?.startsWith('PostConfirmation_')) {
+    return event.request?.userAttributes;
   }
-`;
 
-const createProfile = gql`
-  mutation CreateProfile($input: CreateProfileInput!) {
-    createProfile(input: $input) {
-      id
-      cognitoID
-      owner
-      name
-      email
-    }
-  }
-`;
-
-async function findProfile(graphqlClient, sub) {
-  const result = await graphqlClient.query({
-    query: getProfile,
-    variables: { id: sub },
-    fetchPolicy: 'network-only'
-  });
-  return result.data?.getProfile || null;
+  return event?.identity?.claims;
 }
 
-async function ensureProfile(event, graphqlClient) {
-  const claims = event?.identity?.claims;
-  const sub = claims?.sub;
+async function ensureProfile(event, client, tableName, now = () => new Date()) {
+  const attributes = trustedAttributes(event);
+  const sub = attributes?.sub;
 
   if (!sub) {
-    throw new Error('Unauthorized');
+    throw new Error('Unable to initialize profile');
   }
 
-  const existingProfile = await findProfile(graphqlClient, sub);
-  if (existingProfile) {
-    return existingProfile;
+  const key = { id: sub };
+  const existing = await client.get({
+    TableName: tableName,
+    Key: key,
+    ConsistentRead: true
+  }).promise();
+
+  if (existing.Item) {
+    return existing.Item;
   }
 
-  const variables = {
-    input: {
-      id: sub,
-      cognitoID: sub,
-      owner: sub,
-      name: claims.name || '',
-      email: claims.email || ''
-    }
+  const timestamp = now().toISOString();
+  const profile = {
+    id: sub,
+    cognitoID: sub,
+    owner: sub,
+    name: attributes.name || '',
+    email: attributes.email || '',
+    byTypeName: 'PROFILE',
+    byTypeBalance: 'PROFILE',
+    byTypeCreatedAt: 'PROFILE',
+    contactPref: 'EMAIL',
+    billingFreq: 'MONTHLY',
+    allowText: false,
+    balance: 0,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    __typename: 'Profile'
   };
 
   try {
-    const result = await graphqlClient.mutate({
-      mutation: createProfile,
-      variables
-    });
-    return result.data.createProfile;
-  } catch {
-    const profileCreatedByAnotherRequest = await findProfile(graphqlClient, sub);
-    if (profileCreatedByAnotherRequest) {
-      return profileCreatedByAnotherRequest;
+    await client.put({
+      TableName: tableName,
+      Item: profile,
+      ConditionExpression: 'attribute_not_exists(id)'
+    }).promise();
+    return profile;
+  } catch (error) {
+    if (error?.code === 'ConditionalCheckFailedException') {
+      const raced = await client.get({
+        TableName: tableName,
+        Key: key,
+        ConsistentRead: true
+      }).promise();
+      if (raced.Item) {
+        return raced.Item;
+      }
     }
-    throw new Error('Unable to ensure profile');
+
+    throw new Error('Unable to initialize profile');
   }
 }
 
-exports.handler = async (event) => {
-  const graphqlClient = new appsync.AWSAppSyncClient({
-    url: process.env.API_LEXHOA_GRAPHQLAPIENDPOINTOUTPUT,
-    region: process.env.REGION,
-    auth: {
-      type: 'AWS_IAM',
-      credentials: AWS.config.credentials
-    },
-    disableOffline: true,
-  });
+function createHandler(client = documentClient, tableName = process.env.PROFILE_TABLE_NAME) {
+  return async event => {
+    try {
+      const profile = await ensureProfile(event, client, tableName);
+      return event?.triggerSource?.startsWith('PostConfirmation_') ? event : profile;
+    } catch {
+      throw new Error('Unable to initialize profile');
+    }
+  };
+}
 
-  return ensureProfile(event, graphqlClient);
-};
-
-exports._internals = { ensureProfile };
+exports.handler = createHandler();
+exports._internals = { createHandler, ensureProfile, trustedAttributes };

@@ -1,10 +1,6 @@
 {
   "permissions": {
-    "api": {
-      "lexhoa": [
-        "Mutation"
-      ]
-    }
+    "api": {}
   },
   "lambdaLayers": []
 }

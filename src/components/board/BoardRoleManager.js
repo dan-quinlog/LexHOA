@@ -23,15 +23,20 @@ const BoardRoleManager = ({ userGroups = [] }) => {
 
   const [manageCognitoGroups, { loading: mutationLoading }] = useMutation(MANAGE_COGNITO_GROUPS, {
     onCompleted: (data) => {
-      setNotificationMessage(data.manageCognitoGroups.message || 'Operation completed successfully');
+      const result = data?.manageCognitoGroups;
+      if (!result?.success) {
+        setNotificationMessage(result?.message || 'Unable to update board role');
+        setShowNotification(true);
+        return;
+      }
+
+      setNotificationMessage(result.message || 'Operation completed successfully');
       setShowNotification(true);
       setCognitoId('');
-      if (actionType !== 'LIST') {
-        fetchUsers();
-      }
+      fetchUsers();
     },
-    onError: (error) => {
-      setNotificationMessage(`Failed to ${actionType.toLowerCase()} user: ${error.message}`);
+    onError: () => {
+      setNotificationMessage('Unable to update board role');
       setShowNotification(true);
     }
   });

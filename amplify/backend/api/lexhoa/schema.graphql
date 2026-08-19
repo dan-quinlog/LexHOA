@@ -438,6 +438,7 @@ type Mutation {
     @auth(rules: [{ allow: groups, groups: ["PRESIDENT", "SECRETARY"] }])
   manageCognitoGroups(action: String!, groupName: String!, cognitoId: String!): MutationResult
     @function(name: "manageCognitoGroups-${env}")
+    @auth(rules: [{ allow: groups, groups: ["PRESIDENT"] }])
   createAuthNetTransaction(profileId: ID!, idempotencyKey: String!, expectedAmount: Float!, paymentMethodType: String, opaqueDataDescriptor: String!, opaqueDataValue: String!): AuthNetTransactionResult
     @function(name: "createAuthNetTransaction-${env}")
 }

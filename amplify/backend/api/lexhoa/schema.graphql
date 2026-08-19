@@ -401,6 +401,31 @@ input AddTenantToMyPropertyInput {
   allowText: Boolean
 }
 
+enum MergeProfileValueSource {
+  COGNITO
+  MANUAL
+}
+
+input MergeProfileSelectionsInput {
+  name: MergeProfileValueSource!
+  email: MergeProfileValueSource!
+  phone: MergeProfileValueSource!
+  address: MergeProfileValueSource!
+  city: MergeProfileValueSource!
+  state: MergeProfileValueSource!
+  zip: MergeProfileValueSource!
+  contactPref: MergeProfileValueSource!
+  billingFreq: MergeProfileValueSource!
+  allowText: MergeProfileValueSource!
+  balance: MergeProfileValueSource!
+}
+
+input MergeProfilesInput {
+  cognitoProfileId: ID!
+  manualProfileId: ID!
+  selections: MergeProfileSelectionsInput!
+}
+
 type Mutation {
   ensureMyProfile: Profile
     @function(name: "GenerateProfileOnSignUp-${env}")
@@ -408,6 +433,9 @@ type Mutation {
   addTenantToMyProperty(input: AddTenantToMyPropertyInput!): Profile
     @function(name: "addTenantToMyProperty-${env}")
     @auth(rules: [{ allow: private, provider: userPools }])
+  mergeProfiles(input: MergeProfilesInput!): Profile
+    @function(name: "mergeProfiles-${env}")
+    @auth(rules: [{ allow: groups, groups: ["PRESIDENT", "SECRETARY"] }])
   manageCognitoGroups(action: String!, groupName: String!, cognitoId: String!): MutationResult
     @function(name: "manageCognitoGroups-${env}")
   createAuthNetTransaction(profileId: ID!, idempotencyKey: String!, expectedAmount: Float!, paymentMethodType: String, opaqueDataDescriptor: String!, opaqueDataValue: String!): AuthNetTransactionResult

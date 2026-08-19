@@ -2,25 +2,44 @@ import React, { useState } from 'react';
 import Modal from '../shared/Modal';
 import './MergeProfilesModal.css';
 
-const MergeProfilesModal = ({ profiles, show, onClose, onMerge }) => {
+const MERGE_FIELDS = [
+  'name',
+  'email',
+  'phone',
+  'address',
+  'city',
+  'state',
+  'zip',
+  'contactPref',
+  'billingFreq',
+  'allowText',
+  'balance'
+];
+
+const labels = {
+  contactPref: 'Contact preference',
+  billingFreq: 'Billing frequency',
+  allowText: 'Allow text messages'
+};
+
+const displayValue = value => {
+  if (value === true) return 'Yes';
+  if (value === false) return 'No';
+  return value?.toString() || 'Empty';
+};
+
+const MergeProfilesModal = ({ profiles, show, onClose, onMerge, loading = false }) => {
   const cognitoProfile = profiles.find(p => p.cognitoID);
   const manualProfile = profiles.find(p => !p.cognitoID);
 
-  const [mergedData, setMergedData] = useState({
-    name: cognitoProfile?.name || '',
-    email: cognitoProfile?.email || '',
-    phone: cognitoProfile?.phone || '',
-    address: cognitoProfile?.address || '',
-    city: cognitoProfile?.city || '',
-    state: cognitoProfile?.state || '',
-    zip: cognitoProfile?.zip || '',
-    contactPref: cognitoProfile?.contactPref || 'EMAIL'
-  });
+  const [selections, setSelections] = useState(() =>
+    Object.fromEntries(MERGE_FIELDS.map(field => [field, 'COGNITO']))
+  );
 
-  const handleSelect = (field, value) => {
-    setMergedData(prev => ({
+  const handleSelect = (field, source) => {
+    setSelections(prev => ({
       ...prev,
-      [field]: value
+      [field]: source
     }));
   };
 
@@ -45,27 +64,27 @@ const MergeProfilesModal = ({ profiles, show, onClose, onMerge }) => {
         </div>
 
         <div className="merge-fields">
-          {Object.entries(mergedData).map(([field, value]) => (
+          {MERGE_FIELDS.map(field => (
             <div key={field} className="merge-field">
-              <h4>{field.charAt(0).toUpperCase() + field.slice(1)}</h4>
+              <h4>{labels[field] || field.charAt(0).toUpperCase() + field.slice(1)}</h4>
               <div className="field-options">
                 <label>
                   <input
                     type="radio"
                     name={field}
-                    checked={value === cognitoProfile[field]}
-                    onChange={() => handleSelect(field, cognitoProfile[field], cognitoProfile.id)}
+                    checked={selections[field] === 'COGNITO'}
+                    onChange={() => handleSelect(field, 'COGNITO')}
                   />
-                  {cognitoProfile[field]?.toString() || 'Empty'}
+                  {displayValue(cognitoProfile[field])}
                 </label>
                 <label>
                   <input
                     type="radio"
                     name={field}
-                    checked={value === manualProfile[field]}
-                    onChange={() => handleSelect(field, manualProfile[field], manualProfile.id)}
+                    checked={selections[field] === 'MANUAL'}
+                    onChange={() => handleSelect(field, 'MANUAL')}
                   />
-                  {manualProfile[field]?.toString() || 'Empty'}
+                  {displayValue(manualProfile[field])}
                 </label>
               </div>
             </div>
@@ -73,13 +92,18 @@ const MergeProfilesModal = ({ profiles, show, onClose, onMerge }) => {
         </div>
 
         <div className="modal-actions">
-          <button onClick={() => onMerge(cognitoProfile, manualProfile, mergedData)} className="merge-button">
-            Merge Profiles
+          <button
+            onClick={() => onMerge(cognitoProfile, manualProfile, selections)}
+            className="merge-button"
+            disabled={loading}
+          >
+            {loading ? 'Merging…' : 'Merge Profiles'}
           </button>
-          <button onClick={onClose} className="cancel-button">Cancel</button>
+          <button onClick={onClose} className="cancel-button" disabled={loading}>Cancel</button>
         </div>
       </div>
     </Modal>
   );
 };
 export default MergeProfilesModal;
+export { MERGE_FIELDS };

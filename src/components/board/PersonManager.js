@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLazyQuery, useMutation, useApolloClient } from '@apollo/client';
-import { SEARCH_PROFILES, GET_PROFILE, PROFILE_BY_COGNITO_ID, FIND_RELATED_PROPERTIES, PAYMENTS_BY_OWNER, FIND_RELATED_PINGS, FIND_RELATED_DOCUMENTS } from '../../queries/queries';
-import { CREATE_PROFILE, UPDATE_PROFILE, DELETE_PROFILE, UPDATE_PROPERTY, UPDATE_PAYMENT, UPDATE_PING, UPDATE_DOCUMENT } from '../../queries/mutations';
+import { SEARCH_PROFILES, GET_PROFILE, PROFILE_BY_COGNITO_ID, FIND_RELATED_PROPERTIES } from '../../queries/queries';
+import { CREATE_PROFILE, UPDATE_PROFILE, DELETE_PROFILE, UPDATE_PROPERTY, MERGE_PROFILES } from '../../queries/mutations';
 import BoardCard from './shared/BoardCard';
 import ProfileEditModal from '../shared/ProfileEditModal';
 import DeleteConfirmationModal from '../shared/DeleteConfirmationModal';
@@ -47,9 +47,7 @@ const PersonManager = ({ searchState, setSearchState, selectedProfiles, setSelec
   const [searchById] = useLazyQuery(GET_PROFILE);
   const [searchByCognito] = useLazyQuery(PROFILE_BY_COGNITO_ID);
   const [updateProperty] = useMutation(UPDATE_PROPERTY);
-  const [updatePayment] = useMutation(UPDATE_PAYMENT);
-  const [updatePing] = useMutation(UPDATE_PING);
-  const [updateDocument] = useMutation(UPDATE_DOCUMENT);
+  const [mergeProfiles, { loading: mergeLoading }] = useMutation(MERGE_PROFILES);
 
   // Add mutations
   const [createPerson] = useMutation(CREATE_PROFILE);
@@ -119,103 +117,32 @@ const PersonManager = ({ searchState, setSearchState, selectedProfiles, setSelec
     }
   };
 
-  const handleMergeProfiles = async (cognitoProfile, manualProfile, mergedData) => {
+  const handleMergeProfiles = async (cognitoProfile, manualProfile, selections) => {
     try {
-      // Find related properties
-      const relatedProperties = await client.query({
-        query: FIND_RELATED_PROPERTIES,
-        variables: { profileId: manualProfile.id }
-      });
-
-      // Update properties to point to cognito profile
-      const propertyPromises = relatedProperties.data.listProperties.items.map(property => {
-        const updates = { id: property.id };
-        
-        if (property.profOwnerId === manualProfile.id) {
-          updates.profOwnerId = cognitoProfile.id;
-          updates.owner = cognitoProfile.id;
-        }
-        
-        if (property.profTenantId === manualProfile.id) {
-          updates.profTenantId = cognitoProfile.id;
-        }
-        
-        return updateProperty({ variables: { input: updates } });
-      });
-
-      await Promise.all(propertyPromises);
-
-      // Find and transfer payments
-      let allPayments = [];
-      let nextToken = null;
-      do {
-        const paymentResult = await client.query({
-          query: PAYMENTS_BY_OWNER,
-          variables: { ownerPaymentsId: manualProfile.id, limit: 100, nextToken }
-        });
-        allPayments = [...allPayments, ...paymentResult.data.paymentsByOwner.items];
-        nextToken = paymentResult.data.paymentsByOwner.nextToken;
-      } while (nextToken);
-
-      const paymentPromises = allPayments.map(payment =>
-        updatePayment({
-          variables: { input: { id: payment.id, ownerPaymentsId: cognitoProfile.id } }
-        })
-      );
-      await Promise.all(paymentPromises);
-
-      // Find and transfer pings
-      const relatedPings = await client.query({
-        query: FIND_RELATED_PINGS,
-        variables: { profileId: manualProfile.id }
-      });
-
-      const pingPromises = relatedPings.data.listPings.items.map(ping =>
-        updatePing({
-          variables: { input: { id: ping.id, profCreatorId: cognitoProfile.id } }
-        })
-      );
-      await Promise.all(pingPromises);
-
-      // Find and transfer documents
-      const relatedDocuments = await client.query({
-        query: FIND_RELATED_DOCUMENTS,
-        variables: { profileId: manualProfile.id }
-      });
-
-      const documentPromises = relatedDocuments.data.listDocuments.items.map(doc =>
-        updateDocument({
-          variables: { input: { id: doc.id, uploadedById: cognitoProfile.id } }
-        })
-      );
-      await Promise.all(documentPromises);
-
-      // Transfer authNetCustomerProfileId if manual profile has one and cognito profile doesn't
-      const mergeInput = { id: cognitoProfile.id, ...mergedData };
-      if (manualProfile.authNetCustomerProfileId && !cognitoProfile.authNetCustomerProfileId) {
-        mergeInput.authNetCustomerProfileId = manualProfile.authNetCustomerProfileId;
-      }
-
-      // Update cognito profile with merged data
-      await updatePerson({
+      const result = await mergeProfiles({
         variables: {
-          input: mergeInput
+          input: {
+            cognitoProfileId: cognitoProfile.id,
+            manualProfileId: manualProfile.id,
+            selections
+          }
         }
-      });
-
-      // Delete manual profile
-      await deletePerson({
-        variables: { input: { id: manualProfile.id } }
       });
 
       setShowMergeModal(false);
       setSelectedProfiles([]);
       setSearchState(prev => ({
         ...prev,
-        searchResults: prev.searchResults.filter(p => p.id !== manualProfile.id)
+        searchResults: prev.searchResults
+          .filter(profile => profile.id !== manualProfile.id)
+          .map(profile => profile.id === cognitoProfile.id
+            ? { ...profile, ...result.data.mergeProfiles }
+            : profile)
       }));
     } catch (error) {
       console.error('Error merging profiles:', error);
+      setNotificationMessage('Unable to merge profiles. No profiles were changed.');
+      setShowNotification(true);
     }
   };
 
@@ -331,8 +258,8 @@ const PersonManager = ({ searchState, setSearchState, selectedProfiles, setSelec
       const newSelectedProfiles = [...selectedProfiles, profile];
       if (newSelectedProfiles.length === 2) {
         const cognitoProfiles = newSelectedProfiles.filter(p => p.cognitoID);
-        if (cognitoProfiles.length === 2) {
-          setNotificationMessage("Select a profile without a Cognito ID to merge");
+        if (cognitoProfiles.length !== 1) {
+          setNotificationMessage("Select one Cognito profile and one manual profile to merge");
           setShowNotification(true);
           return;
         }
@@ -502,6 +429,7 @@ const PersonManager = ({ searchState, setSearchState, selectedProfiles, setSelec
               setSelectedProfiles([]);
             }}
             onMerge={handleMergeProfiles}
+            loading={mergeLoading}
           />
         )}
 

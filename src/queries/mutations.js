@@ -92,6 +92,30 @@ export const DELETE_PROFILE = gql`
   }
 `;
 
+export const MERGE_PROFILES = gql`
+  mutation MergeProfiles($input: MergeProfilesInput!) {
+    mergeProfiles(input: $input) {
+      id
+      cognitoID
+      name
+      email
+      phone
+      address
+      city
+      state
+      zip
+      contactPref
+      allowText
+      billingFreq
+      balance
+      tenantAtId
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+
 // Property Mutations
 export const CREATE_PROPERTY = gql`
   mutation CreateProperty(

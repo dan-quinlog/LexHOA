@@ -156,6 +156,18 @@ export const DELETE_PROPERTY = gql`
   }
 `;
 
+export const ENSURE_MY_PROFILE = gql`
+  mutation EnsureMyProfile {
+    ensureMyProfile {
+      id
+      cognitoID
+      owner
+      name
+      email
+    }
+  }
+`;
+
 // Payment Mutations
 export const CREATE_PAYMENT = gql`
   mutation CreatePayment(

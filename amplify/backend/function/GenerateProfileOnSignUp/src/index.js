@@ -2,19 +2,75 @@ const AWS = require('aws-sdk');
 const appsync = require('aws-appsync');
 const gql = require('graphql-tag');
 
-function safeErrorCode(error) {
-  const code = error && (error.code || error.name);
-  const allowedCodes = new Set([
-    'AccessDeniedException',
-    'ApolloError',
-    'CredentialsError',
-    'Error',
-    'NetworkingError',
-    'ThrottlingException'
-  ]);
-  return allowedCodes.has(code)
-    ? code
-    : 'ProfileCreationError';
+const getProfile = gql`
+  query GetProfile($id: ID!) {
+    getProfile(id: $id) {
+      id
+      cognitoID
+      owner
+      name
+      email
+    }
+  }
+`;
+
+const createProfile = gql`
+  mutation CreateProfile($input: CreateProfileInput!) {
+    createProfile(input: $input) {
+      id
+      cognitoID
+      owner
+      name
+      email
+    }
+  }
+`;
+
+async function findProfile(graphqlClient, sub) {
+  const result = await graphqlClient.query({
+    query: getProfile,
+    variables: { id: sub },
+    fetchPolicy: 'network-only'
+  });
+  return result.data?.getProfile || null;
+}
+
+async function ensureProfile(event, graphqlClient) {
+  const claims = event?.identity?.claims;
+  const sub = claims?.sub;
+
+  if (!sub) {
+    throw new Error('Unauthorized');
+  }
+
+  const existingProfile = await findProfile(graphqlClient, sub);
+  if (existingProfile) {
+    return existingProfile;
+  }
+
+  const variables = {
+    input: {
+      id: sub,
+      cognitoID: sub,
+      owner: sub,
+      name: claims.name || '',
+      email: claims.email || ''
+    }
+  };
+
+  try {
+    const result = await graphqlClient.mutate({
+      mutation: createProfile,
+      variables
+    });
+    return result.data.createProfile;
+  } catch {
+    const profileCreatedByAnotherRequest = await findProfile(graphqlClient, sub);
+    if (profileCreatedByAnotherRequest) {
+      return profileCreatedByAnotherRequest;
+    }
+    throw new Error('Unable to ensure profile');
+  }
 }
 
 exports.handler = async (event) => {
@@ -28,33 +84,7 @@ exports.handler = async (event) => {
     disableOffline: true,
   });
 
-  const mutation = gql`
-    mutation CreateProfile($input: CreateProfileInput!) {
-      createProfile(input: $input) {
-        id
-        cognitoID
-        owner
-      }
-    }
-  `;
-
-  const variables = {
-    input: {
-      id: event.request.userAttributes.sub,
-      cognitoID: event.request.userAttributes.sub,
-      owner: event.request.userAttributes.sub,
-      name: event.request.userAttributes.name || '',
-      email: event.request.userAttributes.email || ''
-    }
-  };
-
-  try {
-    await graphqlClient.mutate({ mutation, variables });
-    return event;
-  } catch (error) {
-    console.error('profile_creation_failed', { code: safeErrorCode(error) });
-    throw error;
-  }
+  return ensureProfile(event, graphqlClient);
 };
 
-exports._internals = { safeErrorCode };
+exports._internals = { ensureProfile };

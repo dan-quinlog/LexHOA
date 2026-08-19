@@ -24,6 +24,7 @@ import ReactQuill from 'react-quill';
 import MenuState from './components/menu/MenuState';
 import PrivacyBanner from './components/PrivacyBanner';
 import DatabaseReset from './components/dev/DatabaseReset'
+import useEnsureMyProfile from './hooks/useEnsureMyProfile';
 import 'react-quill/dist/quill.bubble.css';
 
 const amplifyConfiguration = {
@@ -212,10 +213,12 @@ function App() {
       ));
   };
 
+  const cognitoId = user?.userId || user?.username;
+
   const HomePage = () => {
     // Determine user roles based on profile data and groups
     const { loading: profileLoading, error: profileError, data: profileData } = useQuery(PROFILE_BY_COGNITO_ID, {
-      variables: { cognitoID: user?.username },
+      variables: { cognitoID: cognitoId },
       skip: !user,
       client: authenticatedClient
     });
@@ -326,14 +329,7 @@ function App() {
 
   // AppContent component to enable useQuery inside ApolloProvider
   const AppContent = () => {
-    // Query profile to determine isOwner for Documents page
-    const { data: appProfileData } = useQuery(PROFILE_BY_COGNITO_ID, {
-      variables: { cognitoID: user?.username },
-      skip: !user,
-      client: authenticatedClient
-    });
-    
-    const appProfile = appProfileData?.profileByCognitoID?.items[0];
+    const appProfile = useEnsureMyProfile(user, authenticatedClient);
     const isOwner = appProfile?.ownedProperties?.items?.length > 0;
 
     return (
@@ -359,8 +355,8 @@ function App() {
         </header>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/profile" element={<Profile cognitoId={user?.username} />} />
-          <Route path="/billing" element={<Billing cognitoId={user?.username} />} />
+          <Route path="/profile" element={<Profile cognitoId={cognitoId} />} />
+          <Route path="/billing" element={<Billing cognitoId={cognitoId} />} />
           <Route path="/amenities" element={<Amenities />} />
           <Route path="/documents" element={<Documents user={user} userGroups={userGroups} isOwner={isOwner} />} />
           <Route path="/board" element={<Board userGroups={userGroups} user={user} />} />

@@ -389,6 +389,9 @@ type AuthNetTransactionResult {
 }
 
 type Mutation {
+  ensureMyProfile: Profile
+    @function(name: "GenerateProfileOnSignUp-${env}")
+    @auth(rules: [{ allow: private, provider: userPools }])
   manageCognitoGroups(action: String!, groupName: String!, cognitoId: String!): MutationResult
     @function(name: "manageCognitoGroups-${env}")
   createAuthNetTransaction(profileId: ID!, idempotencyKey: String!, expectedAmount: Float!, paymentMethodType: String, opaqueDataDescriptor: String!, opaqueDataValue: String!): AuthNetTransactionResult

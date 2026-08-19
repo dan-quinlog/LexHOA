@@ -26,6 +26,7 @@ const PropertyManager = ({ searchState, setSearchState, userGroups = [] }) => {
   const [properties, setProperties] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [propertyToDelete, setPropertyToDelete] = useState(null);
+  const [saveError, setSaveError] = useState(null);
 
   // Check if user has admin permissions (PRESIDENT only)
   const hasAdminPermission = userGroups && userGroups.includes(PRESIDENT_GROUP);
@@ -95,6 +96,7 @@ const PropertyManager = ({ searchState, setSearchState, userGroups = [] }) => {
     }
   };
   const handleEdit = (property) => {
+    setSaveError(null);
     setSelectedProperty(property);
     setShowEditModal(true);
   };
@@ -134,12 +136,12 @@ const PropertyManager = ({ searchState, setSearchState, userGroups = [] }) => {
   };
 
   const handleSave = async (formData) => {
+    setSaveError(null);
     try {
       const mutationInput = {
         id: formData.id,
         address: formData.address,
         profOwnerId: formData.profOwnerId,
-        owner: formData.profOwnerId,
         profTenantId: formData.profTenantId,
         type: formData.type
       };
@@ -193,8 +195,8 @@ const PropertyManager = ({ searchState, setSearchState, userGroups = [] }) => {
 
       setShowEditModal(false);
       handleSearch(); // Refresh results
-    } catch (error) {
-      console.error('Error saving property:', error);
+    } catch {
+      setSaveError('Unable to save property. Please try again.');
     }
   };
 
@@ -297,6 +299,7 @@ const PropertyManager = ({ searchState, setSearchState, userGroups = [] }) => {
           initialValues={selectedProperty}
           onSubmit={handleSave}
           userGroups={userGroups}
+          error={saveError}
         />
       )}
 

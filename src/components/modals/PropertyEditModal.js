@@ -5,7 +5,7 @@ import './PropertyEditModal.css';
 // Get group name from environment variable
 const PRESIDENT_GROUP = process.env.REACT_APP_PRESIDENT_GROUP_NAME;
 
-const PropertyEditModal = ({ show, onClose, onSubmit, initialValues = {}, userGroups = [] }) => {
+const PropertyEditModal = ({ show, onClose, onSubmit, initialValues = {}, userGroups = [], error }) => {
   const [formData, setFormData] = useState({
     id: '',
     address: '',
@@ -90,6 +90,7 @@ const PropertyEditModal = ({ show, onClose, onSubmit, initialValues = {}, userGr
         </div>
       </div>
       <div className="modal-actions">
+        {error && <p role="alert">{error}</p>}
         <button onClick={handleSubmit}>
           {initialValues?.id ? 'Save' : 'Create'}
         </button>

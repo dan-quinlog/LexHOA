@@ -95,6 +95,20 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "addTenantToMyProperty": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput"
+          ],
+          "category": "api",
+          "resourceName": "lexhoa"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "createAuthNetCustomerProfile": {
       "build": true,
       "dependsOn": [
@@ -210,6 +224,22 @@
         {
           "category": "function",
           "resourceName": "GenerateProfileOnSignUp"
+        }
+      ]
+    },
+    "AMPLIFY_function_addTenantToMyProperty_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "addTenantToMyProperty"
+        }
+      ]
+    },
+    "AMPLIFY_function_addTenantToMyProperty_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "addTenantToMyProperty"
         }
       ]
     },

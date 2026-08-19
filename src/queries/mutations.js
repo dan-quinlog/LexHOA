@@ -158,6 +158,25 @@ export const ENSURE_MY_PROFILE = gql`
   }
 `;
 
+export const ADD_TENANT_TO_MY_PROPERTY = gql`
+  mutation AddTenantToMyProperty($input: AddTenantToMyPropertyInput!) {
+    addTenantToMyProperty(input: $input) {
+      id
+      name
+      email
+      phone
+      address
+      city
+      state
+      zip
+      contactPref
+      allowText
+      tenantAtId
+      owner
+    }
+  }
+`;
+
 // Payment Mutations
 export const CREATE_PAYMENT = gql`
   mutation CreatePayment(

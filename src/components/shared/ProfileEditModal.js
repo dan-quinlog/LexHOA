@@ -10,7 +10,9 @@ const ProfileEditModal = ({
   isOwner = false, 
   isBoard = false,
   hasBalanceEditPermission = false, // New prop for balance edit permission
-  userGroups = []
+  userGroups = [],
+  submitError = '',
+  isSubmitting = false
 }) => {
   const [formData, setFormData] = useState({
     name: '',
@@ -198,9 +200,10 @@ const ProfileEditModal = ({
           </div>
         </div>
       </div>
+      {submitError && <div className="error-message" role="alert">{submitError}</div>}
       <div className="modal-actions">
-        <button onClick={handleSubmit}>
-          {initialValues?.id ? 'Save' : 'Create'}
+        <button onClick={handleSubmit} disabled={isSubmitting}>
+          {isSubmitting ? 'Creating...' : (initialValues?.id ? 'Save' : 'Create')}
         </button>
         <button onClick={onClose}>Cancel</button>
       </div>

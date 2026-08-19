@@ -388,9 +388,25 @@ type AuthNetTransactionResult {
   messageText: String
 }
 
+input AddTenantToMyPropertyInput {
+  propertyId: ID!
+  name: String!
+  email: String!
+  phone: String
+  address: String
+  city: String
+  state: String
+  zip: String
+  contactPref: ContactPrefs
+  allowText: Boolean
+}
+
 type Mutation {
   ensureMyProfile: Profile
     @function(name: "GenerateProfileOnSignUp-${env}")
+    @auth(rules: [{ allow: private, provider: userPools }])
+  addTenantToMyProperty(input: AddTenantToMyPropertyInput!): Profile
+    @function(name: "addTenantToMyProperty-${env}")
     @auth(rules: [{ allow: private, provider: userPools }])
   manageCognitoGroups(action: String!, groupName: String!, cognitoId: String!): MutationResult
     @function(name: "manageCognitoGroups-${env}")

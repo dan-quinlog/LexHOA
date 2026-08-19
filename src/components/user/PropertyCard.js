@@ -1,38 +1,52 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useMutation } from '@apollo/client';
-import { CREATE_PROFILE, UPDATE_PROFILE, UPDATE_PROPERTY } from '../../queries/mutations';
+import { ADD_TENANT_TO_MY_PROPERTY, UPDATE_PROFILE } from '../../queries/mutations';
 import ProfileEditModal from '../shared/ProfileEditModal';
 import './PropertyCard.css';
-const PropertyCard = ({ property, currentProfileId }) => {
+const PropertyCard = ({ property, currentProfileId, onTenantAdded }) => {
   const [showCreateTenantModal, setShowCreateTenantModal] = useState(false);
   const [showEditTenantModal, setShowEditTenantModal] = useState(false);
-  const [createProfile] = useMutation(CREATE_PROFILE);
-  const [updateProperty] = useMutation(UPDATE_PROPERTY);
+  const [createTenantError, setCreateTenantError] = useState('');
+  const [isCreatingTenant, setIsCreatingTenant] = useState(false);
+  const createInFlight = useRef(false);
+  const [addTenantToMyProperty] = useMutation(ADD_TENANT_TO_MY_PROPERTY);
   const [updateProfile] = useMutation(UPDATE_PROFILE);
 
-  const isTenantCurrentUser = property.profTenant?.owner === currentProfileId;
   const isOwner = property.profOwnerId === currentProfileId;
 
   const handleCreateTenant = async (formData) => {
-    const newProfile = await createProfile({
-      variables: {
-        input: {
-          ...formData,
-          owner: currentProfileId
-        }
-      }
-    });
+    if (createInFlight.current) return;
+    createInFlight.current = true;
+    setIsCreatingTenant(true);
+    setCreateTenantError('');
 
-    await updateProperty({
-      variables: {
-        input: {
-          id: property.id,
-          profTenantId: newProfile.data.createProfile.id
+    try {
+      const { name, email, phone, address, city, state, zip, contactPref, allowText } = formData;
+      await addTenantToMyProperty({
+        variables: {
+          input: {
+            propertyId: property.id,
+            name,
+            email,
+            phone,
+            address,
+            city,
+            state,
+            zip,
+            contactPref,
+            allowText
+          }
         }
-      }
-    });
+      });
 
-    setShowCreateTenantModal(false);
+      await onTenantAdded?.();
+      setShowCreateTenantModal(false);
+    } catch {
+      setCreateTenantError('Unable to add tenant. Please try again.');
+    } finally {
+      createInFlight.current = false;
+      setIsCreatingTenant(false);
+    }
   };
 
   const handleUpdateTenant = async (formData) => {
@@ -111,6 +125,8 @@ const PropertyCard = ({ property, currentProfileId }) => {
           show={showCreateTenantModal}
           onClose={() => setShowCreateTenantModal(false)}
           onSubmit={handleCreateTenant}
+          submitError={createTenantError}
+          isSubmitting={isCreatingTenant}
           initialValues={{
             address: property.address,
             city: property.city,
@@ -133,4 +149,3 @@ const PropertyCard = ({ property, currentProfileId }) => {
   );
 };
 export default PropertyCard;
-

@@ -34,7 +34,7 @@ const Profile = ({ cognitoId }) => {
     ]
   });
 
-  const { data: profileData } = useQuery(PROFILE_BY_COGNITO_ID, {
+  const { data: profileData, refetch: refetchProfile } = useQuery(PROFILE_BY_COGNITO_ID, {
     variables: { cognitoID: cognitoId },
     skip: !cognitoId
   });
@@ -304,6 +304,7 @@ const Profile = ({ cognitoId }) => {
                     key={property.id}
                     property={property}
                     currentProfileId={profile.id}
+                    onTenantAdded={refetchProfile}
                   />
                 ))}
               </div>

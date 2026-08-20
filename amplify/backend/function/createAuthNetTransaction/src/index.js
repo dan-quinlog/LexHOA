@@ -6,7 +6,6 @@ const Constants = require('authorizenet').Constants;
 
 const ddb = new AWS.DynamoDB.DocumentClient();
 const secretsManager = new AWS.SecretsManager();
-let transactionKeyPromise;
 const tables = () => { const suffix = `${process.env.API_LEXHOA_GRAPHQLAPIIDOUTPUT}-${process.env.ENV}`; return { profile: `Profile-${suffix}`, payment: `Payment-${suffix}` }; };
 const cents = value => Math.round(Number(value) * 100);
 const paymentId = (subject, profileId, key) => crypto.createHash('sha256').update(`${subject}:${profileId}:${key}`).digest('hex');
@@ -21,11 +20,7 @@ async function loadSecret(secretId, client = secretsManager) {
   return secret.SecretString;
 }
 
-async function getTransactionKey() {
-  if (!transactionKeyPromise) transactionKeyPromise = loadSecret(process.env.AUTHNET_TRANSACTION_SECRET_ID);
-  try { return await transactionKeyPromise; }
-  catch (error) { transactionKeyPromise = undefined; throw error; }
-}
+const getTransactionKey = (client = secretsManager) => loadSecret(process.env.AUTHNET_TRANSACTION_SECRET_ID, client);
 
 async function reserve(profile, payment, client = ddb) {
   const t = tables();
@@ -101,4 +96,4 @@ function processorErrorMessage(response, transaction) {
 async function captureTransaction(data) { const transactionKey = await getTransactionKey(); return new Promise((resolve, reject) => { const auth = new ApiContracts.MerchantAuthenticationType(); auth.setName(process.env.AUTHNET_API_LOGIN_ID); auth.setTransactionKey(transactionKey); const opaque = new ApiContracts.OpaqueDataType(); opaque.setDataDescriptor(data.descriptor); opaque.setDataValue(data.token); const pay = new ApiContracts.PaymentType(); pay.setOpaqueData(opaque); const order = new ApiContracts.OrderType(); order.setInvoiceNumber(data.reference); const txr = new ApiContracts.TransactionRequestType(); txr.setTransactionType(ApiContracts.TransactionTypeEnum.AUTHCAPTURETRANSACTION); txr.setPayment(pay); txr.setAmount(data.amount); txr.setOrder(order); const req = new ApiContracts.CreateTransactionRequest(); req.setRefId(data.reference); req.setMerchantAuthentication(auth); req.setTransactionRequest(txr); const ctrl = new ApiControllers.CreateTransactionController(req.getJSON()); ctrl.setEnvironment(process.env.AUTHNET_ENVIRONMENT === 'production' ? Constants.endpoint.production : Constants.endpoint.sandbox); ctrl.execute(() => { const raw = ctrl.getResponse(); const res = raw && new ApiContracts.CreateTransactionResponse(raw); const tx = res?.getTransactionResponse(); const accountType = String(tx?.getAccountType?.() || '').toLowerCase(); const rail = accountType.includes('echeck') || accountType.includes('bank') ? 'BANK_ACCOUNT' : accountType ? 'CARD' : null; if (res?.getMessages().getResultCode() === ApiContracts.MessageTypeEnum.OK && String(tx?.getResponseCode?.()) === '1' && tx?.getTransId() && rail) return resolve({ transactionId: tx.getTransId(), paymentMethod: rail }); const error = new Error(`Payment processor declined: ${processorErrorMessage(res, tx)}`); error.definitive = Boolean(res); reject(error); }); }); }
 const defaultDeps = { getProfile: id => get(tables().profile, id), getPayment: id => get(tables().payment, id), reserve, attachTransaction, finalize, fail: failPayment, capture: captureTransaction };
 exports.handler = async event => processPayment(event, defaultDeps);
-exports._internals = { processPayment, paymentId, reference, fees, reserve, finalize, failPayment, result, loadSecret, processorErrorMessage };
+exports._internals = { processPayment, paymentId, reference, fees, reserve, finalize, failPayment, result, loadSecret, getTransactionKey, processorErrorMessage };

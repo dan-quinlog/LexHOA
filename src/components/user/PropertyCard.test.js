@@ -167,6 +167,38 @@ test('loads a linked tenant by id and lets the owner edit a tenant without Cogni
   expect(screen.getByRole('button', { name: 'Update Tenant' })).toBeInTheDocument();
 });
 
+test('refetches the tenant and closes only after a successful update', async () => {
+  const tenant = {
+    id: 'tenant-id',
+    cognitoID: null,
+    name: 'Linked Tenant',
+    email: 'linked@example.invalid',
+    phone: '555-0101'
+  };
+  useQuery.mockReturnValue({ data: { getProfile: tenant } });
+  const updateProfile = jest.fn().mockResolvedValue({ data: { updateProfile: tenant } });
+  useMutation.mockImplementation(mutation => {
+    if (mutation === ADD_TENANT_TO_MY_PROPERTY) return [jest.fn()];
+    if (mutation === UPDATE_PROFILE) return [updateProfile];
+    throw new Error('Unexpected mutation');
+  });
+  const onTenantAdded = jest.fn().mockResolvedValue();
+
+  render(
+    <PropertyCard
+      property={{ ...property, profTenantId: tenant.id }}
+      currentProfileId="owner-profile"
+      onTenantAdded={onTenantAdded}
+    />
+  );
+  fireEvent.click(screen.getByRole('button', { name: 'Update Tenant' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Submit tenant' }));
+
+  await waitFor(() => expect(onTenantAdded).toHaveBeenCalledTimes(1));
+  expect(updateProfile).toHaveBeenCalledTimes(1);
+  expect(screen.queryByTestId('tenant-modal')).not.toBeInTheDocument();
+});
+
 test('does not let the owner edit a tenant with a Cognito profile', () => {
   useQuery.mockReturnValue({
     data: {

@@ -76,6 +76,7 @@ const PropertyCard = ({ property, currentProfileId, onTenantAdded }) => {
         }
       }
     });
+    await onTenantAdded?.();
     setShowEditTenantModal(false);
   };
 

@@ -16,7 +16,7 @@ function callerGroups(event) {
 }
 
 async function listUsersInGroup(event, client) {
-  if (!callerGroups(event).includes('PRESIDENT')) {
+  if (!callerGroups(event).some(group => ALLOWED_GROUPS.includes(group))) {
     throw new Error('Access denied');
   }
 
@@ -33,7 +33,7 @@ async function listUsersInGroup(event, client) {
   try {
     const result = await client.send(new ListUsersInGroupCommand({
       GroupName: groupName,
-      UserPoolId: process.env.USER_POOL_ID
+      UserPoolId: process.env.AUTH_LEXHOA4FACA5B8_USERPOOLID
     }));
 
     return (result.Users || []).map(user => {

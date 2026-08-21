@@ -173,7 +173,15 @@
     },
     "listUsersInGroupResolver": {
       "build": true,
-      "dependsOn": [],
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "lexhoa4faca5b8"
+        }
+      ],
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
@@ -378,14 +386,6 @@
       ]
     },
     "AMPLIFY_function_listUsersInGroupResolver_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "listUsersInGroupResolver"
-        }
-      ]
-    },
-    "AMPLIFY_function_listUsersInGroupResolver_userPoolId": {
       "usedBy": [
         {
           "category": "function",

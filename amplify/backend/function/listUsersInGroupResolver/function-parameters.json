@@ -1,9 +1,10 @@
 {
-  "lambdaLayers": [],
-  "environmentVariableList": [
-    {
-      "cloudFormationParameterName": "userPoolId",
-      "environmentVariableName": "USER_POOL_ID"
+  "permissions": {
+    "auth": {
+      "lexhoa4faca5b8": [
+        "read"
+      ]
     }
-  ]
+  },
+  "lambdaLayers": []
 }

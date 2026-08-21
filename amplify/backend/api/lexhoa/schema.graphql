@@ -303,6 +303,8 @@ type MutationResult {
 # Define your custom queries and mutations
 type Query {
   listUsersInGroup(groupName: String!): [CognitoUser]
+    @function(name: "listUsersInGroupResolver-${env}")
+    @auth(rules: [{ allow: groups, groups: ["BOARD", "MEDIA", "TREASURER", "SECRETARY", "PRESIDENT"] }])
 }
 
 type Document @model

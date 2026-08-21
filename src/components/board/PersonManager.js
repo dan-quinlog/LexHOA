@@ -302,7 +302,7 @@ const PersonManager = ({ searchState, setSearchState, selectedProfiles, setSelec
             <option value="email">Email</option>
             <option value="phone">Phone</option>
             <option value="id">Profile ID</option>
-            <option value="cognitoID">Cognito ID</option>
+            <option value="cognitoID">Login ID</option>
           </select>
           <input
             type="text"
@@ -361,12 +361,12 @@ const PersonManager = ({ searchState, setSearchState, selectedProfiles, setSelec
                     </button>
                   </div>
                   <div>
-                    Cognito ID: {person.cognitoID || 'None'}
+                    Login ID: {person.cognitoID || 'None'}
                     {person.cognitoID && (
                       <button 
                         className="copy-btn" 
                         onClick={(e) => copyWithFeedback(person.cognitoID, e)}
-                        title="Copy Cognito ID"
+                        title="Copy Login ID"
                       >
                         Copy
                       </button>

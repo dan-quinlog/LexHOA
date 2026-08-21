@@ -69,7 +69,7 @@ const BoardRoleManager = ({ userGroups = [] }) => {
     }
 
     if (!cognitoId) {
-      setNotificationMessage('Please enter a Cognito ID');
+      setNotificationMessage('Please enter a Login ID');
       setShowNotification(true);
       return;
     }
@@ -114,7 +114,7 @@ const BoardRoleManager = ({ userGroups = [] }) => {
           {(actionType === 'ADD' || actionType === 'REMOVE') && (
             <input
               type="text"
-              placeholder="Enter Cognito ID"
+              placeholder="Enter Login ID"
               value={cognitoId}
               onChange={(e) => setCognitoId(e.target.value)}
               onKeyPress={(e) => {
@@ -149,11 +149,11 @@ const BoardRoleManager = ({ userGroups = [] }) => {
                   }
                   content={
                     <>
-                      <div>Cognito ID: {user.username}
+                      <div>Login ID: {user.username}
                       <button
                       className="copy-btn"
                       onClick={(e) => copyWithFeedback(user.username, e)}
-                      title="Copy Cognito ID"
+                      title="Copy Login ID"
                       >
                       Copy
                       </button>

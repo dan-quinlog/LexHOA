@@ -51,3 +51,65 @@ test('successful audit log contains only allowlisted action and outcome', async 
     assert.equal(output.includes('synthetic-caller'), false);
     assert.equal(output.includes('synthetic-target'), false);
 });
+
+test('removing BOARD strips every managed role before BOARD', async () => {
+    const removed = [];
+    let membershipChecks = 0;
+    const result = await manageCognitoGroups({
+        ...event,
+        arguments: { ...event.arguments, action: 'remove', groupName: 'BOARD' }
+    }, {
+        adminListGroupsForUser: ({ Username }) => ({
+            promise: async () => {
+                if (Username === 'synthetic-caller') return { Groups: [{ GroupName: 'PRESIDENT' }] };
+                membershipChecks += 1;
+                return { Groups: [
+                    { GroupName: 'BOARD' },
+                    { GroupName: 'SECRETARY' },
+                    { GroupName: 'MEDIA' },
+                    { GroupName: 'UNRELATED' }
+                ] };
+            }
+        }),
+        adminGetUser: () => ({ promise: async () => ({}) }),
+        getGroup: () => ({ promise: async () => ({}) }),
+        adminRemoveUserFromGroup: ({ GroupName }) => ({
+            promise: async () => { removed.push(GroupName); }
+        })
+    });
+
+    assert.equal(result.success, true);
+    assert.equal(membershipChecks, 1);
+    assert.deepEqual(removed, ['MEDIA', 'SECRETARY', 'BOARD']);
+    assert.match(result.message, /all board groups/);
+});
+
+test('a bulk removal failure never removes BOARD before remaining roles', async () => {
+    const removed = [];
+    const result = await manageCognitoGroups({
+        ...event,
+        arguments: { ...event.arguments, action: 'remove', groupName: 'BOARD' }
+    }, {
+        adminListGroupsForUser: ({ Username }) => ({
+            promise: async () => Username === 'synthetic-caller'
+                ? { Groups: [{ GroupName: 'PRESIDENT' }] }
+                : { Groups: [
+                    { GroupName: 'BOARD' },
+                    { GroupName: 'TREASURER' },
+                    { GroupName: 'SECRETARY' }
+                ] }
+        }),
+        adminGetUser: () => ({ promise: async () => ({}) }),
+        getGroup: () => ({ promise: async () => ({}) }),
+        adminRemoveUserFromGroup: ({ GroupName }) => ({
+            promise: async () => {
+                if (GroupName === 'SECRETARY') throw new Error('synthetic failure');
+                removed.push(GroupName);
+            }
+        })
+    });
+
+    assert.equal(result.success, false);
+    assert.deepEqual(removed, ['TREASURER']);
+    assert.equal(removed.includes('BOARD'), false);
+});

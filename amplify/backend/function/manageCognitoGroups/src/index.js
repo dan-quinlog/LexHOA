@@ -7,6 +7,8 @@ Amplify Params - DO NOT EDIT */
 
 const aws = require('aws-sdk');
 const cognito = new aws.CognitoIdentityServiceProvider();
+const VALID_GROUPS = ['BOARD', 'MEDIA', 'TREASURER', 'SECRETARY', 'PRESIDENT'];
+const BOARD_REMOVAL_ORDER = ['MEDIA', 'TREASURER', 'SECRETARY', 'PRESIDENT', 'BOARD'];
 
 /**
  * GraphQL resolver for managing Cognito user groups
@@ -47,9 +49,8 @@ async function manageCognitoGroups(event, client = cognito) {
             throw new Error("Access denied. Only members of the PRESIDENT group can manage user groups.");
         }
 
-        const validGroups = ['BOARD', 'MEDIA', 'TREASURER', 'SECRETARY', 'PRESIDENT'];
-        if (!validGroups.includes(groupName)) {
-            throw new Error(`Invalid group. Must be one of: ${validGroups.join(', ')}`);
+        if (!VALID_GROUPS.includes(groupName)) {
+            throw new Error(`Invalid group. Must be one of: ${VALID_GROUPS.join(', ')}`);
         }
 
         // Check if user exists
@@ -117,10 +118,23 @@ async function manageCognitoGroups(event, client = cognito) {
                 message: `Successfully added user '${cognitoId}' to group '${groupName}'`
             };
         } else {
-            // Remove user from group
-            
-            // Special check for PRESIDENT group - prevent removing the last president
-            if (groupName === 'PRESIDENT') {
+            let groupsToRemove = [groupName];
+            if (groupName === 'BOARD') {
+                try {
+                    const memberships = await client.adminListGroupsForUser({
+                        UserPoolId: userPoolId,
+                        Username: cognitoId
+                    }).promise();
+                    const currentGroups = new Set(memberships.Groups.map(group => group.GroupName));
+                    groupsToRemove = BOARD_REMOVAL_ORDER.filter(group => currentGroups.has(group));
+                } catch (error) {
+                    throw new Error("Unable to verify board roles before removal");
+                }
+            }
+
+            // Prevent the caller from removing the only PRESIDENT membership as part of
+            // either a direct role change or complete board offboarding.
+            if (groupsToRemove.includes('PRESIDENT')) {
                 // Check if this is the caller trying to remove themselves
                 if (callerUsername === cognitoId) {
                     // Get all users in PRESIDENT group
@@ -141,31 +155,37 @@ async function manageCognitoGroups(event, client = cognito) {
                     }
                 }
             }
-            
-            try {
-                await client.adminRemoveUserFromGroup({
-                    UserPoolId: userPoolId,
-                    Username: cognitoId,
-                    GroupName: groupName
-                }).promise();
 
-                console.info('cognito_group_management', { action: 'remove', outcome: 'updated' });
-
-                return {
-                    success: true,
-                    message: `Successfully removed user '${cognitoId}' from group '${groupName}'`
-                };
-            } catch (error) {
-                if (error.code === 'ResourceNotFoundException') {
-                    console.info('cognito_group_management', { action: 'remove', outcome: 'unchanged' });
-                    return {
-                        success: true,
-                        message: `User '${cognitoId}' was not in group '${groupName}'`
-                    };
-                } else {
-                    throw error;
+            let removed = false;
+            for (const role of groupsToRemove) {
+                try {
+                    await client.adminRemoveUserFromGroup({
+                        UserPoolId: userPoolId,
+                        Username: cognitoId,
+                        GroupName: role
+                    }).promise();
+                    removed = true;
+                } catch (error) {
+                    if (error.code !== 'ResourceNotFoundException') {
+                        throw error;
+                    }
                 }
             }
+
+            console.info('cognito_group_management', {
+                action: 'remove',
+                outcome: removed ? 'updated' : 'unchanged'
+            });
+            return {
+                success: true,
+                message: groupName === 'BOARD'
+                    ? removed
+                        ? `Successfully removed user '${cognitoId}' from all board groups`
+                        : `User '${cognitoId}' was not in any board groups`
+                    : removed
+                        ? `Successfully removed user '${cognitoId}' from group '${groupName}'`
+                        : `User '${cognitoId}' was not in group '${groupName}'`
+            };
         }
 
     } catch (error) {
@@ -178,4 +198,4 @@ async function manageCognitoGroups(event, client = cognito) {
 }
 
 exports.handler = event => manageCognitoGroups(event);
-exports._internals = { manageCognitoGroups };
+exports._internals = { manageCognitoGroups, VALID_GROUPS, BOARD_REMOVAL_ORDER };

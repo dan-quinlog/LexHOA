@@ -154,6 +154,7 @@ type Payment @model
   totalAmount: Float!
   status: PaymentStatus @default(value: "PENDING")
   description: String
+  owner: String
   ownerPayments: Profile @belongsTo(fields: ["ownerPaymentsId"])
   ownerPaymentsId: ID! @index(name: "byOwnerPayments", queryField: "paymentsByOwner", sortKeyFields: ["createdAt"])
   createdAt: AWSDateTime

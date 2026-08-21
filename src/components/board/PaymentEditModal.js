@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useMutation, useQuery } from '@apollo/client';
+import { useLazyQuery, useMutation } from '@apollo/client';
 import { CREATE_PAYMENT, UPDATE_PAYMENT, UPDATE_PROFILE } from '../../queries/mutations';
 import { GET_PROFILE } from '../../queries/queries';
 import Modal from '../shared/Modal';
@@ -19,23 +19,21 @@ const PaymentEditModal = ({ payment, onClose, show }) => {
   });
   
   const [applyPayment, setApplyPayment] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const [updatePayment] = useMutation(UPDATE_PAYMENT);
   const [createPayment] = useMutation(CREATE_PAYMENT);
   const [updateProfile] = useMutation(UPDATE_PROFILE);
-  
-  // Resolve the target profile so owner authorization is attached to new payments.
-  const { data: profileData } = useQuery(GET_PROFILE, {
-    variables: { id: formData.ownerPaymentsId },
-    skip: Boolean(payment?.id) || !formData.ownerPaymentsId
-  });
+  const [getProfile] = useLazyQuery(GET_PROFILE);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitError('');
     
     if (!formData.checkDate || !formData.checkNumber || !formData.checkAmount ||
         !formData.invoiceNumber || !formData.invoiceAmount || !formData.ownerPaymentsId) {
-        console.log('All fields except notes are required');
+        setSubmitError('Complete all required payment fields.');
         return;
     }
 
@@ -55,21 +53,24 @@ const PaymentEditModal = ({ payment, onClose, show }) => {
         input.totalAmount = checkAmountValue;
     }
 
-    const targetProfile = profileData?.getProfile;
-    if (!payment?.id) {
-      if (targetProfile?.id !== formData.ownerPaymentsId || !targetProfile?.cognitoID) {
-        console.error('Unable to resolve payment owner');
-        return;
-      }
-      input.owner = targetProfile.cognitoID;
-    }
-
+    setIsSubmitting(true);
     try {
       if (payment?.id) {
           await updatePayment({
               variables: { input: { id: payment.id, ...input } }
           });
       } else {
+          // Resolve the profile during submission so creation cannot race the query.
+          const { data: profileData } = await getProfile({
+              variables: { id: formData.ownerPaymentsId },
+              fetchPolicy: 'network-only'
+          });
+          const targetProfile = profileData?.getProfile;
+          if (targetProfile?.id !== formData.ownerPaymentsId || !targetProfile?.cognitoID) {
+              throw new Error('Unable to resolve payment owner');
+          }
+          input.owner = targetProfile.cognitoID;
+
           await createPayment({
               variables: { input }
           });
@@ -93,10 +94,14 @@ const PaymentEditModal = ({ payment, onClose, show }) => {
               }
           }
       }
-      onClose();
     } catch (error) {
         console.error('Error processing payment:', error);
+        setSubmitError('Unable to save payment. Verify the Owner ID and try again.');
+        setIsSubmitting(false);
+        return;
     }
+    setIsSubmitting(false);
+    onClose();
   };
 
   const handleChange = (e) => {
@@ -164,9 +169,10 @@ const PaymentEditModal = ({ payment, onClose, show }) => {
               )}
             </div>
           </div>
+          {submitError && <div role="alert">{submitError}</div>}
           <div className="modal-actions">
-            <button type="submit">
-              {payment?.id ? 'Save' : 'Create'}
+            <button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : payment?.id ? 'Save' : 'Create'}
             </button>
             <button type="button" onClick={onClose}>Cancel</button>
           </div>

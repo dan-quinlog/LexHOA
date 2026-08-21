@@ -24,10 +24,10 @@ const PaymentEditModal = ({ payment, onClose, show }) => {
   const [createPayment] = useMutation(CREATE_PAYMENT);
   const [updateProfile] = useMutation(UPDATE_PROFILE);
   
-  // Get profile data when ownerPaymentsId is set (for applying payment)
+  // Resolve the target profile so owner authorization is attached to new payments.
   const { data: profileData } = useQuery(GET_PROFILE, {
     variables: { id: formData.ownerPaymentsId },
-    skip: !formData.ownerPaymentsId || !applyPayment
+    skip: Boolean(payment?.id) || !formData.ownerPaymentsId
   });
 
   const handleSubmit = async (e) => {
@@ -55,6 +55,15 @@ const PaymentEditModal = ({ payment, onClose, show }) => {
         input.totalAmount = checkAmountValue;
     }
 
+    const targetProfile = profileData?.getProfile;
+    if (!payment?.id) {
+      if (targetProfile?.id !== formData.ownerPaymentsId || !targetProfile?.cognitoID) {
+        console.error('Unable to resolve payment owner');
+        return;
+      }
+      input.owner = targetProfile.cognitoID;
+    }
+
     try {
       if (payment?.id) {
           await updatePayment({
@@ -67,7 +76,7 @@ const PaymentEditModal = ({ payment, onClose, show }) => {
           
           // Apply payment to profile balance if checkbox is checked
           if (applyPayment && formData.ownerPaymentsId && formData.checkAmount) {
-              const currentProfile = profileData?.getProfile;
+              const currentProfile = targetProfile;
               if (currentProfile) {
                   const currentBalance = parseFloat(currentProfile.balance || 0);
                   const paymentAmount = parseFloat(formData.checkAmount);

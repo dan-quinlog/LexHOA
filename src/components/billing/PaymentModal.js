@@ -22,13 +22,16 @@ const SUGGESTED_AMOUNTS = {
 const PAYMENT_METHODS = {
   card: { 
     label: 'Credit/Debit Card', 
-    description: '2.9% + $0.30 fee'
+    description: '1% fee'
   },
   bank_account: { 
     label: 'Bank Account (eCheck)', 
-    description: '0.8% fee (max $5.00)'
+    description: 'No processing fee'
   }
 };
+
+export const calculateProcessingFee = (amount, method) =>
+  Math.round((method === 'bank_account' ? 0 : amount * 0.01) * 100) / 100;
 
 const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
   const [selectedAmount, setSelectedAmount] = useState(null);
@@ -83,10 +86,7 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
   };
 
   const calculateFee = (amount) => {
-    if (isACH) {
-      return Math.min(amount * 0.008, 5.00);
-    }
-    return (amount * 0.029) + 0.30;
+    return calculateProcessingFee(amount, paymentMethodType);
   };
 
   const getPaymentDetails = () => {

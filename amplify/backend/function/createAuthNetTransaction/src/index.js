@@ -10,7 +10,7 @@ const tables = () => { const suffix = `${process.env.API_LEXHOA_GRAPHQLAPIIDOUTP
 const cents = value => Math.round(Number(value) * 100);
 const paymentId = (subject, profileId, key) => crypto.createHash('sha256').update(`${subject}:${profileId}:${key}`).digest('hex');
 const reference = id => `L${id.slice(0, 19)}`;
-function fees(amount, method) { const fee = method === 'bank_account' ? Math.min(amount * .008, 5) : amount * .029 + .30; const processingFee = Math.round(fee * 100) / 100; return { processingFee, totalAmount: Math.round((amount + processingFee) * 100) / 100 }; }
+function fees(amount, method) { const fee = method === 'bank_account' ? 0 : amount * .01; const processingFee = Math.round(fee * 100) / 100; return { processingFee, totalAmount: Math.round((amount + processingFee) * 100) / 100 }; }
 const get = async (TableName, id, client = ddb) => (await client.get({ TableName, Key: { id }, ConsistentRead: true }).promise()).Item;
 
 async function loadSecret(secretId, client = secretsManager) {

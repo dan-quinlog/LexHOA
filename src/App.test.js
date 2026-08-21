@@ -123,9 +123,10 @@ describe('useAuthState', () => {
     expect(source).not.toContain('amplifyconfiguration');
   });
 
-  test('includes Documents in authenticated menu items', () => {
+  test('shows Documents but not Billing in authenticated menu items', () => {
     const source = require('fs').readFileSync(require.resolve('./App'), 'utf8');
     const authenticatedMenu = source.match(/const renderMenuItems = \(\) => \{([\s\S]*?)const cognitoId/)[1];
     expect(authenticatedMenu).toContain("{ label: 'Documents', path: '/documents' }");
+    expect(authenticatedMenu).not.toContain("{ label: 'Billing', path: '/billing' }");
   });
 });

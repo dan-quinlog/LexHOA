@@ -198,7 +198,6 @@ function App() {
   const renderMenuItems = () => {
     const menuItems = [
       { label: 'Profile', path: '/profile' },
-      { label: 'Billing', path: '/billing' },
       { label: 'Board', path: '/board', group: BOARD_GROUP },
       { label: 'Amenities', path: '/amenities' },
       { label: 'Documents', path: '/documents' },

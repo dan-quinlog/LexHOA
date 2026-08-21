@@ -70,6 +70,7 @@ const PaymentEditModal = ({ payment, onClose, show }) => {
               throw new Error('Unable to resolve payment owner');
           }
           input.owner = targetProfile.cognitoID;
+          input.status = 'SUCCEEDED';
 
           await createPayment({
               variables: { input }

@@ -4,6 +4,7 @@ import { useLazyQuery, useMutation } from '@apollo/client';
 import PaymentEditModal from './PaymentEditModal';
 import { CREATE_PAYMENT, UPDATE_PAYMENT, UPDATE_PROFILE } from '../../queries/mutations';
 import { GET_PROFILE } from '../../queries/queries';
+import { getPendingTotal } from '../../utils/payments';
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
@@ -56,10 +57,12 @@ test('attributes a manual payment to the selected profile owner', async () => {
     variables: {
       input: expect.objectContaining({
         ownerPaymentsId: 'owner-profile-id',
-        owner: 'owner-cognito-sub'
+        owner: 'owner-cognito-sub',
+        status: 'SUCCEEDED'
       })
     }
   });
+  expect(getPendingTotal([createPayment.mock.calls[0][0].variables.input])).toBe(0);
   await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
 });
 

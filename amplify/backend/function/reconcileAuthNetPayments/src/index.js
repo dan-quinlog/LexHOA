@@ -53,7 +53,7 @@ async function transition(payment, succeeded, client = ddb) {
   const profileUpdate = succeeded ? { UpdateExpression: 'SET balance=:new, updatedAt=:now REMOVE activePaymentId', ConditionExpression: 'activePaymentId=:pid AND balance=:old', ExpressionAttributeValues: { ':new': Math.max(0, (cents(profile.balance) - cents(payment.amount)) / 100), ':old': profile.balance, ':pid': payment.id, ':now': now } } : { UpdateExpression: 'SET updatedAt=:now REMOVE activePaymentId', ConditionExpression: 'activePaymentId=:pid', ExpressionAttributeValues: { ':pid': payment.id, ':now': now } };
   await client.transactWrite({ TransactItems: [
     { Update: { TableName: t.profile, Key: { id: profile.id }, ...profileUpdate } },
-    { Update: { TableName: t.payment, Key: { id: payment.id }, UpdateExpression: 'SET #s=:next, balanceApplied=:applied, updatedAt=:now', ConditionExpression: '(#s=:pending OR #s=:processing) AND balanceApplied=:notApplied', ExpressionAttributeNames: { '#s': 'status' }, ExpressionAttributeValues: { ':next': succeeded ? 'SUCCEEDED' : 'FAILED', ':applied': succeeded, ':notApplied': false, ':pending': 'PENDING', ':processing': 'PROCESSING', ':now': now } } }
+    { Update: { TableName: t.payment, Key: { id: payment.id }, UpdateExpression: 'SET #s=:next, balanceApplied=:applied, invoiceAmount=:invoice, updatedAt=:now', ConditionExpression: '(#s=:pending OR #s=:processing) AND balanceApplied=:notApplied', ExpressionAttributeNames: { '#s': 'status' }, ExpressionAttributeValues: { ':next': succeeded ? 'SUCCEEDED' : 'FAILED', ':applied': succeeded, ':invoice': succeeded ? payment.amount : 0, ':notApplied': false, ':pending': 'PENDING', ':processing': 'PROCESSING', ':now': now } } }
   ] }).promise(); return true;
 }
 
@@ -64,7 +64,7 @@ async function reverseReturned(payment, client = ddb) {
   const now = new Date().toISOString();
   await client.transactWrite({ TransactItems: [
     { Update: { TableName: t.profile, Key: { id: profile.id }, UpdateExpression: 'SET balance=:new, updatedAt=:now', ConditionExpression: 'balance=:old AND attribute_not_exists(activePaymentId)', ExpressionAttributeValues: { ':new': (cents(profile.balance) + cents(payment.amount)) / 100, ':old': profile.balance, ':now': now } } },
-    { Update: { TableName: t.payment, Key: { id: payment.id }, UpdateExpression: 'SET #s=:failed, balanceApplied=:no, updatedAt=:now', ConditionExpression: '#s=:succeeded AND balanceApplied=:yes', ExpressionAttributeNames: { '#s': 'status' }, ExpressionAttributeValues: { ':failed': 'FAILED', ':succeeded': 'SUCCEEDED', ':no': false, ':yes': true, ':now': now } } }
+    { Update: { TableName: t.payment, Key: { id: payment.id }, UpdateExpression: 'SET #s=:failed, balanceApplied=:no, invoiceAmount=:zero, updatedAt=:now', ConditionExpression: '#s=:succeeded AND balanceApplied=:yes', ExpressionAttributeNames: { '#s': 'status' }, ExpressionAttributeValues: { ':failed': 'FAILED', ':succeeded': 'SUCCEEDED', ':no': false, ':yes': true, ':zero': 0, ':now': now } } }
   ] }).promise(); return true;
 }
 

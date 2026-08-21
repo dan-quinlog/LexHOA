@@ -25,6 +25,7 @@ test('successful transition is one atomic profile/payment request', async () => 
   const client = { get: () => ({ promise: async () => ({ Item: { id: 'u1', balance: 100, activePaymentId: 'p1' } }) }), transactWrite: p => ({ promise: async () => { request = p; } }) };
   await transition(payment(), true, client);
   assert.equal(request.TransactItems.length, 2); assert.match(request.TransactItems[0].Update.UpdateExpression, /REMOVE activePaymentId/); assert.match(request.TransactItems[1].Update.ConditionExpression, /balanceApplied/);
+  assert.equal(request.TransactItems[1].Update.ExpressionAttributeValues[':invoice'], 100);
 });
 test('transaction rail falls back to masked payment details', () => {
   const payment = value => ({ getPayment: () => value });

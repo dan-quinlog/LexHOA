@@ -228,6 +228,7 @@ const PaymentManager = ({ searchState, setSearchState, userGroups = [] }) => {
                 </div>
                 <div>Check ID: {payment.checkNumber || 'N/A'}</div>
                 <div>Check Amount: ${payment.checkAmount ? payment.checkAmount.toFixed(2) : '0.00'}</div>
+                <div>Invoice Amount: ${payment.invoiceAmount ? payment.invoiceAmount.toFixed(2) : '0.00'}</div>
                 <div>Check Date: {payment.checkDate}</div>
               </>
             }

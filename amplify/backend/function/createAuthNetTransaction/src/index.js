@@ -35,15 +35,15 @@ async function finalize(payment, expectedStatus, nextStatus, applyBalance, clien
   const t = tables(); const profile = await get(t.profile, payment.ownerPaymentsId, client);
   if (!profile) throw new Error('Profile missing during finalization');
   const now = new Date().toISOString(); const next = Math.max(0, (cents(profile.balance) - cents(payment.amount)) / 100);
-  const paymentUpdate = applyBalance ? 'SET #s=:next, balanceApplied=:yes, updatedAt=:now' : 'SET #s=:next, updatedAt=:now';
+  const paymentUpdate = applyBalance ? 'SET #s=:next, balanceApplied=:yes, invoiceAmount=:invoice, updatedAt=:now' : 'SET #s=:next, updatedAt=:now';
   const profileValues = { ':pid': payment.id, ':old': profile.balance, ':now': now };
   const paymentValues = { ':next': nextStatus, ':expected': expectedStatus, ':no': false, ':now': now };
-  if (applyBalance) { profileValues[':new'] = next; paymentValues[':yes'] = true; }
+  if (applyBalance) { profileValues[':new'] = next; paymentValues[':yes'] = true; paymentValues[':invoice'] = payment.amount; }
   await client.transactWrite({ TransactItems: [
     { Update: { TableName: t.profile, Key: { id: profile.id }, UpdateExpression: applyBalance ? 'SET balance=:new, updatedAt=:now REMOVE activePaymentId' : 'SET updatedAt=:now', ConditionExpression: 'activePaymentId=:pid AND balance=:old', ExpressionAttributeValues: profileValues } },
     { Update: { TableName: t.payment, Key: { id: payment.id }, UpdateExpression: paymentUpdate, ConditionExpression: '#s=:expected AND balanceApplied=:no', ExpressionAttributeNames: { '#s': 'status' }, ExpressionAttributeValues: paymentValues } }
   ] }).promise();
-  return { ...payment, status: nextStatus, balanceApplied: applyBalance };
+  return { ...payment, status: nextStatus, balanceApplied: applyBalance, invoiceAmount: applyBalance ? payment.amount : payment.invoiceAmount };
 }
 
 async function processPayment(event, deps) {
@@ -61,7 +61,7 @@ async function processPayment(event, deps) {
   if (amount > balance) throw new Error('Payment amount exceeds the current balance');
   const requested = args.paymentMethodType === 'bank_account' ? 'BANK_ACCOUNT' : 'CARD';
   if (!payment) {
-    const now = new Date().toISOString(); payment = { id, __typename: 'Payment', owner: subject, ownerPaymentsId: profile.id, idempotencyKey: args.idempotencyKey, processorReference: reference(id), amount, ...fees(amount, requested === 'BANK_ACCOUNT' ? 'bank_account' : 'card'), invoiceAmount: amount, paymentMethod: requested, status: 'PROCESSING', balanceApplied: false, description: 'HOA Dues Payment', byTypeCreatedAt: 'PAYMENT', createdAt: now, updatedAt: now };
+    const now = new Date().toISOString(); payment = { id, __typename: 'Payment', owner: subject, ownerPaymentsId: profile.id, idempotencyKey: args.idempotencyKey, processorReference: reference(id), amount, ...fees(amount, requested === 'BANK_ACCOUNT' ? 'bank_account' : 'card'), checkAmount: amount, invoiceAmount: 0, paymentMethod: requested, status: 'PROCESSING', balanceApplied: false, description: 'HOA Dues Payment', byTypeCreatedAt: 'PAYMENT', createdAt: now, updatedAt: now };
     try { await deps.reserve(profile, payment); won = true; } catch (e) { payment = await deps.getPayment(id); if (!payment) throw new Error('Another payment is active for this profile'); }
   }
   if (['SUCCEEDED', 'PENDING'].includes(payment.status)) return result(payment);
@@ -81,7 +81,7 @@ async function processPayment(event, deps) {
 }
 
 function result(p) { return { paymentId: p.id, transactionId: p.authNetTransactionId || '', status: p.status, settlementPending: p.status === 'PENDING', amount: p.amount, processingFee: p.processingFee, totalAmount: p.totalAmount, paymentMethodType: p.paymentMethod === 'BANK_ACCOUNT' ? 'bank_account' : 'card' }; }
-async function attachTransaction(payment, transactionId, client = ddb) { const t = tables(); const now = new Date().toISOString(); await client.update({ TableName: t.payment, Key: { id: payment.id }, UpdateExpression: 'SET authNetTransactionId=:tx, updatedAt=:now', ConditionExpression: '#s=:processing AND attribute_not_exists(authNetTransactionId)', ExpressionAttributeNames: { '#s': 'status' }, ExpressionAttributeValues: { ':tx': transactionId, ':now': now, ':processing': 'PROCESSING' } }).promise(); return { ...payment, authNetTransactionId: transactionId, updatedAt: now }; }
+async function attachTransaction(payment, transactionId, client = ddb) { const t = tables(); const now = new Date().toISOString(); await client.update({ TableName: t.payment, Key: { id: payment.id }, UpdateExpression: 'SET authNetTransactionId=:tx, checkNumber=:tx, updatedAt=:now', ConditionExpression: '#s=:processing AND attribute_not_exists(authNetTransactionId)', ExpressionAttributeNames: { '#s': 'status' }, ExpressionAttributeValues: { ':tx': transactionId, ':now': now, ':processing': 'PROCESSING' } }).promise(); return { ...payment, authNetTransactionId: transactionId, checkNumber: transactionId, updatedAt: now }; }
 async function failPayment(payment, client = ddb) { const t = tables(); const now = new Date().toISOString(); await client.transactWrite({ TransactItems: [
   { Update: { TableName: t.profile, Key: { id: payment.ownerPaymentsId }, UpdateExpression: 'SET updatedAt=:now REMOVE activePaymentId', ConditionExpression: 'activePaymentId=:pid', ExpressionAttributeValues: { ':pid': payment.id, ':now': now } } },
   { Update: { TableName: t.payment, Key: { id: payment.id }, UpdateExpression: 'SET #s=:failed, updatedAt=:now', ConditionExpression: '#s=:processing AND attribute_not_exists(authNetTransactionId)', ExpressionAttributeNames: { '#s': 'status' }, ExpressionAttributeValues: { ':processing': 'PROCESSING', ':failed': 'FAILED', ':now': now } } }
@@ -96,4 +96,4 @@ function processorErrorMessage(response, transaction) {
 async function captureTransaction(data) { const transactionKey = await getTransactionKey(); return new Promise((resolve, reject) => { const auth = new ApiContracts.MerchantAuthenticationType(); auth.setName(process.env.AUTHNET_API_LOGIN_ID); auth.setTransactionKey(transactionKey); const opaque = new ApiContracts.OpaqueDataType(); opaque.setDataDescriptor(data.descriptor); opaque.setDataValue(data.token); const pay = new ApiContracts.PaymentType(); pay.setOpaqueData(opaque); const order = new ApiContracts.OrderType(); order.setInvoiceNumber(data.reference); const txr = new ApiContracts.TransactionRequestType(); txr.setTransactionType(ApiContracts.TransactionTypeEnum.AUTHCAPTURETRANSACTION); txr.setPayment(pay); txr.setAmount(data.amount); txr.setOrder(order); const req = new ApiContracts.CreateTransactionRequest(); req.setRefId(data.reference); req.setMerchantAuthentication(auth); req.setTransactionRequest(txr); const ctrl = new ApiControllers.CreateTransactionController(req.getJSON()); ctrl.setEnvironment(process.env.AUTHNET_ENVIRONMENT === 'production' ? Constants.endpoint.production : Constants.endpoint.sandbox); ctrl.execute(() => { const raw = ctrl.getResponse(); const res = raw && new ApiContracts.CreateTransactionResponse(raw); const tx = res?.getTransactionResponse(); const accountType = String(tx?.getAccountType?.() || '').toLowerCase(); const rail = accountType.includes('echeck') || accountType.includes('bank') ? 'BANK_ACCOUNT' : accountType ? 'CARD' : null; if (res?.getMessages().getResultCode() === ApiContracts.MessageTypeEnum.OK && String(tx?.getResponseCode?.()) === '1' && tx?.getTransId() && rail) return resolve({ transactionId: tx.getTransId(), paymentMethod: rail }); const error = new Error(`Payment processor declined: ${processorErrorMessage(res, tx)}`); error.definitive = Boolean(res); reject(error); }); }); }
 const defaultDeps = { getProfile: id => get(tables().profile, id), getPayment: id => get(tables().payment, id), reserve, attachTransaction, finalize, fail: failPayment, capture: captureTransaction };
 exports.handler = async event => processPayment(event, defaultDeps);
-exports._internals = { processPayment, paymentId, reference, fees, reserve, finalize, failPayment, result, loadSecret, getTransactionKey, processorErrorMessage };
+exports._internals = { processPayment, paymentId, reference, fees, reserve, attachTransaction, finalize, failPayment, result, loadSecret, getTransactionKey, processorErrorMessage };

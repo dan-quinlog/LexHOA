@@ -19,7 +19,7 @@ const PropertyCard = ({ property, currentProfileId, onTenantAdded }) => {
   });
 
   const isOwner = property.profOwnerId === currentProfileId;
-  const tenant = property.profTenant || createdTenant || tenantData?.getProfile;
+  const tenant = createdTenant || property.profTenant || tenantData?.getProfile;
 
   const handleCreateTenant = async (formData) => {
     if (createInFlight.current) return;
@@ -60,7 +60,7 @@ const PropertyCard = ({ property, currentProfileId, onTenantAdded }) => {
   const handleUpdateTenant = async (formData) => {
     const { name, email, phone, address, city, state, zip, contactPref, allowText } = formData;
 
-    await updateProfile({
+    const result = await updateProfile({
       variables: {
         input: {
           id: tenant.id,
@@ -76,6 +76,7 @@ const PropertyCard = ({ property, currentProfileId, onTenantAdded }) => {
         }
       }
     });
+    setCreatedTenant(result.data.updateProfile);
     await onTenantAdded?.();
     setShowEditTenantModal(false);
   };

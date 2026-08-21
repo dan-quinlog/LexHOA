@@ -167,7 +167,7 @@ test('loads a linked tenant by id and lets the owner edit a tenant without Cogni
   expect(screen.getByRole('button', { name: 'Update Tenant' })).toBeInTheDocument();
 });
 
-test('refetches the tenant and closes only after a successful update', async () => {
+test('shows the updated tenant, refetches, and closes only after success', async () => {
   const tenant = {
     id: 'tenant-id',
     cognitoID: null,
@@ -176,7 +176,8 @@ test('refetches the tenant and closes only after a successful update', async () 
     phone: '555-0101'
   };
   useQuery.mockReturnValue({ data: { getProfile: tenant } });
-  const updateProfile = jest.fn().mockResolvedValue({ data: { updateProfile: tenant } });
+  const updatedTenant = { ...tenant, name: 'Synthetic Tenant', phone: '555-0100' };
+  const updateProfile = jest.fn().mockResolvedValue({ data: { updateProfile: updatedTenant } });
   useMutation.mockImplementation(mutation => {
     if (mutation === ADD_TENANT_TO_MY_PROPERTY) return [jest.fn()];
     if (mutation === UPDATE_PROFILE) return [updateProfile];
@@ -196,6 +197,8 @@ test('refetches the tenant and closes only after a successful update', async () 
 
   await waitFor(() => expect(onTenantAdded).toHaveBeenCalledTimes(1));
   expect(updateProfile).toHaveBeenCalledTimes(1);
+  expect(screen.getByText('Name: Synthetic Tenant')).toBeInTheDocument();
+  expect(screen.getByText('Phone: 555-0100')).toBeInTheDocument();
   expect(screen.queryByTestId('tenant-modal')).not.toBeInTheDocument();
 });
 

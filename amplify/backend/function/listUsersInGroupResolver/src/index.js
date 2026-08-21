@@ -20,7 +20,7 @@ async function listUsersInGroup(event, client) {
     throw new Error('Access denied');
   }
 
-  const field = event.field || event.info?.fieldName;
+  const field = event.fieldName || event.field || event.info?.fieldName;
   if (field !== 'listUsersInGroup') {
     throw new Error('Unsupported operation');
   }

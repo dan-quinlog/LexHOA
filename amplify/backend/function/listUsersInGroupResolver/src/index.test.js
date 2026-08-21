@@ -6,7 +6,7 @@ const { listUsersInGroup } = require('./index')._internals;
 
 const event = (groups, groupName = 'BOARD', field = 'listUsersInGroup') => ({
   identity: { claims: { 'cognito:groups': groups } },
-  info: { fieldName: field },
+  fieldName: field,
   arguments: { groupName }
 });
 

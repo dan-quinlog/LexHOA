@@ -45,7 +45,7 @@ test('uses the getPing response for Ping ID search', async () => {
   expect(searchById).toHaveBeenCalledWith({ variables: { id: 'search-value' } });
 });
 
-test('uses the pingsByCreator response for Creator ID search', async () => {
+test('uses the creator index response for Creator ID search', async () => {
   const searchByCreator = jest.fn().mockResolvedValue({ data: { pingsByCreator: { items: [ping] } } });
   useLazyQuery.mockImplementation(query => [query === SEARCH_PINGS_BY_CREATOR ? searchByCreator : jest.fn()]);
   render(<Harness searchType="creator" />);
@@ -54,6 +54,13 @@ test('uses the pingsByCreator response for Creator ID search', async () => {
 
   expect(await findRequest()).toBeInTheDocument();
   expect(searchByCreator).toHaveBeenCalledWith({ variables: { profCreatorId: 'search-value' } });
+});
+
+test('uses the generated creator index field in the GraphQL operation', () => {
+  const operation = SEARCH_PINGS_BY_CREATOR.loc.source.body;
+  expect(operation).toContain(
+    'pingsByCreator: pingsByProfCreatorIdAndCreatedAt(profCreatorId: $profCreatorId)'
+  );
 });
 
 test('uses the listPings response for pending search', async () => {

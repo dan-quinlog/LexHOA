@@ -775,7 +775,7 @@ export const SEARCH_PINGS_BY_ID = gql`
 
 export const SEARCH_PINGS_BY_CREATOR = gql`
   query PingsByCreator($profCreatorId: ID!) {
-    pingsByCreator(profCreatorId: $profCreatorId) {
+    pingsByCreator: pingsByProfCreatorIdAndCreatedAt(profCreatorId: $profCreatorId) {
       items {
         id
         type

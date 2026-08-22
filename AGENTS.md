@@ -22,3 +22,13 @@
 - Files under `amplify/#current-cloud-backend`, `amplify/.config/local-*`, and `amplify/team-provider-info.json` are ignored machine-local state and may be absent or stale.
 - Never run `amplify push`, `amplify delete`, an environment removal, or another AWS mutation without explicit user approval and first verifying that the checkout is synchronized to the intended live environment.
 - Amp orbs do not inherit a developer's local AWS SSO session. Use an approved short-lived orb OIDC role when configured; never add long-lived AWS access keys to Amp secrets or repository files.
+
+## Delivery workflow
+
+- Diagnose and reproduce the reported behavior before editing. Prefer the smallest fix at the owning boundary and focused tests over broad scans or unrelated cleanup.
+- For cloud diagnosis, use bounded read-only checks and indexed queries. Do not expose secrets, payment data, opaque tokens, or personal data in commands, logs, artifacts, or thread messages.
+- Present the diagnosis, intended change, validation, and mutation boundary before requesting approval. Require explicit approval before committing, pushing, deploying, or mutating AWS, Amplify, Authorize.Net, or application data.
+- Keep hotfix commits identical across `dev` and `staging`; deploy only the explicitly approved environment. Gate every push or deployment on freshly fetched exact refs and the approved commit SHA.
+- Start at most one connected-repository Amplify `RELEASE` for an approved deployment. Do not retry after a local reporting or connection failure until authoritative state proves no job or mutation occurred.
+- Verify the deployed artifact against the approved commit and check the affected data and infrastructure safety invariants. Report generated infrastructure housekeeping separately from source-intended changes.
+- Stop safely when an identity, ref, configuration, processor, or data invariant fails. Preserve current state, perform no compensating mutation without approval, and report the precise blocker and next bounded step.

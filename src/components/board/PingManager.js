@@ -7,7 +7,7 @@ import { copyWithFeedback } from '../../utils/clipboardUtils';
 import './shared/BoardTools.css';
 
 const PingManager = ({ searchState, setSearchState }) => {
-    const [selectedPing, setSelectedPing] = useState(null);
+    const [searchError, setSearchError] = useState('');
 
     const [searchPings] = useLazyQuery(SEARCH_PINGS_BY_ID);
     const [searchByCreator] = useLazyQuery(SEARCH_PINGS_BY_CREATOR);
@@ -15,33 +15,50 @@ const PingManager = ({ searchState, setSearchState }) => {
     const [updatePing] = useMutation(UPDATE_PING);
 
     const handleSearch = async () => {
-        let response;
-        switch (searchState.searchType) {
-            case 'id':
-                response = await searchPings({
-                    variables: { id: searchState.searchTerm }
-                });
-                break;
-            case 'creator':
-                response = await searchByCreator({
-                    variables: { profCreatorId: searchState.searchTerm }
-                });
-                break;
-            default:
-                return;
+        if (!searchState.searchTerm) return;
+        setSearchError('');
+        try {
+            let searchResults;
+            switch (searchState.searchType) {
+                case 'id': {
+                    const response = await searchPings({
+                        variables: { id: searchState.searchTerm }
+                    });
+                    searchResults = response.data?.getPing ? [response.data.getPing] : [];
+                    break;
+                }
+                case 'creator': {
+                    const response = await searchByCreator({
+                        variables: { profCreatorId: searchState.searchTerm }
+                    });
+                    searchResults = response.data?.pingsByCreator?.items || [];
+                    break;
+                }
+                default:
+                    return;
+            }
+            setSearchState(prev => ({
+                ...prev,
+                searchResults
+            }));
+        } catch (error) {
+            console.error('Ping search failed');
+            setSearchError('Unable to search pings. Please try again.');
         }
-        setSearchState(prev => ({
-            ...prev,
-            searchResults: response.data.listPings.items || []
-        }));
     };
 
     const handlePendingPings = async () => {
-        const response = await listPendingPings();
-        setSearchState(prev => ({
-            ...prev,
-            searchResults: response.data.listPings.items || []
-        }));
+        setSearchError('');
+        try {
+            const response = await listPendingPings();
+            setSearchState(prev => ({
+                ...prev,
+                searchResults: response.data?.listPings?.items || []
+            }));
+        } catch (error) {
+            console.error('Pending ping search failed');
+            setSearchError('Unable to search pings. Please try again.');
+        }
     };
 
     const handleApprove = async (ping) => {
@@ -101,6 +118,7 @@ const PingManager = ({ searchState, setSearchState }) => {
                 <button onClick={handleSearch}>Search</button>
                 <button onClick={handlePendingPings}>View Pending</button>
             </div>
+            {searchError && <div role="alert">{searchError}</div>}
 
             <div className="results-grid">
                 {searchState.searchResults.map(ping => (
@@ -125,7 +143,7 @@ const PingManager = ({ searchState, setSearchState }) => {
                                 <div>Request Details: {ping.instruction}</div>
                                 <div>Related ID:</div>
                                 <ul>
-                                    {ping.items.map((item, index) => (
+                                    {(ping.items || []).map((item, index) => (
                                         <li key={index}>
                                             {item}
                                             <button 

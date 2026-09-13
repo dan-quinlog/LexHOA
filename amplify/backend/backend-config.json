@@ -109,20 +109,6 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
-    "mergeProfiles": {
-      "build": true,
-      "dependsOn": [
-        {
-          "attributes": [
-            "GraphQLAPIIdOutput"
-          ],
-          "category": "api",
-          "resourceName": "lexhoa"
-        }
-      ],
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda"
-    },
     "createAuthNetCustomerProfile": {
       "build": true,
       "dependsOn": [
@@ -199,6 +185,20 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "mergeProfiles": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput"
+          ],
+          "category": "api",
+          "resourceName": "lexhoa"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "monthlyPropertyDues": {
       "build": true,
       "dependsOn": [
@@ -262,22 +262,6 @@
         {
           "category": "function",
           "resourceName": "addTenantToMyProperty"
-        }
-      ]
-    },
-    "AMPLIFY_function_mergeProfiles_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "mergeProfiles"
-        }
-      ]
-    },
-    "AMPLIFY_function_mergeProfiles_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "mergeProfiles"
         }
       ]
     },
@@ -414,6 +398,22 @@
         {
           "category": "function",
           "resourceName": "manageCognitoGroups"
+        }
+      ]
+    },
+    "AMPLIFY_function_mergeProfiles_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "mergeProfiles"
+        }
+      ]
+    },
+    "AMPLIFY_function_mergeProfiles_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "mergeProfiles"
         }
       ]
     },

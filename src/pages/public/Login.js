@@ -15,7 +15,7 @@
 
     return (
       <>
-        <button onClick={handleLogin}>Login</button>
+        <button onClick={handleLogin}>Sign up / Sign in</button>
         {error && <span role="alert">Unable to start sign in. Please try again.</span>}
       </>
     );

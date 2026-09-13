@@ -69,7 +69,7 @@ const ProfileEditModal = ({
   };
 
   return (
-    <Modal show={show} onClose={onClose}>
+    <Modal show={show} onClose={onClose} size="large">
       <h2>{initialValues?.id ? 'Edit' : 'Create New'} Profile</h2>
       <div className="form-container">
         <div className="form-section">

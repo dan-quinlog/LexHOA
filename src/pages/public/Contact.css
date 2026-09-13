@@ -1,9 +1,9 @@
 
 .contact {
   padding-top: 80px;
-  padding-bottom: 20px;
-  padding-left: 11%;
-  padding-right: 11%;
+  padding-bottom: var(--spacing-large);
+  padding-left: var(--spacing-medium);
+  padding-right: var(--spacing-medium);
 }
 
 .contact-content {

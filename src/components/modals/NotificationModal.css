@@ -5,6 +5,7 @@
   transform: translate(-50%, -50%);
   z-index: var(--z-index-notification);
   animation: slideIn var(--transition-normal) ease-out;
+  width: min(90vw, 420px);
 }
 
 .notification-content {
@@ -14,6 +15,19 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   animation: fadeOut var(--transition-slow) ease-in forwards;
   animation-delay: var(--transition-slow);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-medium);
+  overflow-wrap: anywhere;
+}
+
+.notification-content button {
+  flex: 0 0 auto;
+  padding: 0 6px;
+  background: transparent;
+  color: var(--text-color);
+  font-size: 1.25rem;
 }
 
 @keyframes slideIn {

@@ -199,3 +199,37 @@
   color: white;
   font-weight: 600;
 }
+
+@media (max-width: 767px) {
+  .board-tool {
+    padding: 0;
+  }
+
+  .search-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .search-button {
+    width: 100%;
+  }
+
+  .results-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .item-card {
+    min-width: 0;
+    padding: var(--spacing-medium);
+  }
+
+  .card-content {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .card-header,
+  .card-footer {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+}

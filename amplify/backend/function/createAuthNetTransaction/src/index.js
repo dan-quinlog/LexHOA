@@ -34,7 +34,7 @@ async function finalize(payment, expectedStatus, nextStatus, applyBalance, clien
   if (payment.balanceApplied || payment.status === 'SUCCEEDED') return payment;
   const t = tables(); const profile = await get(t.profile, payment.ownerPaymentsId, client);
   if (!profile) throw new Error('Profile missing during finalization');
-  const now = new Date().toISOString(); const next = Math.max(0, (cents(profile.balance) - cents(payment.amount)) / 100);
+  const now = new Date().toISOString(); const next = (cents(profile.balance) - cents(payment.amount)) / 100;
   const paymentUpdate = applyBalance ? 'SET #s=:next, balanceApplied=:yes, invoiceAmount=:invoice, updatedAt=:now' : 'SET #s=:next, updatedAt=:now';
   const profileValues = { ':pid': payment.id, ':old': profile.balance, ':now': now };
   const paymentValues = { ':next': nextStatus, ':expected': expectedStatus, ':no': false, ':now': now };
@@ -54,11 +54,8 @@ async function processPayment(event, deps) {
   if (!profile || (profile.cognitoID || profile.id) !== subject) throw new Error('Profile access denied');
   const id = paymentId(subject, profile.id, args.idempotencyKey); let payment = await deps.getPayment(id); let won = false;
   if (payment && ['SUCCEEDED', 'PENDING'].includes(payment.status)) return result(payment);
-  const balance = cents(profile.balance) / 100;
   const amount = cents(args.expectedAmount) / 100;
-  if (!(balance > 0)) throw new Error('No positive balance due');
   if (!(amount > 0)) throw new Error('Payment amount must be greater than zero');
-  if (amount > balance) throw new Error('Payment amount exceeds the current balance');
   const requested = args.paymentMethodType === 'bank_account' ? 'BANK_ACCOUNT' : 'CARD';
   if (!payment) {
     const now = new Date().toISOString(); payment = { id, __typename: 'Payment', owner: subject, ownerPaymentsId: profile.id, idempotencyKey: args.idempotencyKey, processorReference: reference(id), amount, ...fees(amount, requested === 'BANK_ACCOUNT' ? 'bank_account' : 'card'), checkAmount: amount, invoiceAmount: 0, paymentMethod: requested, status: 'PROCESSING', balanceApplied: false, description: 'HOA Dues Payment', byTypeCreatedAt: 'PAYMENT', createdAt: now, updatedAt: now };

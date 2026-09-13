@@ -110,7 +110,7 @@
 
   .profile-page {
     margin-top: 80px;
-    margin-bottom: 50px;
+    margin-bottom: var(--spacing-large);
   }
 
   .profile-cards {
@@ -119,6 +119,27 @@
 
   .profile-content {
     grid-template-columns: 1fr;
+    padding: var(--spacing-medium);
+  }
+
+  .property-section {
+    padding: var(--spacing-medium);
+  }
+
+  .profile-header {
+    align-items: flex-start;
+    gap: var(--spacing-small);
+  }
+
+  .profile-header > div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--spacing-small);
+  }
+
+  .profile-header button {
+    margin-left: 0;
   }
 
 }
@@ -166,4 +187,10 @@
   margin: 10px 0;
   border-radius: 4px;
   font-size: 14px;
+}
+
+@media (max-width: 480px) {
+  .verification-card .form-group {
+    flex-direction: column;
+  }
 }

@@ -11,9 +11,10 @@ const NotificationModal = ({ message, onClose }) => {
   }, [onClose]);
 
   return (
-    <div className="notification-modal">
+    <div className="notification-modal" role="status">
       <div className="notification-content">
-        {message}
+        <span>{message}</span>
+        <button type="button" onClick={onClose} aria-label="Dismiss notification">×</button>
       </div>
     </div>
   );

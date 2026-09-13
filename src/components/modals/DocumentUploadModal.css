@@ -126,6 +126,10 @@
 
 /* Mobile responsive */
 @media (max-width: 768px) {
+  .document-upload-form {
+    padding: 0;
+  }
+
   .form-row {
     grid-template-columns: 1fr;
   }

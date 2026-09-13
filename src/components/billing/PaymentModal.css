@@ -333,15 +333,28 @@
 }
 
 @media (max-width: 480px) {
-  .amount-options {
-    grid-template-columns: 1fr;
+  .payment-form {
+    padding: 0;
   }
-  
+
   .amount-option.custom {
-    grid-column: span 1;
+    grid-column: span 2;
   }
 
   .payment-method-options {
     grid-template-columns: 1fr;
+  }
+
+  .payment-method-selection {
+    padding: var(--spacing-medium) 0;
+  }
+
+  .payment-method-option {
+    padding: var(--spacing-medium);
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
   }
 }

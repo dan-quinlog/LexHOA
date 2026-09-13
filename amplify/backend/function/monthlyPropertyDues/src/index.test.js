@@ -37,7 +37,7 @@ function memoryDependencies(pages, options = {}) {
     };
 }
 
-test('discovers unique owners from properties and charges each once', async () => {
+test('charges annual dues once per property and combines properties by owner', async () => {
     const store = memoryDependencies([{
         Items: [
             { profOwnerId: 'owner-a' },
@@ -49,16 +49,20 @@ test('discovers unique owners from properties and charges each once', async () =
     }]);
     const counts = await processMonthlyDues({ amount: 50, now, dependencies: store.dependencies });
     assert.deepEqual(counts, { owners: 2, charged: 2, skipped: 0, failed: 0 });
-    assert.equal(store.balances.get('owner-a'), 50);
+    assert.equal(store.balances.get('owner-a'), 100);
     assert.equal(store.balances.get('owner-b'), 50);
 });
 
-test('same-month invocation is idempotent', async () => {
+test('same-year invocation is idempotent', async () => {
     const pages = [{ Items: [{ profOwnerId: 'owner-a' }] }];
     const store = memoryDependencies(pages);
     await processMonthlyDues({ amount: 50, now, dependencies: store.dependencies });
     store.resetPages();
-    const retry = await processMonthlyDues({ amount: 50, now, dependencies: store.dependencies });
+    const retry = await processMonthlyDues({
+        amount: 50,
+        now: new Date('2026-12-31T12:00:00.000Z'),
+        dependencies: store.dependencies
+    });
     assert.deepEqual(retry, { owners: 1, charged: 0, skipped: 1, failed: 0 });
     assert.equal(store.balances.get('owner-a'), 50);
 });
@@ -107,8 +111,8 @@ test('DynamoDB update is atomic, conditional, and duplicate-safe', async () => {
     const dependencies = createDynamoDependencies(client, 'api', 'dev');
     assert.equal(await dependencies.chargeProfile('owner-a', 50, '2026-08', now.toISOString()), 'charged');
     assert.match(updateParams.UpdateExpression, /if_not_exists/);
-    assert.match(updateParams.UpdateExpression, /lastMonthlyDuesPeriod/);
-    assert.match(updateParams.ConditionExpression, /lastMonthlyDuesPeriod/);
+    assert.match(updateParams.UpdateExpression, /lastAnnualDuesPeriod/);
+    assert.match(updateParams.ConditionExpression, /lastAnnualDuesPeriod/);
 
     client.update = () => ({
         promise: async () => { throw Object.assign(new Error('duplicate'), { code: 'ConditionalCheckFailedException' }); }
@@ -156,6 +160,14 @@ test('invalid dues configuration fails closed', () => {
     for (const value of [undefined, '', 'zero', '0', '-1', 'Infinity']) {
         assert.throws(() => parseDuesAmount(value), /INVALID_DUES_CONFIGURATION/);
     }
+});
+
+test('schedule runs once per year on January 1', () => {
+    const parameters = JSON.parse(fs.readFileSync(
+        path.join(__dirname, '..', 'parameters.json'),
+        'utf8'
+    ));
+    assert.equal(parameters.CloudWatchRule, 'cron(0 6 1 1 ? *)');
 });
 
 test('handler logs only aggregate categories and no event or owner details', async () => {

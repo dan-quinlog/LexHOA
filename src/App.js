@@ -177,9 +177,17 @@ function App() {
       }
     }
 
+    function handleEscape(event) {
+      if (event.key === 'Escape') {
+        setIsMenuOpen(false);
+      }
+    }
+
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
     };
   }, []);
 
@@ -190,10 +198,6 @@ function App() {
       console.error('Error signing out: ', error);
     }
   }
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
 
   const renderMenuItems = () => {
     const menuItems = [
@@ -349,12 +353,35 @@ function App() {
               renderMenuItems={renderMenuItems}
             />
           ) : (
-            <nav className="desktop-menu">
-              <Link to="/amenities">Amenities</Link>
-              <Link to="/documents">Documents</Link>
-              <Link to="/contact">Contact</Link>
-              <Login />
-            </nav>
+            <>
+              <nav className="desktop-menu">
+                <Link to="/amenities">Amenities</Link>
+                <Link to="/documents">Documents</Link>
+                <Link to="/contact">Contact</Link>
+                <Login />
+              </nav>
+              <div className="mobile-header-actions">
+                <Login />
+                <div className="hamburger-menu" ref={menuRef}>
+                  <button
+                    type="button"
+                    className="hamburger-button"
+                    aria-label={`${isMenuOpen ? 'Close' : 'Open'} navigation menu`}
+                    aria-expanded={isMenuOpen}
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  >
+                    <span aria-hidden="true" className="hamburger-icon" />
+                  </button>
+                  {isMenuOpen && (
+                    <nav className="dropdown-menu" aria-label="Mobile navigation">
+                      <Link to="/amenities" onClick={() => setIsMenuOpen(false)}>Amenities</Link>
+                      <Link to="/documents" onClick={() => setIsMenuOpen(false)}>Documents</Link>
+                      <Link to="/contact" onClick={() => setIsMenuOpen(false)}>Contact</Link>
+                    </nav>
+                  )}
+                </div>
+              </div>
+            </>
           )}
         </header>
         {initializationError && (
@@ -372,23 +399,6 @@ function App() {
           <Route path="/board" element={<Board userGroups={userGroups} user={user} />} />
           <Route path="/contact" element={<Contact />} />
         </Routes>
-        <footer className="bottom-bar">
-          <nav className="mobile-menu">
-            {user ? (
-              <>
-                {renderMenuItems()}
-                <button onClick={handleSignOut}>Sign Out</button>
-              </>
-            ) : (
-              <>
-                <Link to="/amenities">Amenities</Link>
-                <Link to="/documents">Documents</Link>
-                <Link to="/contact">Contact</Link>
-                <Login />
-              </>
-            )}
-          </nav>
-        </footer>
         <PrivacyBanner />
       </div>
     );

@@ -16,7 +16,7 @@ describe('Login', () => {
     const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
     render(<Login />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Login' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Sign up / Sign in' }));
 
     await waitFor(() => expect(signInWithRedirect).toHaveBeenCalledTimes(1));
     expect(consoleLog).not.toHaveBeenCalled();
@@ -27,7 +27,7 @@ describe('Login', () => {
     signInWithRedirect.mockRejectedValue(new Error('provider detail'));
     render(<Login />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Login' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Sign up / Sign in' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Unable to start sign in. Please try again.');
   });

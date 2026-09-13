@@ -137,7 +137,7 @@ const BulletinModal = ({ bulletin, onClose, modalOpen }) => {
 
   return (
     <>
-      <Modal onClose={handleClose} show={modalOpen}>
+      <Modal onClose={handleClose} show={modalOpen} size="large">
         <div className="bulletin-modal">
           <h2>{bulletin ? 'Edit Bulletin' : 'Create Bulletin'}</h2>
           <div className="form-group">

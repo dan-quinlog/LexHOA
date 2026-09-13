@@ -16,7 +16,7 @@ function parseDuesAmount(value) {
 }
 
 function billingPeriod(date) {
-    return date.toISOString().slice(0, 7);
+    return date.toISOString().slice(0, 4);
 }
 
 function createDynamoDependencies(client, apiId, env) {
@@ -38,8 +38,8 @@ function createDynamoDependencies(client, apiId, env) {
                 await client.update({
                     TableName: profileTable,
                     Key: { id: profileId },
-                    UpdateExpression: 'SET #balance = if_not_exists(#balance, :zero) + :dues, lastMonthlyDuesPeriod = :period, updatedAt = :timestamp',
-                    ConditionExpression: 'attribute_exists(id) AND (attribute_not_exists(lastMonthlyDuesPeriod) OR lastMonthlyDuesPeriod <> :period)',
+                    UpdateExpression: 'SET #balance = if_not_exists(#balance, :zero) + :dues, lastAnnualDuesPeriod = :period, updatedAt = :timestamp',
+                    ConditionExpression: 'attribute_exists(id) AND (attribute_not_exists(lastAnnualDuesPeriod) OR lastAnnualDuesPeriod <> :period)',
                     ExpressionAttributeNames: { '#balance': 'balance' },
                     ExpressionAttributeValues: {
                         ':zero': 0,
@@ -58,14 +58,17 @@ function createDynamoDependencies(client, apiId, env) {
 }
 
 async function processMonthlyDues({ amount, now, dependencies }) {
-    const ownerIds = new Set();
+    const propertyCountsByOwner = new Map();
     let lastEvaluatedKey;
 
     do {
         const page = await dependencies.scanProperties(lastEvaluatedKey);
         for (const property of page.Items || []) {
             if (typeof property.profOwnerId === 'string' && property.profOwnerId.trim()) {
-                ownerIds.add(property.profOwnerId);
+                propertyCountsByOwner.set(
+                    property.profOwnerId,
+                    (propertyCountsByOwner.get(property.profOwnerId) || 0) + 1
+                );
             }
         }
         lastEvaluatedKey = page.LastEvaluatedKey;
@@ -77,9 +80,9 @@ async function processMonthlyDues({ amount, now, dependencies }) {
     let skipped = 0;
     let failed = 0;
 
-    for (const ownerId of ownerIds) {
+    for (const [ownerId, propertyCount] of propertyCountsByOwner) {
         try {
-            const outcome = await dependencies.chargeProfile(ownerId, amount, period, timestamp);
+            const outcome = await dependencies.chargeProfile(ownerId, amount * propertyCount, period, timestamp);
             if (outcome === 'charged') charged += 1;
             else skipped += 1;
         } catch (error) {
@@ -87,7 +90,7 @@ async function processMonthlyDues({ amount, now, dependencies }) {
         }
     }
 
-    const counts = { owners: ownerIds.size, charged, skipped, failed };
+    const counts = { owners: propertyCountsByOwner.size, charged, skipped, failed };
     if (failed > 0) {
         const error = new Error('MONTHLY_DUES_PARTIAL_FAILURE');
         error.counts = counts;
@@ -107,10 +110,10 @@ exports.handler = async () => {
             process.env.ENV
         );
         const counts = await processMonthlyDues({ amount, now, dependencies });
-        console.info('monthly_dues_complete', counts);
+        console.info('annual_dues_complete', counts);
         return {
             success: true,
-            message: `Monthly dues processing complete: ${counts.charged} charged, ${counts.skipped} skipped.`
+            message: `Annual dues processing complete: ${counts.charged} charged, ${counts.skipped} skipped.`
         };
     } catch (error) {
         const code = error && error.message === 'INVALID_DUES_CONFIGURATION'
@@ -119,7 +122,7 @@ exports.handler = async () => {
         const counts = error && error.counts
             ? error.counts
             : { owners: 0, charged: 0, skipped: 0, failed: 1 };
-        console.error('monthly_dues_failed', { code, counts });
+        console.error('annual_dues_failed', { code, counts });
         throw new Error(code);
     }
 };

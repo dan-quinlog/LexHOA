@@ -24,6 +24,17 @@ test('successful processor transition maps transaction and invoice fields', asyn
   assert.equal(update.ExpressionAttributeValues[':invoice'], 25);
   assert.match(update.UpdateExpression, /checkNumber=if_not_exists\(checkNumber,:tx\)/);
 });
+test('successful webhook overpayment creates a credit balance', async () => {
+  process.env.API_LEXHOA_GRAPHQLAPIIDOUTPUT = 'api'; process.env.ENV = 'test';
+  let request;
+  const payment = { id: 'p', ownerPaymentsId: 'profile', amount: 25, balanceApplied: false };
+  const client = {
+    get: () => ({ promise: async () => ({ Item: { id: 'profile', balance: 0, activePaymentId: 'p' } }) }),
+    transactWrite: value => ({ promise: async () => { request = value; } })
+  };
+  await transition(payment, 'SUCCEEDED', 25, 'event', 'processor-transaction', client);
+  assert.equal(request.TransactItems[1].Update.ExpressionAttributeValues[':new'], -25);
+});
 test('transaction rail falls back to masked payment details', () => {
   const payment = value => ({ getPayment: () => value });
   assert.equal(transactionAccountType(payment({ getBankAccount: () => ({}) })), 'eCheck');

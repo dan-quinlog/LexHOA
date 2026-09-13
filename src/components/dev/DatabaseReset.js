@@ -251,7 +251,7 @@ const DatabaseReset = () => {
       <button onClick={handleReset}>Reset Database</button>
       <Modal
         show={showModal}
-        onClose={() => { }}
+        onClose={() => setShowModal(false)}
         closeOnOutsideClick={false}
       >
         <div className="reset-status">

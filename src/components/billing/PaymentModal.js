@@ -120,10 +120,6 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
       setError('Please select or enter a valid payment amount first.');
       return;
     }
-    if (amount > Number(balance)) {
-      setError('Payment amount cannot exceed the current balance.');
-      return;
-    }
     setPaymentMethodType(method);
     setError(null);
     idempotencyKeyRef.current = null;
@@ -173,10 +169,7 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!acceptJsLoaded || !paymentDetails || paymentDetails.amount > Number(balance)) {
-      if (paymentDetails?.amount > Number(balance)) {
-        setError('Payment amount cannot exceed the current balance.');
-      }
+    if (!acceptJsLoaded || !paymentDetails) {
       return;
     }
 

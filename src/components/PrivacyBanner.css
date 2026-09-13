@@ -2,8 +2,7 @@
   position: fixed;
   left: 0;
   right: 0;
-  /* On mobile the fixed .bottom-bar nav occupies the bottom; sit just above it. */
-  bottom: var(--header-height);
+  bottom: 0;
   z-index: var(--z-index-dropdown);
   display: flex;
   align-items: center;
@@ -46,11 +45,4 @@
 
 .privacy-banner-button:hover {
   background: var(--hover-color);
-}
-
-/* On desktop the bottom nav is hidden, so anchor to the very bottom. */
-@media (min-width: 768px) {
-  .privacy-banner {
-    bottom: 0;
-  }
 }

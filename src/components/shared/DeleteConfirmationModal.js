@@ -18,7 +18,7 @@ const DeleteConfirmationModal = ({ show, objectId, onConfirm, onClose }) => {
   };
 
   return (
-    <Modal show={show} onClose={handleClose}>
+    <Modal show={show} onClose={handleClose} size="small">
       <div className="delete-confirmation">
         <h2>Confirm Deletion</h2>
         <p>ID: {objectId}</p>

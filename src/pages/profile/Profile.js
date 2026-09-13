@@ -203,7 +203,7 @@ const Profile = ({ cognitoId }) => {
   };
 
   const EmailVerificationModal = () => (
-    <Modal show={pendingEmailVerification} onClose={() => setPendingEmailVerification(false)}>
+    <Modal show={pendingEmailVerification} onClose={() => setPendingEmailVerification(false)} size="small">
       <h2>Verify Your New Email</h2>
       <p>A verification code has been sent to {newEmail}. Please enter it below to complete your email update.</p>
 

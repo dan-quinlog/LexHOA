@@ -21,10 +21,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
   padding: var(--spacing-small);
   background: var(--secondary-color);
+  color: var(--text-color);
+  border: 0;
   border-radius: var(--border-radius);
   cursor: pointer;
+  font: inherit;
+  text-align: left;
 }
 
 .caret {
@@ -54,6 +59,8 @@
 }
 
 .tool-item {
+  display: block;
+  width: 100%;
   padding: var(--spacing-small);
   cursor: pointer;
   background: var(--background-white);
@@ -61,6 +68,9 @@
   margin: var(--spacing-small) 0;
   border-radius: var(--border-radius);
   transition: all var(--transition-fast) ease;
+  color: var(--text-color);
+  font: inherit;
+  text-align: left;
 }
 
 .tool-item:hover {
@@ -71,6 +81,17 @@
 .board-content {
   flex: 1;
   padding: var(--spacing-large);
+}
+
+@media (max-width: 767px) {
+  .board-content {
+    padding: var(--spacing-medium);
+  }
+
+  .tool-dropdown {
+    max-height: calc(100dvh - 140px);
+    overflow-y: auto;
+  }
 }
 
 @media (min-width: 768px) {

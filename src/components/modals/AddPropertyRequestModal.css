@@ -1,7 +1,8 @@
 
 .property-request-modal {
-  padding: 20px;
-  width: 500px;
+  padding: var(--spacing-small);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .property-request-modal h2 {
@@ -21,8 +22,6 @@
 }
 
 .property-results {
-  max-height: 200px;
-  overflow-y: auto;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
@@ -53,4 +52,22 @@
 .submit-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .property-request-modal .search-controls,
+  .property-request-modal .modal-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .property-request-modal .modal-actions button {
+    width: 100%;
+  }
+
+  .property-item {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--spacing-small);
+  }
 }

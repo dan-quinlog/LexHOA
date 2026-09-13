@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import BulletinManager from '../../components/board/BulletinManager'
 import PersonManager from '../../components/board/PersonManager';
 import PropertyManager from '../../components/board/PropertyManager';
@@ -21,6 +21,22 @@ const TOOLS = [
 const Board = ({ userGroups = [], user }) => {
   const [selectedTool, setSelectedTool] = useState('bulletins');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const closeMenu = event => {
+      if (event.key === 'Escape' || (event.type === 'mousedown' && !menuRef.current?.contains(event.target))) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', closeMenu);
+    document.addEventListener('keydown', closeMenu);
+    return () => {
+      document.removeEventListener('mousedown', closeMenu);
+      document.removeEventListener('keydown', closeMenu);
+    };
+  }, []);
 
   // New state management
   const [personSearchState, setPersonSearchState] = useState({
@@ -95,23 +111,27 @@ const Board = ({ userGroups = [], user }) => {
 
   return (
     <div className="board-container">
-      <div className="board-header">
-        <div
+      <div className="board-header" ref={menuRef}>
+        <button
+          type="button"
           className="tool-selector"
+          aria-expanded={isMenuOpen}
+          aria-controls="board-tool-menu"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
           {TOOLS.find(t => t.id === selectedTool)?.label}
-          <span className={`caret ${isMenuOpen ? 'open' : ''}`}>▼</span>
-        </div>
-        <div className={`tool-dropdown ${isMenuOpen ? 'show' : ''}`}>
+          <span aria-hidden="true" className={`caret ${isMenuOpen ? 'open' : ''}`}>▼</span>
+        </button>
+        <div id="board-tool-menu" className={`tool-dropdown ${isMenuOpen ? 'show' : ''}`}>
           {TOOLS.map(tool => (
-            <div
+            <button
+              type="button"
               key={tool.id}
               className="tool-item"
               onClick={() => handleToolSelect(tool.id)}
             >
               {tool.label}
-            </div>
+            </button>
           ))}
         </div>
       </div>

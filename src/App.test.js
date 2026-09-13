@@ -129,4 +129,13 @@ describe('useAuthState', () => {
     expect(authenticatedMenu).toContain("{ label: 'Documents', path: '/documents' }");
     expect(authenticatedMenu).not.toContain("{ label: 'Billing', path: '/billing' }");
   });
+
+  test('uses top mobile navigation instead of a bottom bar', () => {
+    const source = require('fs').readFileSync(require.resolve('./App'), 'utf8');
+    expect(source).toContain('mobile-header-actions');
+    expect(source).toContain("'Close' : 'Open'} navigation menu");
+    expect(source).toContain("event.key === 'Escape'");
+    expect(source).not.toContain('bottom-bar');
+    expect(source).not.toContain('mobile-menu');
+  });
 });

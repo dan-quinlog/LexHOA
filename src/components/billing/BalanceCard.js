@@ -14,6 +14,7 @@ const BalanceCard = ({ balance = 0, billingFreq = 'MONTHLY', pendingTotal = 0 })
   const effectiveBalance = getEffectiveBalance(balance, pendingTotal);
   const hasPending = pendingTotal > 0;
   const hasBalance = effectiveBalance > 0;
+  const hasCredit = effectiveBalance < 0;
 
   return (
     <div className="balance-card">
@@ -22,13 +23,13 @@ const BalanceCard = ({ balance = 0, billingFreq = 'MONTHLY', pendingTotal = 0 })
       </div>
       <div className="balance-content">
         <div className={`balance-amount ${hasBalance ? 'has-balance' : 'zero-balance'}`}>
-          {formatCurrency(effectiveBalance)}
+          {formatCurrency(Math.abs(effectiveBalance))}
           {hasPending && <span className="pending-asterisk">*</span>}
         </div>
         {hasBalance ? (
           <p className="balance-status">Amount Due</p>
         ) : (
-          <p className="balance-status paid">Paid in Full</p>
+          <p className="balance-status paid">{hasCredit ? 'Account Credit' : 'Paid in Full'}</p>
         )}
         {hasPending && (
           <p className="pending-note">*Including pending payments</p>
@@ -36,7 +37,7 @@ const BalanceCard = ({ balance = 0, billingFreq = 'MONTHLY', pendingTotal = 0 })
       </div>
       <div className="balance-actions">
         <Link to="/billing" className="billing-link">
-          {hasBalance ? 'Make a Payment' : 'View Billing History'}
+          Make a Payment
         </Link>
       </div>
     </div>

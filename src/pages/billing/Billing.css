@@ -142,7 +142,7 @@
 
 @media (max-width: 768px) {
   .billing-page {
-    padding-top: 80px;
+    padding: 80px var(--spacing-medium) var(--spacing-large);
   }
   
   .billing-content {
@@ -151,5 +151,18 @@
   
   .balance-card-large .balance-amount {
     font-size: 2.5rem;
+  }
+
+  .balance-card-large,
+  .dues-info {
+    padding: var(--spacing-medium);
+  }
+
+  .history-section {
+    min-height: 0;
+  }
+
+  .dues-row {
+    gap: var(--spacing-medium);
   }
 }

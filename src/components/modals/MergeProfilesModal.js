@@ -44,7 +44,7 @@ const MergeProfilesModal = ({ profiles, show, onClose, onMerge, loading = false 
   };
 
   return (
-    <Modal show={show} onClose={onClose}>
+    <Modal show={show} onClose={onClose} size="large">
       <div className="merge-modal-content">
         <h2>Merge Profiles</h2>
         <div className="profiles-grid">

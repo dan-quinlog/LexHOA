@@ -12,6 +12,7 @@ export const getPendingTotal = (payments = []) =>
   ) / 100;
 
 // The balance shown to the owner, treating pending payments as if they were
-// already applied so a pending payment "feels" complete. Never goes below zero.
+// already applied so a pending payment "feels" complete. A negative balance is
+// retained because it represents an advance-payment credit.
 export const getEffectiveBalance = (balance = 0, pendingTotal = 0) =>
-  Math.max(0, Math.round(((balance || 0) - pendingTotal) * 100) / 100);
+  Math.round(((balance || 0) - pendingTotal) * 100) / 100;

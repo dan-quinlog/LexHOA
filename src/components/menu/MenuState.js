@@ -33,25 +33,39 @@ const MenuState = ({ userGroups, onSignOut, renderMenuItems }) => {
         setIsOpen(false);
       }
     };
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') setIsOpen(false);
+    };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
   }, []);
 
   return (
     <div className="hamburger-menu" ref={menuRef}>
-      <button onClick={() => setIsOpen(!isOpen)}>☰</button>
+      <button
+        type="button"
+        className="hamburger-button"
+        aria-label="Open navigation menu"
+        aria-expanded={isOpen}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span aria-hidden="true" className="hamburger-icon" />
+      </button>
       {isOpen && (
-        <div className="dropdown-menu">
+        <nav className="dropdown-menu" aria-label="Account navigation">
           {renderMenuItemsWithClose()}
           <button onClick={() => {
             closeMenu();
             onSignOut();
           }}>Sign Out</button>
-        </div>
+        </nav>
       )}
     </div>
   );
 };
 export default MenuState;
-

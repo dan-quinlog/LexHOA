@@ -70,6 +70,7 @@ const Billing = ({ cognitoId }) => {
   const effectiveBalance = getEffectiveBalance(profile.balance, pendingTotal);
   const hasPending = pendingTotal > 0;
   const hasBalance = effectiveBalance > 0;
+  const hasCredit = effectiveBalance < 0;
 
   return (
     <div className="billing-page">
@@ -80,22 +81,18 @@ const Billing = ({ cognitoId }) => {
           <div className="balance-card-large">
             <h3>Account Balance</h3>
             <div className={`balance-amount ${hasBalance ? 'has-balance' : 'zero-balance'}`}>
-              {formatCurrency(effectiveBalance)}
+              {formatCurrency(Math.abs(effectiveBalance))}
               {hasPending && <span className="pending-asterisk">*</span>}
             </div>
-            {hasBalance ? (
-              <>
-                <p className="balance-status">Amount Due</p>
-                <button 
-                  className="pay-now-btn"
-                  onClick={() => setShowPaymentModal(true)}
-                >
-                  Make a Payment
-                </button>
-              </>
-            ) : (
-              <p className="balance-status paid">Paid in Full - Thank You!</p>
-            )}
+            <p className={`balance-status ${hasBalance ? '' : 'paid'}`}>
+              {hasBalance ? 'Amount Due' : hasCredit ? 'Account Credit' : 'Paid in Full - Thank You!'}
+            </p>
+            <button
+              className="pay-now-btn"
+              onClick={() => setShowPaymentModal(true)}
+            >
+              Make a Payment
+            </button>
             {hasPending && (
               <p className="pending-note">*Including {formatCurrency(pendingTotal)} in pending payments</p>
             )}

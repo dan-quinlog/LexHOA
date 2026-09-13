@@ -125,3 +125,16 @@
   color: var(--secondary-color);
   padding: var(--spacing-xl);
 }
+
+@media (max-width: 480px) {
+  .payment-history {
+    padding: var(--spacing-medium);
+  }
+
+  .payment-header,
+  .amount-row {
+    align-items: flex-start;
+    gap: var(--spacing-small);
+    flex-wrap: wrap;
+  }
+}

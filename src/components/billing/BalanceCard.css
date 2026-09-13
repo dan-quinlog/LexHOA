@@ -2,6 +2,8 @@
   background: var(--background-white);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
+  box-sizing: border-box;
+  max-width: 100%;
   padding: var(--spacing-large);
   margin-bottom: var(--spacing-large);
 }

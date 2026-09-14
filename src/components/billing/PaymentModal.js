@@ -33,6 +33,11 @@ const PAYMENT_METHODS = {
 export const calculateProcessingFee = (amount, method) =>
   Math.round((method === 'bank_account' ? 0 : amount * 0.01) * 100) / 100;
 
+export const formatExpiration = (value) => {
+  const digits = value.replace(/\D/g, '').slice(0, 4);
+  return digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
+};
+
 const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
   const [selectedAmount, setSelectedAmount] = useState(null);
   const [customAmount, setCustomAmount] = useState('');
@@ -45,8 +50,7 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
 
   // Card fields
   const [cardNumber, setCardNumber] = useState('');
-  const [expMonth, setExpMonth] = useState('');
-  const [expYear, setExpYear] = useState('');
+  const [expiration, setExpiration] = useState('');
   const [cvv, setCvv] = useState('');
 
   // Bank account fields
@@ -144,10 +148,11 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
           accountType: accountType
         };
       } else {
+        const [month, year] = expiration.split('/');
         secureData.cardData = {
           cardNumber: cardNumber.replace(/\s/g, ''),
-          month: expMonth,
-          year: expYear,
+          month,
+          year,
           cardCode: cvv
         };
       }
@@ -368,24 +373,16 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
               </div>
               <div className="form-row">
                 <div className="form-field">
-                  <label>Month</label>
+                  <label htmlFor="card-expiration">Expiration</label>
                   <input
+                    id="card-expiration"
                     type="text"
-                    value={expMonth}
-                    onChange={(e) => setExpMonth(e.target.value.replace(/\D/g, '').slice(0, 2))}
-                    placeholder="MM"
-                    maxLength="2"
-                    required
-                  />
-                </div>
-                <div className="form-field">
-                  <label>Year</label>
-                  <input
-                    type="text"
-                    value={expYear}
-                    onChange={(e) => setExpYear(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                    placeholder="YYYY"
-                    maxLength="4"
+                    value={expiration}
+                    onChange={(e) => setExpiration(formatExpiration(e.target.value))}
+                    placeholder="MM/YY"
+                    maxLength="5"
+                    inputMode="numeric"
+                    autoComplete="cc-exp"
                     required
                   />
                 </div>

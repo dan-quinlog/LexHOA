@@ -66,6 +66,42 @@ test('attributes a manual payment to the selected profile owner', async () => {
   await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
 });
 
+test('creates a manual payment for a profile without a login', async () => {
+  const createPayment = jest.fn().mockResolvedValue({ data: { createPayment: { id: 'payment-1' } } });
+  const updateProfile = jest.fn().mockResolvedValue({});
+  const getProfile = jest.fn().mockResolvedValue({
+    data: { getProfile: { id: 'no-login-profile-id', cognitoID: null, balance: 300 } }
+  });
+  const onClose = jest.fn();
+  useLazyQuery.mockReturnValue([getProfile]);
+  useMutation.mockImplementation(mutation => {
+    if (mutation === CREATE_PAYMENT) return [createPayment];
+    if (mutation === UPDATE_PROFILE) return [updateProfile];
+    return [jest.fn()];
+  });
+
+  const { container } = render(
+    <PaymentEditModal payment={null} onClose={onClose} show />
+  );
+  const inputs = container.querySelectorAll('input');
+  fireEvent.change(inputs[0], { target: { value: 'synthetic-check' } });
+  fireEvent.change(inputs[1], { target: { value: '2026-08-21' } });
+  fireEvent.change(inputs[2], { target: { value: '100' } });
+  fireEvent.change(inputs[3], { target: { value: 'synthetic-invoice' } });
+  fireEvent.change(inputs[4], { target: { value: '100' } });
+  fireEvent.change(inputs[5], { target: { value: 'no-login-profile-id' } });
+  fireEvent.click(inputs[6]);
+  fireEvent.click(screen.getByRole('button', { name: 'Create' }));
+
+  await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+  const input = createPayment.mock.calls[0][0].variables.input;
+  expect(input).toMatchObject({ ownerPaymentsId: 'no-login-profile-id', status: 'SUCCEEDED' });
+  expect(input).not.toHaveProperty('owner');
+  expect(updateProfile).toHaveBeenCalledWith({
+    variables: { input: { id: 'no-login-profile-id', balance: 200 } }
+  });
+});
+
 test('shows an error and does not create when the owner cannot be resolved', async () => {
   const createPayment = jest.fn();
   const getProfile = jest.fn().mockResolvedValue({ data: { getProfile: null } });

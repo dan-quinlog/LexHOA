@@ -66,10 +66,13 @@ const PaymentEditModal = ({ payment, onClose, show }) => {
               fetchPolicy: 'network-only'
           });
           const targetProfile = profileData?.getProfile;
-          if (targetProfile?.id !== formData.ownerPaymentsId || !targetProfile?.cognitoID) {
+          if (targetProfile?.id !== formData.ownerPaymentsId) {
               throw new Error('Unable to resolve payment owner');
           }
-          input.owner = targetProfile.cognitoID;
+          // Profiles without a login have no cognitoID; mergeProfiles assigns owner when they link.
+          if (targetProfile.cognitoID) {
+              input.owner = targetProfile.cognitoID;
+          }
           input.status = 'SUCCEEDED';
 
           await createPayment({

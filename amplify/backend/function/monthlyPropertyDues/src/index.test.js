@@ -162,12 +162,12 @@ test('invalid dues configuration fails closed', () => {
     }
 });
 
-test('schedule runs once per year on January 1', () => {
+test('schedule runs once per year on November 1', () => {
     const parameters = JSON.parse(fs.readFileSync(
         path.join(__dirname, '..', 'parameters.json'),
         'utf8'
     ));
-    assert.equal(parameters.CloudWatchRule, 'cron(0 6 1 1 ? *)');
+    assert.equal(parameters.CloudWatchRule, 'cron(0 6 1 11 ? *)');
 });
 
 test('handler logs only aggregate categories and no event or owner details', async () => {

@@ -97,6 +97,18 @@ before formal validation.
 - [ ] Complete documented CloudWatch/build-artifact searches for prior credentials or prohibited payment data and follow the approved retention/incident process for any finding.
 - [ ] Test break-glass access and retain its audit record; establish the quarterly privileged-access review and leaver test.
 - [ ] Retain redacted rotation receipts and evidence that replacement credentials work and superseded credentials are inactive.
+- [ ] Record the September 14 – October 12, 2026 production payment outage: double-encoded Amplify parameters (`"production"` and the API login ID with literal quotes) routed payments to the sandbox endpoint and every attempt failed with E00007. Values were corrected in Lambda, SSM, and local configuration on October 12; confirm a successful owner payment and retain the redacted evidence.
+- [ ] Fail closed when `AUTHNET_ENVIRONMENT` is not exactly `production` or `sandbox`, so configuration drift cannot silently route payments to the wrong endpoint.
+- [ ] Give the payment form a new idempotency key after a failed attempt, and return a distinct "previous attempt failed" error instead of "Payment request is already processing" when a failed request is retried.
+
+### Product work scheduled with Sprint 2
+
+These are owner and board features, not PCI controls, and they do not affect the Sprint 2
+completion gate.
+
+- [ ] **Show dues charges to owners.** `monthlyPropertyDues` (annual, November 1, $1000 per property) currently only increases `Profile.balance`. Have each run also create a dues record for the owner, created atomically with the balance change and idempotent per billing year, and show it in the owner's payment history (`src/components/billing/PaymentHistory.js` on the Billing page) alongside payments, so owners can see both payments made and dues added. Decide whether to reuse the `Payment` model with a dues type or add a separate charge model.
+- [ ] **Show balance on owner search cards.** In Board Tools → Person Management (`src/components/board/PersonManager.js`), display each owner's balance on the result card so the board does not need to open Edit to see it.
+- [ ] **Add a Reports tab to Board Tools** (`src/pages/board/Board.js`) with a **Balance report**: every owner's name and current balance, sorted from the largest amount owed to the smallest (credits last).
 
 ### Sprint 2 completion gate
 

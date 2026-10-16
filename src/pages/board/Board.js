@@ -6,6 +6,7 @@ import PaymentManager from '../../components/board/PaymentManager';
 import PingManager from '../../components/board/PingManager';
 import BoardRoleManager from '../../components/board/BoardRoleManager';
 import DocumentManager from '../../components/board/DocumentManager';
+import ReportManager from '../../components/board/ReportManager';
 import './Board.css';
 
 const TOOLS = [
@@ -15,6 +16,7 @@ const TOOLS = [
   { id: 'persons', label: 'Person Management' },
   { id: 'properties', label: 'Property Management' },
   { id: 'payments', label: 'Payment Management' },
+  { id: 'reports', label: 'Reports' },
   { id: 'roles', label: 'Board Role Manager' }
 ];
 
@@ -102,6 +104,8 @@ const Board = ({ userGroups = [], user }) => {
           setSearchState={setPingSearchState}
           userGroups={userGroups}
         />;
+      case 'reports':
+        return <ReportManager userGroups={userGroups} />;
       case 'roles':
         return <BoardRoleManager userGroups={userGroups} />;
       default:

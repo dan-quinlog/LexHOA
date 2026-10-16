@@ -8,6 +8,7 @@ import DeleteConfirmationModal from '../shared/DeleteConfirmationModal';
 import MergeProfilesModal from '../modals/MergeProfilesModal';
 import NotificationModal from '../modals/NotificationModal';
 import { copyWithFeedback } from '../../utils/clipboardUtils';
+import { formatCurrency } from '../../utils/payments';
 import './shared/BoardTools.css';
 
 // Get group names from environment variables
@@ -373,7 +374,7 @@ const PersonManager = ({ searchState, setSearchState, selectedProfiles, setSelec
                     )}
                   </div>
                   <div>Email: {person.email}</div>
-                  <div>Phone: {person.phone}</div>
+                  <div>Balance: {formatCurrency(person.balance)}</div>
                 </>
               }
               status={person.status}

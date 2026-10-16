@@ -103,6 +103,20 @@ export const LIST_PROFILES = gql`
   }
 `;
 
+export const PROFILE_BALANCES = gql`
+  query ProfileBalances($limit: Int, $nextToken: String) {
+    listProfiles(limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        name
+        email
+        balance
+      }
+      nextToken
+    }
+  }
+`;
+
 export const PROFILE_BY_COGNITO_ID = gql`
   query ProfileByCognitoID(
     $cognitoID: String!

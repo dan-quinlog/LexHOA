@@ -1,3 +1,6 @@
+export const formatCurrency = (amount) =>
+  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount || 0);
+
 // Statuses that represent money submitted but not yet applied to the real balance.
 // eCheck (ACH) payments stay in one of these states for 1-5 business days until
 // they settle, at which point the server-side balance is reduced.

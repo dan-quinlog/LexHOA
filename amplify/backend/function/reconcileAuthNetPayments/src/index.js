@@ -26,6 +26,12 @@ async function getTransactionKey() {
   catch (error) { transactionKeyPromise = undefined; throw error; }
 }
 
+function authNetEndpoint() {
+  const environment = process.env.AUTHNET_ENVIRONMENT;
+  if (environment !== 'production' && environment !== 'sandbox') throw new Error('Authorize.Net environment is misconfigured');
+  return Constants.endpoint[environment];
+}
+
 async function scanPending(client = ddb) {
   const items = []; let ExclusiveStartKey;
   do {
@@ -36,11 +42,12 @@ async function scanPending(client = ddb) {
 }
 
 async function details(transId) {
+  const endpoint = authNetEndpoint();
   const transactionKey = await getTransactionKey();
   return new Promise((resolve, reject) => {
     const auth = new ApiContracts.MerchantAuthenticationType(); auth.setName(process.env.AUTHNET_API_LOGIN_ID); auth.setTransactionKey(transactionKey);
     const req = new ApiContracts.GetTransactionDetailsRequest(); req.setMerchantAuthentication(auth); req.setTransId(transId);
-    const ctrl = new ApiControllers.GetTransactionDetailsController(req.getJSON()); ctrl.setEnvironment(process.env.AUTHNET_ENVIRONMENT === 'production' ? Constants.endpoint.production : Constants.endpoint.sandbox);
+    const ctrl = new ApiControllers.GetTransactionDetailsController(req.getJSON()); ctrl.setEnvironment(endpoint);
     ctrl.execute(() => { const res = new ApiContracts.GetTransactionDetailsResponse(ctrl.getResponse()); if (res?.getMessages().getResultCode() !== ApiContracts.MessageTypeEnum.OK) return reject(new Error('Processor verification failed')); const tx = res.getTransaction(); const returned = tx.getReturnedItems?.()?.getReturnedItem?.() || []; resolve({ status: tx.getTransactionStatus(), amount: Number(tx.getSettleAmount?.() || tx.getAuthAmount()), accountType: transactionAccountType(tx), returned: returned.length > 0 }); });
   });
 }
@@ -86,5 +93,5 @@ async function reconcile(deps) {
   return { success: true, ...summary };
 }
 const defaultDeps = { scan: scanPending, details, transition, reverseReturned };
-exports.handler = async () => reconcile(defaultDeps);
-exports._internals = { reconcile, scanPending, details, transition, reverseReturned, rail, FAILED, tables, loadSecret, transactionAccountType };
+exports.handler = async () => { authNetEndpoint(); return reconcile(defaultDeps); };
+exports._internals = { authNetEndpoint, reconcile, scanPending, details, transition, reverseReturned, rail, FAILED, tables, loadSecret, transactionAccountType };

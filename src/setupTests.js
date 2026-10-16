@@ -3,3 +3,6 @@
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
+
+// Tests use the Authorize.Net sandbox regardless of the developer's local .env.
+process.env.REACT_APP_AUTHNET_ENVIRONMENT = 'sandbox';

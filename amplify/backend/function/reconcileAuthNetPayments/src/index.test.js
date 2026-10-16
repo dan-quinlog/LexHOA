@@ -1,5 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const { handler } = require('./index');
 const { reconcile, scanPending, transition, transactionAccountType } = require('./index')._internals;
 const payment = (overrides = {}) => ({ id: 'p1', ownerPaymentsId: 'u1', status: 'PROCESSING', paymentMethod: 'CARD', amount: 100, totalAmount: 103.2, balanceApplied: false, authNetTransactionId: 'private', ...overrides });
 const run = (p, d, apply = async () => true) => reconcile({ scan: async () => [p], details: async () => d, transition: apply });
@@ -44,4 +45,9 @@ test('scan excludes manual checks and legacy zero-ID transactions', async () => 
   await scanPending(client);
   assert.match(request.FilterExpression, /attribute_exists\(authNetTransactionId\)/);
   assert.equal(request.ExpressionAttributeValues[':zero'], '0');
+});
+test('reconciliation stops before scanning when the Authorize.Net environment is misconfigured', async () => {
+  const old = process.env.AUTHNET_ENVIRONMENT;
+  try { process.env.AUTHNET_ENVIRONMENT = '"production"'; await assert.rejects(handler(), /misconfigured/); }
+  finally { if (old === undefined) delete process.env.AUTHNET_ENVIRONMENT; else process.env.AUTHNET_ENVIRONMENT = old; }
 });

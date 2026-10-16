@@ -22,6 +22,12 @@ async function loadSecret(secretId, client = secretsManager) {
 
 const getTransactionKey = (client = secretsManager) => loadSecret(process.env.AUTHNET_TRANSACTION_SECRET_ID, client);
 
+function authNetEndpoint() {
+  const environment = process.env.AUTHNET_ENVIRONMENT;
+  if (environment !== 'production' && environment !== 'sandbox') throw new Error('Authorize.Net environment is misconfigured');
+  return Constants.endpoint[environment];
+}
+
 async function reserve(profile, payment, client = ddb) {
   const t = tables();
   await client.transactWrite({ TransactItems: [
@@ -62,6 +68,7 @@ async function processPayment(event, deps) {
     try { await deps.reserve(profile, payment); won = true; } catch (e) { payment = await deps.getPayment(id); if (!payment) throw new Error('Another payment is active for this profile'); }
   }
   if (['SUCCEEDED', 'PENDING'].includes(payment.status)) return result(payment);
+  if (payment.status === 'FAILED') throw new Error('Previous payment attempt failed. Please try again.');
   if (!payment.authNetTransactionId) {
     if (!won) throw new Error('Payment request is already processing');
     let captured;
@@ -90,7 +97,7 @@ function processorErrorMessage(response, transaction) {
   const text = detail?.getErrorText?.() || fallback?.getText?.();
   return [code, text].filter(Boolean).join(': ') || 'Unknown processor response';
 }
-async function captureTransaction(data) { const transactionKey = await getTransactionKey(); return new Promise((resolve, reject) => { const auth = new ApiContracts.MerchantAuthenticationType(); auth.setName(process.env.AUTHNET_API_LOGIN_ID); auth.setTransactionKey(transactionKey); const opaque = new ApiContracts.OpaqueDataType(); opaque.setDataDescriptor(data.descriptor); opaque.setDataValue(data.token); const pay = new ApiContracts.PaymentType(); pay.setOpaqueData(opaque); const order = new ApiContracts.OrderType(); order.setInvoiceNumber(data.reference); const txr = new ApiContracts.TransactionRequestType(); txr.setTransactionType(ApiContracts.TransactionTypeEnum.AUTHCAPTURETRANSACTION); txr.setPayment(pay); txr.setAmount(data.amount); txr.setOrder(order); const req = new ApiContracts.CreateTransactionRequest(); req.setRefId(data.reference); req.setMerchantAuthentication(auth); req.setTransactionRequest(txr); const ctrl = new ApiControllers.CreateTransactionController(req.getJSON()); ctrl.setEnvironment(process.env.AUTHNET_ENVIRONMENT === 'production' ? Constants.endpoint.production : Constants.endpoint.sandbox); ctrl.execute(() => { const raw = ctrl.getResponse(); const res = raw && new ApiContracts.CreateTransactionResponse(raw); const tx = res?.getTransactionResponse(); const accountType = String(tx?.getAccountType?.() || '').toLowerCase(); const rail = accountType.includes('echeck') || accountType.includes('bank') ? 'BANK_ACCOUNT' : accountType ? 'CARD' : null; if (res?.getMessages().getResultCode() === ApiContracts.MessageTypeEnum.OK && String(tx?.getResponseCode?.()) === '1' && tx?.getTransId() && rail) return resolve({ transactionId: tx.getTransId(), paymentMethod: rail }); const error = new Error(`Payment processor declined: ${processorErrorMessage(res, tx)}`); error.definitive = Boolean(res); reject(error); }); }); }
+async function captureTransaction(data) { const endpoint = authNetEndpoint(); const transactionKey = await getTransactionKey(); return new Promise((resolve, reject) => { const auth = new ApiContracts.MerchantAuthenticationType(); auth.setName(process.env.AUTHNET_API_LOGIN_ID); auth.setTransactionKey(transactionKey); const opaque = new ApiContracts.OpaqueDataType(); opaque.setDataDescriptor(data.descriptor); opaque.setDataValue(data.token); const pay = new ApiContracts.PaymentType(); pay.setOpaqueData(opaque); const order = new ApiContracts.OrderType(); order.setInvoiceNumber(data.reference); const txr = new ApiContracts.TransactionRequestType(); txr.setTransactionType(ApiContracts.TransactionTypeEnum.AUTHCAPTURETRANSACTION); txr.setPayment(pay); txr.setAmount(data.amount); txr.setOrder(order); const req = new ApiContracts.CreateTransactionRequest(); req.setRefId(data.reference); req.setMerchantAuthentication(auth); req.setTransactionRequest(txr); const ctrl = new ApiControllers.CreateTransactionController(req.getJSON()); ctrl.setEnvironment(endpoint); ctrl.execute(() => { const raw = ctrl.getResponse(); const res = raw && new ApiContracts.CreateTransactionResponse(raw); const tx = res?.getTransactionResponse(); const accountType = String(tx?.getAccountType?.() || '').toLowerCase(); const rail = accountType.includes('echeck') || accountType.includes('bank') ? 'BANK_ACCOUNT' : accountType ? 'CARD' : null; if (res?.getMessages().getResultCode() === ApiContracts.MessageTypeEnum.OK && String(tx?.getResponseCode?.()) === '1' && tx?.getTransId() && rail) return resolve({ transactionId: tx.getTransId(), paymentMethod: rail }); const error = new Error(`Payment processor declined: ${processorErrorMessage(res, tx)}`); error.definitive = Boolean(res); reject(error); }); }); }
 const defaultDeps = { getProfile: id => get(tables().profile, id), getPayment: id => get(tables().payment, id), reserve, attachTransaction, finalize, fail: failPayment, capture: captureTransaction };
-exports.handler = async event => processPayment(event, defaultDeps);
-exports._internals = { processPayment, paymentId, reference, fees, reserve, attachTransaction, finalize, failPayment, result, loadSecret, getTransactionKey, processorErrorMessage };
+exports.handler = async event => { authNetEndpoint(); return processPayment(event, defaultDeps); };
+exports._internals = { authNetEndpoint, processPayment, paymentId, reference, fees, reserve, attachTransaction, finalize, failPayment, result, loadSecret, getTransactionKey, processorErrorMessage };

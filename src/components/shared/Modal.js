@@ -4,6 +4,10 @@ import './Modal.css';
 const Modal = ({ children, onClose, show, size = 'medium' }) => {
   const modalRef = useRef();
   const closeButtonRef = useRef();
+  // Callers often pass a new onClose on every render; reading it from a ref keeps
+  // the focus setup below from re-running and stealing focus while the user types.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     if (!show) return undefined;
@@ -16,7 +20,7 @@ const Modal = ({ children, onClose, show, size = 'medium' }) => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (event.key !== 'Tab' || !modalRef.current) return;
@@ -42,7 +46,7 @@ const Modal = ({ children, onClose, show, size = 'medium' }) => {
       document.body.style.overflow = previousOverflow;
       previouslyFocused?.focus?.();
     };
-  }, [onClose, show]);
+  }, [show]);
 
   if (!show) return null;
 

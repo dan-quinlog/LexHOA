@@ -6,11 +6,13 @@ import './PaymentModal.css';
 
 const AUTHNET_CLIENT_KEY = process.env.REACT_APP_AUTHNET_CLIENT_KEY;
 const AUTHNET_API_LOGIN_ID = process.env.REACT_APP_AUTHNET_API_LOGIN_ID;
-const AUTHNET_ENVIRONMENT = process.env.REACT_APP_AUTHNET_ENVIRONMENT || 'sandbox';
+const ACCEPT_JS_URL = {
+  production: 'https://js.authorize.net/v1/Accept.js',
+  sandbox: 'https://jstest.authorize.net/v1/Accept.js'
+}[process.env.REACT_APP_AUTHNET_ENVIRONMENT];
 
-const ACCEPT_JS_URL = AUTHNET_ENVIRONMENT === 'production'
-  ? 'https://js.authorize.net/v1/Accept.js'
-  : 'https://jstest.authorize.net/v1/Accept.js';
+// The attempt definitively failed, so a retry must start a new payment.
+const FAILED_ATTEMPT_ERROR = /Payment processor declined|Previous payment attempt failed/;
 
 const SUGGESTED_AMOUNTS = {
   MONTHLY: { label: '1 Month', amount: 100, description: 'Monthly dues' },
@@ -65,6 +67,7 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
 
   // Load Accept.js script
   useEffect(() => {
+    if (!ACCEPT_JS_URL) return;
     if (document.querySelector(`script[src="${ACCEPT_JS_URL}"]`)) {
       setAcceptJsLoaded(true);
       return;
@@ -209,6 +212,7 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
       }, 2000);
 
     } catch (err) {
+      if (FAILED_ATTEMPT_ERROR.test(err.message)) idempotencyKeyRef.current = null;
       setError(err.message || 'Payment failed');
       setProcessing(false);
     }
@@ -231,6 +235,17 @@ const PaymentForm = ({ profileId, balance, onSuccess, onCancel }) => {
     }
     return parts.length ? parts.join(' ') : v;
   };
+
+  if (!ACCEPT_JS_URL) {
+    return (
+      <div className="payment-form">
+        <div className="payment-error">Payments are unavailable because the payment processor is not configured.</div>
+        <button type="button" onClick={onCancel} className="cancel-btn">
+          Cancel
+        </button>
+      </div>
+    );
+  }
 
   if (succeeded) {
     return (

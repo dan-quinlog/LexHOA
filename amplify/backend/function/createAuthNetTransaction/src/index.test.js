@@ -1,5 +1,6 @@
 const test = require('node:test'); const assert = require('node:assert/strict');
-const { processPayment, attachTransaction, fees, finalize, getTransactionKey, processorErrorMessage } = require('./index')._internals;
+const { handler } = require('./index');
+const { authNetEndpoint, processPayment, attachTransaction, fees, finalize, getTransactionKey, processorErrorMessage } = require('./index')._internals;
 const event = (x = {}) => ({ identity: { claims: { sub: 'user' } }, arguments: { profileId: 'profile', idempotencyKey: 'key', paymentMethodType: 'card', opaqueDataDescriptor: 'desc', opaqueDataValue: 'sensitive-token', expectedAmount: 100, ...x } });
 function store(opts = {}) { let p; let captures = 0; return { deps: { getProfile: async () => ({ id: 'profile', cognitoID: opts.owner || 'user', balance: opts.balance ?? 100 }), getPayment: async () => p, reserve: async (_, value) => { if (opts.reserveFail || p) throw Error('lost'); p = value; }, capture: async () => { captures++; return { transactionId: 'tx', paymentMethod: opts.rail || 'CARD' }; }, attachTransaction: async (value, tx) => p = { ...value, authNetTransactionId: tx }, finalize: async (value, _old, status, applied) => { if (opts.finalizeFail && !opts.failed) { opts.failed = true; throw Error('persist'); } return p = { ...value, status, balanceApplied: applied }; } }, stats: () => ({ p, captures }) }; }
 test('authentication and profile ownership enforced', async () => { await assert.rejects(processPayment({ arguments: event().arguments }, store().deps), /Unauthenticated/); await assert.rejects(processPayment(event(), store({ owner: 'other' }).deps), /access denied/); });
@@ -65,4 +66,21 @@ test('processor errors retain the safe response code and text', () => {
   const transaction = { getErrors: () => ({ getError: () => [{ getErrorCode: () => '2', getErrorText: () => 'This transaction has been declined.' }] }) };
   assert.equal(processorErrorMessage(response, transaction), '2: This transaction has been declined.');
   assert.equal(processorErrorMessage(response), 'E00027: The transaction was unsuccessful.');
+});
+test('Authorize.Net environment must be exactly production or sandbox', async () => {
+  const old = process.env.AUTHNET_ENVIRONMENT;
+  try {
+    process.env.AUTHNET_ENVIRONMENT = 'production'; assert.equal(authNetEndpoint(), 'https://api2.authorize.net/xml/v1/request.api');
+    process.env.AUTHNET_ENVIRONMENT = 'sandbox'; assert.equal(authNetEndpoint(), 'https://apitest.authorize.net/xml/v1/request.api');
+    for (const value of ['"production"', 'Production', 'production ', '']) { process.env.AUTHNET_ENVIRONMENT = value; assert.throws(authNetEndpoint, /misconfigured/); }
+    delete process.env.AUTHNET_ENVIRONMENT; assert.throws(authNetEndpoint, /misconfigured/);
+    process.env.AUTHNET_ENVIRONMENT = '"production"'; await assert.rejects(handler(event()), /misconfigured/);
+  } finally { if (old === undefined) delete process.env.AUTHNET_ENVIRONMENT; else process.env.AUTHNET_ENVIRONMENT = old; }
+});
+test('retrying a declined attempt reports the failure without recharging', async () => {
+  let p; let captures = 0; const decline = new Error('Payment processor declined: 2: This transaction has been declined.'); decline.definitive = true;
+  const deps = { getProfile: async () => ({ id: 'profile', cognitoID: 'user', balance: 100 }), getPayment: async () => p, reserve: async (_, value) => { if (p) throw Error('lost'); p = value; }, capture: async () => { captures++; throw decline; }, fail: async payment => { p = { ...payment, status: 'FAILED' }; } };
+  await assert.rejects(processPayment(event(), deps), /declined/);
+  await assert.rejects(processPayment(event(), deps), /Previous payment attempt failed/);
+  assert.equal(captures, 1);
 });

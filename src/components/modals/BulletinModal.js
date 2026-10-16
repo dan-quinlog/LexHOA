@@ -146,7 +146,6 @@ const BulletinModal = ({ bulletin, onClose, modalOpen }) => {
               type="text"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              tabIndex={1}
             />
           </div>
           <div className="form-group">
@@ -158,7 +157,6 @@ const BulletinModal = ({ bulletin, onClose, modalOpen }) => {
                     type="checkbox"
                     checked={formData.audience.includes(option.value)}
                     onChange={() => handleAudienceChange(option.value)}
-                    tabIndex={2}
                   />
                   {option.label}
                 </label>
@@ -170,7 +168,6 @@ const BulletinModal = ({ bulletin, onClose, modalOpen }) => {
             <ReactQuill
               value={formData.content}
               onChange={(content) => setFormData({ ...formData, content })}
-              tabIndex={3}
               modules={{
                 toolbar: [
                   [{ 'header': [1, 2, false] }],

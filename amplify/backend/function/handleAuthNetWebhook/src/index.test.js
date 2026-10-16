@@ -1,5 +1,5 @@
 const test = require('node:test'); const assert = require('node:assert/strict'); const crypto = require('crypto');
-const mod = require('./index'); const { processEvent, verify, handle, transition, transactionAccountType } = mod._internals; const key = 'k'.repeat(128);
+const mod = require('./index'); const { authNetEndpoint, processEvent, verify, handle, transition, transactionAccountType } = mod._internals; const key = 'k'.repeat(128);
 const sign = raw => `sha512=${crypto.createHmac('sha512', Buffer.from(key, 'utf8')).update(raw).digest('hex')}`;
 const hook = (type = 'authcapture', id = 'event') => ({ notificationId: id, eventType: `net.authorize.payment.${type}.created`, payload: { id: 'tx' } });
 function deps(payment, detail) { const calls = []; return { calls, received: async () => false, details: async () => detail, byTransaction: async id => id === payment.authNetTransactionId ? payment : null, byReference: async ref => ref === payment.processorReference ? payment : null, transition: async (...x) => calls.push(x) }; }
@@ -39,4 +39,9 @@ test('transaction rail falls back to masked payment details', () => {
   const payment = value => ({ getPayment: () => value });
   assert.equal(transactionAccountType(payment({ getBankAccount: () => ({}) })), 'eCheck');
   assert.equal(transactionAccountType(payment({ getBankAccount: () => undefined, getCreditCard: () => ({}) })), 'card');
+});
+test('webhook processor lookups reject a misconfigured Authorize.Net environment', () => {
+  const old = process.env.AUTHNET_ENVIRONMENT;
+  try { process.env.AUTHNET_ENVIRONMENT = '"production"'; assert.throws(authNetEndpoint, /misconfigured/); process.env.AUTHNET_ENVIRONMENT = 'sandbox'; assert.match(authNetEndpoint(), /apitest/); }
+  finally { if (old === undefined) delete process.env.AUTHNET_ENVIRONMENT; else process.env.AUTHNET_ENVIRONMENT = old; }
 });

@@ -106,7 +106,7 @@ before formal validation.
 These are owner and board features, not PCI controls, and they do not affect the Sprint 2
 completion gate.
 
-- [ ] **Show dues charges to owners.** `monthlyPropertyDues` (annual, November 1, $1000 per property) currently only increases `Profile.balance`. Have each run also create a dues record for the owner, created atomically with the balance change and idempotent per billing year, and show it in the owner's payment history (`src/components/billing/PaymentHistory.js` on the Billing page) alongside payments, so owners can see both payments made and dues added. Decide whether to reuse the `Payment` model with a dues type or add a separate charge model.
+- [ ] **Invoices for every charge.** Add an `Invoice` model so dues, assessments, late fees, and adjustments are visible records instead of invisible `Profile.balance` changes, and record each payment's source and creator. Phase 1 (dues invoices and owner history) must ship before the November 1 dues run. See the [invoice feature spec](../../.agent-os/product/feature-specs/invoices.md).
 - [ ] **Show balance on owner search cards.** In Board Tools → Person Management (`src/components/board/PersonManager.js`), display each owner's balance on the result card so the board does not need to open Edit to see it.
 - [ ] **Add a Reports tab to Board Tools** (`src/pages/board/Board.js`) with a **Balance report**: every owner's name and current balance, sorted from the largest amount owed to the smallest (credits last).
 
@@ -128,6 +128,13 @@ completion gate.
 - Deploy independent PCI 11.6.1 payment-page/header tamper monitoring at least weekly, preferably near-real-time, with actionable alerts.
 - Add WAF or an approved equivalent, API/webhook rate limits, method/path restrictions, and abuse alerts.
 - Prove an unauthorized script/origin is blocked, a controlled modification alerts, normal card/ACH tokenization still works, and reports contain no payment values.
+
+### Product work deferred to Sprint 3
+
+These are not PCI controls and do not affect the Sprint 3 completion gate.
+
+- [ ] **Restrict direct balance edits.** Once profile merges are finished, remove direct `Profile.balance` updates so every balance change comes from an invoice or payment.
+- [ ] **Review legacy `Payment` fields** (`invoiceNumber`, `invoiceAmount`, `checkAmount`, and the transaction ID written into `checkNumber`) after the board decides what payments should store.
 
 ## Sprint 4 — Detection and vulnerability operations
 

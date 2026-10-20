@@ -78,6 +78,7 @@ function tablesFromEnvironment(environment) {
     Profile: tableName('Profile', apiId, env),
     Property: tableName('Property', apiId, env),
     Payment: tableName('Payment', apiId, env),
+    Invoice: tableName('Invoice', apiId, env),
     Ping: tableName('Ping', apiId, env),
     Document: tableName('Document', apiId, env)
   };
@@ -180,10 +181,11 @@ async function merge(event, client, tables, options = {}) {
     ExpressionAttributeValues: { ':sourceId': sourceId }
   });
 
-  const [ownedProperties, rentedProperties, payments, pings, documents] = await Promise.all([
+  const [ownedProperties, rentedProperties, payments, invoices, pings, documents] = await Promise.all([
     query(tables.Property, 'byOwner', 'profOwnerId'),
     query(tables.Property, 'byTenant', 'profTenantId'),
     query(tables.Payment, 'byOwnerPayments', 'ownerPaymentsId'),
+    query(tables.Invoice, 'byOwnerInvoices', 'ownerInvoicesId'),
     query(tables.Ping, 'byCreator', 'profCreatorId'),
     query(tables.Document, 'byUploader', 'uploadedById')
   ]);
@@ -214,6 +216,7 @@ async function merge(event, client, tables, options = {}) {
 
   const relationshipUpdates = [
     [payments, tables.Payment, 'ownerPaymentsId', true],
+    [invoices, tables.Invoice, 'ownerInvoicesId', true],
     [pings, tables.Ping, 'profCreatorId', false],
     [documents, tables.Document, 'uploadedById', true]
   ];

@@ -232,6 +232,9 @@
                   "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Payment-${apilexhoaGraphQLAPIIdOutput}-${env}/index/byOwnerPayments"
                 },
                 {
+                  "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Invoice-${apilexhoaGraphQLAPIIdOutput}-${env}/index/byOwnerInvoices"
+                },
+                {
                   "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Ping-${apilexhoaGraphQLAPIIdOutput}-${env}/index/byCreator"
                 },
                 {
@@ -253,6 +256,9 @@
                 },
                 {
                   "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Payment-${apilexhoaGraphQLAPIIdOutput}-${env}"
+                },
+                {
+                  "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Invoice-${apilexhoaGraphQLAPIIdOutput}-${env}"
                 },
                 {
                   "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Ping-${apilexhoaGraphQLAPIIdOutput}-${env}"

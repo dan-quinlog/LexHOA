@@ -6,6 +6,7 @@ const TABLES = {
   Profile: 'Profile-api-dev',
   Property: 'Property-api-dev',
   Payment: 'Payment-api-dev',
+  Invoice: 'Invoice-api-dev',
   Ping: 'Ping-api-dev',
   Document: 'Document-api-dev'
 };
@@ -95,6 +96,7 @@ test('atomically selects values, transfers every relationship, and deletes only 
       { Items: [{ id: 'payment-1' }], LastEvaluatedKey: { id: 'payment-1' } },
       { Items: [{ id: 'payment-2' }] }
     ],
+    byOwnerInvoices: [{ Items: [{ id: 'invoice-1' }] }],
     byCreator: [{ Items: [{ id: 'ping-1' }] }],
     byUploader: [{ Items: [{ id: 'document-1' }] }]
   };
@@ -115,22 +117,22 @@ test('atomically selects values, transfers every relationship, and deletes only 
   assert.equal(result.authNetCustomerProfileId, 'synthetic-customer-id');
 
   const transaction = client.calls.find(call => call.operation === 'transactWrite').request.TransactItems;
-  assert.equal(transaction.length, 8);
+  assert.equal(transaction.length, 9);
   assert.equal(transaction.filter(item => item.Delete).length, 1);
   assert.deepEqual(transaction.at(-1).Delete.Key, { id: 'manual-profile' });
   assert.match(transaction.at(-1).Delete.ConditionExpression, /attribute_not_exists/);
 
   const serialized = JSON.stringify(transaction);
-  for (const id of ['property-owned', 'property-rented', 'payment-1', 'payment-2', 'ping-1', 'document-1']) {
+  for (const id of ['property-owned', 'property-rented', 'payment-1', 'payment-2', 'invoice-1', 'ping-1', 'document-1']) {
     assert.match(serialized, new RegExp(id));
   }
   assert.equal(
     transaction.filter(item => item.Update?.TableName !== TABLES.Profile &&
       item.Update?.ExpressionAttributeValues &&
       Object.values(item.Update.ExpressionAttributeValues).includes('trusted-sub')).length,
-    4
+    5
   );
-  assert.equal(client.calls.filter(call => call.operation === 'query').length, 6);
+  assert.equal(client.calls.filter(call => call.operation === 'query').length, 7);
 });
 
 test('rejects conflicting tenant or payment customer relationships before writing', async () => {

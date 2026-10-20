@@ -78,6 +78,24 @@
   color: #9c27b0;
 }
 
+.status-invoice {
+  background: rgba(51, 51, 51, 0.08);
+  color: var(--text-color);
+}
+
+.invoice-item {
+  border-left: 4px solid var(--primary-color);
+}
+
+.invoice-void {
+  border-left-color: var(--secondary-color);
+}
+
+.invoice-void .amount-row {
+  color: var(--secondary-color);
+  text-decoration: line-through;
+}
+
 .payment-details {
   margin-bottom: var(--spacing-medium);
   padding-bottom: var(--spacing-medium);

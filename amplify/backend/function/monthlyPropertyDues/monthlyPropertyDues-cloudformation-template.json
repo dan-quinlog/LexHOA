@@ -109,7 +109,7 @@
         },
         "Runtime": "nodejs22.x",
         "Layers": [],
-        "Timeout": 25
+        "Timeout": 300
       }
     },
     "LambdaExecutionRole": {
@@ -221,10 +221,51 @@
             {
               "Effect": "Allow",
               "Action": [
+                "dynamodb:GetItem"
+              ],
+              "Resource": [
+                {
+                  "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Profile-${apilexhoaGraphQLAPIIdOutput}-${env}"
+                },
+                {
+                  "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Invoice-${apilexhoaGraphQLAPIIdOutput}-${env}"
+                },
+                {
+                  "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Counter-${apilexhoaGraphQLAPIIdOutput}-${env}"
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
                 "dynamodb:UpdateItem"
               ],
+              "Resource": [
+                {
+                  "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Profile-${apilexhoaGraphQLAPIIdOutput}-${env}"
+                },
+                {
+                  "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Counter-${apilexhoaGraphQLAPIIdOutput}-${env}"
+                }
+              ],
+              "Condition": {
+                "StringEquals": {
+                  "dynamodb:EnclosingOperation": "TransactWriteItems"
+                }
+              }
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:PutItem"
+              ],
               "Resource": {
-                "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Profile-${apilexhoaGraphQLAPIIdOutput}-${env}"
+                "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Invoice-${apilexhoaGraphQLAPIIdOutput}-${env}"
+              },
+              "Condition": {
+                "StringEquals": {
+                  "dynamodb:EnclosingOperation": "TransactWriteItems"
+                }
               }
             }
           ]

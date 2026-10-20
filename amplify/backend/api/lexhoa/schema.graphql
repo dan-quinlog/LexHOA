@@ -63,6 +63,7 @@ type Profile @model
   ])
   ownedProperties: [Property] @hasMany(indexName: "byOwner", fields: ["id"])
   payments: [Payment] @hasMany(indexName: "byOwnerPayments", fields: ["id"])
+  invoices: [Invoice] @hasMany(indexName: "byOwnerInvoices", fields: ["id"])
   tenantAt: Property @belongsTo(fields: ["tenantAtId"])
   tenantAtId: ID @index(name: "byTenantAt")
   createdPings: [Ping] @hasMany(indexName: "byCreator", fields: ["id"])
@@ -161,6 +162,63 @@ type Payment @model
   updatedAt: AWSDateTime
 }
 
+# Invoices are written only by Lambdas through DynamoDB, so no API caller can create or edit them.
+type Invoice @model
+  @auth(rules: [
+    { allow: owner, operations: [read] },
+    { allow: groups, groups: ["BOARD", "TREASURER", "PRESIDENT"], operations: [read] }
+  ]) {
+  id: ID!
+  invoiceNumber: String! @index(name: "byInvoiceNumber", queryField: "invoicesByInvoiceNumber")
+  type: InvoiceType!
+  status: InvoiceStatus @default(value: "ISSUED")
+  billingPeriod: String
+  lineItems: [InvoiceLineItem!]!
+  totalAmount: Float!
+  balanceApplied: Boolean!
+  dateApplied: AWSDate!
+  dateDue: AWSDate!
+  description: String
+  relatedInvoiceId: ID
+  createdBy: String @auth(rules: [
+    { allow: groups, groups: ["BOARD", "TREASURER", "PRESIDENT"], operations: [read] }
+  ])
+  voidedBy: String @auth(rules: [
+    { allow: groups, groups: ["BOARD", "TREASURER", "PRESIDENT"], operations: [read] }
+  ])
+  voidedAt: AWSDateTime
+  voidReason: String
+  owner: String
+  ownerInvoices: Profile @belongsTo(fields: ["ownerInvoicesId"])
+  ownerInvoicesId: ID! @index(name: "byOwnerInvoices", queryField: "invoicesByOwner", sortKeyFields: ["dateApplied"])
+  byTypeDateApplied: String @default(value: "INVOICE")
+    @index(
+      name: "byTypeDateApplied"
+      queryField: "invoicesByTypeDateApplied"
+      sortKeyFields: ["dateApplied"]
+    )
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type InvoiceLineItem {
+  propertyId: ID
+  address: String
+  description: String
+  amount: Float!
+}
+
+# Sequence counters, such as the next invoice number. Written only by Lambdas.
+type Counter @model
+  @auth(rules: [
+    { allow: groups, groups: ["TREASURER", "PRESIDENT"], operations: [read] }
+  ]) {
+  id: ID!
+  seq: Int!
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
 type WebhookReceipt @model
   @auth(rules: [
     { allow: private, provider: iam, operations: [create, read] }
@@ -250,6 +308,18 @@ enum PaymentStatus {
   FAILED
   CANCELED
   REFUNDED
+}
+
+enum InvoiceType {
+  DUES
+  ASSESSMENT
+  LATE_FEE
+  ADJUSTMENT
+}
+
+enum InvoiceStatus {
+  ISSUED
+  VOID
 }
 
 enum Audience {

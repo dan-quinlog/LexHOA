@@ -8,8 +8,8 @@ const statementFor = action => statements.find(statement => statement.Action.inc
 test('allows only exact profile and relationship reads', () => {
   assert.match(statementFor('dynamodb:GetItem').Resource['Fn::Sub'], /:table\/Profile-/);
   const queryResources = statementFor('dynamodb:Query').Resource.map(resource => resource['Fn::Sub']);
-  assert.equal(queryResources.length, 5);
-  for (const index of ['byOwner', 'byTenant', 'byOwnerPayments', 'byCreator', 'byUploader']) {
+  assert.equal(queryResources.length, 6);
+  for (const index of ['byOwner', 'byTenant', 'byOwnerPayments', 'byOwnerInvoices', 'byCreator', 'byUploader']) {
     assert.equal(queryResources.some(resource => resource.endsWith(`/index/${index}`)), true);
   }
 });
@@ -19,7 +19,7 @@ test('allows only transaction-enclosed updates and source-profile deletion', () 
   const update = statementFor('dynamodb:UpdateItem');
   const remove = statementFor('dynamodb:DeleteItem');
   assert.deepEqual(update.Condition, condition);
-  assert.equal(update.Resource.length, 5);
+  assert.equal(update.Resource.length, 6);
   assert.deepEqual(remove.Condition, condition);
   assert.match(remove.Resource['Fn::Sub'], /:table\/Profile-/);
 

@@ -8,116 +8,220 @@ const {
     processMonthlyDues
 } = require('./index')._internals;
 
-const now = new Date('2026-08-18T12:00:00.000Z');
+const now = new Date('2026-11-01T06:00:00.000Z');
 
-function memoryDependencies(pages, options = {}) {
-    const balances = new Map();
-    const periods = new Map();
-    const failedOnce = new Set();
+function canceled() {
+    return Object.assign(new Error('Transaction cancelled'), { code: 'TransactionCanceledException' });
+}
+
+// In-memory store that enforces the same preconditions as the DynamoDB transaction.
+function memoryStore(pages, { profiles = {}, failOnce, raceOnce } = {}) {
+    const invoices = new Map();
+    const balances = new Map(Object.entries(profiles).map(([id, profile]) => [id, profile.balance]));
+    const failed = new Set();
+    let counter = 0;
     let pageIndex = 0;
+    let raced = false;
 
     return {
         dependencies: {
             async scanProperties() {
                 return pages[Math.min(pageIndex++, pages.length - 1)];
             },
-            async chargeProfile(ownerId, amount, period) {
-                if (options.failOnce === ownerId && !failedOnce.has(ownerId)) {
-                    failedOnce.add(ownerId);
+            async getProfile(id) { return profiles[id]; },
+            async invoiceExists(id) { return invoices.has(id); },
+            async readInvoiceCounter() { return counter; },
+            async writeInvoice(invoice, previousSeq) {
+                if (failOnce === invoice.ownerInvoicesId && !failed.has(failOnce)) {
+                    failed.add(failOnce);
                     throw new Error('sensitive-owner-marker');
                 }
-                if (periods.get(ownerId) === period) return 'skipped';
-                periods.set(ownerId, period);
-                balances.set(ownerId, (balances.get(ownerId) || 0) + amount);
-                return 'charged';
+                if (raceOnce && !raced) {
+                    raced = true;
+                    counter += 1; // another writer takes the next number first
+                }
+                if (invoices.has(invoice.id) || counter !== previousSeq || !profiles[invoice.ownerInvoicesId]) {
+                    throw canceled();
+                }
+                invoices.set(invoice.id, invoice);
+                counter = previousSeq + 1;
+                const id = invoice.ownerInvoicesId;
+                balances.set(id, (balances.get(id) || 0) + invoice.totalAmount);
             }
         },
         resetPages() { pageIndex = 0; },
-        balances
+        invoices,
+        balances,
+        get counter() { return counter; }
     };
 }
 
-test('charges annual dues once per property and combines properties by owner', async () => {
-    const store = memoryDependencies([{
-        Items: [
-            { profOwnerId: 'owner-a' },
-            { profOwnerId: 'owner-a' },
-            { profOwnerId: 'owner-b' },
-            { profOwnerId: '' },
-            {}
-        ]
-    }]);
-    const counts = await processMonthlyDues({ amount: 50, now, dependencies: store.dependencies });
+const profiles = {
+    'owner-a': { id: 'owner-a', cognitoID: 'sub-a', balance: 25 },
+    'owner-b': { id: 'owner-b' }
+};
+const pages = [{
+    Items: [
+        { id: 'prop-2', address: '200 Pine St', profOwnerId: 'owner-a' },
+        { id: 'prop-3', address: '300 Oak St', profOwnerId: 'owner-b' },
+        { id: 'prop-1', address: '100 Elm St', profOwnerId: 'owner-a' },
+        { id: 'prop-4', address: '400 Ash St', profOwnerId: '' },
+        { id: 'prop-5' }
+    ]
+}];
+
+test('creates one next-year dues invoice per owner with a line per property and charges the balance', async () => {
+    const store = memoryStore(pages, { profiles });
+    const counts = await processMonthlyDues({ amount: 1000, now, dependencies: store.dependencies });
     assert.deepEqual(counts, { owners: 2, charged: 2, skipped: 0, failed: 0 });
-    assert.equal(store.balances.get('owner-a'), 100);
-    assert.equal(store.balances.get('owner-b'), 50);
+
+    const a = store.invoices.get('dues-2027-owner-a');
+    assert.equal(a.invoiceNumber, 'INV-000001');
+    assert.equal(a.type, 'DUES');
+    assert.equal(a.status, 'ISSUED');
+    assert.equal(a.billingPeriod, '2027');
+    assert.equal(a.dateApplied, '2026-11-01');
+    assert.equal(a.dateDue, '2027-12-31');
+    assert.equal(a.totalAmount, 2000);
+    assert.equal(a.balanceApplied, true);
+    assert.equal(a.createdBy, 'SYSTEM');
+    assert.equal(a.owner, 'sub-a');
+    assert.deepEqual(a.lineItems.map(item => [item.propertyId, item.address, item.amount]), [
+        ['prop-1', '100 Elm St', 1000],
+        ['prop-2', '200 Pine St', 1000]
+    ]);
+
+    const b = store.invoices.get('dues-2027-owner-b');
+    assert.equal(b.invoiceNumber, 'INV-000002');
+    assert.equal(b.totalAmount, 1000);
+    assert.equal('owner' in b, false);
+
+    assert.equal(store.counter, 2);
+    assert.equal(store.balances.get('owner-a'), 2025);
+    assert.equal(store.balances.get('owner-b'), 1000);
 });
 
-test('same-year invocation is idempotent', async () => {
-    const pages = [{ Items: [{ profOwnerId: 'owner-a' }] }];
-    const store = memoryDependencies(pages);
-    await processMonthlyDues({ amount: 50, now, dependencies: store.dependencies });
+test('rerunning the same billing year creates nothing and consumes no invoice numbers', async () => {
+    const store = memoryStore(pages, { profiles });
+    await processMonthlyDues({ amount: 1000, now, dependencies: store.dependencies });
     store.resetPages();
     const retry = await processMonthlyDues({
-        amount: 50,
+        amount: 1000,
         now: new Date('2026-12-31T12:00:00.000Z'),
         dependencies: store.dependencies
     });
-    assert.deepEqual(retry, { owners: 1, charged: 0, skipped: 1, failed: 0 });
-    assert.equal(store.balances.get('owner-a'), 50);
+    assert.deepEqual(retry, { owners: 2, charged: 0, skipped: 2, failed: 0 });
+    assert.equal(store.counter, 2);
+    assert.equal(store.balances.get('owner-a'), 2025);
 });
 
-test('partial retry skips completed owners and finishes remaining owners', async () => {
-    const pages = [{ Items: [{ profOwnerId: 'owner-a' }, { profOwnerId: 'owner-b' }] }];
-    const store = memoryDependencies(pages, { failOnce: 'owner-b' });
+test('partial retry finishes remaining owners without gaps in invoice numbers', async () => {
+    const store = memoryStore(pages, { profiles, failOnce: 'owner-a' });
     await assert.rejects(
-        processMonthlyDues({ amount: 50, now, dependencies: store.dependencies }),
+        processMonthlyDues({ amount: 1000, now, dependencies: store.dependencies }),
         /MONTHLY_DUES_PARTIAL_FAILURE/
     );
+    assert.equal(store.invoices.get('dues-2027-owner-b').invoiceNumber, 'INV-000001');
+
     store.resetPages();
-    const retry = await processMonthlyDues({ amount: 50, now, dependencies: store.dependencies });
+    const retry = await processMonthlyDues({ amount: 1000, now, dependencies: store.dependencies });
     assert.deepEqual(retry, { owners: 2, charged: 1, skipped: 1, failed: 0 });
-    assert.equal(store.balances.get('owner-a'), 50);
-    assert.equal(store.balances.get('owner-b'), 50);
+    assert.equal(store.invoices.get('dues-2027-owner-a').invoiceNumber, 'INV-000002');
+    assert.equal(store.balances.get('owner-a'), 2025);
+    assert.equal(store.balances.get('owner-b'), 1000);
+});
+
+test('retries with the next number when another writer advances the counter', async () => {
+    const store = memoryStore([{ Items: [{ id: 'prop-1', address: '100 Elm St', profOwnerId: 'owner-a' }] }], {
+        profiles,
+        raceOnce: true
+    });
+    const counts = await processMonthlyDues({ amount: 1000, now, dependencies: store.dependencies });
+    assert.equal(counts.charged, 1);
+    assert.equal(store.invoices.get('dues-2027-owner-a').invoiceNumber, 'INV-000002');
+    assert.equal(store.counter, 2);
+    assert.equal(store.balances.get('owner-a'), 1025);
+});
+
+test('skips properties whose owner profile no longer exists', async () => {
+    const store = memoryStore([{ Items: [{ id: 'prop-9', address: '900 Gone St', profOwnerId: 'missing' }] }], { profiles });
+    const counts = await processMonthlyDues({ amount: 1000, now, dependencies: store.dependencies });
+    assert.deepEqual(counts, { owners: 1, charged: 0, skipped: 1, failed: 0 });
+    assert.equal(store.counter, 0);
 });
 
 test('paginates the Property table', async () => {
     let page = 0;
     const keys = [];
+    const store = memoryStore([], { profiles });
     const dependencies = {
+        ...store.dependencies,
         async scanProperties(key) {
             keys.push(key || null);
             page += 1;
             return page === 1
-                ? { Items: [{ profOwnerId: 'owner-a' }], LastEvaluatedKey: { id: 'page-marker' } }
-                : { Items: [{ profOwnerId: 'owner-b' }] };
-        },
-        async chargeProfile() { return 'charged'; }
+                ? { Items: [{ id: 'prop-1', profOwnerId: 'owner-a' }], LastEvaluatedKey: { id: 'page-marker' } }
+                : { Items: [{ id: 'prop-3', profOwnerId: 'owner-b' }] };
+        }
     };
     const counts = await processMonthlyDues({ amount: 50, now, dependencies });
     assert.equal(counts.charged, 2);
     assert.deepEqual(keys, [null, { id: 'page-marker' }]);
 });
 
-test('DynamoDB update is atomic, conditional, and duplicate-safe', async () => {
-    let updateParams;
+test('DynamoDB write creates the invoice, advances the counter, and charges the balance atomically', async () => {
+    const requests = [];
     const client = {
-        scan: () => ({ promise: async () => ({ Items: [] }) }),
-        update: params => {
-            updateParams = params;
+        get: () => ({ promise: async () => ({}) }),
+        transactWrite: params => {
+            requests.push(params);
             return { promise: async () => {} };
         }
     };
     const dependencies = createDynamoDependencies(client, 'api', 'dev');
-    assert.equal(await dependencies.chargeProfile('owner-a', 50, '2026-08', now.toISOString()), 'charged');
-    assert.match(updateParams.UpdateExpression, /if_not_exists/);
-    assert.match(updateParams.UpdateExpression, /lastAnnualDuesPeriod/);
-    assert.match(updateParams.ConditionExpression, /lastAnnualDuesPeriod/);
+    assert.equal(await dependencies.readInvoiceCounter(), 0);
 
-    client.update = () => ({
-        promise: async () => { throw Object.assign(new Error('duplicate'), { code: 'ConditionalCheckFailedException' }); }
-    });
-    assert.equal(await dependencies.chargeProfile('owner-a', 50, '2026-08', now.toISOString()), 'skipped');
+    const invoice = { id: 'dues-2027-owner-a', ownerInvoicesId: 'owner-a', totalAmount: 2000, updatedAt: now.toISOString() };
+    await dependencies.writeInvoice(invoice, 0);
+    await dependencies.writeInvoice(invoice, 41);
+
+    const [first, second] = requests.map(request => request.TransactItems);
+    assert.equal(first.length, 3);
+    assert.equal(first[0].Put.TableName, 'Invoice-api-dev');
+    assert.equal(first[0].Put.ConditionExpression, 'attribute_not_exists(id)');
+    assert.equal(first[1].Update.TableName, 'Counter-api-dev');
+    assert.equal(first[1].Update.ConditionExpression, 'attribute_not_exists(#seq)');
+    assert.equal(first[1].Update.ExpressionAttributeValues[':next'], 1);
+    assert.equal(second[1].Update.ConditionExpression, '#seq = :previous');
+    assert.equal(second[1].Update.ExpressionAttributeValues[':previous'], 41);
+    assert.equal(second[1].Update.ExpressionAttributeValues[':next'], 42);
+    assert.equal(first[2].Update.TableName, 'Profile-api-dev');
+    assert.deepEqual(first[2].Update.Key, { id: 'owner-a' });
+    assert.match(first[2].Update.UpdateExpression, /if_not_exists\(#balance, :zero\) \+ :total/);
+    assert.equal(first[2].Update.ExpressionAttributeValues[':total'], 2000);
+});
+
+test('IAM allows only the reads and transaction writes the dues run needs', () => {
+    const template = JSON.parse(fs.readFileSync(
+        path.join(__dirname, '..', 'monthlyPropertyDues-cloudformation-template.json'),
+        'utf8'
+    ));
+    const statements = template.Resources.AmplifyResourcesPolicy.Properties.PolicyDocument.Statement;
+    const tablesFor = action => {
+        const statement = statements.find(s => s.Action.includes(action));
+        return [].concat(statement.Resource).map(resource => resource['Fn::Sub'].match(/table\/(\w+)-/)[1]);
+    };
+    assert.deepEqual(statements.flatMap(s => s.Action), [
+        'dynamodb:Scan', 'dynamodb:GetItem', 'dynamodb:UpdateItem', 'dynamodb:PutItem'
+    ]);
+    assert.deepEqual(tablesFor('dynamodb:Scan'), ['Property']);
+    assert.deepEqual(tablesFor('dynamodb:GetItem'), ['Profile', 'Invoice', 'Counter']);
+    assert.deepEqual(tablesFor('dynamodb:UpdateItem'), ['Profile', 'Counter']);
+    assert.deepEqual(tablesFor('dynamodb:PutItem'), ['Invoice']);
+    const transactionOnly = { StringEquals: { 'dynamodb:EnclosingOperation': 'TransactWriteItems' } };
+    for (const action of ['dynamodb:UpdateItem', 'dynamodb:PutItem']) {
+        assert.deepEqual(statements.find(s => s.Action.includes(action)).Condition, transactionOnly);
+    }
 });
 
 test('legacy GraphQL parameters are declared only as unused Gen1 compatibility inputs', () => {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@apollo/client';
-import { PROFILE_BY_COGNITO_ID, PAYMENTS_BY_OWNER } from '../../queries/queries';
+import { PROFILE_BY_COGNITO_ID, PAYMENTS_BY_OWNER, INVOICES_BY_OWNER } from '../../queries/queries';
 import PaymentModal from '../../components/billing/PaymentModal';
 import PaymentHistory from '../../components/billing/PaymentHistory';
 import { getPendingTotal, getEffectiveBalance } from '../../utils/payments';
@@ -32,6 +32,20 @@ const Billing = ({ cognitoId }) => {
   );
 
   const payments = paymentsData?.paymentsByOwner?.items || [];
+
+  const { data: invoicesData, loading: invoicesLoading } = useQuery(
+    INVOICES_BY_OWNER,
+    {
+      variables: {
+        ownerInvoicesId: profile?.id,
+        sortDirection: 'DESC',
+        limit: 50
+      },
+      skip: !profile?.id
+    }
+  );
+
+  const invoices = invoicesData?.invoicesByOwner?.items || [];
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -125,9 +139,10 @@ const Billing = ({ cognitoId }) => {
         </div>
 
         <div className="history-section">
-          <PaymentHistory 
-            payments={payments} 
-            loading={paymentsLoading} 
+          <PaymentHistory
+            payments={payments}
+            invoices={invoices}
+            loading={paymentsLoading || invoicesLoading}
           />
         </div>
       </div>

@@ -670,6 +670,44 @@ export const PAYMENTS_BY_OWNER = gql`
   }
 `;
 
+// Owner-facing: omits board-only fields such as createdBy and voidedBy.
+export const INVOICES_BY_OWNER = gql`
+  query InvoicesByOwner(
+    $ownerInvoicesId: ID!
+    $sortDirection: ModelSortDirection
+    $limit: Int
+    $nextToken: String
+  ) {
+    invoicesByOwner(
+      ownerInvoicesId: $ownerInvoicesId
+      sortDirection: $sortDirection
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        invoiceNumber
+        type
+        status
+        billingPeriod
+        lineItems {
+          propertyId
+          address
+          description
+          amount
+        }
+        totalAmount
+        balanceApplied
+        dateApplied
+        dateDue
+        description
+        createdAt
+      }
+      nextToken
+    }
+  }
+`;
+
 export const PAYMENTS_BY_INVOICE_NUMBER = gql`
   query PaymentsByInvoiceNumber(
     $invoiceNumber: String!

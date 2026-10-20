@@ -101,18 +101,6 @@
   color: var(--text-color);
 }
 
-.billing-freq {
-  color: var(--secondary-color);
-  margin-bottom: var(--spacing-medium);
-  font-size: var(--font-size-small);
-}
-
-.dues-amounts {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-small);
-}
-
 .dues-row {
   display: flex;
   justify-content: space-between;

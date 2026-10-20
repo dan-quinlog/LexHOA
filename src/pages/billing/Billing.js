@@ -113,27 +113,10 @@ const Billing = ({ cognitoId }) => {
           </div>
 
           <div className="dues-info">
-            <h4>HOA Dues Schedule</h4>
-            <p className="billing-freq">
-              Your billing frequency: <strong>{profile.billingFreq || 'MONTHLY'}</strong>
-            </p>
-            <div className="dues-amounts">
-              <div className="dues-row">
-                <span>Monthly</span>
-                <span>{formatCurrency(100)}</span>
-              </div>
-              <div className="dues-row">
-                <span>Quarterly (3 months)</span>
-                <span>{formatCurrency(300)}</span>
-              </div>
-              <div className="dues-row">
-                <span>Semi-Annual (6 months)</span>
-                <span>{formatCurrency(600)}</span>
-              </div>
-              <div className="dues-row">
-                <span>Annual (12 months)</span>
-                <span>{formatCurrency(1200)}</span>
-              </div>
+            <h4>HOA Dues</h4>
+            <div className="dues-row">
+              <span>Per property, per year</span>
+              <span>{formatCurrency(1000)}</span>
             </div>
           </div>
         </div>

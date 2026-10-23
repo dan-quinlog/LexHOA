@@ -27,7 +27,8 @@
   border: 1px solid var(--border-color);
 }
 
-.checkbox-label {
+.checkbox-label,
+.apply-payment-section .checkbox-label {
   display: flex;
   align-items: center;
   font-weight: normal;
@@ -35,7 +36,11 @@
   gap: var(--spacing-small);
 }
 
-.checkbox-label input[type="checkbox"] {
+.checkbox-label input[type="checkbox"],
+.apply-payment-section .checkbox-label input[type="checkbox"] {
+  flex: none;
+  width: auto;
+  height: auto;
   margin: 0;
   cursor: pointer;
 }

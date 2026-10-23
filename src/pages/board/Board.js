@@ -63,6 +63,14 @@ const Board = ({ userGroups = [], user }) => {
     searchResults: []
   });
 
+  const [invoiceSearchState, setInvoiceSearchState] = useState({
+    searchType: 'recent',
+    searchTerm: '',
+    searchResults: null
+  });
+
+  const [reportState, setReportState] = useState({ reportId: '', result: null });
+
   const [pingSearchState, setPingSearchState] = useState({
     searchType: 'id',
     searchTerm: '',
@@ -101,7 +109,11 @@ const Board = ({ userGroups = [], user }) => {
           userGroups={userGroups}
         />;
       case 'invoices':
-        return <InvoiceManager userGroups={userGroups} />;
+        return <InvoiceManager
+          searchState={invoiceSearchState}
+          setSearchState={setInvoiceSearchState}
+          userGroups={userGroups}
+        />;
       case 'pings':
         return <PingManager
           searchState={pingSearchState}
@@ -109,7 +121,11 @@ const Board = ({ userGroups = [], user }) => {
           userGroups={userGroups}
         />;
       case 'reports':
-        return <ReportManager userGroups={userGroups} />;
+        return <ReportManager
+          reportState={reportState}
+          setReportState={setReportState}
+          userGroups={userGroups}
+        />;
       case 'roles':
         return <BoardRoleManager userGroups={userGroups} />;
       default:

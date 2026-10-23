@@ -134,6 +134,7 @@ completion gate.
 These are not PCI controls and do not affect the Sprint 3 completion gate.
 
 - [ ] **Restrict direct balance edits.** Once profile merges are finished, remove direct `Profile.balance` updates so every balance change comes from an invoice or payment.
+- [ ] **Remove payment editing.** At the same time, remove the board's Edit action on payments and `update` permission on `Payment`, so a wrong payment is corrected by voiding it and recording a new one.
 - [ ] **Review legacy `Payment` fields** (`invoiceNumber`, `invoiceAmount`, `checkAmount`, and the transaction ID written into `checkNumber`) after the board decides what payments should store.
 
 ## Sprint 4 — Detection and vulnerability operations

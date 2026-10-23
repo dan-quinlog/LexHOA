@@ -175,9 +175,11 @@ does for payments.
 **Phase 1 (before November 1):** `Invoice`, `InvoiceLineItem`, the counter, dues Lambda
 changes, `mergeProfiles` invoice transfer, and the owner Billing history.
 
-**Phase 2 (this sprint):** `createInvoice`, `voidInvoice`, payment `source` and `createdBy`,
+**Phase 2 (this sprint):** `issueInvoice`, `voidInvoice`, payment `source` and `createdBy`,
 `recordManualPayment`, `voidPayment`, the Board Tools UI, and the payment backfill.
 
 **Deferred:**
 - Restrict direct `Profile.balance` edits once profile merges are finished.
+- At the same time, remove payment editing (the board's Edit action and `Payment` update
+  permission); wrong payments are voided and re-recorded.
 - Board decision on the legacy `Payment` fields.

@@ -42,12 +42,14 @@ const SEARCHES = {
   }
 };
 
-const InvoiceManager = ({ userGroups = [] }) => {
+// Search state lives in Board so it survives switching tools.
+const InvoiceManager = ({ searchState, setSearchState, userGroups = [] }) => {
   const client = useApolloClient();
   const [voidInvoice] = useMutation(VOID_INVOICE);
-  const [searchType, setSearchType] = useState('recent');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [results, setResults] = useState(null);
+  const { searchType, searchTerm, searchResults: results } = searchState;
+  const setSearchType = value => setSearchState(prev => ({ ...prev, searchType: value }));
+  const setSearchTerm = value => setSearchState(prev => ({ ...prev, searchTerm: value }));
+  const setResults = value => setSearchState(prev => ({ ...prev, searchResults: value }));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');

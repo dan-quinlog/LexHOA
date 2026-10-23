@@ -14,6 +14,11 @@ process.env.REACT_APP_TREASURER_GROUP_NAME = 'TREASURER';
 process.env.REACT_APP_PRESIDENT_GROUP_NAME = 'PRESIDENT';
 const InvoiceManager = require('./InvoiceManager').default;
 
+const Invoices = ({ userGroups }) => {
+  const [searchState, setSearchState] = React.useState({ searchType: 'recent', searchTerm: '', searchResults: null });
+  return <InvoiceManager searchState={searchState} setSearchState={setSearchState} userGroups={userGroups} />;
+};
+
 const invoice = overrides => ({
   id: 'invoice-1',
   invoiceNumber: 'INV-000042',
@@ -54,7 +59,7 @@ test('the treasurer creates an invoice for an owner property and then sees that 
       [BOARD_INVOICES_BY_OWNER, () => ({ invoicesByOwner: { items: [invoice()] } })]
     ])
   });
-  render(<InvoiceManager userGroups={['BOARD', 'TREASURER']} />);
+  render(<Invoices userGroups={['BOARD', 'TREASURER']} />);
 
   fireEvent.click(screen.getByRole('button', { name: 'Create Invoice' }));
   const dialog = screen.getByRole('dialog');
@@ -101,7 +106,7 @@ test('voiding asks for a reason and refreshes the results', async () => {
     return { data: {} };
   });
   setup({ voidInvoice, queries: new Map([[RECENT_INVOICES, () => ({ invoicesByTypeDateApplied: { items: [current] } })]]) });
-  render(<InvoiceManager userGroups={['PRESIDENT']} />);
+  render(<Invoices userGroups={['PRESIDENT']} />);
 
   fireEvent.click(screen.getByRole('button', { name: 'Search' }));
   fireEvent.click(await screen.findByRole('button', { name: 'Void' }));
@@ -121,7 +126,7 @@ test('voiding asks for a reason and refreshes the results', async () => {
 
 test('board members without the Treasurer or President role can search but not create or void', async () => {
   setup({ queries: new Map([[RECENT_INVOICES, () => ({ invoicesByTypeDateApplied: { items: [invoice()] } })]]) });
-  render(<InvoiceManager userGroups={['BOARD']} />);
+  render(<Invoices userGroups={['BOARD']} />);
 
   expect(screen.queryByRole('button', { name: 'Create Invoice' })).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Search' }));

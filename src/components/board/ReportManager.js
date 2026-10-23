@@ -52,11 +52,14 @@ const REPORTS = [
   }
 ];
 
-const ReportManager = ({ userGroups = [] }) => {
+// The selected report and its results live in Board so they survive switching tools.
+const ReportManager = ({ reportState, setReportState, userGroups = [] }) => {
   const client = useApolloClient();
   const reports = REPORTS.filter((report) => report.groups.some((group) => userGroups.includes(group)));
-  const [reportId, setReportId] = useState(reports[0]?.id || '');
-  const [result, setResult] = useState(null);
+  const reportId = reportState.reportId || reports[0]?.id || '';
+  const { result } = reportState;
+  const setReportId = (value) => setReportState((prev) => ({ ...prev, reportId: value }));
+  const setResult = (value) => setReportState((prev) => ({ ...prev, result: value }));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 

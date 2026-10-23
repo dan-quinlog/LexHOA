@@ -5,6 +5,11 @@ import { MockedProvider } from '@apollo/client/testing';
 process.env.REACT_APP_BOARD_GROUP_NAME = 'BOARD';
 
 const ReportManager = require('./ReportManager').default;
+
+const Reports = ({ userGroups }) => {
+  const [reportState, setReportState] = React.useState({ reportId: '', result: null });
+  return <ReportManager reportState={reportState} setReportState={setReportState} userGroups={userGroups} />;
+};
 const { PROFILE_BALANCES } = require('../../queries/queries');
 
 const page = (nextToken, items, next) => ({
@@ -28,7 +33,7 @@ test('board members run the profile balance report across pages, sorted by balan
   ];
   render(
     <MockedProvider mocks={mocks} addTypename={false}>
-      <ReportManager userGroups={['BOARD']} />
+      <Reports userGroups={['BOARD']} />
     </MockedProvider>
   );
 
@@ -53,7 +58,7 @@ test('board members run the profile balance report across pages, sorted by balan
 test('reports are only offered to the groups allowed to run them', () => {
   render(
     <MockedProvider mocks={[]} addTypename={false}>
-      <ReportManager userGroups={['MEDIA']} />
+      <Reports userGroups={['MEDIA']} />
     </MockedProvider>
   );
 

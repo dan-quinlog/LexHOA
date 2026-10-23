@@ -117,7 +117,7 @@ type Payment @model
   @auth(rules: [
     { allow: owner, operations: [read] },
     { allow: groups, groups: ["BOARD"], operations: [read] },
-    { allow: groups, groups: ["TREASURER", "PRESIDENT"], operations: [create, read, update, delete] },
+    { allow: groups, groups: ["TREASURER", "PRESIDENT"], operations: [create, read, update] },
     { allow: private, provider: iam, operations: [create, read, update] }
   ]) {
   id: ID!
@@ -155,6 +155,22 @@ type Payment @model
   totalAmount: Float!
   status: PaymentStatus @default(value: "PENDING")
   description: String
+  # Audit fields are board-visible only and written only by Lambdas.
+  source: PaymentSource @auth(rules: [
+    { allow: groups, groups: ["BOARD", "TREASURER", "PRESIDENT"], operations: [read] }
+  ])
+  createdBy: String @auth(rules: [
+    { allow: groups, groups: ["BOARD", "TREASURER", "PRESIDENT"], operations: [read] }
+  ])
+  voidedBy: String @auth(rules: [
+    { allow: groups, groups: ["BOARD", "TREASURER", "PRESIDENT"], operations: [read] }
+  ])
+  voidedAt: AWSDateTime @auth(rules: [
+    { allow: groups, groups: ["BOARD", "TREASURER", "PRESIDENT"], operations: [read] }
+  ])
+  voidReason: String @auth(rules: [
+    { allow: groups, groups: ["BOARD", "TREASURER", "PRESIDENT"], operations: [read] }
+  ])
   owner: String
   ownerPayments: Profile @belongsTo(fields: ["ownerPaymentsId"])
   ownerPaymentsId: ID! @index(name: "byOwnerPayments", queryField: "paymentsByOwner", sortKeyFields: ["createdAt"])
@@ -163,6 +179,7 @@ type Payment @model
 }
 
 # Invoices are written only by Lambdas through DynamoDB, so no API caller can create or edit them.
+# The board creates and voids invoices through the issueInvoice and voidInvoice mutations.
 type Invoice @model
   @auth(rules: [
     { allow: owner, operations: [read] },
@@ -308,6 +325,11 @@ enum PaymentStatus {
   FAILED
   CANCELED
   REFUNDED
+}
+
+enum PaymentSource {
+  ONLINE
+  BOARD
 }
 
 enum InvoiceType {
@@ -499,7 +521,53 @@ input MergeProfilesInput {
   selections: MergeProfileSelectionsInput!
 }
 
+input IssueInvoiceLineItemInput {
+  propertyId: ID
+  address: String
+  description: String
+  amount: Float!
+}
+
+input IssueInvoiceInput {
+  ownerInvoicesId: ID!
+  type: InvoiceType!
+  billingPeriod: String
+  lineItems: [IssueInvoiceLineItemInput!]!
+  balanceApplied: Boolean!
+  dateApplied: AWSDate!
+  dateDue: AWSDate!
+  description: String
+  relatedInvoiceId: ID
+}
+
+input RecordManualPaymentInput {
+  ownerPaymentsId: ID!
+  checkDate: AWSDate!
+  checkNumber: String!
+  checkAmount: Float!
+  invoiceNumber: String
+  invoiceAmount: Float
+  applyToBalance: Boolean!
+}
+
+input VoidLedgerEntryInput {
+  id: ID!
+  reason: String!
+}
+
 type Mutation {
+  issueInvoice(input: IssueInvoiceInput!): Invoice
+    @function(name: "manageLedger-${env}")
+    @auth(rules: [{ allow: groups, groups: ["TREASURER", "PRESIDENT"] }])
+  voidInvoice(input: VoidLedgerEntryInput!): Invoice
+    @function(name: "manageLedger-${env}")
+    @auth(rules: [{ allow: groups, groups: ["TREASURER", "PRESIDENT"] }])
+  recordManualPayment(input: RecordManualPaymentInput!): Payment
+    @function(name: "manageLedger-${env}")
+    @auth(rules: [{ allow: groups, groups: ["TREASURER", "PRESIDENT"] }])
+  voidPayment(input: VoidLedgerEntryInput!): Payment
+    @function(name: "manageLedger-${env}")
+    @auth(rules: [{ allow: groups, groups: ["TREASURER", "PRESIDENT"] }])
   ensureMyProfile: Profile
     @function(name: "GenerateProfileOnSignUp-${env}")
     @auth(rules: [{ allow: private, provider: userPools }])

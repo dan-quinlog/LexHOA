@@ -125,12 +125,16 @@ transaction ID written into `checkNumber`) are unchanged pending a board review.
 
 | Mutation | Caller | Behavior |
 |---|---|---|
-| `createInvoice` | Treasurer, President | Validates type, line items, and dates; requires a description for `ADJUSTMENT`; writes the invoice with the next number; applies the balance when requested; records `createdBy` from the caller's identity. |
+| `issueInvoice` | Treasurer, President | Validates type, line items, and dates; requires a description for `ADJUSTMENT`; writes the invoice with the next number; applies the balance when requested; records `createdBy` from the caller's identity. Named `issueInvoice` because the `Invoice` model already generates a (denied) `createInvoice`. |
 | `voidInvoice` | Treasurer, President | Sets `VOID` and the void fields; reverses the balance if the invoice was applied. |
 | `recordManualPayment` | Treasurer, President | See Payment changes. |
 | `voidPayment` | Treasurer, President | See Payment changes. |
 
-All amounts are calculated in cents.
+All amounts are calculated in cents. All four mutations are served by the `manageLedger` Lambda.
+
+Manual payments entered before `recordManualPayment` never set `balanceApplied`, so voiding one
+does not change the balance; Board Tools warns about this, and an `ADJUSTMENT` invoice corrects
+the balance when needed.
 
 ### Dues Lambda (`monthlyPropertyDues`)
 

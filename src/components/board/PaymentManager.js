@@ -1,30 +1,36 @@
 import React, { useState } from 'react';
 import { useLazyQuery, useMutation } from '@apollo/client';
-import { LIST_PAYMENTS, PAYMENTS_BY_OWNER } from '../../queries/queries';
-import { DELETE_PAYMENT } from '../../queries/mutations';
+import { LIST_PAYMENTS, BOARD_PAYMENTS_BY_OWNER } from '../../queries/queries';
+import { VOID_PAYMENT } from '../../queries/mutations';
 import PaymentEditModal from './PaymentEditModal';
 import BoardCard from './shared/BoardCard';
-import DeleteConfirmationModal from '../shared/DeleteConfirmationModal';
+import VoidEntryModal from './VoidEntryModal';
 import { copyWithFeedback } from '../../utils/clipboardUtils';
+import { formatCurrency } from '../../utils/payments';
 import './shared/BoardTools.css';
 
 // Get group names from environment variables
 const TREASURER_GROUP = process.env.REACT_APP_TREASURER_GROUP_NAME;
 const PRESIDENT_GROUP = process.env.REACT_APP_PRESIDENT_GROUP_NAME;
 
+// Payments without a source predate the field; processor fields identify online payments.
+const isOnlinePayment = (payment) =>
+  payment.source === 'ONLINE' || Boolean(payment.authNetTransactionId) ||
+  ['CARD', 'BANK_ACCOUNT'].includes(payment.paymentMethod);
+const isVoided = (payment) => payment.status === 'CANCELED' || payment.status === 'REFUNDED';
+
 const PaymentManager = ({ searchState, setSearchState, userGroups = [] }) => {
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [paymentToDelete, setPaymentToDelete] = useState(null);
+  const [paymentToVoid, setPaymentToVoid] = useState(null);
 
   // Check if user has edit permissions (TREASURER or PRESIDENT)
   const hasEditPermission = userGroups && 
     (userGroups.includes(TREASURER_GROUP) || userGroups.includes(PRESIDENT_GROUP));
 
-  const [searchPayments] = useLazyQuery(LIST_PAYMENTS);
-  const [searchByOwner] = useLazyQuery(PAYMENTS_BY_OWNER);
-  const [deletePayment] = useMutation(DELETE_PAYMENT);
+  const [searchPayments] = useLazyQuery(LIST_PAYMENTS, { fetchPolicy: 'network-only' });
+  const [searchByOwner] = useLazyQuery(BOARD_PAYMENTS_BY_OWNER, { fetchPolicy: 'network-only' });
+  const [voidPayment] = useMutation(VOID_PAYMENT);
 
   const handleSearch = async () => {
     if (!searchState.searchTerm) return;
@@ -129,22 +135,10 @@ const PaymentManager = ({ searchState, setSearchState, userGroups = [] }) => {
     setShowEditModal(true);
   };
 
-  const handleDelete = (payment) => {
-    setPaymentToDelete(payment);
-    setShowDeleteModal(true);
-  };
-
-  const confirmDelete = async () => {
-    try {
-      await deletePayment({
-        variables: { input: { id: paymentToDelete.id } }
-      });
-      setShowDeleteModal(false);
-      setPaymentToDelete(null);
-      handleSearch(); // Refresh the list
-    } catch (error) {
-      console.error('Error deleting payment:', error);
-    }
+  const confirmVoid = async (reason) => {
+    await voidPayment({ variables: { input: { id: paymentToVoid.id, reason } } });
+    setPaymentToVoid(null);
+    handleSearch();
   };
 
   const handleProcess = (payment) => {
@@ -230,13 +224,23 @@ const PaymentManager = ({ searchState, setSearchState, userGroups = [] }) => {
                 <div>Check Amount: ${payment.checkAmount ? payment.checkAmount.toFixed(2) : '0.00'}</div>
                 <div>Invoice Amount: ${payment.invoiceAmount ? payment.invoiceAmount.toFixed(2) : '0.00'}</div>
                 <div>Check Date: {payment.checkDate}</div>
+                <div>Status: {payment.status || 'Not recorded'}</div>
+                <div>Source: {payment.source || (isOnlinePayment(payment) ? 'ONLINE' : 'BOARD')}</div>
+                <div>Created By: {payment.createdBy || 'Not recorded'}</div>
+                {payment.voidedAt && (
+                  <div>
+                    Voided {payment.voidedAt.slice(0, 10)} by {payment.voidedBy}: {payment.voidReason}
+                  </div>
+                )}
               </>
             }
             actions={
-              hasEditPermission ? (
+              hasEditPermission && !isVoided(payment) ? (
                 <>
                   <button onClick={() => handleEdit(payment)}>Edit</button>
-                  <button onClick={() => handleDelete(payment)}>Delete</button>
+                  {!isOnlinePayment(payment) && (
+                    <button onClick={() => setPaymentToVoid(payment)}>Void</button>
+                  )}
                 </>
               ) : null
             }
@@ -255,15 +259,15 @@ const PaymentManager = ({ searchState, setSearchState, userGroups = [] }) => {
           />
         )
       }
-      {hasEditPermission && (
-        <DeleteConfirmationModal
-          show={showDeleteModal}
-          objectId={paymentToDelete?.id}
-          onConfirm={confirmDelete}
-          onClose={() => {
-            setShowDeleteModal(false)
-            setPaymentToDelete(null)
-          }}
+      {hasEditPermission && paymentToVoid && (
+        <VoidEntryModal
+          title="Void Payment"
+          summary={`Check ${paymentToVoid.checkNumber || 'N/A'} for ${formatCurrency(paymentToVoid.amount ?? paymentToVoid.checkAmount)} from ${paymentToVoid.ownerPayments?.name || paymentToVoid.ownerPaymentsId}`}
+          warning={paymentToVoid.balanceApplied
+            ? "The payment amount will be added back to the owner's balance."
+            : 'This payment has no record of reducing the balance, so voiding it will not change the balance. Use an adjustment invoice if the balance needs correcting.'}
+          onConfirm={confirmVoid}
+          onClose={() => setPaymentToVoid(null)}
         />
       )}
     </div>

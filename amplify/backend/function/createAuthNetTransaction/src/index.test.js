@@ -27,6 +27,8 @@ test('processor fields distinguish attempted, accepted, and successful amounts',
   assert.equal(reserved.checkAmount, 25);
   assert.equal(reserved.invoiceAmount, 0);
   assert.equal(reserved.checkNumber, undefined);
+  assert.equal(reserved.source, 'ONLINE');
+  assert.equal(reserved.createdBy, 'user');
 
   let update;
   const accepted = await attachTransaction(reserved, 'processor-transaction', {

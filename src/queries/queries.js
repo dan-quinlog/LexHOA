@@ -596,27 +596,50 @@ export const GET_PAYMENT = gql`
   }
 `;
 
+// Board-only payment fields, including the audit fields owners cannot read.
+const BOARD_PAYMENT_FIELDS = `
+  id
+  checkDate
+  checkNumber
+  checkAmount
+  invoiceNumber
+  invoiceAmount
+  paymentMethod
+  authNetTransactionId
+  amount
+  status
+  balanceApplied
+  source
+  createdBy
+  voidedBy
+  voidedAt
+  voidReason
+  ownerPayments {
+    id
+    name
+  }
+  ownerPaymentsId
+  createdAt
+  updatedAt
+  owner
+`;
+
 export const LIST_PAYMENTS = gql`
   query ListPayments($filter: ModelPaymentFilterInput, $limit: Int, $nextToken: String) {
     listPayments(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
-        id
-        byTypeCreatedAt
-        byTypeCheckDate
-        byTypeInvoiceNumber
-        checkDate
-        checkNumber
-        checkAmount
-        invoiceNumber
-        invoiceAmount
-        ownerPayments {
-          id
-          name
-        }
-        ownerPaymentsId
-        createdAt
-        updatedAt
-        owner
+        ${BOARD_PAYMENT_FIELDS}
+      }
+      nextToken
+    }
+  }
+`;
+
+export const BOARD_PAYMENTS_BY_OWNER = gql`
+  query BoardPaymentsByOwner($ownerPaymentsId: ID!, $sortDirection: ModelSortDirection, $limit: Int, $nextToken: String) {
+    paymentsByOwner(ownerPaymentsId: $ownerPaymentsId, sortDirection: $sortDirection, limit: $limit, nextToken: $nextToken) {
+      items {
+        ${BOARD_PAYMENT_FIELDS}
       }
       nextToken
     }
@@ -702,6 +725,74 @@ export const INVOICES_BY_OWNER = gql`
         dateDue
         description
         createdAt
+      }
+      nextToken
+    }
+  }
+`;
+
+// Board-facing: includes createdBy and void details.
+const BOARD_INVOICE_FIELDS = `
+  id
+  invoiceNumber
+  type
+  status
+  billingPeriod
+  lineItems {
+    propertyId
+    address
+    description
+    amount
+  }
+  totalAmount
+  balanceApplied
+  dateApplied
+  dateDue
+  description
+  relatedInvoiceId
+  createdBy
+  voidedBy
+  voidedAt
+  voidReason
+  ownerInvoices {
+    id
+    name
+  }
+  ownerInvoicesId
+  createdAt
+`;
+
+export const BOARD_INVOICES_BY_OWNER = gql`
+  query BoardInvoicesByOwner($ownerInvoicesId: ID!, $sortDirection: ModelSortDirection, $limit: Int, $nextToken: String) {
+    invoicesByOwner(ownerInvoicesId: $ownerInvoicesId, sortDirection: $sortDirection, limit: $limit, nextToken: $nextToken) {
+      items {
+        ${BOARD_INVOICE_FIELDS}
+      }
+      nextToken
+    }
+  }
+`;
+
+export const BOARD_INVOICES_BY_NUMBER = gql`
+  query BoardInvoicesByNumber($invoiceNumber: String!) {
+    invoicesByInvoiceNumber(invoiceNumber: $invoiceNumber) {
+      items {
+        ${BOARD_INVOICE_FIELDS}
+      }
+    }
+  }
+`;
+
+export const RECENT_INVOICES = gql`
+  query RecentInvoices($limit: Int, $nextToken: String) {
+    invoicesByTypeDateApplied(
+      byTypeDateApplied: "INVOICE"
+      sortDirection: DESC
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        ${BOARD_INVOICE_FIELDS}
       }
       nextToken
     }

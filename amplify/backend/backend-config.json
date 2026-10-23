@@ -185,6 +185,20 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "manageLedger": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput"
+          ],
+          "category": "api",
+          "resourceName": "lexhoa"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "mergeProfiles": {
       "build": true,
       "dependsOn": [

@@ -3,6 +3,7 @@ import BulletinManager from '../../components/board/BulletinManager'
 import PersonManager from '../../components/board/PersonManager';
 import PropertyManager from '../../components/board/PropertyManager';
 import PaymentManager from '../../components/board/PaymentManager';
+import InvoiceManager from '../../components/board/InvoiceManager';
 import PingManager from '../../components/board/PingManager';
 import BoardRoleManager from '../../components/board/BoardRoleManager';
 import DocumentManager from '../../components/board/DocumentManager';
@@ -16,6 +17,7 @@ const TOOLS = [
   { id: 'persons', label: 'Person Management' },
   { id: 'properties', label: 'Property Management' },
   { id: 'payments', label: 'Payment Management' },
+  { id: 'invoices', label: 'Invoices' },
   { id: 'reports', label: 'Reports' },
   { id: 'roles', label: 'Board Role Manager' }
 ];
@@ -98,6 +100,8 @@ const Board = ({ userGroups = [], user }) => {
           setSearchState={setPaymentSearchState}
           userGroups={userGroups}
         />;
+      case 'invoices':
+        return <InvoiceManager userGroups={userGroups} />;
       case 'pings':
         return <PingManager
           searchState={pingSearchState}

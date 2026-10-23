@@ -1,133 +1,73 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { useLazyQuery, useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import PaymentEditModal from './PaymentEditModal';
-import { CREATE_PAYMENT, UPDATE_PAYMENT, UPDATE_PROFILE } from '../../queries/mutations';
-import { GET_PROFILE } from '../../queries/queries';
-import { getPendingTotal } from '../../utils/payments';
+import { RECORD_MANUAL_PAYMENT, UPDATE_PAYMENT } from '../../queries/mutations';
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
-  useMutation: jest.fn(),
-  useLazyQuery: jest.fn()
+  useMutation: jest.fn()
 }));
 
-test('attributes a manual payment to the selected profile owner', async () => {
-  const createPayment = jest.fn().mockResolvedValue({ data: { createPayment: { id: 'payment-1' } } });
-  const getProfile = jest.fn().mockResolvedValue({
-    data: {
-      getProfile: {
-        id: 'owner-profile-id',
-        cognitoID: 'owner-cognito-sub',
-        balance: 300
-      }
-    }
-  });
+const fillCreateForm = (container, ownerId) => {
+  const inputs = container.querySelectorAll('input');
+  fireEvent.change(inputs[0], { target: { value: 'synthetic-check' } });
+  fireEvent.change(inputs[1], { target: { value: '2026-08-21' } });
+  fireEvent.change(inputs[2], { target: { value: '100.25' } });
+  fireEvent.change(inputs[3], { target: { value: 'synthetic-invoice' } });
+  fireEvent.change(inputs[4], { target: { value: '100' } });
+  fireEvent.change(inputs[5], { target: { value: ownerId } });
+  return inputs;
+};
+
+test('records a new payment and its balance change through one server mutation', async () => {
+  const recordManualPayment = jest.fn().mockResolvedValue({ data: { recordManualPayment: { id: 'payment-1' } } });
+  const updatePayment = jest.fn();
   const onClose = jest.fn();
-  useLazyQuery.mockImplementation(query => {
-    expect(query).toBe(GET_PROFILE);
-    return [getProfile];
-  });
   useMutation.mockImplementation(mutation => {
-    if (mutation === CREATE_PAYMENT) return [createPayment];
-    if (mutation === UPDATE_PAYMENT || mutation === UPDATE_PROFILE) return [jest.fn()];
+    if (mutation === RECORD_MANUAL_PAYMENT) return [recordManualPayment];
+    if (mutation === UPDATE_PAYMENT) return [updatePayment];
     throw new Error('Unexpected mutation');
   });
 
-  const { container } = render(
-    <PaymentEditModal payment={null} onClose={onClose} show />
-  );
-  const inputs = container.querySelectorAll('input');
-  fireEvent.change(inputs[0], { target: { value: 'synthetic-check' } });
-  fireEvent.change(inputs[1], { target: { value: '2026-08-21' } });
-  fireEvent.change(inputs[2], { target: { value: '100' } });
-  fireEvent.change(inputs[3], { target: { value: 'synthetic-invoice' } });
-  fireEvent.change(inputs[4], { target: { value: '100' } });
-  fireEvent.change(inputs[5], { target: { value: 'owner-profile-id' } });
-
-  fireEvent.click(screen.getByRole('button', { name: 'Create' }));
-
-  await waitFor(() => expect(createPayment).toHaveBeenCalledTimes(1));
-  expect(getProfile).toHaveBeenCalledWith({
-    variables: { id: 'owner-profile-id' },
-    fetchPolicy: 'network-only'
-  });
-  expect(getProfile.mock.invocationCallOrder[0]).toBeLessThan(createPayment.mock.invocationCallOrder[0]);
-  expect(createPayment).toHaveBeenCalledWith({
-    variables: {
-      input: expect.objectContaining({
-        ownerPaymentsId: 'owner-profile-id',
-        owner: 'owner-cognito-sub',
-        status: 'SUCCEEDED'
-      })
-    }
-  });
-  expect(getPendingTotal([createPayment.mock.calls[0][0].variables.input])).toBe(0);
-  await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
-});
-
-test('creates a manual payment for a profile without a login', async () => {
-  const createPayment = jest.fn().mockResolvedValue({ data: { createPayment: { id: 'payment-1' } } });
-  const updateProfile = jest.fn().mockResolvedValue({});
-  const getProfile = jest.fn().mockResolvedValue({
-    data: { getProfile: { id: 'no-login-profile-id', cognitoID: null, balance: 300 } }
-  });
-  const onClose = jest.fn();
-  useLazyQuery.mockReturnValue([getProfile]);
-  useMutation.mockImplementation(mutation => {
-    if (mutation === CREATE_PAYMENT) return [createPayment];
-    if (mutation === UPDATE_PROFILE) return [updateProfile];
-    return [jest.fn()];
-  });
-
-  const { container } = render(
-    <PaymentEditModal payment={null} onClose={onClose} show />
-  );
-  const inputs = container.querySelectorAll('input');
-  fireEvent.change(inputs[0], { target: { value: 'synthetic-check' } });
-  fireEvent.change(inputs[1], { target: { value: '2026-08-21' } });
-  fireEvent.change(inputs[2], { target: { value: '100' } });
-  fireEvent.change(inputs[3], { target: { value: 'synthetic-invoice' } });
-  fireEvent.change(inputs[4], { target: { value: '100' } });
-  fireEvent.change(inputs[5], { target: { value: 'no-login-profile-id' } });
+  const { container } = render(<PaymentEditModal payment={null} onClose={onClose} show />);
+  const inputs = fillCreateForm(container, ' owner-profile-id ');
   fireEvent.click(inputs[6]);
   fireEvent.click(screen.getByRole('button', { name: 'Create' }));
 
   await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
-  const input = createPayment.mock.calls[0][0].variables.input;
-  expect(input).toMatchObject({ ownerPaymentsId: 'no-login-profile-id', status: 'SUCCEEDED' });
-  expect(input).not.toHaveProperty('owner');
-  expect(updateProfile).toHaveBeenCalledWith({
-    variables: { input: { id: 'no-login-profile-id', balance: 200 } }
+  expect(recordManualPayment).toHaveBeenCalledWith({
+    variables: {
+      input: {
+        ownerPaymentsId: 'owner-profile-id',
+        checkDate: '2026-08-21',
+        checkNumber: 'synthetic-check',
+        checkAmount: 100.25,
+        invoiceNumber: 'synthetic-invoice',
+        invoiceAmount: 100,
+        applyToBalance: true
+      }
+    }
   });
+  expect(updatePayment).not.toHaveBeenCalled();
 });
 
-test('shows an error and does not create when the owner cannot be resolved', async () => {
-  const createPayment = jest.fn();
-  const getProfile = jest.fn().mockResolvedValue({ data: { getProfile: null } });
-  const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
-  useLazyQuery.mockReturnValue([getProfile]);
-  useMutation.mockImplementation(mutation => {
-    if (mutation === CREATE_PAYMENT) return [createPayment];
-    return [jest.fn()];
+test('shows the server reason and stays open when the payment is rejected', async () => {
+  const recordManualPayment = jest.fn().mockRejectedValue({
+    graphQLErrors: [{ message: 'Owner profile not found' }]
   });
+  const onClose = jest.fn();
+  const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+  useMutation.mockImplementation(mutation =>
+    mutation === RECORD_MANUAL_PAYMENT ? [recordManualPayment] : [jest.fn()]);
 
-  const { container } = render(
-    <PaymentEditModal payment={null} onClose={jest.fn()} show />
-  );
-  const inputs = container.querySelectorAll('input');
-  fireEvent.change(inputs[0], { target: { value: 'synthetic-check' } });
-  fireEvent.change(inputs[1], { target: { value: '2026-08-21' } });
-  fireEvent.change(inputs[2], { target: { value: '100' } });
-  fireEvent.change(inputs[3], { target: { value: 'synthetic-invoice' } });
-  fireEvent.change(inputs[4], { target: { value: '100' } });
-  fireEvent.change(inputs[5], { target: { value: 'owner-profile-id' } });
+  const { container } = render(<PaymentEditModal payment={null} onClose={onClose} show />);
+  fillCreateForm(container, 'missing-profile');
   fireEvent.click(screen.getByRole('button', { name: 'Create' }));
 
-  expect(await screen.findByRole('alert')).toHaveTextContent(
-    'Unable to save payment. Verify the Owner ID and try again.'
-  );
-  expect(createPayment).not.toHaveBeenCalled();
+  expect(await screen.findByRole('alert')).toHaveTextContent('Owner profile not found');
+  expect(recordManualPayment.mock.calls[0][0].variables.input.applyToBalance).toBe(false);
+  expect(onClose).not.toHaveBeenCalled();
   expect(screen.getByRole('button', { name: 'Create' })).toBeEnabled();
   consoleError.mockRestore();
 });

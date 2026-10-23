@@ -64,7 +64,7 @@ async function processPayment(event, deps) {
   if (!(amount > 0)) throw new Error('Payment amount must be greater than zero');
   const requested = args.paymentMethodType === 'bank_account' ? 'BANK_ACCOUNT' : 'CARD';
   if (!payment) {
-    const now = new Date().toISOString(); payment = { id, __typename: 'Payment', owner: subject, ownerPaymentsId: profile.id, idempotencyKey: args.idempotencyKey, processorReference: reference(id), amount, ...fees(amount, requested === 'BANK_ACCOUNT' ? 'bank_account' : 'card'), checkAmount: amount, invoiceAmount: 0, paymentMethod: requested, status: 'PROCESSING', balanceApplied: false, description: 'HOA Dues Payment', byTypeCreatedAt: 'PAYMENT', createdAt: now, updatedAt: now };
+    const now = new Date().toISOString(); payment = { id, __typename: 'Payment', owner: subject, ownerPaymentsId: profile.id, idempotencyKey: args.idempotencyKey, processorReference: reference(id), amount, ...fees(amount, requested === 'BANK_ACCOUNT' ? 'bank_account' : 'card'), checkAmount: amount, invoiceAmount: 0, paymentMethod: requested, status: 'PROCESSING', balanceApplied: false, source: 'ONLINE', createdBy: event.identity.claims?.email || subject, description: 'HOA Dues Payment', byTypeCreatedAt: 'PAYMENT', createdAt: now, updatedAt: now };
     try { await deps.reserve(profile, payment); won = true; } catch (e) { payment = await deps.getPayment(id); if (!payment) throw new Error('Another payment is active for this profile'); }
   }
   if (['SUCCEEDED', 'PENDING'].includes(payment.status)) return result(payment);

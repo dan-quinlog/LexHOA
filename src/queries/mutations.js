@@ -234,6 +234,62 @@ export const CREATE_PAYMENT = gql`
   }
 `;
 
+// Ledger mutations: each writes the record and its balance change in one server transaction.
+export const RECORD_MANUAL_PAYMENT = gql`
+  mutation RecordManualPayment($input: RecordManualPaymentInput!) {
+    recordManualPayment(input: $input) {
+      id
+      checkDate
+      checkNumber
+      checkAmount
+      invoiceNumber
+      invoiceAmount
+      amount
+      status
+      balanceApplied
+      source
+      createdBy
+      ownerPaymentsId
+      createdAt
+    }
+  }
+`;
+
+export const VOID_PAYMENT = gql`
+  mutation VoidPayment($input: VoidLedgerEntryInput!) {
+    voidPayment(input: $input) {
+      id
+      status
+      voidedBy
+      voidedAt
+      voidReason
+    }
+  }
+`;
+
+export const ISSUE_INVOICE = gql`
+  mutation IssueInvoice($input: IssueInvoiceInput!) {
+    issueInvoice(input: $input) {
+      id
+      invoiceNumber
+      totalAmount
+      ownerInvoicesId
+    }
+  }
+`;
+
+export const VOID_INVOICE = gql`
+  mutation VoidInvoice($input: VoidLedgerEntryInput!) {
+    voidInvoice(input: $input) {
+      id
+      status
+      voidedBy
+      voidedAt
+      voidReason
+    }
+  }
+`;
+
 // Authorize.Net Mutations
 export const CREATE_AUTHNET_TRANSACTION = gql`
   mutation CreateAuthNetTransaction($profileId: ID!, $idempotencyKey: String!, $expectedAmount: Float!, $paymentMethodType: String, $opaqueDataDescriptor: String!, $opaqueDataValue: String!) {

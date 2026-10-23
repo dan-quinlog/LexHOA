@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { useLazyQuery, useMutation } from '@apollo/client';
-import { CREATE_PAYMENT, UPDATE_PAYMENT, UPDATE_PROFILE } from '../../queries/mutations';
-import { GET_PROFILE } from '../../queries/queries';
+import { useMutation } from '@apollo/client';
+import { RECORD_MANUAL_PAYMENT, UPDATE_PAYMENT } from '../../queries/mutations';
 import Modal from '../shared/Modal';
 import './PaymentEditModal.css';
 
@@ -23,9 +22,7 @@ const PaymentEditModal = ({ payment, onClose, show }) => {
   const [submitError, setSubmitError] = useState('');
 
   const [updatePayment] = useMutation(UPDATE_PAYMENT);
-  const [createPayment] = useMutation(CREATE_PAYMENT);
-  const [updateProfile] = useMutation(UPDATE_PROFILE);
-  const [getProfile] = useLazyQuery(GET_PROFILE);
+  const [recordManualPayment] = useMutation(RECORD_MANUAL_PAYMENT);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,47 +57,25 @@ const PaymentEditModal = ({ payment, onClose, show }) => {
               variables: { input: { id: payment.id, ...input } }
           });
       } else {
-          // Resolve the profile during submission so creation cannot race the query.
-          const { data: profileData } = await getProfile({
-              variables: { id: formData.ownerPaymentsId },
-              fetchPolicy: 'network-only'
-          });
-          const targetProfile = profileData?.getProfile;
-          if (targetProfile?.id !== formData.ownerPaymentsId) {
-              throw new Error('Unable to resolve payment owner');
-          }
-          // Profiles without a login have no cognitoID; mergeProfiles assigns owner when they link.
-          if (targetProfile.cognitoID) {
-              input.owner = targetProfile.cognitoID;
-          }
-          input.status = 'SUCCEEDED';
-
-          await createPayment({
-              variables: { input }
-          });
-          
-          // Apply payment to profile balance if checkbox is checked
-          if (applyPayment && formData.ownerPaymentsId && formData.checkAmount) {
-              const currentProfile = targetProfile;
-              if (currentProfile) {
-                  const currentBalance = parseFloat(currentProfile.balance || 0);
-                  const paymentAmount = parseFloat(formData.checkAmount);
-                  const newBalance = currentBalance - paymentAmount;
-                  
-                  await updateProfile({
-                      variables: {
-                          input: {
-                              id: formData.ownerPaymentsId,
-                              balance: newBalance
-                          }
-                      }
-                  });
+          // The server resolves the owner, records who entered the payment, and applies
+          // the balance change in the same transaction as the payment.
+          await recordManualPayment({
+              variables: {
+                  input: {
+                      ownerPaymentsId: formData.ownerPaymentsId.trim(),
+                      checkDate: formData.checkDate,
+                      checkNumber: formData.checkNumber,
+                      checkAmount: parseFloat(formData.checkAmount),
+                      invoiceNumber: formData.invoiceNumber,
+                      invoiceAmount: parseFloat(formData.invoiceAmount),
+                      applyToBalance: applyPayment
+                  }
               }
-          }
+          });
       }
     } catch (error) {
         console.error('Error processing payment:', error);
-        setSubmitError('Unable to save payment. Verify the Owner ID and try again.');
+        setSubmitError(error?.graphQLErrors?.[0]?.message || 'Unable to save payment. Verify the Owner ID and try again.');
         setIsSubmitting(false);
         return;
     }
